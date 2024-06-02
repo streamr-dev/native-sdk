@@ -9,13 +9,14 @@ This is the ongoing development repository for the Streamr Native SDK, a native 
 
 ```bash
  xcode-select --install
+ brew install jq
  ```
 
 ### Ubuntu
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential cmake ninja-build
+sudo apt-get install -y build-essential cmake ninja-build jq
 ```
 ## Clone the repository
 
