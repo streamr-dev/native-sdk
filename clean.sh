@@ -5,6 +5,4 @@ for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | g
     cd packages/$package/build && ls -A | while read FILE; do echo "\"$FILE\""; done | grep -v ".gitignore" | xargs rm -rf && cd ../../..
 done
 
-
-
-
+cd build && ls -A | while read FILE; do echo "\"$FILE\""; done | grep -v ".gitignore" | xargs rm -rf && cd ..
