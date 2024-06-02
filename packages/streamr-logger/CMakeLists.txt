@@ -31,7 +31,7 @@ message(STATUS "CMake version: ${CMAKE_VERSION}")
 
 project(streamr-logger CXX)
 
-find_package(folly REQUIRED)
+find_package(folly CONFIG REQUIRED)
 
 add_library(logger INTERFACE)
 add_library(streamr::logger ALIAS logger)

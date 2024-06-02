@@ -7,7 +7,7 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(streamr-utils CXX)
 
-find_package(folly REQUIRED)
+find_package(folly CONFIG REQUIRED)
 
 add_library(utils INTERFACE)
 add_library(streamr::utils ALIAS utils)
