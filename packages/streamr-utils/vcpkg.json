@@ -1,13 +1,5 @@
 {
   "name": "streamr-utils",
   "version": "1.0.0",
-  "dependencies": ["folly"],
-  "features": {
-    "monorepo": {
-        "description": "Monorepo dependencies",
-        "dependencies": [
-            "streamr-logger"
-        ]
-    }
-}
+  "dependencies": []
 }
