@@ -10,8 +10,8 @@ private:
 public:
     Logger() : logger("omaloggeri") {
     }
-
-    void log(const std::string& message) {
+    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+    void log(const std::string& message) const {
         XLOG(INFO) << message;
     }
 };

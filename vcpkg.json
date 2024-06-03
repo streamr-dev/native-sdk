@@ -2,6 +2,7 @@
   "name": "streamr-native-sdk",
   "version": "1.0.0",
   "dependencies": [
-    "folly"
+    "folly",
+    "gtest"
   ]
 }
