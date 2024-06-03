@@ -10,13 +10,17 @@ This is the ongoing development repository for the Streamr Native SDK, a native 
 ```bash
  xcode-select --install
  brew install jq
+ brew install llvm
+ ln -s /opt/homebrew/Cellar/llvm/18.1.6/bin/clang-format /opt/homebrew/bin/clang-format
+ ln -s /opt/homebrew/Cellar/llvm/18.1.6/bin/clang-tidy /opt/homebrew/bin/clang-tidy
  ```
 
 ### Ubuntu
 
 ```bash
+sudo apt-add-repository http://apt.llvm.org/jammy/llvm-toolchain-jammy main
 sudo apt-get update
-sudo apt-get install -y build-essential cmake ninja-build jq
+sudo apt-get install -y build-essential cmake ninja-build jq clang-format clang-tidy
 ```
 ## Clone the repository
 

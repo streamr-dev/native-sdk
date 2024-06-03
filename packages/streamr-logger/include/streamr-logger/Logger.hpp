@@ -2,9 +2,11 @@
 #define STREAMER_UTILS_LOGGER_LOGGER_H
 
 #include <folly/logging/xlog.h>
-class Logger {
+class Logger 
+ {
 private:
-    folly::Logger logger;
+    folly::Logger  logger
+    ;
 public:
     Logger() : logger("omaloggeri") {
     }
