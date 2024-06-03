@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_CLANG_TIDY
+  clang-tidy;
+  -format-style='file';
+  -header-filter=${CMAKE_CURRENT_SOURCE_DIR};
+)
 
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -36,7 +41,13 @@ enable_testing()
 find_package(GTest CONFIG REQUIRED)
 
 add_executable(test-unit test/unit/LoggerTest.cpp)
-target_link_libraries(test-unit streamr-logger GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
-include(GoogleTest)
+target_link_libraries(test-unit 
+  PRIVATE streamr-logger
+  PRIVATE GTest::gtest 
+  PRIVATE GTest::gtest_main 
+  PRIVATE GTest::gmock 
+  PRIVATE GTest::gmock_main)
+
+  include(GoogleTest)
 gtest_discover_tests(test-unit)
 

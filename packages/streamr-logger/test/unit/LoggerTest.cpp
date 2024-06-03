@@ -1,7 +1,5 @@
 #include <streamr-logger/Logger.hpp>
-
-#include <folly/Portability.h>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 class LoggerTest : public testing::Test {
 };
