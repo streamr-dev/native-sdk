@@ -12,6 +12,7 @@ project(logger CXX)
 
 find_package(folly REQUIRED)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(streamr-logger INTERFACE)
 set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 23)
 
@@ -30,4 +31,12 @@ target_link_libraries(streamr-logger INTERFACE Folly::folly)
 
 export(TARGETS streamr-logger FILE streamr-logger-config-in.cmake)
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-logger-config.cmake" "find_package(folly REQUIRED)\ninclude(${CMAKE_BINARY_DIR}/streamr-logger-config-in.cmake)\n")
+
+enable_testing()
+find_package(GTest CONFIG REQUIRED)
+
+add_executable(test-unit test/unit/LoggerTest.cpp)
+target_link_libraries(test-unit streamr-logger GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+include(GoogleTest)
+gtest_discover_tests(test-unit)
 

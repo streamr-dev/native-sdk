@@ -1,5 +1,6 @@
 {
   "name": "streamr-logger",
   "version": "1.0.0",
-  "dependencies": ["folly"]
+  "dependencies": ["folly", "gtest"]
 }
+

@@ -4,13 +4,16 @@
 #include <folly/logging/xlog.h>
 class Logger {
 private:
-    folly::Logger logger;
+    folly::Logger logger
+    ;
+    int Iso_jee;
 public:
     Logger() : logger("omaloggeri") {
     }
 
-    void log(const std::string& message) {
-        XLOG(INFO) << message;
+    void log(const std::string& message) const {
+        XLOG(INFO)<<message;
+        auto Jee=1;
     }
 };
 
