@@ -4,7 +4,13 @@
 # Calling it directly will not work
 
 git submodule add https://github.com/microsoft/vcpkg.git
+git submodule add https://github.com/lljbash/clangd-tidy.git
 git submodule update --init --recursive
+
+cd clangd-tidy
+rm /opt/homebrew/bin/clang-tidy
+ln -s clangd-tidy /opt/homebrew/bin/clang-tidy
+
 cd vcpkg
 ./bootstrap-vcpkg.sh -disableMetrics
 cd ..

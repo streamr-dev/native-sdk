@@ -12,8 +12,9 @@ This is the ongoing development repository for the Streamr Native SDK, a native 
  brew install jq
  brew install llvm
  ln -s /opt/homebrew/Cellar/llvm/18.1.6/bin/clang-format /opt/homebrew/bin/clang-format
- ln -s /opt/homebrew/Cellar/llvm/18.1.6/bin/clang-tidy /opt/homebrew/bin/clang-tidy
- ```
+ ln -s /opt/homebrew/Cellar/llvm/18.1.6/bin/clangd /opt/homebrew/bin/clangd
+ brew install trunk
+```
 
 ### Ubuntu
 

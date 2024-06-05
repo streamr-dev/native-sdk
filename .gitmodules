@@ -1,3 +1,6 @@
 [submodule "vcpkg"]
 	path = vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "clangd-tidy"]
+	path = clangd-tidy
+	url = https://github.com/lljbash/clangd-tidy.git
