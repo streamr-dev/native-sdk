@@ -43,24 +43,6 @@ INFO [2024-06-05T08:50:39.787] (File name): Message
 TRACE [2024-06-05T08:50:39.787] (File name): Message
 WARN [2024-06-05T08:50:39.787] (File name): Message
 */
-/*
-#define XLOG(level, ...)                   \
-  XLOG_IMPL(                               \
-      ::folly::LogLevel::level,            \
-      ::folly::LogStreamProcessor::APPEND, \
-      ##__VA_ARGS__)
-*/
-
-
-//Logger::get().logInfo(msg); \
-
-/*
-
-#define SLOG_INFO(level, msg)                   \
-  XLOG_IMPL(                               \
-      ::folly::LogLevel::INFO,            \
-      ::folly::LogStreamProcessor::APPEND)
-*/
 
 class StreamrLogFormatter : public folly::LogFormatter {
  public:
