@@ -22,4 +22,4 @@ actions:
 repo:
   # main is the branch that everyone's work is merged into
   # (this is usually inferred and not required to be set)
-  trunk_branch: module1
+  use_branch_upstream: true
