@@ -1,8 +1,13 @@
 #!/bin/bash
 
-./merge-dependencies.sh
+cmake --build build
+cd build
 
-# Call test for all monorepo packages in their own build directories
-for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | grep -v ")"); do
-    cd packages/$package && ./test.sh && cd ../..
-done
+if [ "$#" -gt 0 ]; then
+    ctest -V -R "$@"
+else
+    ctest -V
+fi
+
+cd ..
+
