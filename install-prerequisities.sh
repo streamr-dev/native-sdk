@@ -30,8 +30,8 @@ else
     sudo apt-get update
     sudo apt-get install -y build-essential cmake ninja-build jq clang-format
     
-    sudo curl https://get.trunk.io -fsSL | bash -s -- -y
-    sudo trunk tools install
+    #sudo curl https://get.trunk.io -fsSL | bash -s -- -y
+    ./trunk tools install
 fi
 
 cd clangd-tidy

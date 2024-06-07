@@ -1,2 +1,2 @@
 #!/bin/bash
-trunk check --no-fix
+./trunk check --no-fix
