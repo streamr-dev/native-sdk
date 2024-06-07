@@ -187,7 +187,7 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 };
 
 class Logger {
-  
+
  public:
   Logger() { this->initializeLoggerDB(folly::LoggerDB::get()); }
 
@@ -204,7 +204,7 @@ class Logger {
 
   void log(const std::string& message) const {XLOG(INFO) << message;}
   void logTrace(const std::string& message) const { XLOG(DBG) << message;}
-  void logDebug(const std::string& message) const { XLOG(DBG) << message;}
+  void logDebug(const std::string& message) const { XLOG(DBG0) << message;}
   void logInfo(const std::string& message) const { XLOG(INFO) << message;}
   void logWarn(const std::string& message) const { XLOG(WARN) << message;}
   void logError(const std::string& message) const { XLOG(ERR) << message;}
