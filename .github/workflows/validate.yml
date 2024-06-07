@@ -1,0 +1,32 @@
+name: validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: install
+        uses: ./.github/workflows/reusable/cached-install
+  lint:
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./lint.sh
+  test:
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./test.sh
