@@ -20,7 +20,7 @@
 #include <folly/logging/StreamHandlerFactory.h>
 #include <folly/logging/xlog.h>
 #include <folly/portability/Time.h>
-
+#include <folly/detail/StaticSingletonManager.h>
 #include <iostream>
 #include <memory>
 
@@ -43,9 +43,24 @@ INFO [2024-06-05T08:50:39.787] (File name): Message
 TRACE [2024-06-05T08:50:39.787] (File name): Message
 WARN [2024-06-05T08:50:39.787] (File name): Message
 */
+/*
+#define XLOG(level, ...)                   \
+  XLOG_IMPL(                               \
+      ::folly::LogLevel::level,            \
+      ::folly::LogStreamProcessor::APPEND, \
+      ##__VA_ARGS__)
+*/
 
 
+//Logger::get().logInfo(msg); \
 
+/*
+
+#define SLOG_INFO(level, msg)                   \
+  XLOG_IMPL(                               \
+      ::folly::LogLevel::INFO,            \
+      ::folly::LogStreamProcessor::APPEND)
+*/
 
 class StreamrLogFormatter : public folly::LogFormatter {
  public:
@@ -134,12 +149,12 @@ class StreamrLogFormatter : public folly::LogFormatter {
   std::string formatMessage(
       const folly::LogMessage& message,
       const folly::LogCategory* handlerCategory) override {
-      return this->formatMessageInStreamrStyle({
-              message.getTimestamp(),
-              message.getFileBaseName(),
-              message.getLineNumber(),
-              message.getLevel(),
-              message.getMessage()});
+    return this->formatMessageInStreamrStyle(
+        {message.getTimestamp(),
+         message.getFileBaseName(),
+         message.getLineNumber(),
+         message.getLevel(),
+         message.getMessage()});
   }
 
  private:
@@ -164,7 +179,6 @@ class StreamrLogFormatter : public folly::LogFormatter {
   }
 
   folly::StringPiece getColorSequence(folly::LogLevel level) {
-
     if (level == folly::LogLevel::DBG) {
       return "\033[90m"; // Gray (TRACE)
     } else if (level == folly::LogLevel::DBG0) {
@@ -212,19 +226,25 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 
 class Logger {
  public:
+
   Logger() { this->initializeLoggerDB(folly::LoggerDB::get()); }
 
-  void initializeLoggerDB(folly::LoggerDB& db) const {
+  static Logger& get() {
+     static Logger instance;
+    return instance;
+  }
+
+  void initializeLoggerDB(folly::LoggerDB& db)  {
     db.registerHandlerFactory(std::make_unique<StreamrHandlerFactory>(), true);
     auto defaultHandlerConfig = folly::LogHandlerConfig(
         "stream", {{"stream", "stderr"}, {"async", "false"}});
-    auto rootCategoryConfig =
-        folly::LogCategoryConfig(folly::LogLevel::MIN_LEVEL, false, {"default"});
+    auto rootCategoryConfig = folly::LogCategoryConfig(
+        folly::LogLevel::MIN_LEVEL, false, {"default"});
     folly::LogConfig config(
         {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
     db.updateConfig(config);
-  }
 
+  }
   void log(const std::string& message) const { XLOG(INFO) << message; }
   void logTrace(const std::string& message) const { XLOG(DBG) << message; }
   void logDebug(const std::string& message) const { XLOG(DBG0) << message; }
@@ -233,5 +253,14 @@ class Logger {
   void logError(const std::string& message) const { XLOG(ERR) << message; }
   void logFatal(const std::string& message) const { XLOG(FATAL) << message; }
 };
+
+#define SLOG_TRACE(msg) Logger::get().logTrace(msg)
+#define SLOG_DEBUG(msg) Logger::get().logDebug(msg)
+#define SLOG_INFO(msg) Logger::get().logInfo(msg)
+#define SLOG_WARN(msg) Logger::get().logWarn(msg)
+#define SLOG_ERROR(msg) Logger::get().logError(msg)
+#define SLOG_FATAL(msg) Logger::get().logFatal(msg)
+
 #endif
 // NOLINTEND(readability-simplify-boolean-expr)
+
