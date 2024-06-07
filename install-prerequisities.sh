@@ -31,6 +31,7 @@ else
     sudo apt-get install -y build-essential cmake ninja-build jq clang-format
     
     curl https://get.trunk.io -fsSL | bash -s -- -y
+    trunk tools install
 fi
 
 cd clangd-tidy
