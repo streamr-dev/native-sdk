@@ -8,4 +8,5 @@ for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | g
 done
 
 # Call build for the root project
+echo "Building root project"
 cd build && cmake .. && make && cd ..

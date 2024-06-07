@@ -25,16 +25,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: install
+        uses: ./.github/workflows/reusable/cached-install
       - name: lint
         run:
-          source lint.sh
+          ./lint.sh
         shell: bash
   test:
     needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: install
+        uses: ./.github/workflows/reusable/cached-install
       - name: test
         run:
-          source test.sh
+          ./test.sh
         shell: bash
