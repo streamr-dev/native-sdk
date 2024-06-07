@@ -19,3 +19,7 @@ actions:
     - trunk-announce
     - trunk-check-pre-push
     - trunk-upgrade-available
+repo:
+  # main is the branch that everyone's work is merged into
+  # (this is usually inferred and not required to be set)
+  trunk_branch: main
