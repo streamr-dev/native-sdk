@@ -3,8 +3,8 @@
 # This script needs to be run using "source install-prerequisities.sh"
 # Calling it directly will not work
 
-git submodule add --force https://github.com/microsoft/vcpkg.git
-git submodule add --force https://github.com/lljbash/clangd-tidy.git
+# git submodule add --force https://github.com/microsoft/vcpkg.git
+# git submodule add --force https://github.com/lljbash/clangd-tidy.git
 git submodule update --init --recursive
 
 TEMP_PROFILE_CONTENTS=""
