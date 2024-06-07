@@ -1,12 +1,12 @@
 #include <streamr-logger/Logger.hpp>
 
 int main() {
-  const Logger logger;
+  Logger logger;
   logger.log("Hello, world!");
   return 0;
 }
 
-int KahuuJuu() {
+int KauhuJuu() {
                                                                           return 0;
 }
 

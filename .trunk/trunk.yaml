@@ -17,6 +17,5 @@ lint:
 actions:
   enabled:
     - trunk-announce
-    - trunk-check-pre-commit
     - trunk-check-pre-push
     - trunk-upgrade-available

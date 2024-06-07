@@ -45,6 +45,8 @@ if [[ ":$PATH:" != *":$CLANGD_TIDY_PATH:"* ]]; then
     export PATH="$CLANGD_TIDY_PATH:$PATH"
 fi
 
+cp clangd-tidy/clangd-tidy .trunk/tools/clang-tidy
+
 cd vcpkg
 ./bootstrap-vcpkg.sh -disableMetrics
 cd ..
