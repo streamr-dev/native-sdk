@@ -21,6 +21,8 @@ runs:
     - name: install-prerequisites
       run:
         source install-prerequisites.sh
+      shell: bash
     - name: install
       run:
         ./install.sh
+      shell: bash
