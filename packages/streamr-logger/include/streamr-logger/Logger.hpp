@@ -49,6 +49,89 @@ class StreamrFormatter : public folly::LogFormatter {
   StreamrFormatter() = default;
   ~StreamrFormatter() override = default;
 
+  struct StreamrLogMessage {
+    std::chrono::system_clock::time_point timestamp;
+    folly::StringPiece fileBasename;
+    unsigned int lineNumber;
+    folly::LogLevel logLevel;
+    const std::string& logMessage;
+  };
+
+  std::string formatMessageInStreamrStyle(const StreamrLogMessage& message) {
+    struct tm ltime;
+    const auto timeSinceEpoch = message.timestamp.time_since_epoch();
+    const auto epochSeconds =
+        std::chrono::duration_cast<std::chrono::seconds>(timeSinceEpoch);
+    const std::chrono::milliseconds millisecs =
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceEpoch) -
+        epochSeconds;
+    time_t unixTimestamp = epochSeconds.count();
+    if (!localtime_r(&unixTimestamp, &ltime)) {
+      memset(&ltime, 0, sizeof(ltime));
+    }
+    auto basename = message.fileBasename;
+    const auto fileNameLength = std::ssize(basename);
+    const auto lineNumberInString = std::to_string(message.lineNumber);
+    const auto lineNumberLength = std::ssize(lineNumberInString);
+
+    const auto fileNameAndLineNumberLength =
+        (fileNameLength + lineNumberLength + separatorLength);
+    // Is filename is truncated if filename, separator and lineNumber does not
+    // fit to the fixed size
+    if (fileNameAndLineNumberLength <= maxFileNameAndLineNumberLength) {
+      basename = basename.toString()
+                     .append(fileNameAndLineNumberSeparator)
+                     .append(lineNumberInString);
+      auto logLine = folly::sformat(
+          "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}\n",
+          getColorSequence(message.logLevel),
+          getLogLevelName(message.logLevel),
+          getResetSequence(message.logLevel),
+          ltime.tm_year + 1900,
+          ltime.tm_mon + 1,
+          ltime.tm_mday,
+          ltime.tm_hour,
+          ltime.tm_min,
+          ltime.tm_sec,
+          millisecs.count(),
+          basename,
+          message.logMessage);
+      return logLine;
+    } else {
+      // Truncate needed
+      auto lengthForTruncatedFileName =
+          maxFileNameAndLineNumberLength - (lineNumberLength + separatorLength);
+      basename = basename.substr(0, lengthForTruncatedFileName);
+      auto logLine = folly::sformat(
+          "{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}\n",
+          getLogLevelName(message.logLevel),
+          ltime.tm_year + 1900,
+          ltime.tm_mon + 1,
+          ltime.tm_mday,
+          ltime.tm_hour,
+          ltime.tm_min,
+          ltime.tm_sec,
+          millisecs.count(),
+          lengthForTruncatedFileName,
+          basename,
+          fileNameAndLineNumberSeparator,
+          lineNumberInString,
+          message.logMessage);
+      return logLine;
+    }
+  }
+
+  std::string formatMessage(
+      const folly::LogMessage& message,
+      const folly::LogCategory* handlerCategory) override {
+      return this->formatMessageInStreamrStyle({
+              message.getTimestamp(),
+              message.getFileBaseName(),
+              message.getLineNumber(),
+              message.getLevel(),
+              message.getMessage()});
+  }
+
  private:
   static constexpr int maxFileNameAndLineNumberLength{36};
   static constexpr folly::StringPiece fileNameAndLineNumberSeparator{": "};
@@ -88,72 +171,6 @@ class StreamrFormatter : public folly::LogFormatter {
     }
     return "\033[1;41m"; // BOLD ON RED BACKGROUND
   }
-
-  std::string formatMessage(
-      const folly::LogMessage& message,
-      const folly::LogCategory* handlerCategory) override {
-    struct tm ltime;
-    const auto timeSinceEpoch = message.getTimestamp().time_since_epoch();
-    const auto epochSeconds =
-        std::chrono::duration_cast<std::chrono::seconds>(timeSinceEpoch);
-    const std::chrono::milliseconds millisecs =
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceEpoch) -
-        epochSeconds;
-    time_t unixTimestamp = epochSeconds.count();
-    if (!localtime_r(&unixTimestamp, &ltime)) {
-      memset(&ltime, 0, sizeof(ltime));
-    }
-    auto basename = message.getFileBaseName();
-    const auto fileNameLength = std::ssize(basename);
-    const auto lineNumberInString = std::to_string(message.getLineNumber());
-    const auto lineNumberLength = std::ssize(lineNumberInString);
-
-    const auto fileNameAndLineNumberLength =
-        (fileNameLength + lineNumberLength + separatorLength);
-    // Is filename is truncated if filename, separator and lineNumber does not
-    // fit to the fixed size
-    if (fileNameAndLineNumberLength <= maxFileNameAndLineNumberLength) {
-      basename = basename.toString()
-                     .append(fileNameAndLineNumberSeparator)
-                     .append(lineNumberInString);
-      auto logLine = folly::sformat(
-          "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}\n",
-          getColorSequence(message.getLevel()),
-          getLogLevelName(message.getLevel()),
-          getResetSequence(message.getLevel()),
-          ltime.tm_year + 1900,
-          ltime.tm_mon + 1,
-          ltime.tm_mday,
-          ltime.tm_hour,
-          ltime.tm_min,
-          ltime.tm_sec,
-          millisecs.count(),
-          basename,
-          message.getMessage());
-      return logLine;
-    } else {
-      // Truncate needed
-      auto lengthForTruncatedFileName =
-          maxFileNameAndLineNumberLength - (lineNumberLength + separatorLength);
-      basename = basename.substr(0, lengthForTruncatedFileName);
-      auto logLine = folly::sformat(
-          "{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}\n",
-          getLogLevelName(message.getLevel()),
-          ltime.tm_year + 1900,
-          ltime.tm_mon + 1,
-          ltime.tm_mday,
-          ltime.tm_hour,
-          ltime.tm_min,
-          ltime.tm_sec,
-          millisecs.count(),
-          lengthForTruncatedFileName,
-          basename,
-          fileNameAndLineNumberSeparator,
-          lineNumberInString,
-          message.getMessage());
-      return logLine;
-    }
-  }
 };
 
 class StreamrFormatterFactory
@@ -187,7 +204,6 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 };
 
 class Logger {
-
  public:
   Logger() { this->initializeLoggerDB(folly::LoggerDB::get()); }
 
@@ -202,13 +218,13 @@ class Logger {
     db.updateConfig(config);
   }
 
-  void log(const std::string& message) const {XLOG(INFO) << message;}
-  void logTrace(const std::string& message) const { XLOG(DBG) << message;}
-  void logDebug(const std::string& message) const { XLOG(DBG0) << message;}
-  void logInfo(const std::string& message) const { XLOG(INFO) << message;}
-  void logWarn(const std::string& message) const { XLOG(WARN) << message;}
-  void logError(const std::string& message) const { XLOG(ERR) << message;}
-  void logFatal(const std::string& message) const { XLOG(FATAL) << message;}
+  void log(const std::string& message) const { XLOG(INFO) << message; }
+  void logTrace(const std::string& message) const { XLOG(DBG) << message; }
+  void logDebug(const std::string& message) const { XLOG(DBG0) << message; }
+  void logInfo(const std::string& message) const { XLOG(INFO) << message; }
+  void logWarn(const std::string& message) const { XLOG(WARN) << message; }
+  void logError(const std::string& message) const { XLOG(ERR) << message; }
+  void logFatal(const std::string& message) const { XLOG(FATAL) << message; }
 };
 #endif
 // NOLINTEND(readability-simplify-boolean-expr)
