@@ -44,10 +44,13 @@ TRACE [2024-06-05T08:50:39.787] (File name): Message
 WARN [2024-06-05T08:50:39.787] (File name): Message
 */
 
-class StreamrFormatter : public folly::LogFormatter {
+
+
+
+class StreamrLogFormatter : public folly::LogFormatter {
  public:
-  StreamrFormatter() = default;
-  ~StreamrFormatter() override = default;
+  StreamrLogFormatter() = default;
+  ~StreamrLogFormatter() override = default;
 
   struct StreamrLogMessage {
     std::chrono::system_clock::time_point timestamp;
@@ -73,7 +76,8 @@ class StreamrFormatter : public folly::LogFormatter {
     const auto fileNameLength = std::ssize(basename);
     const auto lineNumberInString = std::to_string(message.lineNumber);
     const auto lineNumberLength = std::ssize(lineNumberInString);
-
+    const std::string logMessageColor = "\033[36m";
+    const std::string logMessageColorReset = "\033[0m";
     const auto fileNameAndLineNumberLength =
         (fileNameLength + lineNumberLength + separatorLength);
     // Is filename is truncated if filename, separator and lineNumber does not
@@ -83,10 +87,10 @@ class StreamrFormatter : public folly::LogFormatter {
                      .append(fileNameAndLineNumberSeparator)
                      .append(lineNumberInString);
       auto logLine = folly::sformat(
-          "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}\n",
+          "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}{}{}\n",
           getColorSequence(message.logLevel),
           getLogLevelName(message.logLevel),
-          getResetSequence(message.logLevel),
+          logMessageColorReset,
           ltime.tm_year + 1900,
           ltime.tm_mon + 1,
           ltime.tm_mday,
@@ -95,7 +99,9 @@ class StreamrFormatter : public folly::LogFormatter {
           ltime.tm_sec,
           millisecs.count(),
           basename,
-          message.logMessage);
+          logMessageColor,
+          message.logMessage,
+          logMessageColorReset);
       return logLine;
     } else {
       // Truncate needed
@@ -103,8 +109,10 @@ class StreamrFormatter : public folly::LogFormatter {
           maxFileNameAndLineNumberLength - (lineNumberLength + separatorLength);
       basename = basename.substr(0, lengthForTruncatedFileName);
       auto logLine = folly::sformat(
-          "{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}\n",
+          "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n",
+          getColorSequence(message.logLevel),
           getLogLevelName(message.logLevel),
+          logMessageColorReset,
           ltime.tm_year + 1900,
           ltime.tm_mon + 1,
           ltime.tm_mday,
@@ -116,7 +124,9 @@ class StreamrFormatter : public folly::LogFormatter {
           basename,
           fileNameAndLineNumberSeparator,
           lineNumberInString,
-          message.logMessage);
+          logMessageColor,
+          message.logMessage,
+          logMessageColorReset);
       return logLine;
     }
   }
@@ -153,10 +163,6 @@ class StreamrFormatter : public folly::LogFormatter {
     return "FATAL";
   }
 
-  constexpr folly::StringPiece getResetSequence(folly::LogLevel level) {
-    return "\033[0m";
-  }
-
   folly::StringPiece getColorSequence(folly::LogLevel level) {
 
     if (level == folly::LogLevel::DBG) {
@@ -174,7 +180,7 @@ class StreamrFormatter : public folly::LogFormatter {
   }
 };
 
-class StreamrFormatterFactory
+class StreamrLogFormatterFactory
     : public folly::StandardLogHandlerFactory::FormatterFactory {
  public:
   bool processOption(
@@ -184,7 +190,7 @@ class StreamrFormatterFactory
 
   std::shared_ptr<folly::LogFormatter> createFormatter(
       const std::shared_ptr<folly::LogWriter>&) override {
-    return std::make_shared<StreamrFormatter>();
+    return std::make_shared<StreamrLogFormatter>();
     ;
   }
 };
@@ -197,7 +203,7 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
   std::shared_ptr<folly::LogHandler> createHandler(
       const Options& options) override {
     StreamHandlerFactory::WriterFactory writerFactory;
-    StreamrFormatterFactory formatterFactory;
+    StreamrLogFormatterFactory formatterFactory;
 
     return folly::StandardLogHandlerFactory::createHandler(
         getType(), &writerFactory, &formatterFactory, options);
