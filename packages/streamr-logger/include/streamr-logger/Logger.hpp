@@ -158,18 +158,19 @@ class StreamrFormatter : public folly::LogFormatter {
   }
 
   folly::StringPiece getColorSequence(folly::LogLevel level) {
+
     if (level == folly::LogLevel::DBG) {
-      return "\033[1;30m";
+      return "\033[90m"; // Gray (TRACE)
     } else if (level == folly::LogLevel::DBG0) {
-      return "\033[33m"; // YELLOW COLOR
+      return "\033[34m"; // Blue (DEBUG)
     } else if (level == folly::LogLevel::INFO) {
-      return "\033[33m"; // YELLOW COLOR
+      return "\033[32m"; // Green (INFO)
     } else if (level == folly::LogLevel::WARN) {
-      return "\033[31m"; // RED
+      return "\033[33m"; // Yellow (WARN)
     } else if (level == folly::LogLevel::ERR) {
-      return "\033[1;41m"; // BOLD ON RED BACKGROUND
+      return "\033[31m"; // Red (ERROR)
     }
-    return "\033[1;41m"; // BOLD ON RED BACKGROUND
+    return "\033[1;41m"; // Red Background (FATAL)
   }
 };
 
@@ -212,7 +213,7 @@ class Logger {
     auto defaultHandlerConfig = folly::LogHandlerConfig(
         "stream", {{"stream", "stderr"}, {"async", "false"}});
     auto rootCategoryConfig =
-        folly::LogCategoryConfig(folly::kDefaultLogLevel, false, {"default"});
+        folly::LogCategoryConfig(folly::LogLevel::MIN_LEVEL, false, {"default"});
     folly::LogConfig config(
         {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
     db.updateConfig(config);
