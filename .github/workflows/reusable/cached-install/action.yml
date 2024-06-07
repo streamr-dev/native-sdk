@@ -18,9 +18,9 @@ runs:
         key: cache-vcpkg-installed-${{ hashFiles('**/vcpkg_installed/**') }}
         path: |
           **/vcpkg_installed
-    - name: install-prerequisites
+    - name: install-prerequisities
       run:
-        source install-prerequisites.sh
+        source install-prerequisities.sh
       shell: bash
     - name: install
       run:
