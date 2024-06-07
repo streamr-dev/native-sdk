@@ -45,6 +45,9 @@ CLANGD_TIDY_PATH="$(pwd)/clangd-tidy"
 
 if [[ ":$PATH:" != *":$CLANGD_TIDY_PATH:"* ]]; then
     export PATH="$CLANGD_TIDY_PATH:$PATH"
+    if [[ -n "$GITHUB_PATH" ]]; then
+        echo "$CLANGD_TIDY_PATH" >> $GITHUB_PATH
+    fi
 fi
 
 cp clangd-tidy/clangd-tidy .trunk/tools/clang-tidy
@@ -54,9 +57,15 @@ cd vcpkg
 cd ..
 
 export VCPKG_ROOT=$(pwd)/vcpkg
+if [[ -n "$GITHUB_ENV" ]]; then
+    echo "VCPKG_ROOT=$VCPKG_ROOT" >> $GITHUB_ENV
+fi
 
 if [[ ":$PATH:" != *":$VCPKG_ROOT:"* ]]; then
     export PATH=$PATH:$VCPKG_ROOT
+    if [[ -n "$GITHUB_PATH" ]]; then
+        echo "$VCPKG_ROOT" >> $GITHUB_PATH
+    fi
 fi
 
 # Add VCPKG_ROOT environment variable
