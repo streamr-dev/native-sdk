@@ -25,6 +25,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
 else
     PROFILE_FILE=~/.profile
+    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     sudo apt-add-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main'
     sudo apt-get update
     sudo apt-get install -y build-essential cmake ninja-build jq clang-format
