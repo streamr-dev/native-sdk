@@ -8,9 +8,3 @@ TEST_F(LoggerTest, success) {
     logger.log("test");
     int jaa = 1;
 }
-
-TEST_F(LoggerTest, failure) {
-    Logger klogger;
-    klogger.log("test failure");
-    EXPECT_EQ(1, 2);
-}
