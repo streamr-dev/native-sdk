@@ -1,0 +1,58 @@
+name: validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: install
+        uses: ./.github/workflows/reusable/cached-install
+      - name: lint
+        run:
+          ./lint.sh
+        shell: bash
+      - name: test
+        run:
+          ./test.sh
+        shell: bash
+  # lint:
+  #   needs: install
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - name: install
+  #       uses: ./.github/workflows/reusable/cached-install
+  #     - name: lint
+  #       run:
+  #         ./lint.sh
+  #       shell: bash
+  # test:
+  #   needs: install
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - name: install
+  #       uses: ./.github/workflows/reusable/cached-install
+  #     - name: test
+  #       run:
+  #         ./test.sh
+  #       shell: bash

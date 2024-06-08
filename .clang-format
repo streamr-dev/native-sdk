@@ -115,7 +115,6 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 SpaceBeforeSquareBrackets: false
 Standard: Latest
-TabWidth: 8
+TabWidth: 4
 UseCRLF: false
 UseTab: Never
-...
