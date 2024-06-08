@@ -16,6 +16,4 @@ CTEST_RETURN_CODE=$?
 
 cd ..
 
-return $CTEST_RETURN_CODE
-
-
+exit $CTEST_RETURN_CODE
