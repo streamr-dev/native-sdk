@@ -1,0 +1,28 @@
+name: "cached install"
+description: "install dependencies, build and cache result, or restore from cache if present"
+
+runs:
+  using: "composite"
+  steps:
+    - name: cache homedir
+      id: cache-homedir
+      uses: actions/cache@v4
+      with:
+        key: cache-homedir-${{ hashFiles('~/.cache/**') }}
+        path: |
+          ~/.cache
+    - name: cache vcpkg installed
+      id: cache-vcpkg-installed
+      uses: actions/cache@v4
+      with:
+        key: cache-vcpkg-installed-${{ hashFiles('**/vcpkg_installed/**') }}
+        path: |
+          **/vcpkg_installed
+    - name: install-prerequisities
+      run:
+        source install-prerequisities.sh
+      shell: bash
+    - name: install
+      run:
+        ./install.sh
+      shell: bash

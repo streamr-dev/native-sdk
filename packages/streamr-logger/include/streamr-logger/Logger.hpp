@@ -1,6 +1,8 @@
 #ifndef STREAMER_UTILS_LOGGER_LOGGER_H
 #define STREAMER_UTILS_LOGGER_LOGGER_H
-// NOLINTBEGIN(readability-simplify-boolean-expr)
+
+#include <folly/logging/Logger.h>
+#include <folly/logging/xlog.h>
 
 #include <iostream>
 #include <memory>
@@ -207,45 +209,15 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 };
 
 class Logger {
- public:
+ private:
+                folly::Logger logger;
 
-  Logger() { 
-    this->initializeLoggerDB(folly::LoggerDB::get()); 
-  }
-
-  static Logger& get() {
-    static Logger instance;
-    return instance;
-  }
-
-  void log(const std::string& message) const { XLOG(INFO) << message; }
-  void logTrace(const std::string& message) const { XLOG(DBG) << message; }
-  void logDebug(const std::string& message) const { XLOG(DBG0) << message; }
-  void logInfo(const std::string& message) const { XLOG(INFO) << message; }
-  void logWarn(const std::string& message) const { XLOG(WARN) << message; }
-  void logError(const std::string& message) const { XLOG(ERR) << message; }
-  void logFatal(const std::string& message) const { XLOG(FATAL) << message; }
-
-private:
-
- void initializeLoggerDB(folly::LoggerDB& db) {
-    db.registerHandlerFactory(std::make_unique<StreamrHandlerFactory>(), true);
-    auto defaultHandlerConfig = folly::LogHandlerConfig(
-        "stream", {{"stream", "stderr"}, {"async", "false"}});
-    auto rootCategoryConfig = folly::LogCategoryConfig(
-        folly::LogLevel::MIN_LEVEL, false, {"default"});
-    folly::LogConfig config(
-        {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
-    db.updateConfig(config);
-  }
+      public:
+  Logger() : logger("omaloggeri") {}
+  // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+  void log(const std::string& message) const { 
+    XLOG(INFO) << message; }
 };
 
-#define SLOG_TRACE(msg) Logger::get().logTrace(msg)
-#define SLOG_DEBUG(msg) Logger::get().logDebug(msg)
-#define SLOG_INFO(msg) Logger::get().logInfo(msg)
-#define SLOG_WARN(msg) Logger::get().logWarn(msg)
-#define SLOG_ERROR(msg) Logger::get().logError(msg)
-#define SLOG_FATAL(msg) Logger::get().logFatal(msg)
-
-#endif
 // NOLINTEND(readability-simplify-boolean-expr)
+#endif

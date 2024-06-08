@@ -1,0 +1,29 @@
+---
+ci:
+- changed-files:
+  - any-glob-to-any-file: '.github/*'
+  - any-glob-to-any-file: '.github/**/*'
+docs:
+- changed-files:
+  - any-glob-to-any-file: '**.md'
+  - any-glob-to-any-file: '*.md'
+network:
+- changed-files:
+  - any-glob-to-any-file: 'packages/streamr-trackerless-network/*'
+  - any-glob-to-any-file: 'packages/streamr-trackerless-network/**/*'
+dht:
+- changed-files:
+  - any-glob-to-any-file: 'packages/streamr-dht/*'
+  - any-glob-to-any-file: 'packages/streamr-dht/**/*'
+proto-rpc:
+- changed-files:
+  - any-glob-to-any-file: 'packages/streamr-proto-rpc/*'
+  - any-glob-to-any-file: 'packages/streamr-proto-rpc/**/*'
+utils:
+- changed-files:
+  - any-glob-to-any-file: 'packages/streamr-utils/*'
+  - any-glob-to-any-file: 'packages/streamr-utils/**/*'
+logger:
+- changed-files:
+  - any-glob-to-any-file: 'packages/streamr-logger/*'
+  - any-glob-to-any-file: 'packages/streamr-logger/**/*'

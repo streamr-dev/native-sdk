@@ -18,15 +18,9 @@ TEST_F(LoggerTest, trace) {
 */
 /*
 TEST_F(LoggerTest, success) {
-  Logger logger;
-  logger.log("test");
-  int JAA = 1;
-}
-
-TEST_F(LoggerTest, failure) {
-  Logger logger;
-  logger.log("test failure");
-  EXPECT_EQ(1, 2);
+    Logger logger;
+    logger.log("test");
+    int jaa = 1;
 }
 
 TEST_F(LoggerTest, trace) {

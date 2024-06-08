@@ -1,13 +1,9 @@
 #include <streamr-logger/Logger.hpp>
 
-int main() {
-  const Logger logger;
-  logger.log("Hello, world!");
-  return 0;
-}
+int main()
 
-int KahuuJuu() {
-                                                                          return 0;
+{
+    Logger logger;
+    logger.log("Hello, world!");
+    return 0;
 }
-
-class Kivaa {};
