@@ -37,7 +37,3 @@ This script will recognize the operating system type and install the prerequisit
 This script loops through packages listed in `MonorepoPackages.cmake` and cleans the build folders of each package except for the `.gitignore` files. It also cleans the root build folder.
 
 
-
-
-
-

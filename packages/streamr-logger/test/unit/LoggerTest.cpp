@@ -4,13 +4,13 @@
 class LoggerTest : public testing::Test {};
 
 TEST_F(LoggerTest, success) {
-  Logger logger;
-  logger.log("test");
-  int JAA = 1;
+    Logger logger;
+    logger.log("test");
+    int jaa = 1;
 }
 
 TEST_F(LoggerTest, failure) {
-  Logger Klogger;
-      Klogger.log("test failure");
-  EXPECT_EQ(1, 2);
+    Logger klogger;
+    klogger.log("test failure");
+    EXPECT_EQ(1, 2);
 }
