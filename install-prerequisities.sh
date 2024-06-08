@@ -19,8 +19,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     brew install pkg-config
     ln -s /opt/homebrew/Cellar/llvm/18.1.6/bin/clang-format /opt/homebrew/bin/clang-format
     ln -s /opt/homebrew/Cellar/llvm/18.1.6/bin/clangd /opt/homebrew/bin/clangd
-    brew install trunk
-
+   
     rm -f /opt/homebrew/bin/clang-tidy
 
 else
@@ -29,9 +28,6 @@ else
     sudo apt-add-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main'
     sudo apt-get update
     sudo apt-get install -y build-essential cmake ninja-build jq clang-format
-    
-    #sudo curl https://get.trunk.io -fsSL | bash -s -- -y
-    ./trunk tools install
 fi
 
 cd clangd-tidy
@@ -49,8 +45,6 @@ if [[ ":$PATH:" != *":$CLANGD_TIDY_PATH:"* ]]; then
         echo "$CLANGD_TIDY_PATH" >> $GITHUB_PATH
     fi
 fi
-
-cp clangd-tidy/clangd-tidy .trunk/tools/clang-tidy
 
 cd vcpkg
 ./bootstrap-vcpkg.sh -disableMetrics

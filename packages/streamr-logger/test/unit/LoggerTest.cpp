@@ -10,7 +10,7 @@ TEST_F(LoggerTest, success) {
 }
 
 TEST_F(LoggerTest, failure) {
-  Logger logger;
-  logger.log("test failure");
+  Logger Klogger;
+      Klogger.log("test failure");
   EXPECT_EQ(1, 2);
 }

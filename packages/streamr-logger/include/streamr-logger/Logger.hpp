@@ -18,6 +18,7 @@ class StreamrFormatter : public folly::LogFormatter {
       const folly::LogCategory* handlerCategory) override {
     return "jeee!";
   }
+
 };
 
 class StreamrHandlerFactory : public folly::StreamHandlerFactory {
