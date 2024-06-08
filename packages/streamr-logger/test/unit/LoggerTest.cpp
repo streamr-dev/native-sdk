@@ -112,3 +112,4 @@ TEST_F(StreamrLogFormatterTest, fatalNoTruncate) {
   StreamrLogFormatter::StreamrLogMessage msg = {tp, "Filename.cpp", 101010, folly::LogLevel::FATAL, "Message"};
   EXPECT_EQ(formatter_.formatMessageInStreamrStyle(msg), "\x1B[1;41mFATAL\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
 }
+

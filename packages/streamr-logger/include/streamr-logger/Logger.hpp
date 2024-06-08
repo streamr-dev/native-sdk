@@ -2,7 +2,10 @@
 #define STREAMER_UTILS_LOGGER_LOGGER_H
 // NOLINTBEGIN(readability-simplify-boolean-expr)
 
+#include <iostream>
+#include <memory>
 #include <folly/Format.h>
+#include <folly/detail/StaticSingletonManager.h>
 #include <folly/logging/FileHandlerFactory.h>
 #include <folly/logging/LogCategory.h>
 #include <folly/logging/LogCategoryConfig.h>
@@ -20,9 +23,6 @@
 #include <folly/logging/StreamHandlerFactory.h>
 #include <folly/logging/xlog.h>
 #include <folly/portability/Time.h>
-#include <folly/detail/StaticSingletonManager.h>
-#include <iostream>
-#include <memory>
 
 /*
 Format based on this Streamr log. The Filename and line number is fixed size
@@ -209,14 +209,26 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 class Logger {
  public:
 
-  Logger() { this->initializeLoggerDB(folly::LoggerDB::get()); }
+  Logger() { 
+    this->initializeLoggerDB(folly::LoggerDB::get()); 
+  }
 
   static Logger& get() {
-     static Logger instance;
+    static Logger instance;
     return instance;
   }
 
-  void initializeLoggerDB(folly::LoggerDB& db)  {
+  void log(const std::string& message) const { XLOG(INFO) << message; }
+  void logTrace(const std::string& message) const { XLOG(DBG) << message; }
+  void logDebug(const std::string& message) const { XLOG(DBG0) << message; }
+  void logInfo(const std::string& message) const { XLOG(INFO) << message; }
+  void logWarn(const std::string& message) const { XLOG(WARN) << message; }
+  void logError(const std::string& message) const { XLOG(ERR) << message; }
+  void logFatal(const std::string& message) const { XLOG(FATAL) << message; }
+
+private:
+
+ void initializeLoggerDB(folly::LoggerDB& db) {
     db.registerHandlerFactory(std::make_unique<StreamrHandlerFactory>(), true);
     auto defaultHandlerConfig = folly::LogHandlerConfig(
         "stream", {{"stream", "stderr"}, {"async", "false"}});
@@ -225,15 +237,7 @@ class Logger {
     folly::LogConfig config(
         {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
     db.updateConfig(config);
-
   }
-  void log(const std::string& message) const { XLOG(INFO) << message; }
-  void logTrace(const std::string& message) const { XLOG(DBG) << message; }
-  void logDebug(const std::string& message) const { XLOG(DBG0) << message; }
-  void logInfo(const std::string& message) const { XLOG(INFO) << message; }
-  void logWarn(const std::string& message) const { XLOG(WARN) << message; }
-  void logError(const std::string& message) const { XLOG(ERR) << message; }
-  void logFatal(const std::string& message) const { XLOG(FATAL) << message; }
 };
 
 #define SLOG_TRACE(msg) Logger::get().logTrace(msg)
@@ -245,4 +249,3 @@ class Logger {
 
 #endif
 // NOLINTEND(readability-simplify-boolean-expr)
-
