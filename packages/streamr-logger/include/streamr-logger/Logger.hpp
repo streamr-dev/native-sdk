@@ -306,7 +306,11 @@ class Logger {
     void log(const std::string& message, folly::LogLevel level) {
         auto follyLogLevel = getFollyLogLevelFromEnv();
         if (follyLogLevel) {
-            this->initializeLoggerDB(loggerDB, *follyLogLevel, true);
+            if (follyLogLevel != loggerDB.getCategory("")->getLevel()) {
+                // If env root level different compated to folly one, 
+                // set new root level to folly
+                this->initializeLoggerDB(loggerDB, *follyLogLevel, true);
+            }
             folly::LogStreamProcessor(
                 [] {
                     static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
@@ -344,22 +348,7 @@ class Logger {
         }
         return std::nullopt;
     }
-/*
-    void setRootLogLevel(folly::LogLevel follyLogLevel) {
-        char* val = getenv(envLogLevelName);
-        auto isLogged = false;
-        if (val) {
-            auto pair = toFollyLogLevelMap.find(val);
-            if (pair != toFollyLogLevelMap.end()) {
-                if (pair->second != loggerDB.getCategory("")->getLevel()) {
-                    // Root log level changed in end variable, set
-                    // correct root level to folly
-                    this->initializeLoggerDB(loggerDB, pair->second, true);
-                }
-            }
-        }
-    }
-    */
+
     void initializeLoggerDB(
         folly::LoggerDB& db,
         const folly::LogLevel& rootLogLevel = folly::LogLevel::MIN_LEVEL,
