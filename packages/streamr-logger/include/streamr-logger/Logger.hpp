@@ -303,12 +303,19 @@ class Logger {
         return instance;
     }
 
-    void log(const std::string& message, folly::LogLevel level) {
+    // Used only for unit testing
+    Logger(folly::LoggerDB &loggerDB, bool isInitialized = true) : loggerDB{loggerDB} {
+      if (isInitialized) {
+         this->initializeLoggerDB(loggerDB);
+      }
+    }
+    // Returns if log sent
+    bool log(folly::LogLevel level, const std::string& message) {
+        bool logSent = false;
         auto follyLogLevel = getFollyLogLevelFromEnv();
         if (follyLogLevel) {
             if (follyLogLevel != loggerDB.getCategory("")->getLevel()) {
-                // If env root level different compated to folly one, 
-                // set new root level to folly
+                std::cout << "initializeLoggerDB called\n";
                 this->initializeLoggerDB(loggerDB, *follyLogLevel, true);
             }
             folly::LogStreamProcessor(
@@ -329,9 +336,10 @@ class Logger {
                 __LINE__,
                 __func__,
                 ::folly::LogStreamProcessor::APPEND,
-                message)
-                .stream();
+                message).stream();
+                logSent = true;
         }
+        return logSent;
     }
 
    private:
@@ -367,12 +375,12 @@ class Logger {
     }
 };
 
-#define SLOG_TRACE(msg) Logger::get().log(msg, folly::LogLevel::DBG)
-#define SLOG_DEBUG(msg) Logger::get().log(msg, folly::LogLevel::DBG0)
-#define SLOG_INFO(msg) Logger::get().log(msg, folly::LogLevel::INFO)
-#define SLOG_WARN(msg) Logger::get().log(msg, folly::LogLevel::WARN)
-#define SLOG_ERROR(msg) Logger::get().log(msg, folly::LogLevel::ERR)
-#define SLOG_FATAL(msg) Logger::get().log(msg, folly::LogLevel::FATAL)
+#define SLOG_TRACE(msg) Logger::get().log(folly::LogLevel::DBG, msg)
+#define SLOG_DEBUG(msg) Logger::get().log(folly::LogLevel::DBG0, msg)
+#define SLOG_INFO(msg) Logger::get().log(folly::LogLevel::INFO, msg)
+#define SLOG_WARN(msg) Logger::get().log(folly::LogLevel::WARN, msg)
+#define SLOG_ERROR(msg) Logger::get().log(folly::LogLevel::ERR, msg)
+#define SLOG_FATAL(msg) Logger::get().log(folly::LogLevel::FATAL, msg)
 
 }; // namespace logger
 }; // namespace streamr
