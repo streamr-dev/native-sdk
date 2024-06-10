@@ -1,9 +1,6 @@
 #ifndef STREAMER_UTILS_LOGGER_LOGGER_H
 #define STREAMER_UTILS_LOGGER_LOGGER_H
 
-#include <folly/logging/Logger.h>
-#include <folly/logging/xlog.h>
-
 #include <iostream>
 #include <memory>
 #include <folly/Format.h>
@@ -19,6 +16,7 @@
 #include <folly/logging/LogLevel.h>
 #include <folly/logging/LogMessage.h>
 #include <folly/logging/LogWriter.h>
+#include <folly/logging/Logger.h>
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/StandardLogHandler.h>
 #include <folly/logging/StandardLogHandlerFactory.h>
@@ -241,7 +239,7 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 class Logger {
    public:
     Logger() : loggerDB{folly::LoggerDB::get()} {
-        this->initializeLoggerDB(loggerDB);
+        this->initializeLoggerDB(loggerDB, folly::LogLevel::WARN);
     }
 
     static Logger& get() {
@@ -250,19 +248,21 @@ class Logger {
     }
 
     // Used only for unit testing
-    Logger(folly::LoggerDB &loggerDB, bool isInitialized = true) : loggerDB{loggerDB} {
-      if (isInitialized) {
-         this->initializeLoggerDB(loggerDB);
-      }
+    Logger(folly::LoggerDB& loggerDB, bool isInitialized = true)
+        : loggerDB{loggerDB} {
+        if (isInitialized) {
+            this->initializeLoggerDB(loggerDB, folly::LogLevel::WARN);
+        }
     }
-    // Returns if log sent
-    bool log(folly::LogLevel level, const std::string& message) {
-        bool logSent = false;
+
+    void log(folly::LogLevel level, const std::string& message) {
         auto follyLogLevel = getFollyLogLevelFromEnv();
         if (follyLogLevel) {
             if (follyLogLevel != loggerDB.getCategory("")->getLevel()) {
+                // loggerDB.setLevel("", *follyLogLevel);
                 this->initializeLoggerDB(loggerDB, *follyLogLevel, true);
             }
+
             folly::LogStreamProcessor(
                 [] {
                     static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
@@ -281,10 +281,9 @@ class Logger {
                 __LINE__,
                 __func__,
                 ::folly::LogStreamProcessor::APPEND,
-                message).stream();
-                logSent = true;
+                message)
+                .stream();
         }
-        return logSent;
     }
 
    private:
@@ -292,7 +291,6 @@ class Logger {
 
     std::optional<folly::LogLevel> getFollyLogLevelFromEnv() {
         char* val = getenv(envLogLevelName);
-        auto isLogged = false;
         if (val) {
             auto pair = toFollyLogLevelMap.find(val);
             if (pair != toFollyLogLevelMap.end()) {
@@ -304,16 +302,20 @@ class Logger {
 
     void initializeLoggerDB(
         folly::LoggerDB& db,
-        const folly::LogLevel& rootLogLevel = folly::LogLevel::MIN_LEVEL,
+        const folly::LogLevel& rootLogLevel,
         bool isSkipRegisterHandlerFactory = false) {
         if (!isSkipRegisterHandlerFactory) {
             db.registerHandlerFactory(
                 std::make_unique<StreamrHandlerFactory>(), true);
         }
+        auto rootLogLevelInString = folly::logLevelToString(rootLogLevel);
         auto defaultHandlerConfig = folly::LogHandlerConfig(
-            "stream", {{"stream", "stderr"}, {"async", "false"}});
-        auto rootCategoryConfig = folly::LogCategoryConfig(
-            folly::LogLevel::MIN_LEVEL, false, {"default"});
+            "stream",
+            {{"stream", "stderr"},
+             {"async", "false"},
+             {"level", rootLogLevelInString}});
+        auto rootCategoryConfig =
+            folly::LogCategoryConfig(rootLogLevel, false, {"default"});
         folly::LogConfig config(
             {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
         db.updateConfig(config);
