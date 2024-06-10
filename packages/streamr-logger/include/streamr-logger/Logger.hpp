@@ -293,53 +293,62 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 };
 
 class Logger {
-
    public:
-   
     Logger() : loggerDB{folly::LoggerDB::get()} {
         this->initializeLoggerDB(loggerDB);
     }
-    
+
     static Logger& get() {
-      static Logger instance;
-      return instance;
+        static Logger instance;
+        return instance;
     }
 
     void log(const std::string& message, folly::LogLevel level) {
-        this->setRootLogLevelIfNeeded();
-        folly::LogStreamProcessor(
-            [] {
-                static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
-                    folly_detail_xlog_category;
-                return folly_detail_xlog_category.getInfo(
-                    &::folly::detail::custom::xlogFileScopeInfo);
-            }(),
-            (level),
-            [] {
-                constexpr auto* folly_detail_xlog_filename = XLOG_FILENAME;
-                return ::folly::detail::custom::getXlogCategoryName(
-                    folly_detail_xlog_filename, 0);
-            }(),
-            ::folly::detail::custom::isXlogCategoryOverridden(0),
-            XLOG_FILENAME,
-            __LINE__,
-            __func__,
-            ::folly::LogStreamProcessor::APPEND,
-            message)
-            .stream();
+        auto follyLogLevel = getFollyLogLevelFromEnv();
+        if (follyLogLevel) {
+            this->initializeLoggerDB(loggerDB, *follyLogLevel, true);
+            folly::LogStreamProcessor(
+                [] {
+                    static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
+                        folly_detail_xlog_category;
+                    return folly_detail_xlog_category.getInfo(
+                        &::folly::detail::custom::xlogFileScopeInfo);
+                }(),
+                (level),
+                [] {
+                    constexpr auto* folly_detail_xlog_filename = XLOG_FILENAME;
+                    return ::folly::detail::custom::getXlogCategoryName(
+                        folly_detail_xlog_filename, 0);
+                }(),
+                ::folly::detail::custom::isXlogCategoryOverridden(0),
+                XLOG_FILENAME,
+                __LINE__,
+                __func__,
+                ::folly::LogStreamProcessor::APPEND,
+                message)
+                .stream();
+        }
     }
 
    private:
-
     folly::LoggerDB& loggerDB;
 
-    void setRootLogLevelIfNeeded() {
+    std::optional<folly::LogLevel> getFollyLogLevelFromEnv() {
         char* val = getenv(envLogLevelName);
         auto isLogged = false;
-        if (!val) {
-            // Log all levels if env variable not set
-            isLogged = true;
-        } else {
+        if (val) {
+            auto pair = toFollyLogLevelMap.find(val);
+            if (pair != toFollyLogLevelMap.end()) {
+                return std::optional<folly::LogLevel>{std::move(pair->second)};
+            }
+        }
+        return std::nullopt;
+    }
+/*
+    void setRootLogLevel(folly::LogLevel follyLogLevel) {
+        char* val = getenv(envLogLevelName);
+        auto isLogged = false;
+        if (val) {
             auto pair = toFollyLogLevelMap.find(val);
             if (pair != toFollyLogLevelMap.end()) {
                 if (pair->second != loggerDB.getCategory("")->getLevel()) {
@@ -350,7 +359,7 @@ class Logger {
             }
         }
     }
-    //
+    */
     void initializeLoggerDB(
         folly::LoggerDB& db,
         const folly::LogLevel& rootLogLevel = folly::LogLevel::MIN_LEVEL,
