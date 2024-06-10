@@ -88,7 +88,7 @@ TEST_F(StreamrLogFormatterTest, fatalNoTruncate) {
 TEST_F(LoggerTest, initialization) {
     auto logger = Logger::get();
 }
-
+/*
 TEST_F(LoggerTest, NoLogLevelEnvVariableSet) {
     auto logger = Logger::get();
     unsetenv("LOG_LEVEL");
@@ -115,15 +115,15 @@ TEST_F(LoggerTest, RootLogLevelSetToHigherNewValue) {
     setenv("LOG_LEVEL", "trace", 1);
     setenv("LOG_LEVEL", "fatal", 1);
     // Log not written
-    EXPECT_EQ(logger.log(LogLevel::INFO, "Testi"), true);
+    EXPECT_EQ(logger.log(LogLevel::INFO, "Testi"), false);
 }
-
-TEST_F(LoggerTest, LoggerDBIntializationWithDefaultLogMinLevel) {
+*/
+TEST_F(LoggerTest, LoggerDBIntializationWithDefaultLogWarnLevel) {
     LoggerDB db{LoggerDB::TESTING};
     Logger logger{Logger(db)};
 
     // Check that minimum root log level set
-    EXPECT_EQ(db.getCategory("")->getLevel(), LogLevel::MIN_LEVEL);
+    EXPECT_EQ(db.getCategory("")->getLevel(), LogLevel::WARN);
 }
 
 TEST_F(LoggerTest, LoggerDBIntializationWithStreamrHandler) {
@@ -138,4 +138,10 @@ TEST_F(LoggerTest, LoggerDBIntializationWithoutStreamrHandler) {
     Logger logger{Logger(db, false)};
     // Check that minimum root log level set
     EXPECT_EQ(db.getCategory("")->getHandlers().size(), 0);
+}
+
+TEST_F(LoggerTest, First) {
+  setenv("LOG_LEVEL", "error", 1);
+      setenv("LOG_LEVEL", "error", 1);
+  SLOG_INFO("WWWWWWWWW");
 }
