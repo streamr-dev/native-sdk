@@ -26,6 +26,89 @@
 #include <folly/logging/xlog.h>
 #include <folly/portability/Time.h>
 
+namespace streamr {
+namespace logger {
+
+namespace {
+
+static const auto envLogLevelName = "LOG_LEVEL";
+static const auto logLevelTraceText = "trace";
+static const auto logLevelDebugText = "debug";
+static const auto logLevelInfoText = "info";
+static const auto logLevelWarnText = "warn";
+static const auto logLevelErrorText = "error";
+static const auto logLevelFatalText = "fatal";
+static const auto logLevelTraceNum = 10;
+static const auto logLevelDebugNum = 20;
+static const auto logLevelInfoNum = 30;
+static const auto logLevelWarnNum = 40;
+static const auto logLevelErrorNum = 50;
+static const auto logLevelFatalNum = 60;
+
+struct StreamrLogLevel {
+    virtual int getLogLevel() const = 0;
+};
+
+struct LogLevelTrace : StreamrLogLevel {
+    int getLogLevel() const override { return logLevelTraceNum; }
+};
+
+struct LogLevelDebug : StreamrLogLevel {
+    int getLogLevel() const override { return logLevelDebugNum; }
+};
+
+struct LogLevelInfo : StreamrLogLevel {
+    int getLogLevel() const override { return logLevelInfoNum; }
+};
+
+struct LogLevelWarn : StreamrLogLevel {
+    int getLogLevel() const override { return logLevelWarnNum; }
+};
+
+struct LogLevelError : StreamrLogLevel {
+    int getLogLevel() const override { return logLevelErrorNum; }
+};
+
+struct LogFatalError : StreamrLogLevel {
+    int getLogLevel() const override { return logLevelFatalNum; }
+};
+
+/*
+const std::unordered_map<std::string, int> logLevelMap{
+    {logLevelTraceText, logLevelTraceNum},
+    {logLevelDebugText, logLevelDebugNum},
+    {logLevelInfoText, logLevelInfoNum},
+    {logLevelWarnText, logLevelWarnNum},
+    {logLevelErrorText, logLevelErrorNum},
+    {logLevelFatalText, logLevelFatalNum}
+    };
+*/
+const std::unordered_map<std::string, folly::LogLevel> toFollyLogLevelMap{
+    {logLevelTraceText, folly::LogLevel::DBG},
+    {logLevelDebugText, folly::LogLevel::DBG0},
+    {logLevelInfoText, folly::LogLevel::INFO},
+    {logLevelWarnText, folly::LogLevel::WARN},
+    {logLevelErrorText, folly::LogLevel::ERR},
+    {logLevelFatalText, folly::LogLevel::FATAL}};
+/*
+    enum class StreamrLogLevel {
+      trace,
+      debug,
+      info,
+      warn,
+      error,
+      fatal
+    };
+*/
+struct StreamrLogMessage {
+    std::chrono::system_clock::time_point timestamp;
+    folly::StringPiece fileBasename;
+    unsigned int lineNumber;
+    folly::LogLevel logLevel;
+    const std::string& logMessage;
+};
+
+}; // namespace
 /*
 Format based on this Streamr log. The Filename and line number is fixed size
 with 36 characters. If it is longer then it is truncated
@@ -47,177 +130,253 @@ WARN [2024-06-05T08:50:39.787] (File name): Message
 */
 
 class StreamrLogFormatter : public folly::LogFormatter {
- public:
-  StreamrLogFormatter() = default;
-  ~StreamrLogFormatter() override = default;
+   public:
+    StreamrLogFormatter() = default;
+    ~StreamrLogFormatter() override = default;
 
-  struct StreamrLogMessage {
-    std::chrono::system_clock::time_point timestamp;
-    folly::StringPiece fileBasename;
-    unsigned int lineNumber;
-    folly::LogLevel logLevel;
-    const std::string& logMessage;
-  };
+    struct StreamrLogMessage {
+        std::chrono::system_clock::time_point timestamp;
+        folly::StringPiece fileBasename;
+        unsigned int lineNumber;
+        folly::LogLevel logLevel;
+        const std::string& logMessage;
+    };
 
-  std::string formatMessageInStreamrStyle(const StreamrLogMessage& message) {
-    struct tm ltime;
-    const auto timeSinceEpoch = message.timestamp.time_since_epoch();
-    const auto epochSeconds =
-        std::chrono::duration_cast<std::chrono::seconds>(timeSinceEpoch);
-    const std::chrono::milliseconds millisecs =
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceEpoch) -
-        epochSeconds;
-    time_t unixTimestamp = epochSeconds.count();
-    if (!localtime_r(&unixTimestamp, &ltime)) {
-      memset(&ltime, 0, sizeof(ltime));
+    std::string formatMessageInStreamrStyle(const StreamrLogMessage& message) {
+        struct tm ltime;
+        const auto timeSinceEpoch = message.timestamp.time_since_epoch();
+        const auto epochSeconds =
+            std::chrono::duration_cast<std::chrono::seconds>(timeSinceEpoch);
+        const std::chrono::milliseconds millisecs =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                timeSinceEpoch) -
+            epochSeconds;
+        time_t unixTimestamp = epochSeconds.count();
+        if (!localtime_r(&unixTimestamp, &ltime)) {
+            memset(&ltime, 0, sizeof(ltime));
+        }
+        auto basename = message.fileBasename;
+        const auto fileNameLength = std::ssize(basename);
+        const auto lineNumberInString = std::to_string(message.lineNumber);
+        const auto lineNumberLength = std::ssize(lineNumberInString);
+        const std::string logMessageColor = "\033[36m";
+        const std::string logMessageColorReset = "\033[0m";
+        const auto fileNameAndLineNumberLength =
+            (fileNameLength + lineNumberLength + separatorLength);
+        // Is filename is truncated if filename, separator and lineNumber does
+        // not fit to the fixed size
+        if (fileNameAndLineNumberLength <= maxFileNameAndLineNumberLength) {
+            basename = basename.toString()
+                           .append(fileNameAndLineNumberSeparator)
+                           .append(lineNumberInString);
+            auto logLine = folly::sformat(
+                "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}{}{}\n",
+                getColorSequence(message.logLevel),
+                getLogLevelName(message.logLevel),
+                logMessageColorReset,
+                ltime.tm_year + 1900,
+                ltime.tm_mon + 1,
+                ltime.tm_mday,
+                ltime.tm_hour,
+                ltime.tm_min,
+                ltime.tm_sec,
+                millisecs.count(),
+                basename,
+                logMessageColor,
+                message.logMessage,
+                logMessageColorReset);
+            return logLine;
+        } else {
+            // Truncate needed
+            auto lengthForTruncatedFileName = maxFileNameAndLineNumberLength -
+                (lineNumberLength + separatorLength);
+            basename = basename.substr(0, lengthForTruncatedFileName);
+            auto logLine = folly::sformat(
+                "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n",
+                getColorSequence(message.logLevel),
+                getLogLevelName(message.logLevel),
+                logMessageColorReset,
+                ltime.tm_year + 1900,
+                ltime.tm_mon + 1,
+                ltime.tm_mday,
+                ltime.tm_hour,
+                ltime.tm_min,
+                ltime.tm_sec,
+                millisecs.count(),
+                lengthForTruncatedFileName,
+                basename,
+                fileNameAndLineNumberSeparator,
+                lineNumberInString,
+                logMessageColor,
+                message.logMessage,
+                logMessageColorReset);
+            return logLine;
+        }
     }
-    auto basename = message.fileBasename;
-    const auto fileNameLength = std::ssize(basename);
-    const auto lineNumberInString = std::to_string(message.lineNumber);
-    const auto lineNumberLength = std::ssize(lineNumberInString);
-    const std::string logMessageColor = "\033[36m";
-    const std::string logMessageColorReset = "\033[0m";
-    const auto fileNameAndLineNumberLength =
-        (fileNameLength + lineNumberLength + separatorLength);
-    // Is filename is truncated if filename, separator and lineNumber does not
-    // fit to the fixed size
-    if (fileNameAndLineNumberLength <= maxFileNameAndLineNumberLength) {
-      basename = basename.toString()
-                     .append(fileNameAndLineNumberSeparator)
-                     .append(lineNumberInString);
-      auto logLine = folly::sformat(
-          "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}{}{}\n",
-          getColorSequence(message.logLevel),
-          getLogLevelName(message.logLevel),
-          logMessageColorReset,
-          ltime.tm_year + 1900,
-          ltime.tm_mon + 1,
-          ltime.tm_mday,
-          ltime.tm_hour,
-          ltime.tm_min,
-          ltime.tm_sec,
-          millisecs.count(),
-          basename,
-          logMessageColor,
-          message.logMessage,
-          logMessageColorReset);
-      return logLine;
-    } else {
-      // Truncate needed
-      auto lengthForTruncatedFileName =
-          maxFileNameAndLineNumberLength - (lineNumberLength + separatorLength);
-      basename = basename.substr(0, lengthForTruncatedFileName);
-      auto logLine = folly::sformat(
-          "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n",
-          getColorSequence(message.logLevel),
-          getLogLevelName(message.logLevel),
-          logMessageColorReset,
-          ltime.tm_year + 1900,
-          ltime.tm_mon + 1,
-          ltime.tm_mday,
-          ltime.tm_hour,
-          ltime.tm_min,
-          ltime.tm_sec,
-          millisecs.count(),
-          lengthForTruncatedFileName,
-          basename,
-          fileNameAndLineNumberSeparator,
-          lineNumberInString,
-          logMessageColor,
-          message.logMessage,
-          logMessageColorReset);
-      return logLine;
+
+    std::string formatMessage(
+        const folly::LogMessage& message,
+        const folly::LogCategory* handlerCategory) override {
+        return this->formatMessageInStreamrStyle(
+            {message.getTimestamp(),
+             message.getFileBaseName(),
+             message.getLineNumber(),
+             message.getLevel(),
+             message.getMessage()});
     }
-  }
 
-  std::string formatMessage(
-      const folly::LogMessage& message,
-      const folly::LogCategory* handlerCategory) override {
-    return this->formatMessageInStreamrStyle(
-        {message.getTimestamp(),
-         message.getFileBaseName(),
-         message.getLineNumber(),
-         message.getLevel(),
-         message.getMessage()});
-  }
+   private:
+    static constexpr int maxFileNameAndLineNumberLength{36};
+    static constexpr folly::StringPiece fileNameAndLineNumberSeparator{": "};
+    static constexpr auto separatorLength{
+        std::ssize(fileNameAndLineNumberSeparator)};
 
- private:
-  static constexpr int maxFileNameAndLineNumberLength{36};
-  static constexpr folly::StringPiece fileNameAndLineNumberSeparator{": "};
-  static constexpr auto separatorLength{
-      std::ssize(fileNameAndLineNumberSeparator)};
-
-  constexpr folly::StringPiece getLogLevelName(folly::LogLevel level) {
-    if (level == folly::LogLevel::DBG) {
-      return "TRACE";
-    } else if (level == folly::LogLevel::DBG0) {
-      return "DEBUG";
-    } else if (level == folly::LogLevel::INFO) {
-      return "INFO";
-    } else if (level == folly::LogLevel::WARN) {
-      return "WARN";
-    } else if (level == folly::LogLevel::ERR) {
-      return "ERROR";
+    constexpr folly::StringPiece getLogLevelName(folly::LogLevel level) {
+        if (level == folly::LogLevel::DBG) {
+            return "TRACE";
+        } else if (level == folly::LogLevel::DBG0) {
+            return "DEBUG";
+        } else if (level == folly::LogLevel::INFO) {
+            return "INFO";
+        } else if (level == folly::LogLevel::WARN) {
+            return "WARN";
+        } else if (level == folly::LogLevel::ERR) {
+            return "ERROR";
+        }
+        return "FATAL";
     }
-    return "FATAL";
-  }
 
-  folly::StringPiece getColorSequence(folly::LogLevel level) {
-    if (level == folly::LogLevel::DBG) {
-      return "\033[90m"; // Gray (TRACE)
-    } else if (level == folly::LogLevel::DBG0) {
-      return "\033[34m"; // Blue (DEBUG)
-    } else if (level == folly::LogLevel::INFO) {
-      return "\033[32m"; // Green (INFO)
-    } else if (level == folly::LogLevel::WARN) {
-      return "\033[33m"; // Yellow (WARN)
-    } else if (level == folly::LogLevel::ERR) {
-      return "\033[31m"; // Red (ERROR)
+    folly::StringPiece getColorSequence(folly::LogLevel level) {
+        if (level == folly::LogLevel::DBG) {
+            return "\033[90m"; // Gray (TRACE)
+        } else if (level == folly::LogLevel::DBG0) {
+            return "\033[34m"; // Blue (DEBUG)
+        } else if (level == folly::LogLevel::INFO) {
+            return "\033[32m"; // Green (INFO)
+        } else if (level == folly::LogLevel::WARN) {
+            return "\033[33m"; // Yellow (WARN)
+        } else if (level == folly::LogLevel::ERR) {
+            return "\033[31m"; // Red (ERROR)
+        }
+        return "\033[1;41m"; // Red Background (FATAL)
     }
-    return "\033[1;41m"; // Red Background (FATAL)
-  }
 };
 
 class StreamrLogFormatterFactory
     : public folly::StandardLogHandlerFactory::FormatterFactory {
- public:
-  bool processOption(
-      folly::StringPiece name, folly::StringPiece value) override {
-    return false;
-  }
+   public:
+    bool processOption(
+        folly::StringPiece name, folly::StringPiece value) override {
+        return false;
+    }
 
-  std::shared_ptr<folly::LogFormatter> createFormatter(
-      const std::shared_ptr<folly::LogWriter>&) override {
-    return std::make_shared<StreamrLogFormatter>();
-    ;
-  }
+    std::shared_ptr<folly::LogFormatter> createFormatter(
+        const std::shared_ptr<folly::LogWriter>&) override {
+        return std::make_shared<StreamrLogFormatter>();
+        ;
+    }
 };
 
 class StreamrHandlerFactory : public folly::StreamHandlerFactory {
- public:
-  StreamrHandlerFactory() = default;
-  ~StreamrHandlerFactory() override = default;
+   public:
+    StreamrHandlerFactory() = default;
+    ~StreamrHandlerFactory() override = default;
 
-  std::shared_ptr<folly::LogHandler> createHandler(
-      const Options& options) override {
-    StreamHandlerFactory::WriterFactory writerFactory;
-    StreamrLogFormatterFactory formatterFactory;
+    std::shared_ptr<folly::LogHandler> createHandler(
+        const Options& options) override {
+        StreamHandlerFactory::WriterFactory writerFactory;
+        StreamrLogFormatterFactory formatterFactory;
 
-    return folly::StandardLogHandlerFactory::createHandler(
-        getType(), &writerFactory, &formatterFactory, options);
-  }
+        return folly::StandardLogHandlerFactory::createHandler(
+            getType(), &writerFactory, &formatterFactory, options);
+    }
 };
 
 class Logger {
- private:
-                folly::Logger logger;
 
-      public:
-  Logger() : logger("omaloggeri") {}
-  // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-  void log(const std::string& message) const { 
-    XLOG(INFO) << message; }
+   public:
+   
+    Logger() : loggerDB{folly::LoggerDB::get()} {
+        this->initializeLoggerDB(loggerDB);
+    }
+    
+    static Logger& get() {
+      static Logger instance;
+      return instance;
+    }
+
+    void log(const std::string& message, folly::LogLevel level) {
+        this->setRootLogLevelIfNeeded();
+        folly::LogStreamProcessor(
+            [] {
+                static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
+                    folly_detail_xlog_category;
+                return folly_detail_xlog_category.getInfo(
+                    &::folly::detail::custom::xlogFileScopeInfo);
+            }(),
+            (level),
+            [] {
+                constexpr auto* folly_detail_xlog_filename = XLOG_FILENAME;
+                return ::folly::detail::custom::getXlogCategoryName(
+                    folly_detail_xlog_filename, 0);
+            }(),
+            ::folly::detail::custom::isXlogCategoryOverridden(0),
+            XLOG_FILENAME,
+            __LINE__,
+            __func__,
+            ::folly::LogStreamProcessor::APPEND,
+            message)
+            .stream();
+    }
+
+   private:
+
+    folly::LoggerDB& loggerDB;
+
+    void setRootLogLevelIfNeeded() {
+        char* val = getenv(envLogLevelName);
+        auto isLogged = false;
+        if (!val) {
+            // Log all levels if env variable not set
+            isLogged = true;
+        } else {
+            auto pair = toFollyLogLevelMap.find(val);
+            if (pair != toFollyLogLevelMap.end()) {
+                if (pair->second != loggerDB.getCategory("")->getLevel()) {
+                    // Root log level changed in end variable, set
+                    // correct root level to folly
+                    this->initializeLoggerDB(loggerDB, pair->second, true);
+                }
+            }
+        }
+    }
+    //
+    void initializeLoggerDB(
+        folly::LoggerDB& db,
+        const folly::LogLevel& rootLogLevel = folly::LogLevel::MIN_LEVEL,
+        bool isSkipRegisterHandlerFactory = false) {
+        if (!isSkipRegisterHandlerFactory) {
+            db.registerHandlerFactory(
+                std::make_unique<StreamrHandlerFactory>(), true);
+        }
+        auto defaultHandlerConfig = folly::LogHandlerConfig(
+            "stream", {{"stream", "stderr"}, {"async", "false"}});
+        auto rootCategoryConfig = folly::LogCategoryConfig(
+            folly::LogLevel::MIN_LEVEL, false, {"default"});
+        folly::LogConfig config(
+            {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
+        db.updateConfig(config);
+    }
 };
 
-// NOLINTEND(readability-simplify-boolean-expr)
+#define SLOG_TRACE(msg) Logger::get().log(msg, folly::LogLevel::DBG)
+#define SLOG_DEBUG(msg) Logger::get().log(msg, folly::LogLevel::DBG0)
+#define SLOG_INFO(msg) Logger::get().log(msg, folly::LogLevel::INFO)
+#define SLOG_WARN(msg) Logger::get().log(msg, folly::LogLevel::WARN)
+#define SLOG_ERROR(msg) Logger::get().log(msg, folly::LogLevel::ERR)
+#define SLOG_FATAL(msg) Logger::get().log(msg, folly::LogLevel::FATAL)
+
+}; // namespace logger
+}; // namespace streamr
+
 #endif
