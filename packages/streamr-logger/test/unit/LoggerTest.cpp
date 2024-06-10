@@ -10,6 +10,7 @@ using folly::LoggerDB;
 using folly::LogLevel;
 using streamr::logger::Logger;
 using streamr::logger::StreamrLogFormatter;
+using streamr::logger::StreamrHandlerFactory;
 using namespace std::chrono;
 
 class StreamrLogFormatterTest : public testing::Test {

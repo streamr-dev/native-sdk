@@ -38,51 +38,7 @@ static const auto logLevelInfoText = "info";
 static const auto logLevelWarnText = "warn";
 static const auto logLevelErrorText = "error";
 static const auto logLevelFatalText = "fatal";
-static const auto logLevelTraceNum = 10;
-static const auto logLevelDebugNum = 20;
-static const auto logLevelInfoNum = 30;
-static const auto logLevelWarnNum = 40;
-static const auto logLevelErrorNum = 50;
-static const auto logLevelFatalNum = 60;
 
-struct StreamrLogLevel {
-    virtual int getLogLevel() const = 0;
-};
-
-struct LogLevelTrace : StreamrLogLevel {
-    int getLogLevel() const override { return logLevelTraceNum; }
-};
-
-struct LogLevelDebug : StreamrLogLevel {
-    int getLogLevel() const override { return logLevelDebugNum; }
-};
-
-struct LogLevelInfo : StreamrLogLevel {
-    int getLogLevel() const override { return logLevelInfoNum; }
-};
-
-struct LogLevelWarn : StreamrLogLevel {
-    int getLogLevel() const override { return logLevelWarnNum; }
-};
-
-struct LogLevelError : StreamrLogLevel {
-    int getLogLevel() const override { return logLevelErrorNum; }
-};
-
-struct LogFatalError : StreamrLogLevel {
-    int getLogLevel() const override { return logLevelFatalNum; }
-};
-
-/*
-const std::unordered_map<std::string, int> logLevelMap{
-    {logLevelTraceText, logLevelTraceNum},
-    {logLevelDebugText, logLevelDebugNum},
-    {logLevelInfoText, logLevelInfoNum},
-    {logLevelWarnText, logLevelWarnNum},
-    {logLevelErrorText, logLevelErrorNum},
-    {logLevelFatalText, logLevelFatalNum}
-    };
-*/
 const std::unordered_map<std::string, folly::LogLevel> toFollyLogLevelMap{
     {logLevelTraceText, folly::LogLevel::DBG},
     {logLevelDebugText, folly::LogLevel::DBG0},
@@ -90,16 +46,7 @@ const std::unordered_map<std::string, folly::LogLevel> toFollyLogLevelMap{
     {logLevelWarnText, folly::LogLevel::WARN},
     {logLevelErrorText, folly::LogLevel::ERR},
     {logLevelFatalText, folly::LogLevel::FATAL}};
-/*
-    enum class StreamrLogLevel {
-      trace,
-      debug,
-      info,
-      warn,
-      error,
-      fatal
-    };
-*/
+
 struct StreamrLogMessage {
     std::chrono::system_clock::time_point timestamp;
     folly::StringPiece fileBasename;
@@ -273,7 +220,6 @@ class StreamrLogFormatterFactory
     std::shared_ptr<folly::LogFormatter> createFormatter(
         const std::shared_ptr<folly::LogWriter>&) override {
         return std::make_shared<StreamrLogFormatter>();
-        ;
     }
 };
 
@@ -315,7 +261,6 @@ class Logger {
         auto follyLogLevel = getFollyLogLevelFromEnv();
         if (follyLogLevel) {
             if (follyLogLevel != loggerDB.getCategory("")->getLevel()) {
-                std::cout << "initializeLoggerDB called\n";
                 this->initializeLoggerDB(loggerDB, *follyLogLevel, true);
             }
             folly::LogStreamProcessor(
