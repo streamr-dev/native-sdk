@@ -262,7 +262,9 @@ class Logger {
                 // loggerDB.setLevel("", *follyLogLevel);
                 this->initializeLoggerDB(loggerDB, *follyLogLevel, true);
             }
-
+            // This complicated code is mostly copy/pasted from folly's XLOG macro.
+            // It is not very flexible to call macro from here so. This code below prints
+            // a log message without any return code.
             folly::LogStreamProcessor(
                 [] {
                     static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
