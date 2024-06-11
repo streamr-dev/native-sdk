@@ -1,5 +1,7 @@
+#include "streamr-logger/Logger.hpp"
 #include <gtest/gtest.h>
-#include <streamr-logger/Logger.hpp>
+
+using Logger = streamr::logger::Logger;
 
 class LoggerTest : public testing::Test {};
 
