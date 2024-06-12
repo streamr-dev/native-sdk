@@ -23,6 +23,7 @@
 #include <folly/logging/StreamHandlerFactory.h>
 #include <folly/logging/xlog.h>
 #include <folly/portability/Time.h>
+#include "StreamrWriterFactory.hpp"
 
 namespace streamr {
 namespace logger {
@@ -75,7 +76,7 @@ INFO [2024-06-05T08:50:39.787] (File name): Message
 TRACE [2024-06-05T08:50:39.787] (File name): Message
 WARN [2024-06-05T08:50:39.787] (File name): Message
 */
-
+/*
 class StreamrWriterFactory : public folly::StreamHandlerFactory::WriterFactory {
    public:
     StreamrWriterFactory() : logWriter_{nullptr} {}
@@ -94,7 +95,7 @@ class StreamrWriterFactory : public folly::StreamHandlerFactory::WriterFactory {
    private:
     std::shared_ptr<folly::LogWriter> logWriter_ = nullptr;
 };
-
+*/
 class StreamrLogFormatter : public folly::LogFormatter {
    public:
     StreamrLogFormatter() = default;
