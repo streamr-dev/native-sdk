@@ -16,34 +16,38 @@ static constexpr folly::StringPiece fileNameAndLineNumberSeparator{": "};
 static constexpr auto separatorLength{
     std::ssize(fileNameAndLineNumberSeparator)};
 
-constexpr folly::StringPiece getLogLevelName(folly::LogLevel level) {
-    if (level == folly::LogLevel::DBG) {
-        return "TRACE";
-    } else if (level == folly::LogLevel::DBG0) {
-        return "DEBUG";
-    } else if (level == folly::LogLevel::INFO) {
-        return "INFO";
-    } else if (level == folly::LogLevel::WARN) {
-        return "WARN";
-    } else if (level == folly::LogLevel::ERR) {
-        return "ERROR";
-    }
-    return "FATAL";
-}
 
-folly::StringPiece getColorSequence(folly::LogLevel level) {
-    if (level == folly::LogLevel::DBG) {
-        return "\033[90m"; // Gray (TRACE)
-    } else if (level == folly::LogLevel::DBG0) {
-        return "\033[34m"; // Blue (DEBUG)
-    } else if (level == folly::LogLevel::INFO) {
-        return "\033[32m"; // Green (INFO)
-    } else if (level == folly::LogLevel::WARN) {
-        return "\033[33m"; // Yellow (WARN)
-    } else if (level == folly::LogLevel::ERR) {
-        return "\033[31m"; // Red (ERROR)
+struct LogLevelData {
+    folly::StringPiece logLevelName;
+    folly::StringPiece color;
+};
+
+// FATAL cannot be used in folly because it aborts. So CRITICAL is converted
+// to Streamr fatal
+constexpr LogLevelData getLogLevelData(const folly::LogLevel level) {
+    switch (level) {
+    case folly::LogLevel::DBG:
+        return {"TRACE", "\033[90m"};
+        break;
+    case folly::LogLevel::DBG0:
+        return {"DEBUG", "\033[34m"};
+        break;
+    case folly::LogLevel::INFO:
+        return {"INFO", "\033[32m"};
+        break;
+    case folly::LogLevel::WARN:
+        return {"WARN", "\033[33m"};
+        break; 
+    case folly::LogLevel::ERR:
+        return {"ERROR", "\033[31m"};
+        break; 
+    case folly::LogLevel::CRITICAL:
+        return {"FATAL", "\033[1;41m"};
+        break;    
+    default: 
+        return {"TRACE", "\033[90m"};
+        break;  
     }
-    return "\033[1;41m"; // Red Background (FATAL)
 }
 
 } // namespace
@@ -106,14 +110,15 @@ public:
             (fileNameLength + lineNumberLength + separatorLength);
         // Is filename is truncated if filename, separator and lineNumber does
         // not fit to the fixed size
+        auto logLevelData = getLogLevelData(message.logLevel);
         if (fileNameAndLineNumberLength <= maxFileNameAndLineNumberLength) {
             basename = basename.toString()
                            .append(fileNameAndLineNumberSeparator)
                            .append(lineNumberInString);
             auto logLine = folly::sformat(
                 "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}{}{}\n",
-                getColorSequence(message.logLevel),
-                getLogLevelName(message.logLevel),
+                logLevelData.color,
+                logLevelData.logLevelName,
                 logMessageColorReset,
                 ltime.tm_year + 1900,
                 ltime.tm_mon + 1,
@@ -134,8 +139,8 @@ public:
             basename = basename.substr(0, lengthForTruncatedFileName);
             auto logLine = folly::sformat(
                 "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n",
-                getColorSequence(message.logLevel),
-                getLogLevelName(message.logLevel),
+                logLevelData.color,
+                logLevelData.logLevelName,
                 logMessageColorReset,
                 ltime.tm_year + 1900,
                 ltime.tm_mon + 1,
