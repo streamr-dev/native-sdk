@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
-set(CMAKE_CXX_STANDARD 23)
-#set(CMAKE_CXX_CLANG_TIDY
-#  clang-tidy;
-#  -format-style='file';
-#  -header-filter=${CMAKE_CURRENT_SOURCE_DIR};
-#)
-set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)
-
+set(CMAKE_CXX_STANDARD 26)
+#set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)
 
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -42,14 +36,13 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-logger-config.cmake" "find_package(folly
 enable_testing()
 find_package(GTest CONFIG REQUIRED)
 
-add_executable(test-unit test/unit/LoggerTest.cpp)
-target_link_libraries(test-unit 
+add_executable(streamr-logger-test-unit test/unit/LoggerTest.cpp)
+target_link_libraries(streamr-logger-test-unit 
   PUBLIC streamr-logger
   PUBLIC GTest::gtest 
   PUBLIC GTest::gtest_main 
   PUBLIC GTest::gmock 
   PUBLIC GTest::gmock_main)
 
-  include(GoogleTest)
-gtest_discover_tests(test-unit)
-
+include(GoogleTest)
+gtest_discover_tests(streamr-logger-test-unit)
