@@ -37,13 +37,15 @@ static const auto logLevelWarnText = "warn";
 static const auto logLevelErrorText = "error";
 static const auto logLevelFatalText = "fatal";
 
+enum class StreamrLogLevel { trace, debug, info, warn, error, fatal };
+
 const std::unordered_map<std::string, folly::LogLevel> toFollyLogLevelMap{
     {logLevelTraceText, folly::LogLevel::DBG},
     {logLevelDebugText, folly::LogLevel::DBG0},
     {logLevelInfoText, folly::LogLevel::INFO},
     {logLevelWarnText, folly::LogLevel::WARN},
     {logLevelErrorText, folly::LogLevel::ERR},
-    {logLevelFatalText, folly::LogLevel::FATAL}};
+    {logLevelFatalText, folly::LogLevel::CRITICAL}};
 
 struct StreamrLogMessage {
     std::chrono::system_clock::time_point timestamp;
@@ -73,6 +75,25 @@ INFO [2024-06-05T08:50:39.787] (File name): Message
 TRACE [2024-06-05T08:50:39.787] (File name): Message
 WARN [2024-06-05T08:50:39.787] (File name): Message
 */
+
+class StreamrWriterFactory : public folly::StreamHandlerFactory::WriterFactory {
+   public:
+    StreamrWriterFactory() : logWriter_{nullptr} {}
+
+    StreamrWriterFactory(std::shared_ptr<folly::LogWriter> logWriter)
+        : logWriter_{logWriter} {}
+
+    std::shared_ptr<folly::LogWriter> createWriter() override {
+        if (logWriter_) {
+            return logWriter_;
+        } else {
+            return folly::StreamHandlerFactory::WriterFactory::createWriter();
+        }
+    }
+
+   private:
+    std::shared_ptr<folly::LogWriter> logWriter_ = nullptr;
+};
 
 class StreamrLogFormatter : public folly::LogFormatter {
    public:
@@ -223,64 +244,69 @@ class StreamrLogFormatterFactory
 
 class StreamrHandlerFactory : public folly::StreamHandlerFactory {
    public:
-    StreamrHandlerFactory(StreamHandlerFactory::WriterFactory* writerFactory) 
-            : writerFactory_{writerFactory} {
-
-                std::cout << "eeeee\n";
-    }
     StreamrHandlerFactory() = default;
     ~StreamrHandlerFactory() override = default;
+    StreamrHandlerFactory(StreamrWriterFactory* writerFactory)
+        : writerFactory_{writerFactory} {}
 
     std::shared_ptr<folly::LogHandler> createHandler(
         const Options& options) override {
-      //  StreamHandlerFactory::WriterFactory* writerFactory;
+        //  StreamHandlerFactory::WriterFactory writerFactory;
         StreamrLogFormatterFactory formatterFactory;
 
         return folly::StandardLogHandlerFactory::createHandler(
             getType(), writerFactory_, &formatterFactory, options);
     }
 
-    private:
-
-    StreamHandlerFactory::WriterFactory* writerFactory_;
-
+   private:
+    StreamrWriterFactory* writerFactory_;
 };
 
 class Logger {
    public:
+    Logger(std::shared_ptr<folly::LogWriter> logWriter = nullptr)
+        : loggerDB_{folly::LoggerDB::get()} {
+        if (logWriter) {
+            // logWriter_ = std::make_shared<LogWriterMock>();
+            writerFactory_ = StreamrWriterFactory(logWriter);
+        } else {
+            writerFactory_ = StreamrWriterFactory();
+        }
+        logHandlerFactory_ = {
+            std::make_unique<StreamrHandlerFactory>(&writerFactory_)};
+        this->initializeLoggerDB(folly::LogLevel::DBG);
+    }
 
-   Logger() : loggerDB_{folly::LoggerDB::get()} {
-                writerFactory_ = folly::StreamHandlerFactory::WriterFactory();
-                logHandlerFactory_ = {std::make_unique<StreamrHandlerFactory>(&writerFactory_)};
-                this->initializeLoggerDB(folly::LogLevel::WARN);
-              }
-
-
-    static Logger& get() {
-        static Logger instance;
+    static Logger& get(std::shared_ptr<folly::LogWriter> logWriter = nullptr) {
+        static Logger instance(logWriter);
         return instance;
     }
 
     // Used only for unit testing
-    Logger(folly::LoggerDB& loggerDB, std::unique_ptr<folly::LogHandlerFactory> logHandlerFactory, bool isInitialized = true)
-        : loggerDB_{loggerDB}, logHandlerFactory_(std::move(logHandlerFactory))  {
+    Logger(
+        folly::LoggerDB& loggerDB,
+        std::shared_ptr<folly::LogWriter> logWriter,
+        bool isInitialized = true)
+        : loggerDB_{loggerDB}, logWriter_{logWriter} {
         if (isInitialized) {
-            this->initializeLoggerDB(folly::LogLevel::WARN);
+            writerFactory_ = StreamrWriterFactory(logWriter_);
+            logHandlerFactory_ = {
+                std::make_unique<StreamrHandlerFactory>(&writerFactory_)};
+            this->initializeLoggerDB(folly::LogLevel::DBG);
         }
     }
 
     void log(folly::LogLevel level, const std::string& message) {
         auto follyLogLevel = getFollyLogLevelFromEnv();
         if (follyLogLevel) {
-            
             if (follyLogLevel != loggerDB_.getCategory("")->getLevel()) {
                 // loggerDB.setLevel("", *follyLogLevel);
-                 this->initializeLoggerDB(*follyLogLevel, true);
+                this->initializeLoggerDB(*follyLogLevel, true);
             }
-            
-            // This complicated code is mostly copy/pasted from folly's XLOG macro.
-            // It is not very flexible to call macro from here so. This code below prints
-            // a log message without any return code.
+
+            // This complicated code is mostly copy/pasted from folly's XLOG
+            // macro. It is not very flexible to call macro from here so. This
+            // code below prints a log message without any return code.
             folly::LogStreamProcessor(
                 [] {
                     static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
@@ -305,9 +331,11 @@ class Logger {
     }
 
    private:
+    std::shared_ptr<folly::LogWriter> logWriter_;
+    StreamrWriterFactory writerFactory_;
     folly::LoggerDB& loggerDB_;
     std::unique_ptr<folly::LogHandlerFactory> logHandlerFactory_;
-    folly::StreamHandlerFactory::WriterFactory writerFactory_;
+    // folly::StreamHandlerFactory::WriterFactory writerFactory_;
     std::optional<folly::LogLevel> getFollyLogLevelFromEnv() {
         char* val = getenv(envLogLevelName);
         if (val) {
@@ -320,11 +348,11 @@ class Logger {
     }
 
     void initializeLoggerDB(
-      //  folly::LoggerDB& db,
+        //  folly::LoggerDB& db,
         const folly::LogLevel& rootLogLevel,
         bool isSkipRegisterHandlerFactory = false) {
         if (!isSkipRegisterHandlerFactory) {
-             loggerDB_.registerHandlerFactory(
+            loggerDB_.registerHandlerFactory(
                 std::move(logHandlerFactory_), true);
         }
         auto rootLogLevelInString = folly::logLevelToString(rootLogLevel);
@@ -346,30 +374,9 @@ class Logger {
 #define SLOG_INFO(msg) Logger::get().log(folly::LogLevel::INFO, msg)
 #define SLOG_WARN(msg) Logger::get().log(folly::LogLevel::WARN, msg)
 #define SLOG_ERROR(msg) Logger::get().log(folly::LogLevel::ERR, msg)
-#define SLOG_FATAL(msg) Logger::get().log(folly::LogLevel::FATAL, msg)
-/*
-class StreamrWriterFactory: public folly::StreamHandlerFactory::WriterFactory {
-
-public:
-     StreamrWriterFactory(std::shared_ptr<folly::LogWriter> logWriter) : logWriter_{logWriter} {}
-
-     std::shared_ptr<folly::LogWriter> createWriter() override {
-        return logWriter_;
-     }
-
-  //  std::shared_ptr<LogWriter> StreamHandlerFactory::WriterFactory::createWriter() 
-private:
-    std::shared_ptr<folly::LogWriter> logWriter_;
-  
-};
-
-*/
-
+#define SLOG_FATAL(msg) Logger::get().log(folly::LogLevel::CRITICAL, msg)
 
 }; // namespace logger
 }; // namespace streamr
 
 #endif
-
-
-//make_shared<ImmediateFileWriter>(std::move(file));
