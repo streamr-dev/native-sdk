@@ -16,7 +16,6 @@ using namespace std::chrono;
 class LogWriterMock : public folly::LogWriter {
    public:
     int isCalled;
-  //  folly::StringPiece buffer;
 
     LogWriterMock() : isCalled{0} {}
 
