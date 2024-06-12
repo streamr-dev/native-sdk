@@ -1,17 +1,18 @@
-#ifndef STREAMER_UTILS_LOGGER_LOGGER_H
-#define STREAMER_UTILS_LOGGER_LOGGER_H
+#ifndef STREAMER_UTILS_LOGGER_LOGGER_HPP
+#define STREAMER_UTILS_LOGGER_LOGGER_HPP
 
-#include <folly/logging/Logger.h>
-#include <folly/logging/xlog.h>
+#include <iostream>
 
+namespace streamr::logger {
 class Logger {
-   private:
-    folly::Logger logger;
+public:
+    Logger() = default;
 
-   public:
-    Logger() : logger("omaloggeri") {}
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-    void log(const std::string& message) const { XLOG(INFO) << message; }
+    void log(const std::string& message) const {
+        std::cout << message << std::endl;
+    }
 };
 
+} // namespace streamr::logger
 #endif
