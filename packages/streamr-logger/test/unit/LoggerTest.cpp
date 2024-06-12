@@ -5,7 +5,7 @@
 #include <folly/logging/LogCategory.h>
 #include <folly/logging/LogMessage.h>
 
-using folly::LoggerDB;
+//using folly::LoggerDB;
 using folly::LogLevel;
 using streamr::logger::Logger;
 using streamr::logger::StreamrHandlerFactory;
@@ -102,8 +102,9 @@ TEST_F(StreamrLogFormatterTest, errorNoTruncate) {
 }
 
 TEST_F(StreamrLogFormatterTest, fatalNoTruncate) {
+    // Cannot use FATAL in Folly because it aborts, CRITICAL is converted to FATAL
     StreamrLogFormatter::StreamrLogMessage msg = {
-        tp, "Filename.cpp", 101010, folly::LogLevel::FATAL, "Message"};
+        tp, "Filename.cpp", 101010, folly::LogLevel::CRITICAL, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
         "\x1B[1;41mFATAL\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");

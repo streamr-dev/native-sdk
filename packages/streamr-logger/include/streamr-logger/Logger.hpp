@@ -79,6 +79,7 @@ public:
         auto pair = fromStreamrToFollyLogLevelMap.find(streamrLevel);
         if (pair == fromStreamrToFollyLogLevelMap.end()) {
             // Not found from map, return
+            return;
         }
         if (follyRootLogLevel) {
             if (follyRootLogLevel != loggerDB_.getCategory("")->getLevel()) {
