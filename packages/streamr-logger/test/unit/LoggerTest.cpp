@@ -50,7 +50,7 @@ class LoggerTest : public testing::Test {
 };
 
 TEST_F(StreamrLogFormatterTest, traceNoTruncate) {
-    StreamrLogFormatter::StreamrLogMessage msg = {
+     StreamrLogFormatter::StreamrLogMessage msg = {
         tp, "Filename.cpp", 100, folly::LogLevel::DBG, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
