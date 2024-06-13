@@ -19,7 +19,6 @@ class StreamrLogFormatterFactory
         return std::make_shared<StreamrLogFormatter>();
     }
 };
-
 };
 
 #endif

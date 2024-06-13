@@ -8,14 +8,15 @@
 
 namespace {
 
-// If you change maxFileNameAndLineNumberLength, please remember to change
-// hardcoded 36 in sformat. It can be changed later when knowing how to add 36
-// as constant to sformat.
 static constexpr int maxFileNameAndLineNumberLength{36};
 static constexpr folly::StringPiece fileNameAndLineNumberSeparator{": "};
 static constexpr auto separatorLength{
     std::ssize(fileNameAndLineNumberSeparator)};
-
+static const std::string nonTruncatedFormatter =
+    "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<" +
+    std::to_string(maxFileNameAndLineNumberLength) + "}): {}{}{}\n";
+static constexpr std::string_view truncatedFormatter =
+    "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n";
 
 struct LogLevelData {
     folly::StringPiece logLevelName;
@@ -26,27 +27,27 @@ struct LogLevelData {
 // to Streamr fatal
 constexpr LogLevelData getLogLevelData(const folly::LogLevel level) {
     switch (level) {
-    case folly::LogLevel::DBG:
-        return {"TRACE", "\033[90m"};
-        break;
-    case folly::LogLevel::DBG0:
-        return {"DEBUG", "\033[34m"};
-        break;
-    case folly::LogLevel::INFO:
-        return {"INFO", "\033[32m"};
-        break;
-    case folly::LogLevel::WARN:
-        return {"WARN", "\033[33m"};
-        break; 
-    case folly::LogLevel::ERR:
-        return {"ERROR", "\033[31m"};
-        break; 
-    case folly::LogLevel::CRITICAL:
-        return {"FATAL", "\033[1;41m"};
-        break;    
-    default: 
-        return {"TRACE", "\033[90m"};
-        break;  
+        case folly::LogLevel::DBG:
+            return {"TRACE", "\033[90m"};
+            break;
+        case folly::LogLevel::DBG0:
+            return {"DEBUG", "\033[34m"};
+            break;
+        case folly::LogLevel::INFO:
+            return {"INFO", "\033[32m"};
+            break;
+        case folly::LogLevel::WARN:
+            return {"WARN", "\033[33m"};
+            break;
+        case folly::LogLevel::ERR:
+            return {"ERROR", "\033[31m"};
+            break;
+        case folly::LogLevel::CRITICAL:
+            return {"FATAL", "\033[1;41m"};
+            break;
+        default:
+            return {"TRACE", "\033[90m"};
+            break;
     }
 }
 
@@ -110,13 +111,24 @@ public:
             (fileNameLength + lineNumberLength + separatorLength);
         // Is filename is truncated if filename, separator and lineNumber does
         // not fit to the fixed size
+        //  string_from<signed, maxFileNameAndLineNumberLength>::value
         auto logLevelData = getLogLevelData(message.logLevel);
+        //  constexpr std::string_view firstPartFormatterString = "{}{}{}
+        //  [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<"; constexpr
+        //  std::string_view lastPartFormatterString =  "}): {}{}{}\n";
+        //  constexpr std::string_view formatterString =
+        //  firstPartFormatterString + lastPartFormatterString;
+
+        // firstPargFormatterString + string_from<signed,
+        // maxFileNameAndLineNumberLength>::value
+
         if (fileNameAndLineNumberLength <= maxFileNameAndLineNumberLength) {
+            //   auto testi = string_from<signed, -1>::value;
             basename = basename.toString()
                            .append(fileNameAndLineNumberSeparator)
                            .append(lineNumberInString);
             auto logLine = folly::sformat(
-                "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}{}{}\n",
+                nonTruncatedFormatter,
                 logLevelData.color,
                 logLevelData.logLevelName,
                 logMessageColorReset,
@@ -138,7 +150,9 @@ public:
                 (lineNumberLength + separatorLength);
             basename = basename.substr(0, lengthForTruncatedFileName);
             auto logLine = folly::sformat(
-                "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n",
+                truncatedFormatter,
+                //  "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:
+                //  <*}{}{}): {}{}{}\n",
                 logLevelData.color,
                 logLevelData.logLevelName,
                 logMessageColorReset,
