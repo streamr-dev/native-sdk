@@ -109,21 +109,8 @@ public:
         const std::string logMessageColorReset = "\033[0m";
         const auto fileNameAndLineNumberLength =
             (fileNameLength + lineNumberLength + separatorLength);
-        // Is filename is truncated if filename, separator and lineNumber does
-        // not fit to the fixed size
-        //  string_from<signed, maxFileNameAndLineNumberLength>::value
         auto logLevelData = getLogLevelData(message.logLevel);
-        //  constexpr std::string_view firstPartFormatterString = "{}{}{}
-        //  [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<"; constexpr
-        //  std::string_view lastPartFormatterString =  "}): {}{}{}\n";
-        //  constexpr std::string_view formatterString =
-        //  firstPartFormatterString + lastPartFormatterString;
-
-        // firstPargFormatterString + string_from<signed,
-        // maxFileNameAndLineNumberLength>::value
-
         if (fileNameAndLineNumberLength <= maxFileNameAndLineNumberLength) {
-            //   auto testi = string_from<signed, -1>::value;
             basename = basename.toString()
                            .append(fileNameAndLineNumberSeparator)
                            .append(lineNumberInString);
@@ -151,8 +138,6 @@ public:
             basename = basename.substr(0, lengthForTruncatedFileName);
             auto logLine = folly::sformat(
                 truncatedFormatter,
-                //  "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:
-                //  <*}{}{}): {}{}{}\n",
                 logLevelData.color,
                 logLevelData.logLevelName,
                 logMessageColorReset,
