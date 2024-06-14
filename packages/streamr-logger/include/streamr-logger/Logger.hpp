@@ -9,24 +9,23 @@
 #include <folly/logging/xlog.h>
 #include "StreamrHandlerFactory.hpp"
 #include "StreamrWriterFactory.hpp"
-#include "StreamrLogColors.hpp"
 
 namespace streamr::logger {
 
 namespace detail {
 
-static const auto ENV_LOG_LEVEL_NAME = "LOG_LEVEL"; // NOLINT
-static const auto LOG_LEVEL_TRACE_NAME = "trace"; // NOLINT
-static const auto LOG_LEVEL_DEBUG_NAME = "debug"; // NOLINT
-static const auto LOG_LEVEL_INFO_NAME = "info"; // NOLINT
-static const auto LOG_LEVEL_WARN_NAME = "warn"; // NOLINT
-static const auto LOG_LEVEL_ERROR_NAME = "error"; // NOLINT
-static const auto LOG_LEVEL_FATAL_NAME = "fatal"; // NOLINT
+static const auto EnvLogLevelName = "LOG_LEVEL"; // NOLINT
+static const auto LogLevelTraceName = "trace"; // NOLINT
+static const auto LogLevelDebugName = "debug"; // NOLINT
+static const auto LogLevelInfoName = "info"; // NOLINT
+static const auto LogLevelWarnName = "warn"; // NOLINT
+static const auto LogLevelErrorName = "error"; // NOLINT
+static const auto LogLevelFatalName = "fatal"; // NOLINT
 
 enum class StreamrLogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL }; // NOLINT
 
 const std::unordered_map<StreamrLogLevel, folly::LogLevel>
-    FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP{
+    FromStreamrToFollyLogLevelMap{
         // NOLINT
         {StreamrLogLevel::TRACE, folly::LogLevel::DBG},
         {StreamrLogLevel::DEBUG, folly::LogLevel::DBG0},
@@ -35,14 +34,14 @@ const std::unordered_map<StreamrLogLevel, folly::LogLevel>
         {StreamrLogLevel::ERROR, folly::LogLevel::ERR},
         {StreamrLogLevel::FATAL, folly::LogLevel::CRITICAL}};
 
-const std::unordered_map<std::string, folly::LogLevel> TO_FOLLY_LEVEL_MAP{
+const std::unordered_map<std::string, folly::LogLevel> ToFollyLevelMap{
     // NOLINT
-    {LOG_LEVEL_TRACE_NAME, folly::LogLevel::DBG},
-    {LOG_LEVEL_DEBUG_NAME, folly::LogLevel::DBG0},
-    {LOG_LEVEL_INFO_NAME, folly::LogLevel::INFO},
-    {LOG_LEVEL_WARN_NAME, folly::LogLevel::WARN},
-    {LOG_LEVEL_ERROR_NAME, folly::LogLevel::ERR},
-    {LOG_LEVEL_FATAL_NAME, folly::LogLevel::CRITICAL}};
+    {LogLevelTraceName, folly::LogLevel::DBG},
+    {LogLevelDebugName, folly::LogLevel::DBG0},
+    {LogLevelInfoName, folly::LogLevel::INFO},
+    {LogLevelWarnName, folly::LogLevel::WARN},
+    {LogLevelErrorName, folly::LogLevel::ERR},
+    {LogLevelFatalName, folly::LogLevel::CRITICAL}};
 
 }; // namespace detail
 
@@ -52,8 +51,8 @@ public:
     explicit Logger(
         detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
         T contextBindings = "",
-        std::shared_ptr<folly::LogWriter> logWriter = nullptr)
-        : defaultLogLevel_{detail::FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP.at(
+        std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
+        : defaultLogLevel_{detail::FromStreamrToFollyLogLevelMap.at(
               defaultLogLevel)},
           contextBindings_{contextBindings},
           loggerDB_{folly::LoggerDB::get()} {
@@ -106,9 +105,9 @@ private:
     folly::LogLevel defaultLogLevel_;
 
     folly::LogLevel getFollyLogRootLevel() {
-        char* val = getenv(detail::ENV_LOG_LEVEL_NAME);
+        char* val = getenv(detail::EnvLogLevelName);
         if (val) {
-            return detail::TO_FOLLY_LEVEL_MAP.at(val);
+            return detail::ToFollyLevelMap.at(val);
         }
         return defaultLogLevel_;
     }
@@ -129,12 +128,11 @@ private:
             this->initializeLoggerDB(follyRootLogLevel, true);
         }
         std::string extraArgument;
-        
         if (metadata != "") {
             extraArgument = " " + extraArgument + toString(metadata);
             if (contextBindings_ != "") {
                 extraArgument = extraArgument + " " + contextBindings_;
-            }       
+            }      
         }
         // This complicated code is mostly copy/pasted from folly's XLOG
         // macro. It is not very flexible to call macro from here so. This
@@ -183,8 +181,6 @@ private:
     }
 };
 
-
 }; // namespace streamr::logger
-
 
 #endif

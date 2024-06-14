@@ -11,14 +11,14 @@ namespace streamr::logger {
 
 namespace detail {
 
-static constexpr int MAX_FILENAME_AND_LINE_NUMBER_LENGTH{36};
-static constexpr folly::StringPiece FILENAME_AND_LINE_NUMBER_SEPARATOR{": "};
-static constexpr auto SEPARATOR_LENGTH{
-    std::ssize(FILENAME_AND_LINE_NUMBER_SEPARATOR)};
-static const std::string NON_TRUNCATED_FORMATTER =
+static constexpr int maxFileNameAndLineNumberLength{36};
+static constexpr folly::StringPiece fileNameAndLineNumberSeparator{": "};
+static constexpr auto separatorLength{
+    std::ssize(fileNameAndLineNumberSeparator)};
+static const std::string NonTruncatedFormatter =
     "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<" +
-    std::to_string(MAX_FILENAME_AND_LINE_NUMBER_LENGTH) + "}): {}{}{}\n";
-static constexpr std::string_view TRUNCATED_FORMATTER =
+    std::to_string(maxFileNameAndLineNumberLength) + "}): {}{}{}\n";
+static constexpr std::string_view truncatedFormatter =
     "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n";
 
 struct LogLevelData {
@@ -31,25 +31,25 @@ struct LogLevelData {
 constexpr LogLevelData getLogLevelData(const folly::LogLevel level) {
     switch (level) {
         case folly::LogLevel::DBG:
-            return {"TRACE", detail::colors::GRAY};
+            return {"TRACE", detail::colors::Gray};
             break;
         case folly::LogLevel::DBG0:
-            return {"DEBUG", detail::colors::BLUE};
+            return {"DEBUG", detail::colors::Blue};
             break;
         case folly::LogLevel::INFO:
-            return {"INFO", detail::colors::GREEN};
+            return {"INFO", detail::colors::Green};
             break;
         case folly::LogLevel::WARN:
-            return {"WARN", detail::colors::YELLOW};
+            return {"WARN", detail::colors::Yellow};
             break;
         case folly::LogLevel::ERR:
-            return {"ERROR", detail::colors::RED};
+            return {"ERROR", detail::colors::Red};
             break;
         case folly::LogLevel::CRITICAL:
-            return {"FATAL", detail::colors::BG_RED};
+            return {"FATAL", detail::colors::BgRed};
             break;
         default:
-            return {"TRACE", detail::colors::GRAY};
+            return {"TRACE", detail::colors::Gray};
             break;
     }
 }
@@ -109,19 +109,19 @@ public:
         //  const std::string logMessageColor = "\033[36m";
         //  const std::string logMessageColorReset = "\033[0m";
         const auto fileNameAndLineNumberLength =
-            (fileNameLength + lineNumberLength + detail::SEPARATOR_LENGTH);
+            (fileNameLength + lineNumberLength + detail::separatorLength);
         auto logLevelData = detail::getLogLevelData(message.logLevel);
         const auto tmStartYear{1900};
         if (fileNameAndLineNumberLength <=
-            detail::MAX_FILENAME_AND_LINE_NUMBER_LENGTH) {
+            detail::maxFileNameAndLineNumberLength) {
             basename = basename.toString()
-                           .append(detail::FILENAME_AND_LINE_NUMBER_SEPARATOR)
+                           .append(detail::fileNameAndLineNumberSeparator)
                            .append(lineNumberInString);
             auto logLine = folly::sformat(
-                detail::NON_TRUNCATED_FORMATTER,
+                detail::NonTruncatedFormatter,
                 logLevelData.color,
                 logLevelData.logLevelName,
-                detail::colors::RESET_COLOR,
+                detail::colors::ResetColor,
                 ltime.tm_year + tmStartYear,
                 ltime.tm_mon + 1,
                 ltime.tm_mday,
@@ -130,21 +130,21 @@ public:
                 ltime.tm_sec,
                 millisecs.count(),
                 basename,
-                detail::colors::CYAN,
+                detail::colors::Cyan,
                 message.logMessage,
-                detail::colors::RESET_COLOR);
+                detail::colors::ResetColor);
             return logLine;
         }
         // Truncate needed
         auto lengthForTruncatedFileName =
-            detail::MAX_FILENAME_AND_LINE_NUMBER_LENGTH -
-            (lineNumberLength + detail::SEPARATOR_LENGTH);
+            detail::maxFileNameAndLineNumberLength -
+            (lineNumberLength + detail::separatorLength);
         basename = basename.substr(0, lengthForTruncatedFileName);
         auto logLine = folly::sformat(
-            detail::TRUNCATED_FORMATTER,
+            detail::truncatedFormatter,
             logLevelData.color,
             logLevelData.logLevelName,
-            detail::colors::RESET_COLOR,
+            detail::colors::ResetColor,
             ltime.tm_year + tmStartYear,
             ltime.tm_mon + 1,
             ltime.tm_mday,
@@ -154,11 +154,11 @@ public:
             millisecs.count(),
             lengthForTruncatedFileName,
             basename,
-            detail::FILENAME_AND_LINE_NUMBER_SEPARATOR,
+            detail::fileNameAndLineNumberSeparator,
             lineNumberInString,
-            detail::colors::CYAN,
+            detail::colors::Cyan,
             message.logMessage,
-            detail::colors::RESET_COLOR);
+            detail::colors::ResetColor);
         return logLine;
     }
 
