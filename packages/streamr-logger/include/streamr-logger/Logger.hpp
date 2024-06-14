@@ -14,19 +14,18 @@ namespace streamr::logger {
 
 namespace detail {
 
-static const auto EnvLogLevelName = "LOG_LEVEL"; // NOLINT
-static const auto LogLevelTraceName = "trace"; // NOLINT
-static const auto LogLevelDebugName = "debug"; // NOLINT
-static const auto LogLevelInfoName = "info"; // NOLINT
-static const auto LogLevelWarnName = "warn"; // NOLINT
-static const auto LogLevelErrorName = "error"; // NOLINT
-static const auto LogLevelFatalName = "fatal"; // NOLINT
+static const auto EnvLogLevelName = "LOG_LEVEL";
+static const auto LogLevelTraceName = "trace";
+static const auto LogLevelDebugName = "debug";
+static const auto LogLevelInfoName = "info";
+static const auto LogLevelWarnName = "warn";
+static const auto LogLevelErrorName = "error";
+static const auto LogLevelFatalName = "fatal";
 
-enum class StreamrLogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL }; // NOLINT
+enum class StreamrLogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL };
 
 const std::unordered_map<StreamrLogLevel, folly::LogLevel>
     FromStreamrToFollyLogLevelMap{
-        // NOLINT
         {StreamrLogLevel::TRACE, folly::LogLevel::DBG},
         {StreamrLogLevel::DEBUG, folly::LogLevel::DBG0},
         {StreamrLogLevel::INFO, folly::LogLevel::INFO},
@@ -35,7 +34,6 @@ const std::unordered_map<StreamrLogLevel, folly::LogLevel>
         {StreamrLogLevel::FATAL, folly::LogLevel::CRITICAL}};
 
 const std::unordered_map<std::string, folly::LogLevel> ToFollyLevelMap{
-    // NOLINT
     {LogLevelTraceName, folly::LogLevel::DBG},
     {LogLevelDebugName, folly::LogLevel::DBG0},
     {LogLevelInfoName, folly::LogLevel::INFO},
@@ -132,7 +130,7 @@ private:
             extraArgument = " " + extraArgument + toString(metadata);
             if (contextBindings_ != "") {
                 extraArgument = extraArgument + " " + contextBindings_;
-            }      
+            }
         }
         // This complicated code is mostly copy/pasted from folly's XLOG
         // macro. It is not very flexible to call macro from here so. This
