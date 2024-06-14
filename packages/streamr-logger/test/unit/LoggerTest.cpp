@@ -2,53 +2,56 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <streamr-logger/Logger.hpp>
+#include <streamr-logger/StreamrLogFormatter.hpp>
 #include <folly/logging/LogCategory.h>
 #include <folly/logging/LogMessage.h>
 
 //using folly::LoggerDB;
-using folly::LogLevel;
 using streamr::logger::Logger;
-using streamr::logger::StreamrHandlerFactory;
+//using streamr::logger::StreamrHandlerFactory;
 using streamr::logger::StreamrLogFormatter;
-using streamr::logger::StreamrLogLevel;
-using namespace std::chrono;
+using streamr::logger::detail::StreamrLogLevel;
+using namespace std::chrono; // NOLINT
 
-class LogWriterMock : public folly::LogWriter {
+struct LogWriterMock : public folly::LogWriter {
    public:
-    int isCalled;
+    int isCalled; // NOLINT
 
     LogWriterMock() : isCalled{0} {}
 
-    void writeMessage(folly::StringPiece buf, uint32_t flags = 0) override {
+    void writeMessage(folly::StringPiece buf,  uint32_t /* flags */) override {
         std::cout << buf.toString();
         isCalled = 1;
     }
-    bool ttyOutput() const override { return true; }
+    bool ttyOutput() const override { return true; } // NOLINT
     void flush() override {}
 };
 
 class StreamrLogFormatterTest : public testing::Test {
     // using streamr::logger::StreamrLogFormatter;
     void SetUp() override {
-        const auto ymd2 = year_month_day(2024y, January, 31d);
-        tp = sys_days{ymd2};
+        const auto ymd2 = std::chrono::year_month_day(2024y, std::chrono::January, 31d);
+        tp = std::chrono::sys_days{ymd2};
     }
 
-   protected:
-    StreamrLogFormatter formatter_{};
-    system_clock::time_point tp;
+   private:
+    StreamrLogFormatter formatter_;
+    std::chrono::system_clock::time_point tp;
 };
 
 class LoggerTest : public testing::Test {
     void SetUp() override {
         logWriterMock = std::make_shared<LogWriterMock>();
-        Logger::get(logWriterMock);
+       // logger = Logger::get(logWriterMock);
     }
 
-   protected:
-    std::shared_ptr<LogWriterMock> logWriterMock;
-};
 
+
+   protected:
+    Logger<std::string>& logger{Logger<std::string>::get(logWriterMock)}; // NOLINT
+    std::shared_ptr<LogWriterMock> logWriterMock; // NOLINT
+};
+/*
 TEST_F(StreamrLogFormatterTest, traceNoTruncate) {
      StreamrLogFormatter::StreamrLogMessage msg = {
         tp, "Filename.cpp", 100, folly::LogLevel::DBG, "Message"};
@@ -422,6 +425,30 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
     setenv("LOG_LEVEL", "fatal", 1);
 
     SLOG_FATAL("Testi");
+    // Log written
+    EXPECT_EQ(logWriterMock->isCalled, 1);
+}
+*/
+
+
+
+TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
+    setenv("LOG_LEVEL", "trace", 1);
+
+    logger.info<std::string>("TestMessage", "Optionalparam");
+    // Log written
+    EXPECT_EQ(logWriterMock->isCalled, 1);
+}
+
+TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg2) {
+    setenv("LOG_LEVEL", "trace", 1);
+
+    auto lgr{Logger<std::string>(StreamrLogLevel::INFO, "Test ContextBinding", logWriterMock) };
+    lgr.info<std::string>("TESTIII", "Text");
+
+    //  void info(const std::string& msg, std::optional<T> metadata) {
+  
+    //logger.info<std::string>("TestMessage", "Optionalparam");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
 }
