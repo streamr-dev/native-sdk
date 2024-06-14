@@ -1,9 +1,9 @@
-//#include <streamr-logger/Logger.hpp>
+// #include <streamr-logger/Logger.hpp>
 
 int main()
 
 {
- //   Logger logger;
-  //  logger.log("Hello, world!");
+    //   Logger logger;
+    //  logger.log("Hello, world!");
     return 0;
 }
