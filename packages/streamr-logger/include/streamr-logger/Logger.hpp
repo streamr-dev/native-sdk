@@ -7,60 +7,55 @@
 #include <folly/logging/LogWriter.h>
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/xlog.h>
+#include "StreamrHandlerFactory.hpp" 
 #include "StreamrWriterFactory.hpp"
-#include "StreamrHandlerFactory.hpp"
 
 namespace streamr {
 namespace logger {
 
-namespace {
+namespace detail {
 
-static const auto envLogLevelName = "LOG_LEVEL";
-static const auto logLevelTraceText = "trace";
-static const auto logLevelDebugText = "debug";
-static const auto logLevelInfoText = "info";
-static const auto logLevelWarnText = "warn";
-static const auto logLevelErrorText = "error";
-static const auto logLevelFatalText = "fatal";
+static const auto ENV_LOG_LEVEL_NAME = "LOG_LEVEL"; // NOLINT
+static const auto LOG_LEVEL_TRACE_NAME = "trace";// NOLINT
+static const auto LOG_LEVEL_DEBUG_NAME = "debug";// NOLINT
+static const auto LOG_LEVEL_INFO_NAME = "info";// NOLINT
+static const auto LOG_LEVEL_WARN_NAME = "warn";// NOLINT
+static const auto LOG_LEVEL_ERROR_NAME = "error";// NOLINT
+static const auto LOG_LEVEL_FATAL_NAME = "fatal";// NOLINT
 
-enum class StreamrLogLevel { trace, debug, info, warn, error, fatal };
+enum class StreamrLogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL };  // NOLINT
 
-const std::unordered_map<StreamrLogLevel, folly::LogLevel> fromStreamrToFollyLogLevelMap{
-    {StreamrLogLevel::trace, folly::LogLevel::DBG},
-    {StreamrLogLevel::debug, folly::LogLevel::DBG0},
-    {StreamrLogLevel::info, folly::LogLevel::INFO},
-    {StreamrLogLevel::warn, folly::LogLevel::WARN},
-    {StreamrLogLevel::error, folly::LogLevel::ERR},
-    {StreamrLogLevel::fatal, folly::LogLevel::CRITICAL}};
+const std::unordered_map<StreamrLogLevel, folly::LogLevel>
+    FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP{// NOLINT
+        {StreamrLogLevel::TRACE, folly::LogLevel::DBG},
+        {StreamrLogLevel::DEBUG, folly::LogLevel::DBG0},
+        {StreamrLogLevel::INFO, folly::LogLevel::INFO}, 
+        {StreamrLogLevel::WARN, folly::LogLevel::WARN},
+        {StreamrLogLevel::ERROR, folly::LogLevel::ERR},
+        {StreamrLogLevel::FATAL, folly::LogLevel::CRITICAL}};
 
-const std::unordered_map<std::string, folly::LogLevel> toFollyLogLevelMap{
-    {logLevelTraceText, folly::LogLevel::DBG},
-    {logLevelDebugText, folly::LogLevel::DBG0},
-    {logLevelInfoText, folly::LogLevel::INFO},
-    {logLevelWarnText, folly::LogLevel::WARN},
-    {logLevelErrorText, folly::LogLevel::ERR},
-    {logLevelFatalText, folly::LogLevel::CRITICAL}};
-
-std::optional<folly::LogLevel> getFollyLogLevelFromEnv() {
-    char* val = getenv(envLogLevelName);
-    if (val) {
-        auto pair = toFollyLogLevelMap.find(val);
-        if (pair != toFollyLogLevelMap.end()) {
-            return std::optional<folly::LogLevel>{std::move(pair->second)};
-        }
-    }
-    return std::nullopt;
-}
+const std::unordered_map<std::string, folly::LogLevel> TO_FOLLY_LEVEL_MAP{// NOLINT
+    {LOG_LEVEL_TRACE_NAME, folly::LogLevel::DBG},
+    {LOG_LEVEL_DEBUG_NAME, folly::LogLevel::DBG0},
+    {LOG_LEVEL_INFO_NAME, folly::LogLevel::INFO},
+    {LOG_LEVEL_WARN_NAME, folly::LogLevel::WARN},
+    {LOG_LEVEL_ERROR_NAME, folly::LogLevel::ERR},
+    {LOG_LEVEL_FATAL_NAME, folly::LogLevel::CRITICAL}};
 
 }; // namespace
 
+template <typename A>
 class Logger {
 public:
-
-    Logger(std::shared_ptr<folly::LogWriter> logWriter = nullptr)
-        : loggerDB_{folly::LoggerDB::get()} {
+    explicit Logger(
+        detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
+        std::optional<A> contextBindings = std::nullopt,
+        std::shared_ptr<folly::LogWriter> logWriter = nullptr)  // NOLINT
+        : defaultLogLevel_{detail::FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP.at(defaultLogLevel)},
+          contextBindings_{contextBindings},
+          loggerDB_{folly::LoggerDB::get()} {
         if (logWriter) {
-            writerFactory_ = StreamrWriterFactory(logWriter);
+            writerFactory_ = StreamrWriterFactory(logWriter); // NOLINT
         } else {
             writerFactory_ = StreamrWriterFactory();
         }
@@ -70,46 +65,19 @@ public:
     }
 
     static Logger& get(std::shared_ptr<folly::LogWriter> logWriter = nullptr) {
-        static Logger instance(logWriter);
+        static Logger instance(
+            streamr::logger::detail::StreamrLogLevel::INFO, std::nullopt, logWriter);
         return instance;
     }
 
-    void log(StreamrLogLevel streamrLevel, const std::string& message) {
-        auto follyRootLogLevel = getFollyLogLevelFromEnv();
-        auto pair = fromStreamrToFollyLogLevelMap.find(streamrLevel);
-        if (pair == fromStreamrToFollyLogLevelMap.end()) {
-            // Not found from map, return
-            return;
-        }
-        if (follyRootLogLevel) {
-            if (follyRootLogLevel != loggerDB_.getCategory("")->getLevel()) {
-                // loggerDB.setLevel("", *follyLogLevel);
-                this->initializeLoggerDB(*follyRootLogLevel, true);
-            }
-            // This complicated code is mostly copy/pasted from folly's XLOG
-            // macro. It is not very flexible to call macro from here so. This
-            // code below prints a log message without any return code.
-            folly::LogStreamProcessor(
-                [] {
-                    static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
-                        folly_detail_xlog_category;
-                    return folly_detail_xlog_category.getInfo(
-                        &::folly::detail::custom::xlogFileScopeInfo);
-                }(),
-                (pair->second),
-                [] {
-                    constexpr auto* folly_detail_xlog_filename = XLOG_FILENAME;
-                    return ::folly::detail::custom::getXlogCategoryName(
-                        folly_detail_xlog_filename, 0);
-                }(),
-                ::folly::detail::custom::isXlogCategoryOverridden(0),
-                XLOG_FILENAME,
-                __LINE__,
-                __func__,
-                ::folly::LogStreamProcessor::APPEND,
-                message)
-                .stream();
-        }
+    template <typename T>
+    std::string toString(T metadata) {
+        return metadata;
+    }
+
+    template <typename T>
+    void info(const std::string& msg, std::optional<T> metadata) {
+        log(folly::LogLevel::INFO, msg, metadata);
     }
 
 private:
@@ -117,7 +85,60 @@ private:
     StreamrWriterFactory writerFactory_;
     folly::LoggerDB& loggerDB_;
     std::unique_ptr<folly::LogHandlerFactory> logHandlerFactory_;
-   
+    std::optional<A> contextBindings_;
+    folly::LogLevel defaultLogLevel_;
+
+    folly::LogLevel getFollyLogRootLevel() {
+        char* val = getenv(detail::ENV_LOG_LEVEL_NAME);
+        if (val) {
+            return detail::TO_FOLLY_LEVEL_MAP.at(val);
+        } 
+        return defaultLogLevel_;
+    }
+
+    template <typename T>
+    void log(
+        folly::LogLevel follyLogLevelLevel,
+        const std::string& msg,
+        std::optional<T> metadata) {
+        auto follyRootLogLevel = getFollyLogRootLevel();
+        if (follyRootLogLevel != loggerDB_.getCategory("")->getLevel()) {
+            // loggerDB.setLevel("", *follyLogLevel);
+            this->initializeLoggerDB(follyRootLogLevel, true);
+        }
+        std::string extraArgument;
+        if (metadata) {
+            extraArgument = extraArgument + *metadata;
+            if (contextBindings_) {
+                extraArgument = extraArgument + *contextBindings_;
+            }
+        }
+        // This complicated code is mostly copy/pasted from folly's XLOG
+        // macro. It is not very flexible to call macro from here so. This
+        // code below prints a log message without any return code.
+        folly::LogStreamProcessor(
+            [] {
+                static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
+                    follyDetailXlogCategory;
+                return follyDetailXlogCategory.getInfo(
+                    &::folly::detail::custom::xlogFileScopeInfo);
+            }(),
+            (follyLogLevelLevel),
+            [] {
+                constexpr auto* follyDetailXlogFilename = XLOG_FILENAME;
+                return ::folly::detail::custom::getXlogCategoryName(
+                    follyDetailXlogFilename, 0);
+            }(),
+            ::folly::detail::custom::isXlogCategoryOverridden(0),
+            XLOG_FILENAME,
+            __LINE__,
+            __func__,
+            ::folly::LogStreamProcessor::APPEND,
+            msg,
+            extraArgument)
+            .stream();
+    }
+
     void initializeLoggerDB(
         const folly::LogLevel& rootLogLevel,
         bool isSkipRegisterHandlerFactory = false) {
@@ -139,12 +160,12 @@ private:
     }
 };
 
-#define SLOG_TRACE(msg) Logger::get().log(StreamrLogLevel::trace, msg)
-#define SLOG_DEBUG(msg) Logger::get().log(StreamrLogLevel::debug, msg)
-#define SLOG_INFO(msg) Logger::get().log(StreamrLogLevel::info, msg)
-#define SLOG_WARN(msg) Logger::get().log(StreamrLogLevel::warn, msg)
-#define SLOG_ERROR(msg) Logger::get().log(StreamrLogLevel::error, msg)
-#define SLOG_FATAL(msg) Logger::get().log(StreamrLogLevel::fatal, msg)
+#define SLOG_TRACE(msg) Logger::get().log(StreamrLogLevel::TRACE, msg)
+#define SLOG_DEBUG(msg) Logger::get().log(StreamrLogLevel::DEBUG, msg)
+#define SLOG_INFO(msg) Logger::get().log(StreamrLogLevel::INFO, msg)
+#define SLOG_WARN(msg) Logger::get().log(StreamrLogLevel::WARN, msg)
+#define SLOG_ERROR(msg) Logger::get().log(StreamrLogLevel::ERROR, msg)
+#define SLOG_FATAL(msg) Logger::get().log(StreamrLogLevel::FATAL, msg)
 
 }; // namespace logger
 }; // namespace streamr
