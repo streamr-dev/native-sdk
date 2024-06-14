@@ -14,10 +14,10 @@ using namespace std::chrono; // NOLINT
 
 struct LogWriterMock : public folly::LogWriter {
 public:
-    std::string buffer;
+    std::string buffer; // NOLINT
     int isCalled; // NOLINT
 
-    LogWriterMock() : isCalled{0}, buffer{} {}
+    LogWriterMock() : isCalled{0} {}
 
     void writeMessage(folly::StringPiece buf, uint32_t /* flags */) override {
         std::cout << buf.toString();
@@ -37,8 +37,10 @@ class StreamrLogFormatterTest : public testing::Test {
     }
 
 protected:
-    StreamrLogFormatter formatter_;
-    std::chrono::system_clock::time_point tp;
+    const unsigned int lineNumber2{100}; // NOLINT
+    const unsigned int lineNumber{101010}; // NOLINT
+    StreamrLogFormatter formatter_; // NOLINT
+    std::chrono::system_clock::time_point tp; // NOLINT
 };
 
 class LoggerTest : public testing::Test {
@@ -50,7 +52,7 @@ protected:
 
 TEST_F(StreamrLogFormatterTest, traceNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        tp, "Filename.cpp", 100, folly::LogLevel::DBG, "Message"};
+        tp, "Filename.cpp", lineNumber2, folly::LogLevel::DBG, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
         "\x1B[90mTRACE\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 100                   ): \x1B[36mMessage\x1B[0m\n");
@@ -60,7 +62,7 @@ TEST_F(StreamrLogFormatterTest, traceTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
         tp,
         "1234567890123456789012345678901234567890.cpp",
-        100,
+        lineNumber2,
         folly::LogLevel::DBG,
         "Message"};
     EXPECT_EQ(
@@ -70,7 +72,7 @@ TEST_F(StreamrLogFormatterTest, traceTruncate) {
 
 TEST_F(StreamrLogFormatterTest, debugNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        tp, "Filename.cpp", 101010, folly::LogLevel::DBG0, "Message"};
+        tp, "Filename.cpp", lineNumber, folly::LogLevel::DBG0, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
         "\x1B[34mDEBUG\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
@@ -78,7 +80,7 @@ TEST_F(StreamrLogFormatterTest, debugNoTruncate) {
 
 TEST_F(StreamrLogFormatterTest, infoNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        tp, "Filename.cpp", 101010, folly::LogLevel::INFO, "Message"};
+        tp, "Filename.cpp", lineNumber, folly::LogLevel::INFO, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
         "\x1B[32mINFO\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
@@ -86,7 +88,7 @@ TEST_F(StreamrLogFormatterTest, infoNoTruncate) {
 
 TEST_F(StreamrLogFormatterTest, warnoNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        tp, "Filename.cpp", 101010, folly::LogLevel::WARN, "Message"};
+        tp, "Filename.cpp", lineNumber, folly::LogLevel::WARN, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
         "\x1B[33mWARN\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
@@ -94,7 +96,7 @@ TEST_F(StreamrLogFormatterTest, warnoNoTruncate) {
 
 TEST_F(StreamrLogFormatterTest, errorNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        tp, "Filename.cpp", 101010, folly::LogLevel::ERR, "Message"};
+        tp, "Filename.cpp", lineNumber, folly::LogLevel::ERR, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
         "\x1B[31mERROR\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
@@ -104,7 +106,7 @@ TEST_F(StreamrLogFormatterTest, fatalNoTruncate) {
     // Cannot use FATAL in Folly because it aborts, CRITICAL is converted to
     // FATAL
     StreamrLogFormatter::StreamrLogMessage msg = {
-        tp, "Filename.cpp", 101010, folly::LogLevel::CRITICAL, "Message"};
+        tp, "Filename.cpp", lineNumber, folly::LogLevel::CRITICAL, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
         "\x1B[1;41mFATAL\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");

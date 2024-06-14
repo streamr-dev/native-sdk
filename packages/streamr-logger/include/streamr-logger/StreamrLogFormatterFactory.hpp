@@ -8,9 +8,10 @@ namespace streamr::logger {
 
 class StreamrLogFormatterFactory
     : public folly::StandardLogHandlerFactory::FormatterFactory {
-   public:
+public:
     bool processOption(
-        folly::StringPiece /* name */, folly::StringPiece /* value */) override {
+        folly::StringPiece /* name */,
+        folly::StringPiece /* value */) override {
         return false;
     }
 
@@ -19,6 +20,6 @@ class StreamrLogFormatterFactory
         return std::make_shared<StreamrLogFormatter>();
     }
 };
-};
+}; // namespace streamr::logger
 
 #endif
