@@ -46,9 +46,92 @@ const std::unordered_map<std::string, folly::LogLevel> TO_FOLLY_LEVEL_MAP{
 
 }; // namespace detail
 
-template <typename A>
+
 class Logger {
 public:
+  
+    /*
+    Logger(
+        detail::StreamrLogLevel defaultLogLevel,
+        std::optional<T> contextBindings,
+        std::shared_ptr<folly::LogWriter> logWriter) :
+
+           defaultLogLevel_{detail::FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP.at(
+              defaultLogLevel)},
+        contextBindings_{contextBindings ? toString(*contextBindings) : ""},
+        loggerDB_{folly::LoggerDB::get()}
+
+        {
+            if (logWriter) {
+                writerFactory_ = StreamrWriterFactory(logWriter); // NOLINT
+            } else {
+                writerFactory_ = StreamrWriterFactory();
+            }
+            logHandlerFactory_ = {
+                std::make_unique<StreamrHandlerFactory>(&writerFactory_)};
+            this->initializeLoggerDB(folly::LogLevel::DBG);
+        }
+*/
+  template <typename T=std::string>
+    explicit Logger(
+        detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
+        T contextBindings = "",
+        std::shared_ptr<folly::LogWriter> logWriter = nullptr)
+        : defaultLogLevel_{detail::FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP.at(defaultLogLevel)},
+          contextBindings_{contextBindings},
+          loggerDB_{folly::LoggerDB::get()} {
+        if (logWriter) {
+            writerFactory_ = StreamrWriterFactory(logWriter);
+        } else {
+            writerFactory_ = StreamrWriterFactory();
+        }
+        logHandlerFactory_ = std::make_unique<StreamrHandlerFactory>(&writerFactory_);
+        this->initializeLoggerDB(folly::LogLevel::DBG);
+    }
+/*
+    Logger() : Logger<std::string>(detail::StreamrLogLevel::INFO, std::nullopt, nullptr) {}
+*/
+/*
+    Logger() : Logger<std::string>(detail::StreamrLogLevel::INFO, std::nullopt, nullptr) {
+
+    }
+*/
+   // Logger() : Logger<std::string>(detail::StreamrLogLevel::INFO, "", nullptr) {
+
+
+   // }
+
+/*
+    explicit Logger(
+        detail::StreamrLogLevel defaultLogLevel,
+        A contextBindings,
+        std::shared_ptr<folly::LogWriter>) : 
+        
+        defaultLogLevel_{detail::FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP.at(
+              defaultLogLevel)},
+        contextBindings_{toString(contextBindings)}
+        loggerDB_{folly::LoggerDB::get()} {}
+*/
+
+        
+    
+        /*
+        defaultLogLevel_{detail::FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP.at(
+              defaultLogLevel)},
+          contextBindings_{contextBindings},
+          loggerDB_{folly::LoggerDB::get()} {
+        if (logWriter) {
+            writerFactory_ = StreamrWriterFactory(logWriter); // NOLINT
+        } else {
+            writerFactory_ = StreamrWriterFactory();
+        }
+        logHandlerFactory_ = {
+            std::make_unique<StreamrHandlerFactory>(&writerFactory_)};
+        this->initializeLoggerDB(folly::LogLevel::DBG);
+        */
+    
+
+    /*
     explicit Logger(
         detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
         std::optional<A> contextBindings = std::nullopt,
@@ -66,12 +149,20 @@ public:
             std::make_unique<StreamrHandlerFactory>(&writerFactory_)};
         this->initializeLoggerDB(folly::LogLevel::DBG);
     }
+*/
+   
+      
+  
 
     static Logger& get(std::shared_ptr<folly::LogWriter> logWriter = nullptr) {
+        static Logger instance;
+/*
         static Logger instance(
             streamr::logger::detail::StreamrLogLevel::INFO,
             std::nullopt,
             logWriter);
+*/
+
         return instance;
     }
 
@@ -88,16 +179,7 @@ public:
     }
 
     void debug(const std::string& msg) { log(folly::LogLevel::DBG0, msg); }
-    /*
-        template <typename T>
-        void info(const std::string& msg, T metadata) {
-            log(folly::LogLevel::INFO, msg, std::optional<T>(metadata));
-        }
-
-        void info(const std::string& msg) {
-            log(folly::LogLevel::INFO, msg);
-        }
-    */
+ 
     template <typename T>
     void warn(const std::string& msg, T metadata) {
         log(folly::LogLevel::WARN, msg, metadata);
@@ -124,7 +206,7 @@ private:
     StreamrWriterFactory writerFactory_;
     folly::LoggerDB& loggerDB_;
     std::unique_ptr<folly::LogHandlerFactory> logHandlerFactory_;
-    std::optional<A> contextBindings_;
+    std::string contextBindings_;
     folly::LogLevel defaultLogLevel_;
 
     folly::LogLevel getFollyLogRootLevel() {
@@ -153,8 +235,8 @@ private:
         std::string extraArgument;
         if (metadata) {
             extraArgument = extraArgument + *metadata;
-            if (contextBindings_) {
-                extraArgument = extraArgument + *contextBindings_;
+            if (contextBindings_ != "") {
+                extraArgument = extraArgument + contextBindings_;
             }
         }
         // This complicated code is mostly copy/pasted from folly's XLOG

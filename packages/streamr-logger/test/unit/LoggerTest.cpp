@@ -46,8 +46,8 @@ class LoggerTest : public testing::Test {
     }
 
 protected:
-    Logger<std::string>& logger{  // NOLINT
-        Logger<std::string>::get(logWriterMock)}; // NOLINT
+    Logger& logger{  // NOLINT
+        Logger::get(logWriterMock)}; // NOLINT
     std::shared_ptr<LogWriterMock> logWriterMock; // NOLINT
 };
 /*
@@ -438,7 +438,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
     setenv("LOG_LEVEL", "trace", 1);
 
-    logger.warn<std::string>("TestMessage", "Optionalparam");
+    logger.warn("TestMessage", "Optionalparam");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
 }
@@ -455,9 +455,9 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg2) {
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg3) {
     setenv("LOG_LEVEL", "trace", 1);
 
-    auto lgr{Logger<std::string>(
-        StreamrLogLevel::INFO, "Test ContextBinding", logWriterMock)};
-    lgr.warn<std::string>("TESTIII", "Text");
+    auto lgr{Logger(
+        StreamrLogLevel::INFO,  "ContextBindingText", logWriterMock)};
+    lgr.warn("TESTIII", "Text");
 
     //  void info(const std::string& msg, std::optional<T> metadata) {
 
@@ -466,12 +466,22 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg3) {
     EXPECT_EQ(logWriterMock->isCalled, 1);
 }
 
+TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg7) {
+    setenv("LOG_LEVEL", "trace", 1);
+
+    auto lgr{Logger(
+        StreamrLogLevel::INFO,  "ContextBindingText", logWriterMock)};
+    lgr.warn("TESTIII", "Text");
+
+
+    EXPECT_EQ(logWriterMock->isCalled, 1);
+}
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg5) {
     setenv("LOG_LEVEL", "trace", 1);
 
     auto lgr{Logger()};
-    lgr.warn<std::string>("TESTIII", "Text");
+    lgr.warn("TESTIII", "Text");
 
     //  void info(const std::string& msg, std::optional<T> metadata) {
 
