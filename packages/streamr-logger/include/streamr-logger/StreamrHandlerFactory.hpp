@@ -13,7 +13,7 @@ class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 public:
     StreamrHandlerFactory() = default;
     ~StreamrHandlerFactory() override = default;
-    StreamrHandlerFactory(StreamrWriterFactory* writerFactory)
+    explicit StreamrHandlerFactory(StreamrWriterFactory* writerFactory)
         : writerFactory_{writerFactory} {}
 
     std::shared_ptr<folly::LogHandler> createHandler(
