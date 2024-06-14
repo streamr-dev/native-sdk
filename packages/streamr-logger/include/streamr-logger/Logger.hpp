@@ -7,7 +7,7 @@
 #include <folly/logging/LogWriter.h>
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/xlog.h>
-#include "StreamrHandlerFactory.hpp" 
+#include "StreamrHandlerFactory.hpp"
 #include "StreamrWriterFactory.hpp"
 
 namespace streamr {
@@ -16,25 +16,27 @@ namespace logger {
 namespace detail {
 
 static const auto ENV_LOG_LEVEL_NAME = "LOG_LEVEL"; // NOLINT
-static const auto LOG_LEVEL_TRACE_NAME = "trace";// NOLINT
-static const auto LOG_LEVEL_DEBUG_NAME = "debug";// NOLINT
-static const auto LOG_LEVEL_INFO_NAME = "info";// NOLINT
-static const auto LOG_LEVEL_WARN_NAME = "warn";// NOLINT
-static const auto LOG_LEVEL_ERROR_NAME = "error";// NOLINT
-static const auto LOG_LEVEL_FATAL_NAME = "fatal";// NOLINT
+static const auto LOG_LEVEL_TRACE_NAME = "trace"; // NOLINT
+static const auto LOG_LEVEL_DEBUG_NAME = "debug"; // NOLINT
+static const auto LOG_LEVEL_INFO_NAME = "info"; // NOLINT
+static const auto LOG_LEVEL_WARN_NAME = "warn"; // NOLINT
+static const auto LOG_LEVEL_ERROR_NAME = "error"; // NOLINT
+static const auto LOG_LEVEL_FATAL_NAME = "fatal"; // NOLINT
 
-enum class StreamrLogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL };  // NOLINT
+enum class StreamrLogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL }; // NOLINT
 
 const std::unordered_map<StreamrLogLevel, folly::LogLevel>
-    FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP{// NOLINT
+    FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP{
+        // NOLINT
         {StreamrLogLevel::TRACE, folly::LogLevel::DBG},
         {StreamrLogLevel::DEBUG, folly::LogLevel::DBG0},
-        {StreamrLogLevel::INFO, folly::LogLevel::INFO}, 
+        {StreamrLogLevel::INFO, folly::LogLevel::INFO},
         {StreamrLogLevel::WARN, folly::LogLevel::WARN},
         {StreamrLogLevel::ERROR, folly::LogLevel::ERR},
         {StreamrLogLevel::FATAL, folly::LogLevel::CRITICAL}};
 
-const std::unordered_map<std::string, folly::LogLevel> TO_FOLLY_LEVEL_MAP{// NOLINT
+const std::unordered_map<std::string, folly::LogLevel> TO_FOLLY_LEVEL_MAP{
+    // NOLINT
     {LOG_LEVEL_TRACE_NAME, folly::LogLevel::DBG},
     {LOG_LEVEL_DEBUG_NAME, folly::LogLevel::DBG0},
     {LOG_LEVEL_INFO_NAME, folly::LogLevel::INFO},
@@ -42,7 +44,7 @@ const std::unordered_map<std::string, folly::LogLevel> TO_FOLLY_LEVEL_MAP{// NOL
     {LOG_LEVEL_ERROR_NAME, folly::LogLevel::ERR},
     {LOG_LEVEL_FATAL_NAME, folly::LogLevel::CRITICAL}};
 
-}; // namespace
+}; // namespace detail
 
 template <typename A>
 class Logger {
@@ -50,8 +52,9 @@ public:
     explicit Logger(
         detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
         std::optional<A> contextBindings = std::nullopt,
-        std::shared_ptr<folly::LogWriter> logWriter = nullptr)  // NOLINT
-        : defaultLogLevel_{detail::FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP.at(defaultLogLevel)},
+        std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
+        : defaultLogLevel_{detail::FROM_STEAMR_TO_FOLLY_LOG_LEVEL_MAP.at(
+              defaultLogLevel)},
           contextBindings_{contextBindings},
           loggerDB_{folly::LoggerDB::get()} {
         if (logWriter) {
@@ -66,19 +69,55 @@ public:
 
     static Logger& get(std::shared_ptr<folly::LogWriter> logWriter = nullptr) {
         static Logger instance(
-            streamr::logger::detail::StreamrLogLevel::INFO, std::nullopt, logWriter);
+            streamr::logger::detail::StreamrLogLevel::INFO,
+            std::nullopt,
+            logWriter);
         return instance;
     }
 
     template <typename T>
-    std::string toString(T metadata) {
-        return metadata;
+    void trace(const std::string& msg, T metadata) {
+        log(folly::LogLevel::DBG, msg, metadata);
     }
 
+    void trace(const std::string& msg) { log(folly::LogLevel::DBG, msg); }
+
     template <typename T>
-    void info(const std::string& msg, std::optional<T> metadata) {
-        log(folly::LogLevel::INFO, msg, metadata);
+    void debug(const std::string& msg, T metadata) {
+        log(folly::LogLevel::DBG0, msg, metadata);
     }
+
+    void debug(const std::string& msg) { log(folly::LogLevel::DBG0, msg); }
+    /*
+        template <typename T>
+        void info(const std::string& msg, T metadata) {
+            log(folly::LogLevel::INFO, msg, std::optional<T>(metadata));
+        }
+
+        void info(const std::string& msg) {
+            log(folly::LogLevel::INFO, msg);
+        }
+    */
+    template <typename T>
+    void warn(const std::string& msg, T metadata) {
+        log(folly::LogLevel::WARN, msg, metadata);
+    }
+
+    void warn(const std::string& msg) { log(folly::LogLevel::WARN, msg); }
+
+    template <typename T>
+    void error(const std::string& msg, T metadata) {
+        log(folly::LogLevel::ERR, msg, std::optional<T>(metadata));
+    }
+
+    void error(const std::string& msg) { log(folly::LogLevel::ERR, msg); }
+
+    template <typename T>
+    void fatal(const std::string& msg, T metadata) {
+        log(folly::LogLevel::CRITICAL, msg, std::optional<T>(metadata));
+    }
+
+    void fatal(const std::string& msg) { log(folly::LogLevel::CRITICAL, msg); }
 
 private:
     std::shared_ptr<folly::LogWriter> logWriter_;
@@ -92,15 +131,20 @@ private:
         char* val = getenv(detail::ENV_LOG_LEVEL_NAME);
         if (val) {
             return detail::TO_FOLLY_LEVEL_MAP.at(val);
-        } 
+        }
         return defaultLogLevel_;
     }
 
     template <typename T>
-    void log(
+    std::string toString(T metadata) {
+        return metadata;
+    }
+
+    void logCommon(
         folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
-        std::optional<T> metadata) {
+        std::optional<std::string> metadata = std::nullopt) {
+
         auto follyRootLogLevel = getFollyLogRootLevel();
         if (follyRootLogLevel != loggerDB_.getCategory("")->getLevel()) {
             // loggerDB.setLevel("", *follyLogLevel);
@@ -137,6 +181,25 @@ private:
             msg,
             extraArgument)
             .stream();
+    }
+
+    void log(
+        folly::LogLevel follyLogLevelLevel,
+        const std::string& msg) {
+
+        logCommon(follyLogLevelLevel, msg);
+
+    }
+
+
+    template <typename T>
+    void log(
+        folly::LogLevel follyLogLevelLevel,
+        const std::string& msg,
+        T metadata) {
+
+        logCommon(follyLogLevelLevel, msg, metadata);
+
     }
 
     void initializeLoggerDB(

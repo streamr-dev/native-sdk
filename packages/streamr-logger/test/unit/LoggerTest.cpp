@@ -6,20 +6,19 @@
 #include <folly/logging/LogCategory.h>
 #include <folly/logging/LogMessage.h>
 
-//using folly::LoggerDB;
 using streamr::logger::Logger;
-//using streamr::logger::StreamrHandlerFactory;
+// using streamr::logger::StreamrHandlerFactory;
 using streamr::logger::StreamrLogFormatter;
 using streamr::logger::detail::StreamrLogLevel;
 using namespace std::chrono; // NOLINT
 
 struct LogWriterMock : public folly::LogWriter {
-   public:
+public:
     int isCalled; // NOLINT
 
     LogWriterMock() : isCalled{0} {}
 
-    void writeMessage(folly::StringPiece buf,  uint32_t /* flags */) override {
+    void writeMessage(folly::StringPiece buf, uint32_t /* flags */) override {
         std::cout << buf.toString();
         isCalled = 1;
     }
@@ -30,11 +29,12 @@ struct LogWriterMock : public folly::LogWriter {
 class StreamrLogFormatterTest : public testing::Test {
     // using streamr::logger::StreamrLogFormatter;
     void SetUp() override {
-        const auto ymd2 = std::chrono::year_month_day(2024y, std::chrono::January, 31d);
+        const auto ymd2 =
+            std::chrono::year_month_day(2024y, std::chrono::January, 31d);
         tp = std::chrono::sys_days{ymd2};
     }
 
-   private:
+private:
     StreamrLogFormatter formatter_;
     std::chrono::system_clock::time_point tp;
 };
@@ -42,13 +42,12 @@ class StreamrLogFormatterTest : public testing::Test {
 class LoggerTest : public testing::Test {
     void SetUp() override {
         logWriterMock = std::make_shared<LogWriterMock>();
-       // logger = Logger::get(logWriterMock);
+        // logger = Logger::get(logWriterMock);
     }
 
-
-
-   protected:
-    Logger<std::string>& logger{Logger<std::string>::get(logWriterMock)}; // NOLINT
+protected:
+    Logger<std::string>& logger{  // NOLINT
+        Logger<std::string>::get(logWriterMock)}; // NOLINT
     std::shared_ptr<LogWriterMock> logWriterMock; // NOLINT
 };
 /*
@@ -57,7 +56,8 @@ TEST_F(StreamrLogFormatterTest, traceNoTruncate) {
         tp, "Filename.cpp", 100, folly::LogLevel::DBG, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[90mTRACE\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 100                   ): \x1B[36mMessage\x1B[0m\n");
+        "\x1B[90mTRACE\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 100 ):
+\x1B[36mMessage\x1B[0m\n");
 }
 
 TEST_F(StreamrLogFormatterTest, traceTruncate) {
@@ -69,7 +69,8 @@ TEST_F(StreamrLogFormatterTest, traceTruncate) {
         "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[90mTRACE\x1B[0m [2024-01-31T02:00:00.0] (1234567890123456789012345678901: 100): \x1B[36mMessage\x1B[0m\n");
+        "\x1B[90mTRACE\x1B[0m [2024-01-31T02:00:00.0]
+(1234567890123456789012345678901: 100): \x1B[36mMessage\x1B[0m\n");
 }
 
 TEST_F(StreamrLogFormatterTest, debugNoTruncate) {
@@ -77,7 +78,8 @@ TEST_F(StreamrLogFormatterTest, debugNoTruncate) {
         tp, "Filename.cpp", 101010, folly::LogLevel::DBG0, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[34mDEBUG\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        "\x1B[34mDEBUG\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010 ):
+\x1B[36mMessage\x1B[0m\n");
 }
 
 TEST_F(StreamrLogFormatterTest, infoNoTruncate) {
@@ -85,7 +87,8 @@ TEST_F(StreamrLogFormatterTest, infoNoTruncate) {
         tp, "Filename.cpp", 101010, folly::LogLevel::INFO, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[32mINFO\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        "\x1B[32mINFO\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010 ):
+\x1B[36mMessage\x1B[0m\n");
 }
 
 TEST_F(StreamrLogFormatterTest, warnoNoTruncate) {
@@ -93,7 +96,8 @@ TEST_F(StreamrLogFormatterTest, warnoNoTruncate) {
         tp, "Filename.cpp", 101010, folly::LogLevel::WARN, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[33mWARN\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        "\x1B[33mWARN\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010 ):
+\x1B[36mMessage\x1B[0m\n");
 }
 
 TEST_F(StreamrLogFormatterTest, errorNoTruncate) {
@@ -101,16 +105,17 @@ TEST_F(StreamrLogFormatterTest, errorNoTruncate) {
         tp, "Filename.cpp", 101010, folly::LogLevel::ERR, "Message"};
     EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[31mERROR\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        "\x1B[31mERROR\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010 ):
+\x1B[36mMessage\x1B[0m\n");
 }
 
 TEST_F(StreamrLogFormatterTest, fatalNoTruncate) {
-    // Cannot use FATAL in Folly because it aborts, CRITICAL is converted to FATAL
-    StreamrLogFormatter::StreamrLogMessage msg = {
-        tp, "Filename.cpp", 101010, folly::LogLevel::CRITICAL, "Message"};
-    EXPECT_EQ(
+    // Cannot use FATAL in Folly because it aborts, CRITICAL is converted to
+FATAL StreamrLogFormatter::StreamrLogMessage msg = { tp, "Filename.cpp", 101010,
+folly::LogLevel::CRITICAL, "Message"}; EXPECT_EQ(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[1;41mFATAL\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        "\x1B[1;41mFATAL\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010 ):
+\x1B[36mMessage\x1B[0m\n");
 }
 
 TEST_F(LoggerTest, NoLogLevelEnvVariableSet) {
@@ -430,12 +435,10 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
 }
 */
 
-
-
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
     setenv("LOG_LEVEL", "trace", 1);
 
-    logger.info<std::string>("TestMessage", "Optionalparam");
+    logger.warn<std::string>("TestMessage", "Optionalparam");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
 }
@@ -443,12 +446,36 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg2) {
     setenv("LOG_LEVEL", "trace", 1);
 
-    auto lgr{Logger<std::string>(StreamrLogLevel::INFO, "Test ContextBinding", logWriterMock) };
-    lgr.info<std::string>("TESTIII", "Text");
+    logger.warn("TestMessage");
+    // Log written
+    EXPECT_EQ(logWriterMock->isCalled, 1);
+}
+
+
+TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg3) {
+    setenv("LOG_LEVEL", "trace", 1);
+
+    auto lgr{Logger<std::string>(
+        StreamrLogLevel::INFO, "Test ContextBinding", logWriterMock)};
+    lgr.warn<std::string>("TESTIII", "Text");
 
     //  void info(const std::string& msg, std::optional<T> metadata) {
-  
-    //logger.info<std::string>("TestMessage", "Optionalparam");
-    // Log written
+
+    // logger.info<std::string>("TestMessage", "Optionalparam");
+    //  Log written
+    EXPECT_EQ(logWriterMock->isCalled, 1);
+}
+
+
+TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg5) {
+    setenv("LOG_LEVEL", "trace", 1);
+
+    auto lgr{Logger()};
+    lgr.warn<std::string>("TESTIII", "Text");
+
+    //  void info(const std::string& msg, std::optional<T> metadata) {
+
+    // logger.info<std::string>("TestMessage", "Optionalparam");
+    //  Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
 }
