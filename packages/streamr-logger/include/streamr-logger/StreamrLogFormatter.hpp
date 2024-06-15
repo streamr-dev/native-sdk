@@ -11,16 +11,16 @@ namespace streamr::logger {
 
 namespace detail {
 
+// If you change maxFileNameAndLineNumberLength, then please change it in
+// NonTruncatedFormatter too
 static constexpr int maxFileNameAndLineNumberLength{36};
 static constexpr folly::StringPiece fileNameAndLineNumberSeparator{": "};
 static constexpr auto separatorLength{
     std::ssize(fileNameAndLineNumberSeparator)};
-static const std::string NonTruncatedFormatter =
-    "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<" +
-    std::to_string(maxFileNameAndLineNumberLength) + "}): {}{}{}\n";
+static constexpr std::string_view nonTruncatedFormatter =
+    "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}{}{}\n";
 static constexpr std::string_view truncatedFormatter =
     "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n";
-
 struct LogLevelData {
     folly::StringPiece logLevelName;
     folly::StringPiece color;
@@ -106,8 +106,6 @@ public:
         const auto fileNameLength = std::ssize(basename);
         const auto lineNumberInString = std::to_string(message.lineNumber);
         const auto lineNumberLength = std::ssize(lineNumberInString);
-        //  const std::string logMessageColor = "\033[36m";
-        //  const std::string logMessageColorReset = "\033[0m";
         const auto fileNameAndLineNumberLength =
             (fileNameLength + lineNumberLength + detail::separatorLength);
         auto logLevelData = detail::getLogLevelData(message.logLevel);
@@ -118,7 +116,7 @@ public:
                            .append(detail::fileNameAndLineNumberSeparator)
                            .append(lineNumberInString);
             auto logLine = folly::sformat(
-                detail::NonTruncatedFormatter,
+                detail::nonTruncatedFormatter,
                 logLevelData.color,
                 logLevelData.logLevelName,
                 detail::colors::ResetColor,
