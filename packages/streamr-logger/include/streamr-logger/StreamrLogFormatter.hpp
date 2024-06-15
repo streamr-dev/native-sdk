@@ -11,19 +11,18 @@ namespace streamr::logger {
 
 namespace detail {
 
-// If you change maxFileNameAndLineNumberLength, then please change it in
-// NonTruncatedFormatter too
-static constexpr int maxFileNameAndLineNumberLength{36};
-static constexpr folly::StringPiece fileNameAndLineNumberSeparator{": "};
-static constexpr auto separatorLength{
-    std::ssize(fileNameAndLineNumberSeparator)};
+// If you change MaxFileNameAndLineNumberLength, then please change it in
+// nonTruncatedFormatter too
+static const int MaxFileNameAndLineNumberLength{36};
+static const std::string FileNameAndLineNumberSeparator{": "};
+static const auto SeparatorLength{std::ssize(FileNameAndLineNumberSeparator)};
 static constexpr std::string_view nonTruncatedFormatter =
     "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}{}{}\n";
 static constexpr std::string_view truncatedFormatter =
     "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n";
 struct LogLevelData {
-    folly::StringPiece logLevelName;
-    folly::StringPiece color;
+    std::string_view logLevelName;
+    std::string_view color;
 };
 
 // FATAL cannot be used in folly because it aborts. So CRITICAL is converted
@@ -102,19 +101,18 @@ public:
         if (!localtime_r(&unixTimestamp, &ltime)) {
             memset(&ltime, 0, sizeof(ltime));
         }
-        auto basename = message.fileBasename;
+        auto basename = message.fileBasename.toString();
         const auto fileNameLength = std::ssize(basename);
         const auto lineNumberInString = std::to_string(message.lineNumber);
         const auto lineNumberLength = std::ssize(lineNumberInString);
         const auto fileNameAndLineNumberLength =
-            (fileNameLength + lineNumberLength + detail::separatorLength);
+            (fileNameLength + lineNumberLength + detail::SeparatorLength);
         auto logLevelData = detail::getLogLevelData(message.logLevel);
         const auto tmStartYear{1900};
         if (fileNameAndLineNumberLength <=
-            detail::maxFileNameAndLineNumberLength) {
-            basename = basename.toString()
-                           .append(detail::fileNameAndLineNumberSeparator)
-                           .append(lineNumberInString);
+            detail::MaxFileNameAndLineNumberLength) {
+            basename = basename + detail::FileNameAndLineNumberSeparator +
+                lineNumberInString;
             auto logLine = folly::sformat(
                 detail::nonTruncatedFormatter,
                 logLevelData.color,
@@ -135,8 +133,8 @@ public:
         }
         // Truncate needed
         auto lengthForTruncatedFileName =
-            detail::maxFileNameAndLineNumberLength -
-            (lineNumberLength + detail::separatorLength);
+            detail::MaxFileNameAndLineNumberLength -
+            (lineNumberLength + detail::SeparatorLength);
         basename = basename.substr(0, lengthForTruncatedFileName);
         auto logLine = folly::sformat(
             detail::truncatedFormatter,
@@ -152,7 +150,7 @@ public:
             millisecs.count(),
             lengthForTruncatedFileName,
             basename,
-            detail::fileNameAndLineNumberSeparator,
+            detail::FileNameAndLineNumberSeparator,
             lineNumberInString,
             detail::colors::Cyan,
             message.logMessage,
