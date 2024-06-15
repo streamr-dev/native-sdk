@@ -20,7 +20,7 @@ public:
     LogWriterMock() : isCalled{0} {}
 
     void writeMessage(folly::StringPiece buf, uint32_t /* flags */) override {
-        std::cout << buf.toString();
+        std::cout << "Buffer:" + buf.toString();
         buffer = buf.toString();
         isCalled = 1;
     }
