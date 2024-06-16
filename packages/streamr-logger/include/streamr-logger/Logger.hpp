@@ -7,7 +7,7 @@
 #include <folly/logging/LogWriter.h>
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/xlog.h>
-#include "../../../../packages/streamr-json/include/streamr-json/toString.hpp"
+#include "streamr-json/toString.hpp"
 #include "StreamrHandlerFactory.hpp"
 #include "StreamrWriterFactory.hpp"
 
