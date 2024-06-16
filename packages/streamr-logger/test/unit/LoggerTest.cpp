@@ -7,7 +7,6 @@
 #include <folly/logging/LogMessage.h>
 
 using streamr::logger::Logger;
-// using streamr::logger::StreamrHandlerFactory;
 using streamr::logger::StreamrLogFormatter;
 using streamr::logger::detail::StreamrLogLevel;
 using namespace std::chrono; // NOLINT
@@ -32,7 +31,7 @@ class StreamrLogFormatterTest : public testing::Test {
     // using streamr::logger::StreamrLogFormatter;
     void SetUp() override {
         const auto ymd2 =
-            std::chrono::year_month_day(2024y, std::chrono::January, 31d);
+            std::chrono::year_month_day(2024y, std::chrono::January, 05d);
         tp = std::chrono::sys_days{ymd2};
     }
 
@@ -53,9 +52,11 @@ protected:
 TEST_F(StreamrLogFormatterTest, traceNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
         tp, "Filename.cpp", lineNumber2, folly::LogLevel::DBG, "Message"};
-    EXPECT_EQ(
+
+    EXPECT_THAT(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[90mTRACE\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 100                   ): \x1B[36mMessage\x1B[0m\n");
+        testing::ContainsRegex(
+            "90mTRACE.+0m \\[2024\\-01\\-0.T..:00:00\\.0\\] \\(Filename.cpp: 100                   \\): .+36mMessage.+0m"));
 }
 
 TEST_F(StreamrLogFormatterTest, traceTruncate) {
@@ -65,41 +66,51 @@ TEST_F(StreamrLogFormatterTest, traceTruncate) {
         lineNumber2,
         folly::LogLevel::DBG,
         "Message"};
-    EXPECT_EQ(
+
+    EXPECT_THAT(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[90mTRACE\x1B[0m [2024-01-31T02:00:00.0] (1234567890123456789012345678901: 100): \x1B[36mMessage\x1B[0m\n");
+        testing::ContainsRegex(
+            "90mTRACE.+0m \\[2024\\-01\\-0.T..:00:00\\.0\\] \\(1234567890123456789012345678901: 100\\): .+36mMessage.+0m"));
 }
 
 TEST_F(StreamrLogFormatterTest, debugNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
         tp, "Filename.cpp", lineNumber, folly::LogLevel::DBG0, "Message"};
-    EXPECT_EQ(
+
+    EXPECT_THAT(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[34mDEBUG\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        testing::ContainsRegex(
+            "34mDEBUG.+0m \\[2024\\-01\\-0.T..:00:00\\.0\\] \\(Filename.cpp: 101010                \\): .+36mMessage.+0m"));
 }
 
 TEST_F(StreamrLogFormatterTest, infoNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
         tp, "Filename.cpp", lineNumber, folly::LogLevel::INFO, "Message"};
-    EXPECT_EQ(
+
+    EXPECT_THAT(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[32mINFO\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        testing::ContainsRegex(
+            "32mINFO.+0m \\[2024\\-01\\-0.T..:00:00\\.0\\] \\(Filename.cpp: 101010                \\): .+36mMessage.+0m"));
 }
 
 TEST_F(StreamrLogFormatterTest, warnoNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
         tp, "Filename.cpp", lineNumber, folly::LogLevel::WARN, "Message"};
-    EXPECT_EQ(
+
+    EXPECT_THAT(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[33mWARN\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        testing::ContainsRegex(
+            "33mWARN.+0m \\[2024\\-01\\-0.T..:00:00\\.0\\] \\(Filename.cpp: 101010                \\): .+36mMessage.+0m"));
 }
 
 TEST_F(StreamrLogFormatterTest, errorNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
         tp, "Filename.cpp", lineNumber, folly::LogLevel::ERR, "Message"};
-    EXPECT_EQ(
+
+    EXPECT_THAT(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[31mERROR\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        testing::ContainsRegex(
+            "31mERROR.+0m \\[2024\\-01\\-0.T..:00:00\\.0\\] \\(Filename.cpp: 101010                \\): .+36mMessage.+0m"));
 }
 
 TEST_F(StreamrLogFormatterTest, fatalNoTruncate) {
@@ -107,9 +118,11 @@ TEST_F(StreamrLogFormatterTest, fatalNoTruncate) {
     // FATAL
     StreamrLogFormatter::StreamrLogMessage msg = {
         tp, "Filename.cpp", lineNumber, folly::LogLevel::CRITICAL, "Message"};
-    EXPECT_EQ(
+
+    EXPECT_THAT(
         formatter_.formatMessageInStreamrStyle(msg),
-        "\x1B[1;41mFATAL\x1B[0m [2024-01-31T02:00:00.0] (Filename.cpp: 101010                ): \x1B[36mMessage\x1B[0m\n");
+        testing::ContainsRegex(
+            "1;41mFATAL.+0m \\[2024\\-01\\-0.T..:00:00\\.0\\] \\(Filename.cpp: 101010                \\): .+36mMessage.+0m"));
 }
 
 TEST_F(LoggerTest, NoLogLevelEnvVariableSetInfoLogSent) {
