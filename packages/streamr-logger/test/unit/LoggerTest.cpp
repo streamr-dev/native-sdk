@@ -452,7 +452,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
 TEST_F(LoggerTest, TraceLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "trace", 1);
 
-    logger.trace("Testi", "LogExtraArgumentText");
+    logger.trace("Testi", folly::StringPiece("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("TRACE"));
     EXPECT_THAT(
@@ -463,7 +463,7 @@ TEST_F(LoggerTest, TraceLogWithExtraArgumentText) {
 TEST_F(LoggerTest, DebugLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "debug", 1);
 
-    logger.debug("Testi", "LogExtraArgumentText");
+    logger.debug("Testi", folly::StringPiece("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("DEBUG"));
     EXPECT_THAT(
@@ -474,7 +474,7 @@ TEST_F(LoggerTest, DebugLogWithExtraArgumentText) {
 TEST_F(LoggerTest, InfoLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "info", 1);
 
-    logger.info("Testi", "LogExtraArgumentText");
+    logger.info("Testi", folly::StringPiece("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("INFO"));
     EXPECT_THAT(
@@ -485,7 +485,7 @@ TEST_F(LoggerTest, InfoLogWithExtraArgumentText) {
 TEST_F(LoggerTest, WarnLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "warn", 1);
 
-    logger.warn("Testi", "LogExtraArgumentText");
+    logger.warn("Testi", folly::StringPiece("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("WARN"));
     EXPECT_THAT(
@@ -496,7 +496,7 @@ TEST_F(LoggerTest, WarnLogWithExtraArgumentText) {
 TEST_F(LoggerTest, ErrorLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "error", 1);
 
-    logger.error("Testi", "LogExtraArgumentText");
+    logger.error("Testi", folly::StringPiece("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("ERROR"));
     EXPECT_THAT(
@@ -507,7 +507,7 @@ TEST_F(LoggerTest, ErrorLogWithExtraArgumentText) {
 TEST_F(LoggerTest, FatalLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "fatal", 1);
 
-    logger.fatal("Testi", "LogExtraArgumentText");
+    logger.fatal("Testi", folly::StringPiece("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("FATAL"));
     EXPECT_THAT(
@@ -522,7 +522,7 @@ TEST(LoggerContextBindingText, FatalLogWithExtraArgumentTextAndContextBinding) {
     Logger tmpLogger =
         Logger(StreamrLogLevel::INFO, "ContextBindingText", tmpLogWriterMock);
 
-    tmpLogger.fatal("Testi", "LogExtraArgumentText");
+    tmpLogger.fatal("Testi", folly::StringPiece("LogExtraArgumentText"));
 
     EXPECT_THAT(tmpLogWriterMock->buffer, testing::HasSubstr("FATAL"));
     EXPECT_THAT(

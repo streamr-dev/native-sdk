@@ -7,6 +7,7 @@
 #include <folly/logging/LogWriter.h>
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/xlog.h>
+#include "../../../../packages/streamr-json/include/streamr-json/toString.hpp"
 #include "StreamrHandlerFactory.hpp"
 #include "StreamrWriterFactory.hpp"
 
@@ -64,32 +65,32 @@ public:
         this->initializeLoggerDB(folly::LogLevel::DBG);
     }
 
-    template <typename T = std::string>
+    template <streamr::json::TypeWithToString T = folly::StringPiece>
     void trace(const std::string& msg, T metadata = "") {
         log(folly::LogLevel::DBG, msg, metadata);
     }
 
-    template <typename T = std::string>
+    template <streamr::json::TypeWithToString T = folly::StringPiece>
     void debug(const std::string& msg, T metadata = "") {
         log(folly::LogLevel::DBG0, msg, metadata);
     }
 
-    template <typename T = std::string>
+    template <streamr::json::TypeWithToString T = folly::StringPiece>
     void info(const std::string& msg, T metadata = "") {
         log(folly::LogLevel::INFO, msg, metadata);
     }
 
-    template <typename T = std::string>
+    template <streamr::json::TypeWithToString T = folly::StringPiece>
     void warn(const std::string& msg, T metadata = "") {
         log(folly::LogLevel::WARN, msg, metadata);
     }
 
-    template <typename T = std::string>
+    template <streamr::json::TypeWithToString T = folly::StringPiece>
     void error(const std::string& msg, T metadata = "") {
         log(folly::LogLevel::ERR, msg, metadata);
     }
 
-    template <typename T = std::string>
+    template <streamr::json::TypeWithToString T = folly::StringPiece>
     void fatal(const std::string& msg, T metadata = "") {
         log(folly::LogLevel::CRITICAL, msg, metadata);
     }
@@ -109,12 +110,7 @@ private:
         return defaultLogLevel_;
     }
 
-    template <typename T>
-    std::string toString(T metadata) {
-        return metadata;
-    }
-
-    template <typename T = std::string>
+    template <streamr::json::TypeWithToString T = folly::StringPiece>
     void log(
         folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
@@ -126,7 +122,7 @@ private:
         }
         std::string extraArgument;
         if (metadata != "") {
-            extraArgument = " " + extraArgument + toString(metadata);
+            extraArgument = " " + extraArgument + metadata.toString();
             if (contextBindings_ != "") {
                 extraArgument = extraArgument + " " + contextBindings_;
             }
