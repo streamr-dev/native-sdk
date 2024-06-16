@@ -6,13 +6,13 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 # make the current package a monorepo package
 include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
-
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../packages/streamr-json/include/streamr-json)
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(logger CXX)
 
 find_package(folly REQUIRED)
-
+find_package(streamr-json REQUIRED)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(streamr-logger INTERFACE)
 set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 23)
@@ -24,7 +24,7 @@ target_include_directories(
            $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(streamr-logger INTERFACE Folly::folly)
-
+target_link_libraries(streamr-logger INTERFACE streamr-json)
 # TODO: Is there a better way to do this?
 # - Apparently not: https://gitlab.kitware.com/cmake/cmake/-/issues/20511
 # - At least parse the deps from the vcpkg.json file and use them to find_package() in this file and to add the
