@@ -95,7 +95,6 @@ public:
     }
 
 private:
-    std::shared_ptr<folly::LogWriter> logWriter_;
     StreamrWriterFactory writerFactory_;
     folly::LoggerDB& loggerDB_;
     std::unique_ptr<folly::LogHandlerFactory> logHandlerFactory_;
