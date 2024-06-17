@@ -8,7 +8,6 @@
         "monorepo": {
             "description": "Monorepo dependencies",
             "dependencies": [
-                "streamr-utils",
                 "streamr-logger"
             ]
         }

@@ -5,12 +5,12 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <gtest/gtest.h>
 
-#include "streamr-json/toJson.hpp"
+#include <gtest/gtest.h>
 
 #include "TestClass.hpp"
 #include "WeatherData.hpp"
+#include "streamr-json/toJson.hpp"
 
 using streamr::json::toJson;
 
@@ -20,52 +20,57 @@ class ToJsonTest : public ::testing::Test {
 protected:
     WeatherData weatherData; // NOLINT
     TestClass testClass; // NOLINT
+    json weatherJson; // NOLINT
 
     void SetUp() override {
         weatherData = {
             .dataId = 0,
             .dataLabel = "Test data",
             .dataByCountry = {
-                {
-                    "Finland",
-                    {.locality = "Helsinki",
-                     .temperatures =
-                         {
-                             {.temperature = 23.4,
-                              .timestamp = std::time(nullptr)}, // NOLINT
-                             {.temperature = 24.5,
-                              .timestamp = std::time(nullptr) + 1000} // NOLINT
-                         }},
-                },
+                {"Finland",
+                 {
+                     {.locality = "Helsinki",
+                      .temperatures =
+                          {
+                              {.temperature = 23.4, .timestamp = 1}, // NOLINT
+                              {.temperature = 24.5, .timestamp = 1000} // NOLINT
+                          }},
+                 }},
                 {"Sweden",
-                 {.locality = "Stockholm",
-                  .temperatures = {
-                      {.temperature = 22.0,
-                       .timestamp = std::time(nullptr)}, // NOLINT
-                      {.temperature = 21.6,
-                       .timestamp = std::time(nullptr) + 1000} // NOLINT
-                  }}}}};
+                 {{.locality = "Stockholm",
+                   .temperatures = {
+                       {.temperature = 22.0, .timestamp = 1}, // NOLINT
+                       {.temperature = 21.6, .timestamp = 1000} // NOLINT
+                   }}}}}};
+        weatherJson = R"({
+            "dataId": 0,
+            "dataLabel": "Test data",
+            "dataByCountry": {
+                "Finland": [
+                    {
+                        "locality": "Helsinki",
+                        "temperatures": [
+                            {"temperature": 23.4, "timestamp": 1},
+                            {"temperature": 24.5, "timestamp": 1000}
+                        ]
+                    }
+                ],
+                "Sweden": [
+                    {
+                    "locality": "Stockholm",
+                    "temperatures": [
+                            {"temperature": 22.0, "timestamp": 1},
+                            {"temperature": 21.6, "timestamp": 1000}
+                        ]
+                    }
+                ]
+            }
+        })"_json;
     }
 };
 
 TEST_F(ToJsonTest, TestWeatherDataToJson) {
-    json expectedJson = {
-        {"dataId", 0},
-        {"dataLabel", "Test data"},
-        {"dataByCountry",
-         {{"Finland",
-           {{"locality", "Helsinki"},
-            {"temperatures",
-             {{{"temperature", 23.4}, {"timestamp", std::time(nullptr)}},
-              {{"temperature", 24.5},
-               {"timestamp", std::time(nullptr) + 1000}}}}}},
-          {"Sweden",
-           {{"locality", "Stockholm"},
-            {"temperatures",
-             {{{"temperature", 22.0}, {"timestamp", std::time(nullptr)}},
-              {{"temperature", 21.6},
-               {"timestamp", std::time(nullptr) + 1000}}}}}}}}};
-    EXPECT_EQ(toJson(weatherData), expectedJson);
+    EXPECT_EQ(toJson(weatherData), weatherJson);
 }
 
 TEST_F(ToJsonTest, TestInitializerListToJson) {
@@ -86,6 +91,37 @@ TEST_F(ToJsonTest, TestInitializerListToJson) {
              {"answer", {{"everything", 42}}},
              {"list", {1, 0, 2}},
              {"object", {{"currency", "USD"}, {"value", 42.99}}}}));
+}
+
+TEST_F(ToJsonTest, TestInitializerListWithStructContentToJson) {
+    EXPECT_EQ(toJson({{"data", weatherData}}), json({{"data", weatherJson}}));
+}
+
+TEST_F(ToJsonTest, TestInitializerListWithStructContentEmptyInputToJson) {
+    json expectedJson = {
+        {"data", {{"dataId", 0}, {"dataLabel", ""}, {"dataByCountry", {}}}}};
+    WeatherData emptyData{};
+    EXPECT_EQ(toJson({{"data", emptyData}}), expectedJson);
+}
+
+TEST_F(ToJsonTest, TestInitializerListWithStructContentNullInputToJson) {
+    json expectedJson = {{"data", nullptr}};
+    WeatherData* nullData = nullptr;
+    EXPECT_EQ(toJson({{"data", nullptr}}), expectedJson);
+}
+
+TEST_F(ToJsonTest, TestInitializerListWithStructContentZeroInputToJson) {
+    json expectedJson = {
+        {"data", {{"dataId", 0}, {"dataLabel", ""}, {"dataByCountry", {}}}}};
+    WeatherData zeroData;
+    zeroData.dataId = 0;
+    zeroData.dataLabel = "";
+    zeroData.dataByCountry = {};
+    EXPECT_EQ(toJson({{"data", zeroData}}), expectedJson);
+};
+
+TEST_F(ToJsonTest, TestInitializerListWithStructContent) {
+    EXPECT_EQ(toJson({{"data", weatherData}}), json({{"data", weatherJson}}));
 }
 
 TEST_F(ToJsonTest, TestIntToJson) {
@@ -193,6 +229,139 @@ TEST_F(ToJsonTest, TestForwardListToJson) {
 TEST_F(ToJsonTest, TestClassToJson) {
     json expectedJson = {{"a", testClass.getA()}, {"b", testClass.getB()}};
     EXPECT_EQ(toJson(testClass), expectedJson);
+}
+
+TEST_F(ToJsonTest, TestEmptyStructToJson) {
+    struct EmptyStruct {
+    } emptyStruct;
+    EXPECT_EQ(toJson(emptyStruct), json({}));
+}
+
+TEST_F(ToJsonTest, TestSpecialCharactersToJson) {
+    std::string specialCharacters = "!@#$%^&*()";
+    EXPECT_EQ(toJson(specialCharacters), "!@#$%^&*()");
+}
+
+TEST_F(ToJsonTest, TestNullPointerToJson) {
+    int* nullPointer = nullptr;
+    json j(nullptr);
+    EXPECT_EQ(toJson(nullPointer), j);
+}
+
+TEST_F(ToJsonTest, TestNonNullPointerToJson) {
+    int a = 1;
+    int* nonNullPointer = &a;
+
+    json j(*nonNullPointer);
+
+    EXPECT_EQ(toJson(nonNullPointer), j);
+}
+
+TEST_F(ToJsonTest, TestWeatherDataSmartPointersToJson) {
+    WeatherDataSmartPointers weatherDataSmartPointers;
+    weatherDataSmartPointers.dataId = 0;
+    weatherDataSmartPointers.dataLabel =
+        std::make_shared<std::string>("Test data");
+
+    auto finlandDataSample = std::make_shared<DataSample>();
+    finlandDataSample->locality = "Helsinki";
+    finlandDataSample->temperatures.push_back({23.4, 1});
+    finlandDataSample->temperatures.push_back({24.5, 1000});
+    weatherDataSmartPointers.dataByCountry["Finland"].push_back(
+        finlandDataSample);
+
+    auto swedenDataSample = std::make_shared<DataSample>();
+    swedenDataSample->locality = "Stockholm";
+    swedenDataSample->temperatures.push_back({22.0, 1});
+    swedenDataSample->temperatures.push_back({21.6, 1000});
+    weatherDataSmartPointers.dataByCountry["Sweden"].push_back(
+        swedenDataSample);
+
+    EXPECT_EQ(toJson(weatherDataSmartPointers), weatherJson);
+}
+
+TEST_F(ToJsonTest, TestWeatherDataRegularPointersToJson) {
+    WeatherDataRegularPointers weatherDataRegularPointers;
+    weatherDataRegularPointers.dataId = 0;
+    weatherDataRegularPointers.dataLabel = new std::string("Test data");
+    auto* finlandSample = new DataSample;
+    finlandSample->locality = "Helsinki";
+    finlandSample->temperatures.push_back({23.4, 1});
+    finlandSample->temperatures.push_back({24.5, 1000});
+    weatherDataRegularPointers.dataByCountry["Finland"].push_back(
+        finlandSample);
+
+    auto* swedenSample = new DataSample;
+    swedenSample->locality = "Stockholm";
+    swedenSample->temperatures.push_back({22.0, 1});
+    swedenSample->temperatures.push_back({21.6, 1000});
+    weatherDataRegularPointers.dataByCountry["Sweden"].push_back(swedenSample);
+    json expectedJson = R"(
+        {
+            "dataId": 0,
+            "dataLabel": "Test data",
+            "dataByCountry": {
+                "Finland": [
+                    {
+                        "locality": "Helsinki",
+                        "temperatures": [
+                            {"temperature": 23.4, "timestamp": 1},
+                            {"temperature": 24.5, "timestamp": 1000}
+                        ]
+                    }
+                ],
+                "Sweden": [
+                    {
+                    "locality": "Stockholm",
+                    "temperatures": [
+                            {"temperature": 22.0, "timestamp": 1},
+                            {"temperature": 21.6, "timestamp": 1000}
+                        ]
+                    }
+                ]
+            }
+        }
+    )"_json;
+    /*
+    json expectedJson = {
+        {"dataId", 0},
+        {"dataLabel", "Test data"},
+        {"dataByCountry",
+            {"Finland", {
+                {
+                    {
+                        {"locality", "Helsinki"},
+                        {"temperatures",
+                            {
+                                {{"temperature", 23.4}, {"timestamp",
+    std::time(nullptr)}},
+                                {{"temperature", 24.5}, {"timestamp",
+    std::time(nullptr) + 1000}}
+                            }
+                        }
+                    }
+                }}}}}},
+            {"Sweden", {
+                {
+                    {
+                        {"locality", "Stockholm"},
+                        {"temperatures",
+            {
+                {{"temperature", 22.0}, {"timestamp", std::time(nullptr)}},
+                {{"temperature", 21.6}, {"timestamp", std::time(nullptr) +
+    1000}}
+            }}}}}}
+    };*/
+
+    EXPECT_EQ(toJson(weatherDataRegularPointers), expectedJson);
+
+    delete weatherDataRegularPointers.dataLabel;
+    for (auto& sample : weatherDataRegularPointers.dataByCountry["Finland"]) {
+        delete sample;
+    }
+    for (auto& sample : weatherDataRegularPointers.dataByCountry["Sweden"]) {
+        delete sample;
+    }
 }
 
 // NOLINTEND(readability-magic-numbers)

@@ -1,7 +1,7 @@
 #ifndef STREAMR_JSON_TOJSON_HPP
 #define STREAMR_JSON_TOJSON_HPP
 
-#include <ranges>
+#include <initializer_list>
 #include <string_view>
 #include <type_traits>
 #include <boost/pfr.hpp>
@@ -10,68 +10,14 @@
 #include <boost/pfr/traits.hpp>
 #include <boost/pfr/tuple_size.hpp>
 #include <nlohmann/json.hpp>
+#include <streamr-json/JsonBuilder.hpp>
+#include <streamr-json/jsonConcepts.hpp>
 
 namespace streamr::json {
 
 using json = nlohmann::json;
 using JsonInitializerList = nlohmann::json::initializer_list_t;
 
-// Concepts for template specialization
-
-template <typename T>
-concept AssignableToJson = std::is_assignable<json&, T>::value;
-
-template <typename T>
-concept TypeWithToJson = requires(T obj) {
-    { obj.toJson() } -> std::same_as<json>;
-};
-
-template <typename Container>
-concept AssociativeType = requires(Container cont) {
-    typename Container::key_type;
-    typename Container::mapped_type;
-    { cont.begin() } -> std::same_as<typename Container::iterator>;
-    { cont.end() } -> std::same_as<typename Container::iterator>;
-    requires(not AssignableToJson<Container>);
-};
-
-template <typename T>
-concept IterableType = requires(T container) {
-    requires std::ranges::range<T>;
-    requires(not std::is_same<T, std::string>::value);
-    requires(not AssociativeType<T>);
-    requires(not AssignableToJson<T>);
-};
-
-template <typename T>
-concept ReflectableType = requires(T value) {
-    { boost::pfr::is_implicitly_reflectable<T, std::nullptr_t>::value };
-    requires(not AssociativeType<T>);
-    requires(not IterableType<T>);
-    requires(not TypeWithToJson<T>);
-    requires(not AssignableToJson<T>);
-};
-
-/*
-template <typename T>
-json toJson(const T& value) { // NOLINT(misc-unused-parameters)
-    static_assert(
-        !ReflectableType<T>,
-        "The type cannot be converted to JSON/string. For classes with \
-        private fields, you MUST implement toJson()/toString() member functions
-\
-        in order to be able to call
-toJson(classInstance)/toString(classInstance). \ Otherwise calling the functions
-will result in this compile error.");
-
-    json j = "The type cannot be converted to JSON or string: " +
-        std::string(typeid(T).name());
-
-    std::cerr << j << std::endl;
-
-    return j;
-}
-*/
 // Forward-declaration of this template function is necessary because it is used
 // in the template specialization below and calls toJson()
 
@@ -92,25 +38,49 @@ void addStructElementsToJson(
      ...);
 }
 
+// if none of the other templates match, use JSON builder
+template <AssignableToJsonBuilder T = std::initializer_list<JsonBuilder>>
+json toJson(const T& value) {
+    // static_assert(!std::is_pointer_v<T>, "Pointers cannot be converted to
+    // JSON");
+    if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
+        return pointerToJson(value);
+    }
+    return JsonBuilder(value).getJson();
+}
+
 template <ReflectableType T>
 json toJson(const T& value) {
+    // static_assert(!std::is_pointer_v<T>, "Pointers cannot be converted to
+    // JSON");
+    // if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
+    //    return pointerToJson(value);
+    //}
     json j;
     constexpr std::size_t structSize = boost::pfr::tuple_size<T>::value;
     addStructElementsToJson(j, value, std::make_index_sequence<structSize>{});
+    if (j.is_null()) {
+        j = json({});
+    }
     return j;
 }
 
 template <IterableType T>
 json toJson(const T& value) {
+    // if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
+    //     return pointerToJson(value);
+    // }
     json j;
     for (const auto& elem : value) {
         j.push_back(toJson(elem));
     }
     return j;
 }
-
 template <AssociativeType T>
 json toJson(const T& value) {
+    // if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
+    //     return pointerToJson(value);
+    // }
     json j;
     for (const auto& elem : value) {
         j[elem.first] = toJson(elem.second);
@@ -121,16 +91,50 @@ json toJson(const T& value) {
 // The default type parameter is needed because otherwise the template
 // specialization cannot recognize the curly-bracket initializer list
 
-template <AssignableToJson T = JsonInitializerList>
+template <AssignableToNlohmannJson T>
 json toJson(const T& value) {
+    // if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
+    //     return pointerToJson(value);
+    // }
     json j;
     j = value;
     return j;
 }
 
+/*
+template <NotAssignableToJson T>
+json toJson(const T& value) {   // NOLINT(misc-unused-parameters)
+    json j;
+    j = "defaultarvo";
+    return j;
+}
+*/
+
 template <TypeWithToJson T>
 json toJson(const T& value) {
     return value.toJson();
+}
+
+// Handling of pointer types
+
+// template <typename T>
+// bool isNullPointer(const T* value) {
+//     return value == nullptr;
+// }
+
+template <typename T>
+json pointerToJson(T value) {
+    // if (isNullPointer(*value)) {
+    if (!value) {
+        return json(nullptr);
+    }
+
+    return toJson(*value);
+}
+
+template <PointerType T>
+json toJson(T value) {
+    return pointerToJson(value);
 }
 
 // Definition of the template function forward-declared above

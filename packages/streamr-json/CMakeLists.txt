@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 
 set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -13,7 +13,9 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(streamr-json CXX)
 
+
 find_package(Boost CONFIG REQUIRED)
+message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 find_package(nlohmann_json CONFIG REQUIRED)
       
 if(NOT TARGET Boost::pfr)
@@ -22,8 +24,6 @@ if(NOT TARGET Boost::pfr)
 endif()
 
 add_library(streamr-json INTERFACE)
-set_property(TARGET streamr-json PROPERTY CXX_STANDARD 23)
-
 add_library(streamr::streamr-json ALIAS streamr-json)
 
 target_include_directories(
@@ -38,16 +38,21 @@ target_link_libraries(streamr-json INTERFACE nlohmann_json::nlohmann_json)
 # - At least parse the deps from the vcpkg.json file and use them to find_package() in this file and to add the
 # find_package() calls to the wrapper
 
-export(TARGETS streamr-json FILE streamr-json-config-in.cmake)
+export(TARGETS streamr-json
+  NAMESPACE streamr::
+  FILE streamr-json-config-in.cmake)
 
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-json-config.cmake" 
-  "find_package(Boost REQUIRED)\n
-  find_package(nlohmann_json REQUIRED)\n
-  if(NOT TARGET Boost::pfr)\n
-    add_library(Boost::pfr INTERFACE IMPORTED)\n
-    set_target_properties(Boost::pfr PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n
-  endif()\n
-  include(${CMAKE_BINARY_DIR}/streamr-json-config-in.cmake)\n")
+  "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
+  "find_package(Boost CONFIG REQUIRED)\n"
+  "message(STATUS \"CMAKE_PREFIX_PATH: \${CMAKE_PREFIX_PATH}\")\n"
+  "find_package(nlohmann_json CONFIG REQUIRED)\n"
+  "message(STATUS \"after trying to find lohmann\")\n"
+  "if(NOT TARGET Boost::pfr)\n"
+    "    add_library(Boost::pfr INTERFACE IMPORTED)\n"
+    "    set_target_properties(Boost::pfr PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
+  "endif()\n"
+  "include(${CMAKE_BINARY_DIR}/streamr-json-config-in.cmake)\n")
 
 enable_testing()
 find_package(GTest CONFIG REQUIRED)
