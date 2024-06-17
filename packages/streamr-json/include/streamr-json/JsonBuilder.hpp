@@ -9,19 +9,23 @@ namespace streamr::json {
 using json = nlohmann::json;
 
 /**
- * @brief A private tool class for building nlohmann::json objects out of initializer lists. 
- * This class should not be used directly by the user, use toJson() function instead!
+ * @brief A private tool class for building nlohmann::json objects out of
+ * initializer lists. This class should not be used directly by the user, use
+ * toJson() function instead!
  * @details For example, the following json:
  * @code {dataId: "123", dataPoints: [1,7,3]}
  * can be expressed in the nlohmann initializer list format as
  * @code { {"dataId", "123"}, {"dataPoints", {1, 7, 3} } }
  * If this is passed to JsonBuilder constructor:
  * @code JsonBuilder j{ {"dataId", "123"}, {"dataPoints", {1, 7, 3} } };
- * The compiler will generate code that call JsonBuilder constructors recursively in a depth-first manner.
- * The JsonBuilder(const T& value) constructors are first executed on the primitive types, to cenvert them 
- * To JsonBuilders. JsonBuilder(std::initializer_list<JsonBuilder> init) 
- * constructor is then recursively called on the sections of JsonBuilders delimited by curly brackets, until the root of the treee is reached.
- * @note This class is not meant to be used directly by the user, use toJson() function instead.
+ * The compiler will generate code that call JsonBuilder constructors
+ * recursively in a depth-first manner. The JsonBuilder(const T& value)
+ * constructors are first executed on the primitive types, to cenvert them To
+ * JsonBuilders. JsonBuilder(std::initializer_list<JsonBuilder> init)
+ * constructor is then recursively called on the sections of JsonBuilders
+ * delimited by curly brackets, until the root of the treee is reached.
+ * @note This class is not meant to be used directly by the user, use toJson()
+ * function instead.
  */
 class JsonBuilder {
     json jsonData;
