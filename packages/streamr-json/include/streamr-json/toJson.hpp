@@ -38,24 +38,34 @@ void addStructElementsToJson(
      ...);
 }
 
-// if none of the other templates match, use JSON builder
+/**
+ * @brief Specialization to initializer_lists. The initializer lists should be
+ * in the nlohmann::json format.
+ * @tparam T The type of initializer list to convert to JSON.
+ * @param value The initializer list to convert to JSON. The list can hold
+ * almost any types, except the ones with private members.
+ * @return The JSON representation of the value.
+ */
+
 template <AssignableToJsonBuilder T = std::initializer_list<JsonBuilder>>
 json toJson(const T& value) {
-    // static_assert(!std::is_pointer_v<T>, "Pointers cannot be converted to
-    // JSON");
     if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
         return pointerToJson(value);
     }
     return JsonBuilder(value).getJson();
 }
 
+/**
+ * @brief Specialization for types that are reflectable by boost::pfr. This
+ * includes almost all structs that do not have private members.
+ * @tparam T The type of the value to convert to JSON. T must not have private
+ * members.
+ * @param value The value to convert to JSON.
+ * @return The JSON representation of the value.
+ */
+
 template <ReflectableType T>
 json toJson(const T& value) {
-    // static_assert(!std::is_pointer_v<T>, "Pointers cannot be converted to
-    // JSON");
-    // if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
-    //    return pointerToJson(value);
-    //}
     json j;
     constexpr std::size_t structSize = boost::pfr::tuple_size<T>::value;
     addStructElementsToJson(j, value, std::make_index_sequence<structSize>{});
@@ -65,22 +75,34 @@ json toJson(const T& value) {
     return j;
 }
 
+/**
+ * @brief Specialization for iterable types such as std::vector, std::list, etc.
+ * @tparam T The type of the value to convert to JSON. T must be an iterable
+ * type.
+ * @param value The value to convert to JSON.
+ * @return The JSON representation of the value.
+ */
+
 template <IterableType T>
 json toJson(const T& value) {
-    // if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
-    //     return pointerToJson(value);
-    // }
     json j;
     for (const auto& elem : value) {
         j.push_back(toJson(elem));
     }
     return j;
 }
+
+/**
+ * @brief Specialization for associative types such as std::map,
+ * std::unordered_map, etc.
+ * @tparam T The type of the value to convert to JSON. T must be an associative
+ * type.
+ * @param value The value to convert to JSON.
+ * @return The JSON representation of the value.
+ */
+
 template <AssociativeType T>
 json toJson(const T& value) {
-    // if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
-    //     return pointerToJson(value);
-    // }
     json j;
     for (const auto& elem : value) {
         j[elem.first] = toJson(elem.second);
@@ -88,39 +110,34 @@ json toJson(const T& value) {
     return j;
 }
 
-// The default type parameter is needed because otherwise the template
-// specialization cannot recognize the curly-bracket initializer list
+/**
+ * @brief Specialization for types that are directly assignable to
+ * nlohmann::json.
+ * @tparam T The type of the value to convert to JSON. T must be assignable to
+ * nlohmann::json.
+ * @param value The value to convert to JSON.
+ * @return The JSON representation of the value.
+ */
 
 template <AssignableToNlohmannJson T>
 json toJson(const T& value) {
-    // if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
-    //     return pointerToJson(value);
-    // }
     json j;
     j = value;
     return j;
 }
 
-/*
-template <NotAssignableToJson T>
-json toJson(const T& value) {   // NOLINT(misc-unused-parameters)
-    json j;
-    j = "defaultarvo";
-    return j;
-}
-*/
+/**
+ * @brief Specialization for types that have a toJson() member function.
+ * @tparam T The type of the value to convert to JSON. T must have a member
+ * function with the signature nlohmann::json toJson() const;
+ * @param value The value to convert to JSON.
+ * @return The JSON representation of the value.
+ */
 
 template <TypeWithToJson T>
 json toJson(const T& value) {
     return value.toJson();
 }
-
-// Handling of pointer types
-
-// template <typename T>
-// bool isNullPointer(const T* value) {
-//     return value == nullptr;
-// }
 
 template <typename T>
 json pointerToJson(T value) {
