@@ -1,6 +1,13 @@
 {
   "name": "streamr-logger",
   "version": "1.0.0",
-  "dependencies": ["folly", "gtest"]
+  "dependencies": ["folly", "gtest"],
+  "features": {
+    "monorepo": {
+        "description": "Monorepo dependencies",
+        "dependencies": [
+            "streamr-json"
+        ]
+    }
+  }
 }
-
