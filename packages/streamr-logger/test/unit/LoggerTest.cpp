@@ -46,7 +46,8 @@ class LoggerTest : public testing::Test {
 protected:
     std::shared_ptr<LogWriterMock> logWriterMock =
         std::make_shared<LogWriterMock>();
-    Logger logger = Logger(StreamrLogLevel::INFO, "", logWriterMock);
+    Logger logger =
+        Logger(StreamrLogLevel::INFO, folly::StringPiece(""), logWriterMock);
 };
 
 TEST_F(StreamrLogFormatterTest, traceNoTruncate) {
@@ -519,8 +520,10 @@ TEST(LoggerContextBindingText, FatalLogWithExtraArgumentTextAndContextBinding) {
     setenv("LOG_LEVEL", "fatal", 1);
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
         std::make_shared<LogWriterMock>();
-    Logger tmpLogger =
-        Logger(StreamrLogLevel::INFO, "ContextBindingText", tmpLogWriterMock);
+    Logger tmpLogger = Logger(
+        StreamrLogLevel::INFO,
+        folly::StringPiece("ContextBindingText"),
+        tmpLogWriterMock);
 
     tmpLogger.fatal("Testi", folly::StringPiece("LogExtraArgumentText"));
 

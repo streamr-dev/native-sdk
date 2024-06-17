@@ -7,9 +7,9 @@
 #include <folly/logging/LogWriter.h>
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/xlog.h>
-#include "streamr-json/toString.hpp"
 #include "StreamrHandlerFactory.hpp"
 #include "StreamrWriterFactory.hpp"
+#include "streamr-json/toString.hpp"
 
 namespace streamr::logger {
 
@@ -46,14 +46,14 @@ const std::unordered_map<std::string, folly::LogLevel> ToFollyLevelMap{
 
 class Logger {
 public:
-    template <typename T = std::string>
+    template <streamr::json::TypeWithToString T = folly::StringPiece>
     explicit Logger(
         detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
-        T contextBindings = "",
+        const T& contextBindings = "",
         std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
         : defaultLogLevel_{detail::FromStreamrToFollyLogLevelMap.at(
               defaultLogLevel)},
-          contextBindings_{contextBindings},
+          contextBindings_{contextBindings.toString()},
           loggerDB_{folly::LoggerDB::get()} {
         if (logWriter) {
             writerFactory_ = StreamrWriterFactory(logWriter);
@@ -66,32 +66,32 @@ public:
     }
 
     template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void trace(const std::string& msg, T metadata = "") {
+    void trace(const std::string& msg, const T& metadata = "") {
         log(folly::LogLevel::DBG, msg, metadata);
     }
 
     template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void debug(const std::string& msg, T metadata = "") {
+    void debug(const std::string& msg, const T& metadata = "") {
         log(folly::LogLevel::DBG0, msg, metadata);
     }
 
     template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void info(const std::string& msg, T metadata = "") {
+    void info(const std::string& msg, const T& metadata = "") {
         log(folly::LogLevel::INFO, msg, metadata);
     }
 
     template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void warn(const std::string& msg, T metadata = "") {
+    void warn(const std::string& msg, const T& metadata = "") {
         log(folly::LogLevel::WARN, msg, metadata);
     }
 
     template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void error(const std::string& msg, T metadata = "") {
+    void error(const std::string& msg, const T& metadata = "") {
         log(folly::LogLevel::ERR, msg, metadata);
     }
 
     template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void fatal(const std::string& msg, T metadata = "") {
+    void fatal(const std::string& msg, const T& metadata = "") {
         log(folly::LogLevel::CRITICAL, msg, metadata);
     }
 
@@ -114,7 +114,7 @@ private:
     void log(
         folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
-        T metadata = "") {
+        const T& metadata = "") {
         auto follyRootLogLevel = getFollyLogRootLevel();
         if (follyRootLogLevel != loggerDB_.getCategory("")->getLevel()) {
             // loggerDB.setLevel("", *follyLogLevel);
