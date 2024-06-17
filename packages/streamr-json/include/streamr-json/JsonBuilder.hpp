@@ -8,6 +8,21 @@
 namespace streamr::json {
 using json = nlohmann::json;
 
+/**
+ * @brief A private tool class for building nlohmann::json objects out of initializer lists. 
+ * This class should not be used directly by the user, use toJson() function instead!
+ * @details For example, the following json:
+ * @code {dataId: "123", dataPoints: [1,7,3]}
+ * can be expressed in the nlohmann initializer list format as
+ * @code { {"dataId", "123"}, {"dataPoints", {1, 7, 3} } }
+ * If this is passed to JsonBuilder constructor:
+ * @code JsonBuilder j{ {"dataId", "123"}, {"dataPoints", {1, 7, 3} } };
+ * The compiler will generate code that call JsonBuilder constructors recursively in a depth-first manner.
+ * The JsonBuilder(const T& value) constructors are first executed on the primitive types, to cenvert them 
+ * To JsonBuilders. JsonBuilder(std::initializer_list<JsonBuilder> init) 
+ * constructor is then recursively called on the sections of JsonBuilders delimited by curly brackets, until the root of the treee is reached.
+ * @note This class is not meant to be used directly by the user, use toJson() function instead.
+ */
 class JsonBuilder {
     json jsonData;
 
@@ -21,18 +36,7 @@ public:
     template <NotAssignableToNlohmannJson T>
     JsonBuilder(const T& value) { // NOLINT(google-explicit-constructor) - Allow
                                   // implicit conversion
-        // static_assert(!std::is_pointer_v<T>, "Pointers cannot be converted to
-        // JSON");
-        /*
-        if constexpr (std::is_pointer_v<T>) {
-            if (&value == 0) {
-                jsonData = nullptr;
-            }
-            else {
-                jsonData = "<pointer>";
-            }
-        }
-        */
+
         jsonData = toJson(value);
     }
 
@@ -83,14 +87,6 @@ public:
 template <typename T>
 concept AssignableToJsonBuilder =
     std::is_same<std::initializer_list<JsonBuilder>, T>::value;
-/*
-requires(T value) {
-    { std::is_assignable<JsonBuilder&, T>::value };
-    //requires(not AssociativeType<T>);
-    //requires(not IterableType<T>);
-    requires(not TypeWithToJson<T>);
-    requires(not AssignableToNlohmannJson<T>);
-};*/
 
 } // namespace streamr::json
 
