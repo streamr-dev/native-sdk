@@ -108,7 +108,7 @@ private:
         const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
         const T& metadata) {
-        auto extraArgument{streamr::json::toJson(metadata)};
+        auto extraArgument = streamr::json::toJson(metadata);
         changeToObjectIfNotStructured(extraArgument, "metadata");
         extraArgument.merge_patch(contextBindings_);
         auto extraArgumentInString = getJsonObjectInString(extraArgument);
