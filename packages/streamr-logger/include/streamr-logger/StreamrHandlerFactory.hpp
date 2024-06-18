@@ -1,5 +1,5 @@
-#ifndef STREAMER_LOGGER_STREAMHANDLERFACTORY_H
-#define STREAMER_LOGGER_STREAMHANDLERFACTORY_H
+#ifndef STREAMER_LOGGER_STREAMHANDLERFACTORY_HPP
+#define STREAMER_LOGGER_STREAMHANDLERFACTORY_HPP
 
 #include <folly/logging/StandardLogHandler.h>
 #include <folly/logging/StandardLogHandlerFactory.h>
@@ -10,6 +10,9 @@
 namespace streamr::logger {
 
 class StreamrHandlerFactory : public folly::StreamHandlerFactory {
+private:
+    StreamrWriterFactory* writerFactory_;
+
 public:
     StreamrHandlerFactory() = default;
     ~StreamrHandlerFactory() override = default;
@@ -22,9 +25,6 @@ public:
         return folly::StandardLogHandlerFactory::createHandler(
             getType(), writerFactory_, &formatterFactory, options);
     }
-
-private:
-    StreamrWriterFactory* writerFactory_;
 };
 }; // namespace streamr::logger
 

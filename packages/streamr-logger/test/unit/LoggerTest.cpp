@@ -365,7 +365,7 @@ TEST_F(LoggerTest, TraceLogWithExtraArgumentText) {
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("TRACE"));
     EXPECT_THAT(
         logWriterMock->buffer,
-        testing::HasSubstr("Testi{\"metadata\":\"LogExtraArgumentText\"}"));
+        testing::HasSubstr("Testi {\"metadata\":\"LogExtraArgumentText\"}"));
 }
 
 TEST_F(LoggerTest, DebugLogWithExtraArgumentText) {
@@ -376,7 +376,7 @@ TEST_F(LoggerTest, DebugLogWithExtraArgumentText) {
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("DEBUG"));
     EXPECT_THAT(
         logWriterMock->buffer,
-        testing::HasSubstr("Testi{\"metadata\":\"LogExtraArgumentText\"}"));
+        testing::HasSubstr("Testi {\"metadata\":\"LogExtraArgumentText\"}"));
 }
 
 TEST_F(LoggerTest, InfoLogWithExtraArgumentText) {
@@ -387,7 +387,7 @@ TEST_F(LoggerTest, InfoLogWithExtraArgumentText) {
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("INFO"));
     EXPECT_THAT(
         logWriterMock->buffer,
-        testing::HasSubstr("Testi{\"metadata\":\"LogExtraArgumentText\"}"));
+        testing::HasSubstr("Testi {\"metadata\":\"LogExtraArgumentText\"}"));
 }
 
 TEST_F(LoggerTest, WarnLogWithExtraArgumentText) {
@@ -398,7 +398,7 @@ TEST_F(LoggerTest, WarnLogWithExtraArgumentText) {
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("WARN"));
     EXPECT_THAT(
         logWriterMock->buffer,
-        testing::HasSubstr("Testi{\"metadata\":\"LogExtraArgumentText\"}"));
+        testing::HasSubstr("Testi {\"metadata\":\"LogExtraArgumentText\"}"));
 }
 
 TEST_F(LoggerTest, ErrorLogWithExtraArgumentText) {
@@ -409,7 +409,7 @@ TEST_F(LoggerTest, ErrorLogWithExtraArgumentText) {
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("ERROR"));
     EXPECT_THAT(
         logWriterMock->buffer,
-        testing::HasSubstr("Testi{\"metadata\":\"LogExtraArgumentText\"}"));
+        testing::HasSubstr("Testi {\"metadata\":\"LogExtraArgumentText\"}"));
 }
 
 TEST_F(LoggerTest, FatalLogWithExtraArgumentText) {
@@ -421,7 +421,7 @@ TEST_F(LoggerTest, FatalLogWithExtraArgumentText) {
 
     EXPECT_THAT(
         logWriterMock->buffer,
-        testing::HasSubstr("Testi{\"metadata\":\"LogExtraArgumentText\"}"));
+        testing::HasSubstr("Testi {\"metadata\":\"LogExtraArgumentText\"}"));
 }
 
 TEST_F(LoggerTest, FatalLogWithExtraArgumentObject) {
@@ -433,7 +433,7 @@ TEST_F(LoggerTest, FatalLogWithExtraArgumentObject) {
 
     EXPECT_THAT(
         logWriterMock->buffer,
-        testing::HasSubstr("Testi{\"value1\":\"TestString\",\"value2\":42}"));
+        testing::HasSubstr("Testi {\"value1\":\"TestString\",\"value2\":42}"));
 }
 
 TEST(LoggerContextBindingAndMetadataMerge, StringsMerged) {
@@ -483,5 +483,5 @@ TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
     EXPECT_THAT(
         tmpLogWriterMock->buffer,
         testing::HasSubstr(
-            "Testi{\"foo1\":\"bar1A\",\"foo2\":42,\"foo3\":\"bar3\",\"foo4\":24,\"foo5\":\"bar5\"}"));
+            "Testi {\"foo1\":\"bar1A\",\"foo2\":42,\"foo3\":\"bar3\",\"foo4\":24,\"foo5\":\"bar5\"}"));
 }

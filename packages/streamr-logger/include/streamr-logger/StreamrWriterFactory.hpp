@@ -1,11 +1,14 @@
-#ifndef STREAMER_LOGGER_STREAMRWRITERFACTORY_H
-#define STREAMER_LOGGER_STREAMRWRITERFACTORY_H
+#ifndef STREAMER_LOGGER_STREAMRWRITERFACTORY_HPP
+#define STREAMER_LOGGER_STREAMRWRITERFACTORY_HPP
 
 #include <folly/logging/StreamHandlerFactory.h>
 
 namespace streamr::logger {
 
 class StreamrWriterFactory : public folly::StreamHandlerFactory::WriterFactory {
+private:
+    std::shared_ptr<folly::LogWriter> logWriter_ = nullptr;
+
 public:
     StreamrWriterFactory() : logWriter_{nullptr} {}
 
@@ -18,9 +21,6 @@ public:
         }
         return folly::StreamHandlerFactory::WriterFactory::createWriter();
     }
-
-private:
-    std::shared_ptr<folly::LogWriter> logWriter_ = nullptr;
 };
 
 }; // namespace streamr::logger
