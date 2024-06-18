@@ -138,9 +138,6 @@ private:
             // loggerDB.setLevel("", *follyLogLevel);
             this->initializeLoggerDB(follyRootLogLevel, true);
         }
-        // This complicated code is mostly copy/pasted from folly's XLOG
-        // macro. It is not very flexible to call macro from here so. This
-        // code below prints a log message without any return code.
         sendLogMessage(follyLogLevelLevel, msg, metadata);
     }
 
