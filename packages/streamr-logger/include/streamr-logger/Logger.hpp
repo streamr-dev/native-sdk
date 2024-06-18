@@ -9,6 +9,7 @@
 #include <folly/logging/xlog.h>
 #include "StreamrHandlerFactory.hpp"
 #include "StreamrWriterFactory.hpp"
+#include "streamr-json/toJson.hpp"
 #include "streamr-json/toString.hpp"
 
 namespace streamr::logger {
@@ -46,60 +47,77 @@ const std::unordered_map<std::string, folly::LogLevel> ToFollyLevelMap{
 
 class Logger {
 public:
-    template <streamr::json::TypeWithToString T = folly::StringPiece>
+    template <typename T = std::string>
     explicit Logger(
+        const T& contextBindings,
         detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
-        const T& contextBindings = "",
         std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
         : defaultLogLevel_{detail::FromStreamrToFollyLogLevelMap.at(
               defaultLogLevel)},
-          contextBindings_{contextBindings.toString()},
           loggerDB_{folly::LoggerDB::get()} {
-        if (logWriter) {
-            writerFactory_ = StreamrWriterFactory(logWriter);
-        } else {
-            writerFactory_ = StreamrWriterFactory();
-        }
-        logHandlerFactory_ =
-            std::make_unique<StreamrHandlerFactory>(&writerFactory_);
-        this->initializeLoggerDB(folly::LogLevel::DBG);
+        contextBindings_ = streamr::json::toJson(contextBindings);
+        changeToObjectIfNotStructured(contextBindings_, "contextBindings_");
+        initialize(std::move(logWriter));
     }
 
-    template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void trace(const std::string& msg, const T& metadata = "") {
+    template <typename T = std::string>
+    explicit Logger(
+        detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
+        std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
+        : defaultLogLevel_{detail::FromStreamrToFollyLogLevelMap.at(
+              defaultLogLevel)},
+          loggerDB_{folly::LoggerDB::get()} {
+        contextBindings_ = nlohmann::json::object({});
+        initialize(std::move(logWriter));
+    }
+
+    template <typename T = std::string>
+    void trace(const std::string& msg, const T& metadata) {
         log(folly::LogLevel::DBG, msg, metadata);
     }
 
-    template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void debug(const std::string& msg, const T& metadata = "") {
+    void trace(const std::string& msg) { log(folly::LogLevel::DBG, msg); }
+
+    template <typename T = std::string>
+    void debug(const std::string& msg, const T& metadata) {
         log(folly::LogLevel::DBG0, msg, metadata);
     }
 
-    template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void info(const std::string& msg, const T& metadata = "") {
+    void debug(const std::string& msg) { log(folly::LogLevel::DBG0, msg); }
+
+    template <typename T = std::string>
+    void info(const std::string& msg, const T& metadata) {
         log(folly::LogLevel::INFO, msg, metadata);
     }
 
-    template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void warn(const std::string& msg, const T& metadata = "") {
+    void info(const std::string& msg) { log(folly::LogLevel::INFO, msg); }
+
+    template <typename T = std::string>
+    void warn(const std::string& msg, const T& metadata) {
         log(folly::LogLevel::WARN, msg, metadata);
     }
 
-    template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void error(const std::string& msg, const T& metadata = "") {
+    void warn(const std::string& msg) { log(folly::LogLevel::WARN, msg); }
+
+    template <typename T = std::string>
+    void error(const std::string& msg, const T& metadata) {
         log(folly::LogLevel::ERR, msg, metadata);
     }
 
-    template <streamr::json::TypeWithToString T = folly::StringPiece>
-    void fatal(const std::string& msg, const T& metadata = "") {
+    void error(const std::string& msg) { log(folly::LogLevel::ERR, msg); }
+
+    template <typename T = std::string>
+    void fatal(const std::string& msg, const T& metadata) {
         log(folly::LogLevel::CRITICAL, msg, metadata);
     }
+
+    void fatal(const std::string& msg) { log(folly::LogLevel::CRITICAL, msg); }
 
 private:
     StreamrWriterFactory writerFactory_;
     folly::LoggerDB& loggerDB_;
     std::unique_ptr<folly::LogHandlerFactory> logHandlerFactory_;
-    std::string contextBindings_;
+    nlohmann::json contextBindings_;
     folly::LogLevel defaultLogLevel_;
 
     folly::LogLevel getFollyLogRootLevel() {
@@ -110,22 +128,58 @@ private:
         return defaultLogLevel_;
     }
 
-    template <streamr::json::TypeWithToString T = folly::StringPiece>
+    void initialize(std::shared_ptr<folly::LogWriter> logWriter) { // NOLINT
+        if (logWriter) {
+            writerFactory_ = StreamrWriterFactory(logWriter);
+        } else {
+            writerFactory_ = StreamrWriterFactory();
+        }
+        logHandlerFactory_ =
+            std::make_unique<StreamrHandlerFactory>(&writerFactory_);
+        this->initializeLoggerDB(folly::LogLevel::DBG);
+    }
+
+    void changeToObjectIfNotStructured(
+        nlohmann::json& element, const std::string_view name) {
+        if (!element.is_structured()) {
+            // Change to object if not structured
+            element = nlohmann::json::object({{name, element}});
+        }
+    }
+
+    template <typename T = std::string>
     void log(
         folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
-        const T& metadata = "") {
+        const T& metadata) {
+        auto extraArgument{streamr::json::toJson(metadata)};
+        changeToObjectIfNotStructured(extraArgument, "metadata");
+        extraArgument.merge_patch(contextBindings_);
+        auto extraArgumentInString = getJsonObjectInString(extraArgument);
+        logCommon(follyLogLevelLevel, msg, extraArgumentInString);
+    }
+
+    std::string getJsonObjectInString(nlohmann::json& object) {
+        if (object.empty()) {
+            return ("");
+        }
+        return streamr::json::toString(object);
+    }
+
+    void log(folly::LogLevel follyLogLevelLevel, const std::string& msg) {
+        auto extraArgumentInString{getJsonObjectInString(contextBindings_)};
+        logCommon(follyLogLevelLevel, msg, extraArgumentInString);
+    }
+
+    template <typename T = std::string>
+    void logCommon(
+        folly::LogLevel follyLogLevelLevel,
+        const std::string& msg,
+        std::string& metadata) {
         auto follyRootLogLevel = getFollyLogRootLevel();
         if (follyRootLogLevel != loggerDB_.getCategory("")->getLevel()) {
             // loggerDB.setLevel("", *follyLogLevel);
             this->initializeLoggerDB(follyRootLogLevel, true);
-        }
-        std::string extraArgument;
-        if (metadata != "") {
-            extraArgument = " " + extraArgument + metadata.toString();
-            if (contextBindings_ != "") {
-                extraArgument = extraArgument + " " + contextBindings_;
-            }
         }
         // This complicated code is mostly copy/pasted from folly's XLOG
         // macro. It is not very flexible to call macro from here so. This
@@ -149,7 +203,7 @@ private:
             __func__,
             ::folly::LogStreamProcessor::APPEND,
             msg,
-            extraArgument)
+            metadata)
             .stream();
     }
 
