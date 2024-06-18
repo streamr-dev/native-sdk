@@ -14,7 +14,7 @@ find_package(folly REQUIRED)
 find_package(streamr-json REQUIRED)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(streamr-logger INTERFACE)
-set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 23)
+set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 26)
 
 add_library(streamr::streamr-logger ALIAS streamr-logger)
 
