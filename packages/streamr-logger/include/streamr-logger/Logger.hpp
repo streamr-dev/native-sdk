@@ -149,7 +149,7 @@ private:
 
     template <typename T = std::string>
     void log(
-        folly::LogLevel follyLogLevelLevel,
+        const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
         const T& metadata) {
         auto extraArgument{streamr::json::toJson(metadata)};
@@ -159,23 +159,23 @@ private:
         logCommon(follyLogLevelLevel, msg, extraArgumentInString);
     }
 
-    std::string getJsonObjectInString(nlohmann::json& object) {
+    std::string getJsonObjectInString(const nlohmann::json& object) {
         if (object.empty()) {
             return ("");
         }
         return streamr::json::toString(object);
     }
 
-    void log(folly::LogLevel follyLogLevelLevel, const std::string& msg) {
+    void log(const folly::LogLevel follyLogLevelLevel, const std::string& msg) {
         auto extraArgumentInString{getJsonObjectInString(contextBindings_)};
         logCommon(follyLogLevelLevel, msg, extraArgumentInString);
     }
 
     template <typename T = std::string>
     void logCommon(
-        folly::LogLevel follyLogLevelLevel,
+        const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
-        std::string& metadata) {
+        const std::string& metadata) {
         auto follyRootLogLevel = getFollyLogRootLevel();
         if (follyRootLogLevel != loggerDB_.getCategory("")->getLevel()) {
             // loggerDB.setLevel("", *follyLogLevel);
