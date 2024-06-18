@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -15,11 +16,23 @@ struct DataSample {
     std::string locality;
     std::vector<TemperatureReading> temperatures;
 };
-
 struct WeatherData {
     int dataId;
     std::string dataLabel;
-    std::map<std::string, DataSample> dataByCountry;
+    std::map<std::string, std::vector<DataSample>> dataByCountry;
+};
+
+struct WeatherDataSmartPointers {
+    int dataId;
+    std::shared_ptr<std::string> dataLabel;
+    std::map<std::string, std::vector<std::shared_ptr<DataSample>>>
+        dataByCountry;
+};
+
+struct WeatherDataRegularPointers {
+    int dataId;
+    std::string* dataLabel;
+    std::map<std::string, std::vector<DataSample*>> dataByCountry;
 };
 
 #endif

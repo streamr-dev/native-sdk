@@ -16,6 +16,6 @@ target_include_directories(
   streamr-utils INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(streamr-utils)  # INTERFACE Folly::folly)
+#target_link_libraries(streamr-utils)
 
 export(TARGETS streamr-utils FILE streamr-utils-config.cmake)
