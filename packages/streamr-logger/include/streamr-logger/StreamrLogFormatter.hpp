@@ -106,9 +106,7 @@ public:
                 timeSinceEpoch) -
             epochSeconds;
         time_t unixTimestamp = epochSeconds.count();
-        if (!localtime_r(&unixTimestamp, &ltime)) {
-            memset(&ltime, 0, sizeof(ltime));
-        }
+        localtime_r(&unixTimestamp, &ltime);
         auto basename = message.fileBasename.toString();
         const auto fileNameLength = std::ssize(basename);
         const auto lineNumberInString = std::to_string(message.lineNumber);
