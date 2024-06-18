@@ -80,7 +80,6 @@ private:
         char* val = getenv(detail::envLogLevelName.data());
         if (val) {
             return detail::getFollyLogLevel(val);
-            //  return detail::ToFollyLevelMap.at(val);
         }
         return defaultLogLevel_;
     }
@@ -201,7 +200,7 @@ public:
         : defaultLogLevel_{detail::getFollyLogLevel(defaultLogLevel)},
           loggerDB_{folly::LoggerDB::get()} {
         contextBindings_ = streamr::json::toJson(contextBindings);
-        changeToObjectIfNotStructured(contextBindings_, "contextBindings_");
+        changeToObjectIfNotStructured(contextBindings_, "contextBindings");
         initialize(std::move(logWriter));
     }
 
