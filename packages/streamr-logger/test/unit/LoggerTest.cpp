@@ -452,7 +452,7 @@ TEST(LoggerContextBindingAndMetadataMerge, StringsMerged) {
     EXPECT_THAT(
         tmpLogWriterMock->buffer,
         testing::HasSubstr(
-            "{\"contextBindings_\":\"ContextBindingText\",\"metadata\":\"LogExtraArgumentText\"}"));
+            "{\"contextBindings\":\"ContextBindingText\",\"metadata\":\"LogExtraArgumentText\"}"));
 }
 
 TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
