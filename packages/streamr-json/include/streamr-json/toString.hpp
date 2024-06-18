@@ -5,6 +5,8 @@
  * Convert (almost) any struct to string in C++20.
  **/
 
+#include "streamr-json/JsonBuilder.hpp"
+#include "streamr-json/jsonConcepts.hpp"
 #include "streamr-json/toJson.hpp"
 
 namespace streamr::json {
@@ -19,7 +21,17 @@ std::string toString(const T& value) {
     return toJson<T>(value).dump();
 }
 
-template <AssignableToJson T = JsonInitializerList>
+template <AssignableToJsonBuilder T = std::initializer_list<JsonBuilder>>
+std::string toString(const T& value) {
+    return toJson<T>(value).dump();
+}
+
+template <InitializerList T>
+std::string toString(const T& value) {
+    return toJson<T>(value).dump();
+}
+
+template <AssignableToNlohmannJson T>
 std::string toString(const T& value) {
     return toJson<T>(value).dump();
 }
