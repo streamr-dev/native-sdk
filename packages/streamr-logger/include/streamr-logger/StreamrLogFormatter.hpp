@@ -1,5 +1,5 @@
-#ifndef STREAMER_LOGGER_STREAMRLOGFORMATTER_H
-#define STREAMER_LOGGER_STREAMRLOGFORMATTER_H
+#ifndef STREAMER_LOGGER_STREAMRLOGFORMATTER_HPP
+#define STREAMER_LOGGER_STREAMRLOGFORMATTER_HPP
 
 #include <folly/Format.h>
 #include <folly/logging/LogFormatter.h>
@@ -12,22 +12,25 @@ namespace streamr::logger {
 namespace detail {
 
 // If you change MaxFileNameAndLineNumberLength, then please change it in
-// nonTruncatedFormatter too
-static const int MaxFileNameAndLineNumberLength{36};
+// nonTruncatedFormatterPart too
+static constexpr int maxFileNameAndLineNumberLength{36};
 static const std::string FileNameAndLineNumberSeparator{": "};
 static const auto SeparatorLength{std::ssize(FileNameAndLineNumberSeparator)};
-static constexpr std::string_view nonTruncatedFormatter =
-    "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({:<36}): {}{}{}\n";
-static constexpr std::string_view truncatedFormatter =
-    "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] ({: <*}{}{}): {}{}{}\n";
-struct LogLevelData {
+static const auto FirstPartOfLogMessageFormatter =
+    "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] (";
+static const auto NonTruncatedFormatterPart = "{:<36}";
+static const auto TruncatedFormatterPart = "{: <*}{}{}";
+static const auto LastPartOfLogMessageFormatter = "): {}{}{}";
+
+struct LogLevelNameAndColor {
     std::string_view logLevelName;
     std::string_view color;
 };
 
 // FATAL cannot be used in folly because it aborts. So CRITICAL is converted
-// to Streamr fatal
-constexpr LogLevelData getLogLevelData(const folly::LogLevel level) {
+// to Streamr fatal. This function can be used at compile time.
+constexpr LogLevelNameAndColor getLogLevelNameAndColor(
+    const folly::LogLevel level) {
     switch (level) {
         case folly::LogLevel::DBG:
             return {"TRACE", detail::colors::Gray};
@@ -52,7 +55,6 @@ constexpr LogLevelData getLogLevelData(const folly::LogLevel level) {
             break;
     }
 }
-
 } // namespace detail
 
 /*
@@ -66,6 +68,12 @@ ERROR [2024-06-06T13:52:49.816] (1234567890123456789012345678901: 101):<Message>
 
 This one is not truncated:
 ERROR [2024-06-06T13:52:49.816] (1234567890123456.cpp: 101           ):<Message>
+
+Also Context bindings and/or metadata are added after Message if needed for
+example ERROR [2024-06-06T13:52:49.816] (1234567890123456789012345678901:
+101):<Message>
+{\"foo1\":\"bar1A\",\"foo2\":42,\"foo3\":\"bar3\",\"foo4\":24,\"foo5\":\"bar5\"}
+
 
 DEBUG [2024-06-05T08:50:39.787] (File name): Message
 ERROR [2024-06-05T08:50:39.787] (File name): Message
@@ -107,37 +115,10 @@ public:
         const auto lineNumberLength = std::ssize(lineNumberInString);
         const auto fileNameAndLineNumberLength =
             (fileNameLength + lineNumberLength + detail::SeparatorLength);
-        auto logLevelData = detail::getLogLevelData(message.logLevel);
+        auto logLevelData = detail::getLogLevelNameAndColor(message.logLevel);
         const auto tmStartYear{1900};
-        if (fileNameAndLineNumberLength <=
-            detail::MaxFileNameAndLineNumberLength) {
-            basename = basename + detail::FileNameAndLineNumberSeparator +
-                lineNumberInString;
-            auto logLine = folly::sformat(
-                detail::nonTruncatedFormatter,
-                logLevelData.color,
-                logLevelData.logLevelName,
-                detail::colors::ResetColor,
-                ltime.tm_year + tmStartYear,
-                ltime.tm_mon + 1,
-                ltime.tm_mday,
-                ltime.tm_hour,
-                ltime.tm_min,
-                ltime.tm_sec,
-                millisecs.count(),
-                basename,
-                detail::colors::Cyan,
-                message.logMessage,
-                detail::colors::ResetColor);
-            return logLine;
-        }
-        // Truncate needed
-        auto lengthForTruncatedFileName =
-            detail::MaxFileNameAndLineNumberLength -
-            (lineNumberLength + detail::SeparatorLength);
-        basename = basename.substr(0, lengthForTruncatedFileName);
-        auto logLine = folly::sformat(
-            detail::truncatedFormatter,
+        auto firstPartOfLogLine = folly::sformat(
+            detail::FirstPartOfLogMessageFormatter,
             logLevelData.color,
             logLevelData.logLevelName,
             detail::colors::ResetColor,
@@ -147,15 +128,34 @@ public:
             ltime.tm_hour,
             ltime.tm_min,
             ltime.tm_sec,
-            millisecs.count(),
-            lengthForTruncatedFileName,
-            basename,
-            detail::FileNameAndLineNumberSeparator,
-            lineNumberInString,
+            millisecs.count());
+        std::string middlePartOfLogLine;
+        if (fileNameAndLineNumberLength <=
+            detail::maxFileNameAndLineNumberLength) {
+            // No truncate
+            basename = basename + detail::FileNameAndLineNumberSeparator +
+                lineNumberInString;
+            middlePartOfLogLine =
+                folly::sformat(detail::NonTruncatedFormatterPart, basename);
+        } else {
+            // Truncate needed
+            auto lengthForTruncatedFileName =
+                detail::maxFileNameAndLineNumberLength -
+                (lineNumberLength + detail::SeparatorLength);
+            basename = basename.substr(0, lengthForTruncatedFileName);
+            middlePartOfLogLine = folly::sformat(
+                detail::TruncatedFormatterPart,
+                lengthForTruncatedFileName,
+                basename,
+                detail::FileNameAndLineNumberSeparator,
+                lineNumberInString);
+        }
+        auto lastPartOfLogLine = folly::sformat(
+            detail::LastPartOfLogMessageFormatter,
             detail::colors::Cyan,
             message.logMessage,
             detail::colors::ResetColor);
-        return logLine;
+        return firstPartOfLogLine + middlePartOfLogLine + lastPartOfLogLine;
     }
 
     std::string formatMessage(
