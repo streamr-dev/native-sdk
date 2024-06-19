@@ -31,7 +31,8 @@ class LoggerTest : public testing::Test {
 protected:
     std::shared_ptr<LogWriterMock> logWriterMock =
         std::make_shared<LogWriterMock>();
-     Logger& logger = Logger::instance("Test.cpp", std::string(""), StreamrLogLevel::INFO, logWriterMock);
+
+    Logger& logger = Logger::instance(__FILE__, std::string(""), StreamrLogLevel::INFO, logWriterMock);
 };
 
 
