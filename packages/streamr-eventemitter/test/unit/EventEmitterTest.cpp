@@ -34,9 +34,13 @@ TEST_F(EventEmitterTest, TestListenerCount) {
 
     EventEmitter<Events> eventEmitter;
 
-    eventEmitter.on<Greeting>([](std::string_view message) -> void {});
+    eventEmitter.on<Greeting>([](std::string_view message) -> void {
+        std::cout << "listener1: " << message << std::endl;
+    });
 
-    eventEmitter.on<Greeting>([](std::string_view message) -> void {});
+    eventEmitter.on<Greeting>([](std::string_view message) -> void {
+        std::cout << "listener2: " << message << std::endl;
+    });
 
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 2);
 }
