@@ -447,7 +447,7 @@ TEST(LoggerContextBindingAndMetadataMerge, StringsMerged) {
         StreamrLogLevel::INFO,
         tmpLogWriterMock);
 
-    tmpLogger.logFatal("Testi", 110, std::string("LogExtraArgumentText"));
+    tmpLogger.logFatal("Testi", 110, std::string("LogExtraArgumentText")); // NOLINT
 
     EXPECT_THAT(tmpLogWriterMock->buffer, testing::HasSubstr("FATAL"));
 
@@ -477,7 +477,7 @@ TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
     Logger logger{"Test.cpp", TestStruct1(), StreamrLogLevel::INFO, tmpLogWriterMock};
 
     auto testStruct2 = TestStruct2();
-    logger.logFatal("Testi", 110, testStruct2);
+    logger.logFatal("Testi", 110, testStruct2); // NOLINT
     EXPECT_THAT(tmpLogWriterMock->buffer, testing::HasSubstr("FATAL"));
 
     EXPECT_THAT(
