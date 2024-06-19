@@ -32,13 +32,13 @@ protected:
     std::shared_ptr<LogWriterMock> logWriterMock =
         std::make_shared<LogWriterMock>();
 
-    Logger& logger = Logger::instance(__FILE__, std::string(""), StreamrLogLevel::INFO, logWriterMock);
+    Logger& logger = Logger::instance(
+        __FILE__, std::string(""), StreamrLogLevel::INFO, logWriterMock);
 };
-
 
 TEST_F(LoggerTest, NoLogLevelEnvVariableSetInfoLogSent) {
     unsetenv("LOG_LEVEL");
- 
+
     info("Testi");
     // Log message written with default info
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -54,7 +54,7 @@ TEST_F(LoggerTest, NoLogLevelEnvVariableSetDebugLogNotSent) {
 
 TEST_F(LoggerTest, LogLevelSetWronglyInEnvVariable) {
     unsetenv("NotFound");
-  
+
     info("Testi");
     // Info log message written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -64,7 +64,7 @@ TEST_F(LoggerTest, LogLevelSetWronglyInEnvVariable) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithTraceLogMsg) {
     setenv("LOG_LEVEL", "trace", 1);
-   
+
     trace("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -72,7 +72,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithTraceLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithDebugLogMsg) {
     setenv("LOG_LEVEL", "trace", 1);
-  
+
     debug("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -80,7 +80,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithDebugLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithInfoLogMsg) {
     setenv("LOG_LEVEL", "trace", 1);
-  
+
     info("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -88,7 +88,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithInfoLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToTracelWithWarnLogMsg) {
     setenv("LOG_LEVEL", "trace", 1);
-  
+
     warn("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -96,7 +96,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToTracelWithWarnLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithErrorLogMsg) {
     setenv("LOG_LEVEL", "trace", 1);
- 
+
     error("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -104,7 +104,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithErrorLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithFatalLogMsg) {
     setenv("LOG_LEVEL", "trace", 1);
- 
+
     fatal("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -114,7 +114,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToTraceWithFatalLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithTraceLogMsg) {
     setenv("LOG_LEVEL", "debug", 1);
- 
+
     trace("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -122,7 +122,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithTraceLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithDebugLogMsg) {
     setenv("LOG_LEVEL", "debug", 1);
-  
+
     debug("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -130,7 +130,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithDebugLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithInfoLogMsg) {
     setenv("LOG_LEVEL", "debug", 1);
- 
+
     info("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -138,7 +138,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithInfoLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithWarnLogMsg) {
     setenv("LOG_LEVEL", "debug", 1);
- 
+
     warn("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -146,7 +146,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithWarnLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithErrorLogMsg) {
     setenv("LOG_LEVEL", "debug", 1);
- 
+
     error("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -155,7 +155,6 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithErrorLogMsg) {
 TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithFatalLogMsg) {
     setenv("LOG_LEVEL", "debug", 1);
 
-  
     fatal("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -165,7 +164,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToDebugWithFatalLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithTraceLogMsg) {
     setenv("LOG_LEVEL", "info", 1);
- 
+
     trace("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -173,7 +172,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithTraceLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithDebugLogMsg) {
     setenv("LOG_LEVEL", "info", 1);
-  
+
     debug("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -181,7 +180,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithDebugLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithInfoLogMsg) {
     setenv("LOG_LEVEL", "info", 1);
-  
+
     info("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -189,7 +188,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithInfoLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithWarnLogMsg) {
     setenv("LOG_LEVEL", "info", 1);
-  
+
     warn("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -197,7 +196,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithWarnLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithErrorLogMsg) {
     setenv("LOG_LEVEL", "info", 1);
-  
+
     error("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -205,7 +204,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithErrorLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithFatalLogMsg) {
     setenv("LOG_LEVEL", "info", 1);
-  
+
     fatal("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -215,7 +214,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToInfoWithFatalLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithTraceLogMsg) {
     setenv("LOG_LEVEL", "warn", 1);
-  
+
     trace("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -223,7 +222,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithTraceLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithDebugLogMsg) {
     setenv("LOG_LEVEL", "warn", 1);
- 
+
     debug("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -231,7 +230,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithDebugLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithInfoLogMsg) {
     setenv("LOG_LEVEL", "warn", 1);
- 
+
     info("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -239,7 +238,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithInfoLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithWarnLogMsg) {
     setenv("LOG_LEVEL", "warn", 1);
- 
+
     warn("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -247,14 +246,14 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithWarnLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithErrorLogMsg) {
     setenv("LOG_LEVEL", "warn", 1);
-   error("Testi");
+    error("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
 }
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithFatalLogMsg) {
     setenv("LOG_LEVEL", "warn", 1);
-  
+
     fatal("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -263,7 +262,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToWarnWithFatalLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetErrorWithTraceLogMsg) {
     setenv("LOG_LEVEL", "error", 1);
- 
+
     trace("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -271,7 +270,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetErrorWithTraceLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithDebugLogMsg) {
     setenv("LOG_LEVEL", "error", 1);
- 
+
     debug("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -279,7 +278,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithDebugLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithInfoLogMsg) {
     setenv("LOG_LEVEL", "error", 1);
- 
+
     info("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -287,7 +286,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithInfoLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithWarnLogMsg) {
     setenv("LOG_LEVEL", "error", 1);
-  
+
     warn("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -295,7 +294,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithWarnLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithErrorLogMsg) {
     setenv("LOG_LEVEL", "error", 1);
-  
+
     error("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -303,7 +302,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithErrorLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithFatalLogMsg) {
     setenv("LOG_LEVEL", "error", 1);
- 
+
     fatal("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -312,7 +311,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToErrorWithFatalLogMsg) {
 // Env variable log level set to fatal
 TEST_F(LoggerTest, LogLevelEnvVariableSetFatalWithTraceLogMsg) {
     setenv("LOG_LEVEL", "fatal", 1);
-  
+
     trace("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -320,7 +319,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetFatalWithTraceLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithDebugLogMsg) {
     setenv("LOG_LEVEL", "fatal", 1);
-  
+
     debug("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -336,7 +335,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithInfoLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithWarnLogMsg) {
     setenv("LOG_LEVEL", "fatal", 1);
- 
+
     warn("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -344,7 +343,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithWarnLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithErrorLogMsg) {
     setenv("LOG_LEVEL", "fatal", 1);
- 
+
     error("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 0);
@@ -352,7 +351,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithErrorLogMsg) {
 
 TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
     setenv("LOG_LEVEL", "fatal", 1);
- 
+
     fatal("Testi");
     // Log written
     EXPECT_EQ(logWriterMock->isCalled, 1);
@@ -360,7 +359,7 @@ TEST_F(LoggerTest, LogLevelEnvVariableSetToFatalWithFatalLogMsg) {
 
 TEST_F(LoggerTest, TraceLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "trace", 1);
- 
+
     trace("Testi", std::string("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("TRACE"));
@@ -371,7 +370,7 @@ TEST_F(LoggerTest, TraceLogWithExtraArgumentText) {
 
 TEST_F(LoggerTest, DebugLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "debug", 1);
-  
+
     debug("Testi", std::string("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("DEBUG"));
@@ -382,7 +381,7 @@ TEST_F(LoggerTest, DebugLogWithExtraArgumentText) {
 
 TEST_F(LoggerTest, InfoLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "info", 1);
- 
+
     info("Testi", std::string("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("INFO"));
@@ -393,7 +392,7 @@ TEST_F(LoggerTest, InfoLogWithExtraArgumentText) {
 
 TEST_F(LoggerTest, WarnLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "warn", 1);
- 
+
     warn("Testi", std::string("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("WARN"));
@@ -404,7 +403,7 @@ TEST_F(LoggerTest, WarnLogWithExtraArgumentText) {
 
 TEST_F(LoggerTest, ErrorLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "error", 1);
- 
+
     error("Testi", std::string("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("ERROR"));
@@ -415,7 +414,7 @@ TEST_F(LoggerTest, ErrorLogWithExtraArgumentText) {
 
 TEST_F(LoggerTest, FatalLogWithExtraArgumentText) {
     setenv("LOG_LEVEL", "fatal", 1);
- 
+
     fatal("Testi", std::string("LogExtraArgumentText"));
 
     EXPECT_THAT(logWriterMock->buffer, testing::HasSubstr("FATAL"));
@@ -427,7 +426,7 @@ TEST_F(LoggerTest, FatalLogWithExtraArgumentText) {
 
 TEST_F(LoggerTest, FatalLogWithExtraArgumentObject) {
     setenv("LOG_LEVEL", "fatal", 1);
-  
+
     auto testData = TestData();
     fatal("Testi", testData);
     //  EXPECT_THAT(logWriterMock->buffer, TestData());
@@ -447,7 +446,8 @@ TEST(LoggerContextBindingAndMetadataMerge, StringsMerged) {
         StreamrLogLevel::INFO,
         tmpLogWriterMock);
 
-    tmpLogger.logFatal("Testi", 110, std::string("LogExtraArgumentText")); // NOLINT
+    tmpLogger.logFatal(
+        "Testi", 110, std::string("LogExtraArgumentText")); // NOLINT
 
     EXPECT_THAT(tmpLogWriterMock->buffer, testing::HasSubstr("FATAL"));
 
@@ -474,7 +474,8 @@ TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
         std::string foo5 = "bar5";
     };
 
-    Logger logger{"Test.cpp", TestStruct1(), StreamrLogLevel::INFO, tmpLogWriterMock};
+    Logger logger{
+        "Test.cpp", TestStruct1(), StreamrLogLevel::INFO, tmpLogWriterMock};
 
     auto testStruct2 = TestStruct2();
     logger.logFatal("Testi", 110, testStruct2); // NOLINT
