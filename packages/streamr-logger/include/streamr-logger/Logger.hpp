@@ -101,8 +101,8 @@ private:
         if (!element.is_structured()) {
             // Change to object if not structured
             if (element.is_string() && element.dump() == "\"\"") {
-                // If empty string (default value when object is not needed), then
-                // add empty object
+                // If empty string (default value when object is not needed),
+                // then add empty object
                 element = nlohmann::json::object({});
             } else {
                 auto temp = element.dump();
