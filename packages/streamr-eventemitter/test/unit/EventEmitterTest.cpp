@@ -134,3 +134,56 @@ TEST_F(EventEmitterTest, TestRemoveAllListenersWithoutEventType) {
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 0);
     ASSERT_EQ(eventEmitter.listenerCount<Farewell>(), 0);
 }
+
+TEST_F(EventEmitterTest, TestNullSafetyOfEventHandlerPointers) {
+    struct Greeting : Event<std::string_view> {};
+
+    using Events = std::tuple<Greeting>;
+    EventEmitter<Events> eventEmitter;
+
+    std::function<void(std::string_view)> listener1 = nullptr;
+
+    eventEmitter.on<Greeting>(listener1);
+    eventEmitter.emit<Greeting>("Hello, world!");
+}
+
+TEST_F(EventEmitterTest, TestOffCalledTwice) {
+    struct Greeting : Event<std::string_view> {};
+
+    using Events = std::tuple<Greeting>;
+    EventEmitter<Events> eventEmitter;
+
+    auto listener1 = [](std::string_view message) -> void {
+        std::cout << "listener1: " << message << std::endl;
+    };
+
+    eventEmitter.on<Greeting>(listener1);
+
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 1);
+
+    eventEmitter.off<Greeting>(listener1);
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 0);
+
+    // Call off() again on the same listener
+    eventEmitter.off<Greeting>(listener1);
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 0);
+}
+
+TEST_F(EventEmitterTest, TestSameHandlerAddedOnlyOnce) {
+    struct Greeting : Event<std::string_view> {};
+
+    using Events = std::tuple<Greeting>;
+    EventEmitter<Events> eventEmitter;
+
+    auto listener1 = [](std::string_view message) -> void {
+        std::cout << "listener1: " << message << std::endl;
+    };
+
+    eventEmitter.on<Greeting>(listener1);
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 1);
+
+    // Try to add the same listener again
+    eventEmitter.on<Greeting>(listener1);
+    // The count should still be 1 as the same listener cannot be added twice
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 1);
+}

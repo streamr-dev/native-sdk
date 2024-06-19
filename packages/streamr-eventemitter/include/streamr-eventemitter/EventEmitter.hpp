@@ -26,12 +26,9 @@ struct Event {
         size_t id;
 
     public:
-        template <typename CallbackType>
-            requires(std::is_assignable<HandlerFunction, CallbackType>::value)
-        explicit Handler(CallbackType& callback, bool once = false)
-            : handlerFunction(callback), once(once) {
-            id = reinterpret_cast<size_t>(&callback);
-
+        explicit Handler(
+            HandlerFunction callback, size_t handlerId, bool once = false)
+            : handlerFunction(callback), id(handlerId), once(once) {
             std::cout << "Handler created with id: " << id << std::endl;
         }
 
@@ -40,14 +37,13 @@ struct Event {
         void operator()(HandlerArgumentTypes... args) {
             handlerFunction(std::forward<HandlerArgumentTypes>(args)...);
         }
+
         [[nodiscard]] bool isOnce() const { return once; }
+
+        [[nodiscard]] size_t getId() const { return id; }
     };
 };
-/*
-template <typename EventType, typename EmitterEventType>
-concept SameAsEmitterEventType = std::is_same<EventType,
-EmitterEventType>::value;
-*/
+
 // Each event type gets generated its own  EventEmitterImpl
 template <typename EmitterEventType>
 class EventEmitterImpl {
@@ -62,10 +58,21 @@ public:
             std::is_assignable<
                 typename EmitterEventType::Handler::HandlerFunction,
                 CallbackType>::value)
-    void on(const CallbackType& handlerFunction) {
+    void on(const CallbackType& callback) {
+        typename EmitterEventType::Handler::HandlerFunction handlerFunction =
+            callback;
+        // silently ignore null callbacks
+        if (!handlerFunction) {
+            return;
+        }
         std::lock_guard guard{mutex};
-        typename EmitterEventType::Handler handler(handlerFunction);
-        this->eventHandlers.push_back(handler);
+        auto handlerId = reinterpret_cast<size_t>(&callback);
+        typename EmitterEventType::Handler handler(handlerFunction, handlerId);
+        auto it =
+            std::find(eventHandlers.begin(), eventHandlers.end(), handler);
+        if (it == eventHandlers.end()) {
+            this->eventHandlers.push_back(handler);
+        }
     }
 
     template <typename EventType, typename CallbackType>
@@ -74,10 +81,22 @@ public:
             std::is_assignable<
                 typename EmitterEventType::Handler::HandlerFunction,
                 CallbackType>::value)
-    void once(const CallbackType& handlerFunction) {
+    void once(const CallbackType& callback) {
+        typename EmitterEventType::Handler::HandlerFunction handlerFunction =
+            callback;
+        // silently ignore null callbacks
+        if (!handlerFunction) {
+            return;
+        }
+        auto handlerId = reinterpret_cast<size_t>(&callback);
         std::lock_guard guard{mutex};
-        typename EmitterEventType::Handler handler(handlerFunction, true);
-        this->eventHandlers.push_back(handler);
+        typename EmitterEventType::Handler handler(
+            handlerFunction, handlerId, true);
+        auto it =
+            std::find(eventHandlers.begin(), eventHandlers.end(), handler);
+        if (it == eventHandlers.end()) {
+            this->eventHandlers.push_back(handler);
+        }
     }
 
     template <typename EventType, typename CallbackType>
@@ -86,11 +105,14 @@ public:
             std::is_assignable<
                 typename EmitterEventType::Handler::HandlerFunction,
                 CallbackType>::value)
-    void off(const CallbackType& handlerFunctionToRemove) {
+    void off(const CallbackType& callbackToRemove) {
+        auto handlerId = reinterpret_cast<size_t>(&callbackToRemove);
         std::lock_guard guard{mutex};
-        typename EmitterEventType::Handler handlerToRemove(
-            handlerFunctionToRemove);
-        this->eventHandlers.remove(handlerToRemove);
+
+        this->eventHandlers.remove_if(
+            [&handlerId](const typename EmitterEventType::Handler& handler) {
+                return handler.getId() == handlerId;
+            });
     }
 
     template <typename EventType>
