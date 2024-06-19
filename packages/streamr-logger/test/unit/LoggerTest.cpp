@@ -19,7 +19,6 @@ public:
     LogWriterMock() : isCalled{0} {}
 
     void writeMessage(folly::StringPiece buf, uint32_t /* flags */) override {
-        std::cout << "!!!!!!!!!!!!!!!Buffer:" + buf.toString() + "\n";
         buffer = buf.toString();
         isCalled = 1;
     }
@@ -457,6 +456,48 @@ TEST(LoggerContextBindingAndMetadataMerge, StringsMerged) {
             "{\"contextBindings\":\"ContextBindingText\",\"metadata\":\"LogExtraArgumentText\"}"));
 }
 
+TEST(
+    LoggerContextBindingAndMetadataMerge,
+    ContextBindingStringAndEmptyMetadataMerge) {
+    setenv("LOG_LEVEL", "fatal", 1);
+    std::shared_ptr<LogWriterMock> tmpLogWriterMock =
+        std::make_shared<LogWriterMock>();
+    Logger tmpLogger = Logger(
+        "Test.cpp",
+        std::string("ContextBindingText"),
+        StreamrLogLevel::INFO,
+        tmpLogWriterMock);
+
+    tmpLogger.logFatal("Testi", 110); // NOLINT
+
+    EXPECT_THAT(tmpLogWriterMock->buffer, testing::HasSubstr("FATAL"));
+
+    EXPECT_THAT(
+        tmpLogWriterMock->buffer,
+        testing::HasSubstr(
+            "\x1B[36mTesti {\"contextBindings\":\"ContextBindingText\"}\x1B[0m"));
+}
+
+TEST(
+    LoggerContextBindingAndMetadataMerge,
+    EmptyContextBindingAndMetadataStringMerge) {
+    setenv("LOG_LEVEL", "fatal", 1);
+    std::shared_ptr<LogWriterMock> tmpLogWriterMock =
+        std::make_shared<LogWriterMock>();
+    Logger tmpLogger = Logger(
+        "Test.cpp", std::string(""), StreamrLogLevel::INFO, tmpLogWriterMock);
+
+    tmpLogger.logFatal(
+        "Testi", 110, std::string("LogExtraArgumentText")); // NOLINT
+
+    EXPECT_THAT(tmpLogWriterMock->buffer, testing::HasSubstr("FATAL"));
+
+    EXPECT_THAT(
+        tmpLogWriterMock->buffer,
+        testing::HasSubstr(
+            "\x1B[36mTesti {\"metadata\":\"LogExtraArgumentText\"}\x1B[0m"));
+}
+
 TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
     setenv("LOG_LEVEL", "fatal", 1);
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
@@ -485,4 +526,52 @@ TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
         tmpLogWriterMock->buffer,
         testing::HasSubstr(
             "Testi {\"foo1\":\"bar1A\",\"foo2\":42,\"foo3\":\"bar3\",\"foo4\":24,\"foo5\":\"bar5\"}"));
+}
+
+TEST(
+    LoggerContextBindingAndMetadataMerge, ContextBindingAndEmptyMetadataMerge) {
+    setenv("LOG_LEVEL", "fatal", 1);
+    std::shared_ptr<LogWriterMock> tmpLogWriterMock =
+        std::make_shared<LogWriterMock>();
+
+    struct TestStruct1 {
+        std::string foo1 = "bar1A";
+        int foo2 = 42; // NOLINT
+        std::string foo3 = "bar3";
+    };
+    Logger logger{
+        "Test.cpp", TestStruct1(), StreamrLogLevel::INFO, tmpLogWriterMock};
+
+    logger.logFatal("Testi", 110); // NOLINT
+    EXPECT_THAT(tmpLogWriterMock->buffer, testing::HasSubstr("FATAL"));
+
+    EXPECT_THAT(
+        tmpLogWriterMock->buffer,
+        testing::HasSubstr(
+            "\x1B[36mTesti {\"foo1\":\"bar1A\",\"foo2\":42,\"foo3\":\"bar3\"}\x1B[0m"));
+}
+
+TEST(
+    LoggerContextBindingAndMetadataMerge, EmptyContextBindingAndMetadataMerge) {
+    setenv("LOG_LEVEL", "fatal", 1);
+    std::shared_ptr<LogWriterMock> tmpLogWriterMock =
+        std::make_shared<LogWriterMock>();
+
+    struct TestStruct1 {
+        std::string foo1 = "bar1A";
+        int foo2 = 42; // NOLINT
+        std::string foo3 = "bar3";
+    };
+
+    Logger logger{
+        "Test.cpp", std::string(""), StreamrLogLevel::INFO, tmpLogWriterMock};
+
+    auto testStruct1 = TestStruct1();
+    logger.logFatal("Testi", 110, testStruct1); // NOLINT
+    EXPECT_THAT(tmpLogWriterMock->buffer, testing::HasSubstr("FATAL"));
+
+    EXPECT_THAT(
+        tmpLogWriterMock->buffer,
+        testing::HasSubstr(
+            "\x1B[36mTesti {\"foo1\":\"bar1A\",\"foo2\":42,\"foo3\":\"bar3\"}\x1B[0m"));
 }
