@@ -6,6 +6,7 @@
 #include <iostream>
 #include <list>
 #include <mutex>
+#include <optional>
 #include <tuple>
 #include <type_traits>
 
@@ -42,7 +43,11 @@ struct Event {
         [[nodiscard]] bool isOnce() const { return once; }
     };
 };
-
+/*
+template <typename EventType, typename EmitterEventType>
+concept SameAsEmitterEventType = std::is_same<EventType,
+EmitterEventType>::value;
+*/
 // Each event type gets generated its own  EventEmitterImpl
 template <typename EmitterEventType>
 class EventEmitterImpl {
@@ -52,9 +57,11 @@ private:
 
 public:
     template <typename EventType, typename CallbackType>
-        requires(std::is_assignable<
-                 typename EmitterEventType::Handler::HandlerFunction,
-                 CallbackType>::value)
+        requires(
+            std::is_same<EventType, EmitterEventType>::value &&
+            std::is_assignable<
+                typename EmitterEventType::Handler::HandlerFunction,
+                CallbackType>::value)
     void on(const CallbackType& handlerFunction) {
         std::lock_guard guard{mutex};
         typename EmitterEventType::Handler handler(handlerFunction);
@@ -62,9 +69,11 @@ public:
     }
 
     template <typename EventType, typename CallbackType>
-        requires(std::is_assignable<
-                 typename EmitterEventType::Handler::HandlerFunction,
-                 CallbackType>::value)
+        requires(
+            std::is_same<EventType, EmitterEventType>::value &&
+            std::is_assignable<
+                typename EmitterEventType::Handler::HandlerFunction,
+                CallbackType>::value)
     void once(const CallbackType& handlerFunction) {
         std::lock_guard guard{mutex};
         typename EmitterEventType::Handler handler(handlerFunction, true);
@@ -72,9 +81,11 @@ public:
     }
 
     template <typename EventType, typename CallbackType>
-        requires(std::is_assignable<
-                 typename EmitterEventType::Handler::HandlerFunction,
-                 CallbackType>::value)
+        requires(
+            std::is_same<EventType, EmitterEventType>::value &&
+            std::is_assignable<
+                typename EmitterEventType::Handler::HandlerFunction,
+                CallbackType>::value)
     void off(const CallbackType& handlerFunctionToRemove) {
         std::lock_guard guard{mutex};
         typename EmitterEventType::Handler handlerToRemove(
@@ -87,6 +98,13 @@ public:
     uint32_t listenerCount() {
         std::lock_guard guard{mutex};
         return this->eventHandlers.size();
+    }
+
+    template <typename EventType>
+        requires(std::is_same<EventType, EmitterEventType>::value)
+    void removeAllListeners() {
+        std::lock_guard guard{mutex};
+        this->eventHandlers.clear();
     }
 
     template <typename EventType, typename... EventArgs>
@@ -123,7 +141,15 @@ struct EventEmitter<std::tuple<EventTypes...>>
     using EventEmitterImpl<EventTypes>::on...;
     using EventEmitterImpl<EventTypes>::off...;
     using EventEmitterImpl<EventTypes>::listenerCount...;
+    using EventEmitterImpl<EventTypes>::removeAllListeners...;
     using EventEmitterImpl<EventTypes>::emit...;
+
+    template <typename T = std::nullopt_t>
+    void removeAllListeners() {
+        (EventEmitterImpl<EventTypes>::template removeAllListeners<
+             EventTypes>(),
+         ...);
+    }
 };
 
 } // namespace streamr::eventemitter

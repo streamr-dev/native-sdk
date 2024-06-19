@@ -83,3 +83,54 @@ TEST_F(EventEmitterTest, TestOnce) {
     // Check that the listener was removed
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 0);
 }
+
+TEST_F(EventEmitterTest, TestRemoveAllListeners) {
+    struct Greeting : Event<std::string_view> {};
+
+    using Events = std::tuple<Greeting>;
+    EventEmitter<Events> eventEmitter;
+
+    auto listener1 = [](std::string_view message) -> void {
+        std::cout << "listener1: " << message << std::endl;
+    };
+
+    auto listener2 = [](std::string_view message) -> void {
+        std::cout << "listener2: " << message << std::endl;
+    };
+
+    eventEmitter.on<Greeting>(listener1);
+    eventEmitter.on<Greeting>(listener2);
+
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 2);
+
+    eventEmitter.removeAllListeners<Greeting>();
+
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 0);
+}
+
+TEST_F(EventEmitterTest, TestRemoveAllListenersWithoutEventType) {
+    struct Greeting : Event<std::string_view> {};
+    struct Farewell : Event<std::string_view> {};
+
+    using Events = std::tuple<Greeting, Farewell>;
+    EventEmitter<Events> eventEmitter;
+
+    auto listener1 = [](std::string_view message) -> void {
+        std::cout << "listener1: " << message << std::endl;
+    };
+
+    auto listener2 = [](std::string_view message) -> void {
+        std::cout << "listener2: " << message << std::endl;
+    };
+
+    eventEmitter.on<Greeting>(listener1);
+    eventEmitter.on<Farewell>(listener2);
+
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 1);
+    ASSERT_EQ(eventEmitter.listenerCount<Farewell>(), 1);
+
+    eventEmitter.removeAllListeners();
+
+    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 0);
+    ASSERT_EQ(eventEmitter.listenerCount<Farewell>(), 0);
+}
