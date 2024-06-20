@@ -122,7 +122,7 @@ public:
     }
 
     template <MatchingEventType<EmitterEventType> EventType>
-    uint32_t listenerCount() {
+    size_t listenerCount() {
         std::lock_guard guard{mMutex};
         return mEventHandlers.size();
     }
@@ -162,7 +162,7 @@ struct EventEmitter;
 // EventEmitter<Events> eventEmitter;
 
 // Mixin design pattern: generate EventEmitterImpl for each EventType and
-// inherit from all of them
+// inherit from them all
 template <typename... EventTypes>
 struct EventEmitter<std::tuple<EventTypes...>>
     : public EventEmitterImpl<EventTypes>... {
@@ -174,7 +174,7 @@ struct EventEmitter<std::tuple<EventTypes...>>
     using EventEmitterImpl<EventTypes>::emit...;
 
     // Use C++ 17 fold expression to remove all listeners for all event types
-    // https://en.cppreference.com/w/cpp/language/fold
+    // https://www.foonathan.net/2020/05/fold-tricks/
 
     template <typename T = std::nullopt_t>
     void removeAllListeners() {
