@@ -11,11 +11,11 @@
 
 namespace streamr::eventemitter {
 
-template <typename... HandlerArgumentTypes>
-
 // Event class that all events must inherit from.
 // Usage example:
 // struct MyEvent : Event<int, std::string> {};
+
+template <typename... HandlerArgumentTypes>
 struct Event {
     class Handler {
     public:
@@ -64,6 +64,8 @@ private:
             // Use a "magic static"
             // https://blog.mbedded.ninja/programming/languages/c-plus-plus/magic-statics/
             static size_t counter = 1;
+            static std::mutex handlerReferenceCounterMutex;
+            std::lock_guard<std::mutex> lock(handlerReferenceCounterMutex);
             return HandlerReference(counter++);
         }
         static HandlerReference createNonExistent() {

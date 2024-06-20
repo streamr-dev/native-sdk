@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <future>
 #include <string_view>
 #include <gtest/gtest.h>
@@ -26,6 +27,64 @@ TEST_F(EventEmitterTest, TestEmit) {
 
     eventEmitter.emit<Greeting>("Hello, world!");
     ASSERT_EQ(promise.get_future().get(), "Hello, world!");
+}
+
+TEST_F(EventEmitterTest, TestEmitMultipleListeners) {
+    struct Greeting : Event<std::string_view> {};
+    using Events = std::tuple<Greeting>;
+
+    EventEmitter<Events> eventEmitter;
+
+    std::promise<std::string_view> promise1;
+    std::promise<std::string_view> promise2;
+
+    eventEmitter.on<Greeting>([&promise1](std::string_view message) -> void {
+        promise1.set_value(message);
+    });
+
+    eventEmitter.on<Greeting>([&promise2](std::string_view message) -> void {
+        promise2.set_value(message);
+    });
+
+    eventEmitter.emit<Greeting>("Hello, world!");
+
+    ASSERT_EQ(promise1.get_future().get(), "Hello, world!");
+    ASSERT_EQ(promise2.get_future().get(), "Hello, world!");
+}
+
+TEST_F(EventEmitterTest, TestEmitFromMultipleThreads) {
+    constexpr int numEvents = 8;
+
+    struct Greeting : Event<> {};
+    using Events = std::tuple<Greeting>;
+
+    EventEmitter<Events> eventEmitter;
+
+    std::vector<size_t> eventCounters(numEvents);
+    std::mutex countersMutex;
+
+    for (auto& eventCounter : eventCounters) {
+        eventEmitter.on<Greeting>([&eventCounter, &countersMutex]() -> void {
+            std::lock_guard<std::mutex> lock(countersMutex);
+            eventCounter++;
+        });
+    }
+
+    std::list<std::future<void>> asyncTasks;
+    for (int i = 0; i < numEvents; ++i) {
+        asyncTasks.push_back(std::async(std::launch::async, [&eventEmitter]() {
+            eventEmitter.emit<Greeting>();
+        }));
+    }
+
+    // Wait for all tasks to finish
+    for (auto& task : asyncTasks) {
+        task.get();
+    }
+
+    for (auto& eventCounter : eventCounters) {
+        ASSERT_EQ(eventCounter, numEvents);
+    }
 }
 
 TEST_F(EventEmitterTest, TestListenerCount) {
