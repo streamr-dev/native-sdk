@@ -43,6 +43,14 @@ struct Event {
     };
 };
 
+template <typename T, typename EmitterEventType>
+concept MatchingEventType = std::is_same<T, EmitterEventType>::value;
+
+template <typename T, typename EmitterEventType>
+concept MatchingCallbackType =
+    std::is_assignable<typename EmitterEventType::Handler::HandlerFunction, T>::
+        value;
+
 // Each event type gets generated its own EventEmitterImpl
 template <typename EmitterEventType>
 class EventEmitterImpl {
@@ -75,12 +83,10 @@ private:
     };
 
 public:
-    template <typename EventType, typename CallbackType>
-        requires(
-            std::is_same<EventType, EmitterEventType>::value &&
-            std::is_assignable<
-                typename EmitterEventType::Handler::HandlerFunction,
-                CallbackType>::value)
+    template <
+        MatchingEventType<EmitterEventType> EventType,
+        MatchingCallbackType<EmitterEventType> CallbackType>
+
     HandlerReference on(const CallbackType& callback, bool once = false) {
         typename EmitterEventType::Handler::HandlerFunction handlerFunction =
             callback;
@@ -98,18 +104,14 @@ public:
         return handlerReference;
     }
 
-    template <typename EventType, typename CallbackType>
-        requires(
-            std::is_same<EventType, EmitterEventType>::value &&
-            std::is_assignable<
-                typename EmitterEventType::Handler::HandlerFunction,
-                CallbackType>::value)
+    template <
+        MatchingEventType<EmitterEventType> EventType,
+        MatchingCallbackType<EmitterEventType> CallbackType>
     HandlerReference once(const CallbackType& callback) {
         return this->on<EventType, CallbackType>(callback, true);
     }
 
-    template <typename EventType>
-        requires(std::is_same<EventType, EmitterEventType>::value)
+    template <MatchingEventType<EmitterEventType> EventType>
     void off(HandlerReference handlerReference) {
         std::lock_guard guard{mutex};
 
@@ -120,22 +122,21 @@ public:
             });
     }
 
-    template <typename EventType>
-        requires(std::is_same<EventType, EmitterEventType>::value)
+    template <MatchingEventType<EmitterEventType> EventType>
     uint32_t listenerCount() {
         std::lock_guard guard{mutex};
         return this->eventHandlers.size();
     }
 
-    template <typename EventType>
-        requires(std::is_same<EventType, EmitterEventType>::value)
+    template <MatchingEventType<EmitterEventType> EventType>
     void removeAllListeners() {
         std::lock_guard guard{mutex};
         this->eventHandlers.clear();
     }
 
-    template <typename EventType, typename... EventArgs>
-        requires(std::is_same<EventType, EmitterEventType>::value)
+    template <
+        MatchingEventType<EmitterEventType> EventType,
+        typename... EventArgs>
     void emit(EventArgs&&... args) {
         std::list<typename EmitterEventType::Handler> currentHandlers;
 
