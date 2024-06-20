@@ -88,6 +88,7 @@ public:
         MatchingCallbackType<EmitterEventType> CallbackType>
 
     HandlerReference on(const CallbackType& callback, bool once = false) {
+        std::lock_guard guard{mutex};
         typename EmitterEventType::Handler::HandlerFunction handlerFunction =
             callback;
         // silently ignore null callbacks
@@ -97,8 +98,6 @@ public:
         auto handlerReference = HandlerReference::create();
         typename EmitterEventType::Handler handler(
             handlerFunction, handlerReference.getId(), once);
-
-        std::lock_guard guard{mutex};
 
         this->eventHandlers.push_back(handler);
         return handlerReference;
@@ -138,21 +137,18 @@ public:
         MatchingEventType<EmitterEventType> EventType,
         typename... EventArgs>
     void emit(EventArgs&&... args) {
-        std::list<typename EmitterEventType::Handler> currentHandlers;
+        std::lock_guard guard{mutex};
 
-        { // Take copy of eventHandlers at the time of emitting
-            std::lock_guard guard{mutex};
-            currentHandlers = this->eventHandlers;
-            // remove the "once" type handlers that we are going to handle
-            this->eventHandlers.remove_if(
-                [](const typename EmitterEventType::Handler& handler) {
-                    return handler.isOnce();
-                });
-        }
         // invoke the event on currentHandlers
-        for (auto& handler : currentHandlers) {
+        for (auto& handler : this->eventHandlers) {
             std::invoke(handler, std::forward<EventArgs>(args)...);
         }
+
+        // remove the "once" type handlers that we just handled
+        this->eventHandlers.remove_if(
+            [](const typename EmitterEventType::Handler& handler) {
+                return handler.isOnce();
+            });
     }
 };
 
