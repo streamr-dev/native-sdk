@@ -22,24 +22,24 @@ struct Event {
         using HandlerFunction = std::function<void(HandlerArgumentTypes...)>;
 
     private:
-        HandlerFunction handlerFunction;
-        size_t id;
-        bool once;
+        HandlerFunction mHandlerFunction;
+        size_t mId;
+        bool mOnce;
 
     public:
         explicit Handler(
             HandlerFunction callback, size_t handlerId, bool once = false)
-            : handlerFunction(callback), id(handlerId), once(once) {}
+            : mHandlerFunction(callback), mId(handlerId), mOnce(once) {}
 
         void operator()(HandlerArgumentTypes... args) {
-            handlerFunction(std::forward<HandlerArgumentTypes>(args)...);
+            mHandlerFunction(std::forward<HandlerArgumentTypes>(args)...);
         }
 
-        bool operator==(const Handler& other) const { return id == other.id; }
+        bool operator==(const Handler& other) const { return mId == other.mId; }
 
-        [[nodiscard]] bool isOnce() const { return once; }
+        [[nodiscard]] bool isOnce() const { return mOnce; }
 
-        [[nodiscard]] size_t getId() const { return id; }
+        [[nodiscard]] size_t getId() const { return mId; }
     };
 };
 
@@ -55,17 +55,14 @@ concept MatchingCallbackType =
 template <typename EmitterEventType>
 class EventEmitterImpl {
 private:
-    std::list<typename EmitterEventType::Handler> eventHandlers;
-    std::mutex mutex;
-
     // Immutable reference to a Handler.
     // This is needed because there is no way of checking the validity
     // of iterators returned by std::list, and removing a handler twice would
     // crash the program if iterators were used.
     class HandlerReference {
     private:
-        size_t id;
-        explicit HandlerReference(size_t id) : id(id) {}
+        size_t mId;
+        explicit HandlerReference(size_t id) : mId(id) {}
 
     public:
         static HandlerReference create() {
@@ -79,8 +76,11 @@ private:
         static HandlerReference createNonExistent() {
             return HandlerReference(0);
         }
-        [[nodiscard]] size_t getId() const { return id; }
+        [[nodiscard]] size_t getId() const { return mId; }
     };
+
+    std::list<typename EmitterEventType::Handler> mEventHandlers;
+    std::mutex mMutex;
 
 public:
     template <
@@ -88,7 +88,7 @@ public:
         MatchingCallbackType<EmitterEventType> CallbackType>
 
     HandlerReference on(const CallbackType& callback, bool once = false) {
-        std::lock_guard guard{mutex};
+        std::lock_guard guard{mMutex};
         typename EmitterEventType::Handler::HandlerFunction handlerFunction =
             callback;
         // silently ignore null callbacks
@@ -99,7 +99,7 @@ public:
         typename EmitterEventType::Handler handler(
             handlerFunction, handlerReference.getId(), once);
 
-        this->eventHandlers.push_back(handler);
+        mEventHandlers.push_back(handler);
         return handlerReference;
     }
 
@@ -112,9 +112,9 @@ public:
 
     template <MatchingEventType<EmitterEventType> EventType>
     void off(HandlerReference handlerReference) {
-        std::lock_guard guard{mutex};
+        std::lock_guard guard{mMutex};
 
-        this->eventHandlers.remove_if(
+        mEventHandlers.remove_if(
             [&handlerReference](
                 const typename EmitterEventType::Handler& handler) {
                 return handler.getId() == handlerReference.getId();
@@ -123,29 +123,29 @@ public:
 
     template <MatchingEventType<EmitterEventType> EventType>
     uint32_t listenerCount() {
-        std::lock_guard guard{mutex};
-        return this->eventHandlers.size();
+        std::lock_guard guard{mMutex};
+        return mEventHandlers.size();
     }
 
     template <MatchingEventType<EmitterEventType> EventType>
     void removeAllListeners() {
-        std::lock_guard guard{mutex};
-        this->eventHandlers.clear();
+        std::lock_guard guard{mMutex};
+        mEventHandlers.clear();
     }
 
     template <
         MatchingEventType<EmitterEventType> EventType,
         typename... EventArgs>
     void emit(EventArgs&&... args) {
-        std::lock_guard guard{mutex};
+        std::lock_guard guard{mMutex};
 
         // invoke the event on currentHandlers
-        for (auto& handler : this->eventHandlers) {
+        for (auto& handler : mEventHandlers) {
             std::invoke(handler, std::forward<EventArgs>(args)...);
         }
 
         // remove the "once" type handlers that we just handled
-        this->eventHandlers.remove_if(
+        mEventHandlers.remove_if(
             [](const typename EmitterEventType::Handler& handler) {
                 return handler.isOnce();
             });
