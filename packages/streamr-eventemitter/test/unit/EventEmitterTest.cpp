@@ -59,12 +59,12 @@ TEST_F(EventEmitterTest, TestOff) {
         std::cout << "listener2: " << message << std::endl;
     };
 
-    eventEmitter.on<Greeting>(listener1);
+    auto listener1Reference = eventEmitter.on<Greeting>(listener1);
     eventEmitter.on<Greeting>(listener2);
 
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 2);
 
-    eventEmitter.off<Greeting>(listener1);
+    eventEmitter.off<Greeting>(listener1Reference);
 
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 1);
 }
@@ -161,33 +161,14 @@ TEST_F(EventEmitterTest, TestOffCalledTwice) {
         std::cout << "listener1: " << message << std::endl;
     };
 
-    eventEmitter.on<Greeting>(listener1);
+    auto listener1Reference = eventEmitter.on<Greeting>(listener1);
 
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 1);
 
-    eventEmitter.off<Greeting>(listener1);
+    eventEmitter.off<Greeting>(listener1Reference);
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 0);
 
     // Call off() again on the same listener
-    eventEmitter.off<Greeting>(listener1);
+    eventEmitter.off<Greeting>(listener1Reference);
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 0);
-}
-
-TEST_F(EventEmitterTest, TestSameHandlerAddedOnlyOnce) {
-    struct Greeting : Event<std::string_view> {};
-
-    using Events = std::tuple<Greeting>;
-    EventEmitter<Events> eventEmitter;
-
-    auto listener1 = [](std::string_view message) -> void {
-        std::cout << "listener1: " << message << std::endl;
-    };
-
-    eventEmitter.on<Greeting>(listener1);
-    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 1);
-
-    // Try to add the same listener again
-    eventEmitter.on<Greeting>(listener1);
-    // The count should still be 1 as the same listener cannot be added twice
-    ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 1);
 }

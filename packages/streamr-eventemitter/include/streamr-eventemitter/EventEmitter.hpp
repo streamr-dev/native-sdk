@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <functional>
-#include <iostream>
 #include <list>
 #include <mutex>
 #include <optional>
@@ -12,31 +11,27 @@
 
 namespace streamr::eventemitter {
 
-template <class... HandlerArgumentTypes>
+template <typename... HandlerArgumentTypes>
 struct Event {
-    // Generate an Event for all passed HandlerArgumentTypes
-    // using Handler = std::function<void(HandlerArgumentTypes...)>;
     class Handler {
     public:
         using HandlerFunction = std::function<void(HandlerArgumentTypes...)>;
 
     private:
         HandlerFunction handlerFunction;
-        bool once;
         size_t id;
+        bool once;
 
     public:
         explicit Handler(
             HandlerFunction callback, size_t handlerId, bool once = false)
-            : handlerFunction(callback), id(handlerId), once(once) {
-            std::cout << "Handler created with id: " << id << std::endl;
-        }
-
-        bool operator==(const Handler& other) const { return id == other.id; }
+            : handlerFunction(callback), id(handlerId), once(once) {}
 
         void operator()(HandlerArgumentTypes... args) {
             handlerFunction(std::forward<HandlerArgumentTypes>(args)...);
         }
+
+        bool operator==(const Handler& other) const { return id == other.id; }
 
         [[nodiscard]] bool isOnce() const { return once; }
 
@@ -47,9 +42,32 @@ struct Event {
 // Each event type gets generated its own  EventEmitterImpl
 template <typename EmitterEventType>
 class EventEmitterImpl {
+    friend class EmitterEventType::Handler;
+
 private:
     std::list<typename EmitterEventType::Handler> eventHandlers;
     std::mutex mutex;
+
+    // Immutable reference to a Handler.
+    // This is needed because there is no way of checking the validity
+    // of iterators returned by std::list, and removing a handler twice would
+    // crash the program if iterators were used.
+    class HandlerReference {
+    private:
+        size_t id;
+        explicit HandlerReference(size_t id) : id(id) {}
+
+    public:
+        static HandlerReference create() {
+            // https://blog.mbedded.ninja/programming/languages/c-plus-plus/magic-statics/
+            static size_t counter = 1;
+            return HandlerReference(counter++);
+        }
+        static HandlerReference createNonExistent() {
+            return HandlerReference(0);
+        }
+        [[nodiscard]] size_t getId() const { return id; }
+    };
 
 public:
     template <typename EventType, typename CallbackType>
@@ -58,45 +76,21 @@ public:
             std::is_assignable<
                 typename EmitterEventType::Handler::HandlerFunction,
                 CallbackType>::value)
-    void on(const CallbackType& callback) {
+    HandlerReference on(const CallbackType& callback, bool once = false) {
         typename EmitterEventType::Handler::HandlerFunction handlerFunction =
             callback;
         // silently ignore null callbacks
         if (!handlerFunction) {
-            return;
+            return HandlerReference::createNonExistent();
         }
-        std::lock_guard guard{mutex};
-        auto handlerId = reinterpret_cast<size_t>(&callback);
-        typename EmitterEventType::Handler handler(handlerFunction, handlerId);
-        auto it =
-            std::find(eventHandlers.begin(), eventHandlers.end(), handler);
-        if (it == eventHandlers.end()) {
-            this->eventHandlers.push_back(handler);
-        }
-    }
-
-    template <typename EventType, typename CallbackType>
-        requires(
-            std::is_same<EventType, EmitterEventType>::value &&
-            std::is_assignable<
-                typename EmitterEventType::Handler::HandlerFunction,
-                CallbackType>::value)
-    void once(const CallbackType& callback) {
-        typename EmitterEventType::Handler::HandlerFunction handlerFunction =
-            callback;
-        // silently ignore null callbacks
-        if (!handlerFunction) {
-            return;
-        }
-        auto handlerId = reinterpret_cast<size_t>(&callback);
-        std::lock_guard guard{mutex};
+        auto handlerReference = HandlerReference::create();
         typename EmitterEventType::Handler handler(
-            handlerFunction, handlerId, true);
-        auto it =
-            std::find(eventHandlers.begin(), eventHandlers.end(), handler);
-        if (it == eventHandlers.end()) {
-            this->eventHandlers.push_back(handler);
-        }
+            handlerFunction, handlerReference.getId(), once);
+
+        std::lock_guard guard{mutex};
+
+        this->eventHandlers.push_back(handler);
+        return handlerReference;
     }
 
     template <typename EventType, typename CallbackType>
@@ -105,13 +99,19 @@ public:
             std::is_assignable<
                 typename EmitterEventType::Handler::HandlerFunction,
                 CallbackType>::value)
-    void off(const CallbackType& callbackToRemove) {
-        auto handlerId = reinterpret_cast<size_t>(&callbackToRemove);
+    HandlerReference once(const CallbackType& callback) {
+        return this->on<EventType, CallbackType>(callback, true);
+    }
+
+    template <typename EventType>
+        requires(std::is_same<EventType, EmitterEventType>::value)
+    void off(HandlerReference handlerReference) {
         std::lock_guard guard{mutex};
 
         this->eventHandlers.remove_if(
-            [&handlerId](const typename EmitterEventType::Handler& handler) {
-                return handler.getId() == handlerId;
+            [&handlerReference](
+                const typename EmitterEventType::Handler& handler) {
+                return handler.getId() == handlerReference.getId();
             });
     }
 
