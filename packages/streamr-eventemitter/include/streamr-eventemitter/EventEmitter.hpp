@@ -12,6 +12,10 @@
 namespace streamr::eventemitter {
 
 template <typename... HandlerArgumentTypes>
+
+// Event class that all events must inherit from.
+// Usage example:
+// struct MyEvent : Event<int, std::string> {};
 struct Event {
     class Handler {
     public:
@@ -39,11 +43,9 @@ struct Event {
     };
 };
 
-// Each event type gets generated its own  EventEmitterImpl
+// Each event type gets generated its own EventEmitterImpl
 template <typename EmitterEventType>
 class EventEmitterImpl {
-    friend class EmitterEventType::Handler;
-
 private:
     std::list<typename EmitterEventType::Handler> eventHandlers;
     std::mutex mutex;
@@ -59,6 +61,7 @@ private:
 
     public:
         static HandlerReference create() {
+            // Use a "magic static"
             // https://blog.mbedded.ninja/programming/languages/c-plus-plus/magic-statics/
             static size_t counter = 1;
             return HandlerReference(counter++);
@@ -143,7 +146,7 @@ public:
                     return handler.isOnce();
                 });
         }
-        // envoke the event on currentHandlers
+        // invoke the event on currentHandlers
         for (auto& handler : currentHandlers) {
             std::invoke(handler, std::forward<EventArgs>(args)...);
         }
@@ -155,16 +158,24 @@ template <typename... EventTypes>
 struct EventEmitter;
 
 // Only provide specialization for std::tuple<EventTypes...>
-template <typename... EventTypes>
+// Usage example:
+// using Events = std::tuple<MyEvent, MyOtherEvent>;
+// EventEmitter<Events> eventEmitter;
 
-// Generate EventEmitterImpl for each EventType and inherit from all of them
+// Mixin design pattern: generate EventEmitterImpl for each EventType and
+// inherit from all of them
+template <typename... EventTypes>
 struct EventEmitter<std::tuple<EventTypes...>>
     : public EventEmitterImpl<EventTypes>... {
+    // Make the inherited methods visible to the templating system
     using EventEmitterImpl<EventTypes>::on...;
     using EventEmitterImpl<EventTypes>::off...;
     using EventEmitterImpl<EventTypes>::listenerCount...;
     using EventEmitterImpl<EventTypes>::removeAllListeners...;
     using EventEmitterImpl<EventTypes>::emit...;
+
+    // Use C++ 17 fold expression to remove all listeners for all event types
+    // https://en.cppreference.com/w/cpp/language/fold
 
     template <typename T = std::nullopt_t>
     void removeAllListeners() {
