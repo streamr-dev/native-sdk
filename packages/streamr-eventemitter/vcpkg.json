@@ -1,0 +1,5 @@
+{
+  "name": "streamr-eventemitter",
+  "version": "1.0.0",
+  "dependencies": ["gtest"]
+}
