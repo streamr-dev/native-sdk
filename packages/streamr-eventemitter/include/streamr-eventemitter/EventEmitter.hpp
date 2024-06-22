@@ -52,50 +52,64 @@ concept MatchingCallbackType =
         value;
 
 // Each event type gets generated its own EventEmitterImpl
-template <typename EmitterEventType>
+template <typename EmitterEventType, typename HostEventEmitter>
 class EventEmitterImpl {
 private:
     // Immutable reference to a Handler.
     // This is needed because there is no way of checking the validity
     // of iterators returned by std::list, and removing a handler twice would
     // crash the program if iterators were used.
-    class HandlerReference {
+    class HandlerToken {
     private:
         size_t mId;
-        explicit HandlerReference(size_t id) : mId(id) {}
+        explicit HandlerToken(size_t id) : mId(id) {}
 
     public:
-        static HandlerReference create() {
+        static HandlerToken create() {
             // Use a "magic static"
             // https://blog.mbedded.ninja/programming/languages/c-plus-plus/magic-statics/
             static size_t counter = 1;
             static std::mutex handlerReferenceCounterMutex;
             std::lock_guard<std::mutex> lock(handlerReferenceCounterMutex);
-            return HandlerReference(counter++);
+            return HandlerToken(counter++);
         }
-        static HandlerReference createNonExistent() {
-            return HandlerReference(0);
-        }
+        static HandlerToken createNonExistent() { return HandlerToken(0); }
         [[nodiscard]] size_t getId() const { return mId; }
     };
 
     std::list<typename EmitterEventType::Handler> mEventHandlers;
-    std::mutex mMutex;
+    std::mutex& getMutex() {
+        // CRTP design pattern:
+        // https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
+        // Get the shared mutex from the HostEventEmitter
+        return static_cast<HostEventEmitter*>(this)->getMutex();
+    }
 
 public:
+    /**
+     * @brief Adds an event listener to the event emitter.
+     * @tparam EventType The type of the event to listen for.
+     * @tparam CallbackType (automatically deduced) The type of the callback
+     * function to be called when the event is emitted.
+     * @param callback The callback function to be called when the event is
+     * emitted.
+     * @param once Whether the listener should be removed after the first time
+     * it is called.
+     * @return A token that can be used to remove the listener.
+     * @details Usage: eventEmitter.on<MyEvent>(myCallbackLambda);
+     */
     template <
         MatchingEventType<EmitterEventType> EventType,
         MatchingCallbackType<EmitterEventType> CallbackType>
-
-    HandlerReference on(const CallbackType& callback, bool once = false) {
-        std::lock_guard guard{mMutex};
+    HandlerToken on(const CallbackType& callback, bool once = false) {
+        std::lock_guard guard{getMutex()};
         typename EmitterEventType::Handler::HandlerFunction handlerFunction =
             callback;
         // silently ignore null callbacks
         if (!handlerFunction) {
-            return HandlerReference::createNonExistent();
+            return HandlerToken::createNonExistent();
         }
-        auto handlerReference = HandlerReference::create();
+        auto handlerReference = HandlerToken::create();
         typename EmitterEventType::Handler handler(
             handlerFunction, handlerReference.getId(), once);
 
@@ -106,13 +120,13 @@ public:
     template <
         MatchingEventType<EmitterEventType> EventType,
         MatchingCallbackType<EmitterEventType> CallbackType>
-    HandlerReference once(const CallbackType& callback) {
+    HandlerToken once(const CallbackType& callback) {
         return this->on<EventType, CallbackType>(callback, true);
     }
 
     template <MatchingEventType<EmitterEventType> EventType>
-    void off(HandlerReference handlerReference) {
-        std::lock_guard guard{mMutex};
+    void off(HandlerToken handlerReference) {
+        std::lock_guard guard{getMutex()};
 
         mEventHandlers.remove_if(
             [&handlerReference](
@@ -123,13 +137,13 @@ public:
 
     template <MatchingEventType<EmitterEventType> EventType>
     size_t listenerCount() {
-        std::lock_guard guard{mMutex};
+        std::lock_guard guard{getMutex()};
         return mEventHandlers.size();
     }
 
     template <MatchingEventType<EmitterEventType> EventType>
     void removeAllListeners() {
-        std::lock_guard guard{mMutex};
+        std::lock_guard guard{getMutex()};
         mEventHandlers.clear();
     }
 
@@ -137,7 +151,7 @@ public:
         MatchingEventType<EmitterEventType> EventType,
         typename... EventArgs>
     void emit(EventArgs&&... args) {
-        std::lock_guard guard{mMutex};
+        std::lock_guard guard{getMutex()};
 
         // invoke the event on currentHandlers
         for (auto& handler : mEventHandlers) {
@@ -162,23 +176,42 @@ struct EventEmitter;
 // EventEmitter<Events> eventEmitter;
 
 // Mixin design pattern: generate EventEmitterImpl for each EventType and
-// inherit from them all
+// inherit from them all.
+// Curiously recurring template pattern (CRTP):
+// https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
+// pass the EventEmitter type as the HostEventEmitter to the EventEmitterImpls
+// to allow the EventEmitterImpls to access the same mutex.
 template <typename... EventTypes>
-struct EventEmitter<std::tuple<EventTypes...>>
-    : public EventEmitterImpl<EventTypes>... {
+class EventEmitter<std::tuple<EventTypes...>>
+    : public EventEmitterImpl< // inherit from EventEmitterImpl for each
+                               // EventType
+          EventTypes,
+          EventEmitter<std::tuple<EventTypes...>>>... { // pass own type as
+                                                        // HostEventEmitter
+private:
+    // Mutex shared by all EventEmitterImpls
+    std::mutex mMutex;
+
+    // Define an alias for own type to make the code below more readable
+    using SelfType = EventEmitter<std::tuple<EventTypes...>>;
+
+public:
+    // Accessor for EventEmitterImpls
+    std::mutex& getMutex() { return mMutex; }
+
     // Make the inherited methods visible to the templating system
-    using EventEmitterImpl<EventTypes>::on...;
-    using EventEmitterImpl<EventTypes>::off...;
-    using EventEmitterImpl<EventTypes>::listenerCount...;
-    using EventEmitterImpl<EventTypes>::removeAllListeners...;
-    using EventEmitterImpl<EventTypes>::emit...;
+    using EventEmitterImpl<EventTypes, SelfType>::on...;
+    using EventEmitterImpl<EventTypes, SelfType>::off...;
+    using EventEmitterImpl<EventTypes, SelfType>::listenerCount...;
+    using EventEmitterImpl<EventTypes, SelfType>::removeAllListeners...;
+    using EventEmitterImpl<EventTypes, SelfType>::emit...;
 
     // Use C++ 17 fold expression to remove all listeners for all event types
     // https://www.foonathan.net/2020/05/fold-tricks/
 
     template <typename T = std::nullopt_t>
     void removeAllListeners() {
-        (EventEmitterImpl<EventTypes>::template removeAllListeners<
+        (EventEmitterImpl<EventTypes, SelfType>::template removeAllListeners<
              EventTypes>(),
          ...);
     }
