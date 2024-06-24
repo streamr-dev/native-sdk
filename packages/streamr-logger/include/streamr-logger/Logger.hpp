@@ -121,7 +121,12 @@ private:
         changeToObjectIfNotStructured(extraArgument, "metadata");
         extraArgument.merge_patch(mContextBindings);
         auto extraArgumentInString = getJsonObjectInString(extraArgument);
-        logCommon(follyLogLevelLevel, msg, extraArgumentInString, location);
+        auto follyRootLogLevel = getFollyLogRootLevel();
+        if (follyRootLogLevel != mLoggerDB.getCategory("")->getLevel()) {
+            this->initializeLoggerDB(follyRootLogLevel, true);
+        }
+        sendLogMessage(
+            follyLogLevelLevel, msg, extraArgumentInString, location);
     }
 
     std::string getJsonObjectInString(const nlohmann::json& object) {
@@ -130,27 +135,6 @@ private:
         }
         // One space because it is needed after message
         return " " + streamr::json::toString(object);
-    }
-
-    void log(
-        const folly::LogLevel follyLogLevelLevel,
-        const std::string& msg,
-        const std::source_location& location) {
-        auto extraArgumentInString{getJsonObjectInString(mContextBindings)};
-        logCommon(follyLogLevelLevel, msg, extraArgumentInString, location);
-    }
-
-    template <typename T = std::string>
-    void logCommon(
-        const folly::LogLevel follyLogLevelLevel,
-        const std::string& msg,
-        const std::string& metadata,
-        const std::source_location& location) {
-        auto follyRootLogLevel = getFollyLogRootLevel();
-        if (follyRootLogLevel != mLoggerDB.getCategory("")->getLevel()) {
-            this->initializeLoggerDB(follyRootLogLevel, true);
-        }
-        sendLogMessage(follyLogLevelLevel, msg, metadata, location);
     }
 
     void sendLogMessage(
@@ -217,97 +201,55 @@ public:
     template <typename T = std::string>
     void trace(
         const std::string& msg,
-        const T& metadata,
+        const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
         log(folly::LogLevel::DBG, msg, metadata, location);
     }
 
-    void trace(
-        const std::string& msg,
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::DBG, msg, location);
-    }
-
     template <typename T = std::string>
     void debug(
         const std::string& msg,
-        const T& metadata,
+        const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
         log(folly::LogLevel::DBG0, msg, metadata, location);
     }
 
-    void debug(
-        const std::string& msg,
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::DBG0, msg, location);
-    }
-
     template <typename T = std::string>
     void info(
         const std::string& msg,
-        const T& metadata,
+        const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
         log(folly::LogLevel::INFO, msg, metadata, location);
     }
 
-    void info(
-        const std::string& msg,
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::INFO, msg, location);
-    }
-
     template <typename T = std::string>
     void warn(
         const std::string& msg,
-        const T& metadata,
+        const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
         log(folly::LogLevel::WARN, msg, metadata, location);
     }
 
-    void warn(
-        const std::string& msg,
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::WARN, msg, location);
-    }
-
     template <typename T = std::string>
     void error(
         const std::string& msg,
-        const T& metadata,
+        const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
         log(folly::LogLevel::ERR, msg, metadata, location);
     }
 
-    void error(
-        const std::string& msg,
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::ERR, msg, location);
-    }
-
     template <typename T = std::string>
     void fatal(
         const std::string& msg,
-        const T& metadata,
+        const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
         log(folly::LogLevel::CRITICAL, msg, metadata, location);
-    }
-
-    void fatal(
-        const std::string& msg,
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::CRITICAL, msg, location);
     }
 };
 
