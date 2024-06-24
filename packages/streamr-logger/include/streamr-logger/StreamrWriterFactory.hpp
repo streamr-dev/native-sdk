@@ -7,17 +7,17 @@ namespace streamr::logger {
 
 class StreamrWriterFactory : public folly::StreamHandlerFactory::WriterFactory {
 private:
-    std::shared_ptr<folly::LogWriter> logWriter_ = nullptr;
+    std::shared_ptr<folly::LogWriter> mLogWriter = nullptr;
 
 public:
-    StreamrWriterFactory() : logWriter_{nullptr} {}
+    StreamrWriterFactory() : mLogWriter{nullptr} {}
 
     explicit StreamrWriterFactory(std::shared_ptr<folly::LogWriter> logWriter)
-        : logWriter_{std::move(logWriter)} {}
+        : mLogWriter{std::move(logWriter)} {}
 
     std::shared_ptr<folly::LogWriter> createWriter() override {
-        if (logWriter_) {
-            return logWriter_;
+        if (mLogWriter) {
+            return mLogWriter;
         }
         return folly::StreamHandlerFactory::WriterFactory::createWriter();
     }

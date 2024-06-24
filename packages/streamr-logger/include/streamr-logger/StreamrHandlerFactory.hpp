@@ -11,19 +11,19 @@ namespace streamr::logger {
 
 class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 private:
-    StreamrWriterFactory* writerFactory_;
+    StreamrWriterFactory* mWriterFactory;
 
 public:
     StreamrHandlerFactory() = default;
     ~StreamrHandlerFactory() override = default;
     explicit StreamrHandlerFactory(StreamrWriterFactory* writerFactory)
-        : writerFactory_{writerFactory} {}
+        : mWriterFactory{writerFactory} {}
 
     std::shared_ptr<folly::LogHandler> createHandler(
         const Options& options) override {
         StreamrLogFormatterFactory formatterFactory;
         return folly::StandardLogHandlerFactory::createHandler(
-            getType(), writerFactory_, &formatterFactory, options);
+            getType(), mWriterFactory, &formatterFactory, options);
     }
 };
 }; // namespace streamr::logger

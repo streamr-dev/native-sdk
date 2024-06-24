@@ -70,29 +70,29 @@ constexpr folly::LogLevel getFollyLogLevel(
 
 class Logger {
 private:
-    StreamrWriterFactory writerFactory_;
-    folly::LoggerDB& loggerDB_;
-    std::unique_ptr<folly::LogHandlerFactory> logHandlerFactory_;
-    nlohmann::json contextBindings_;
-    folly::LogLevel defaultLogLevel_;
-    std::string filename_;
+    StreamrWriterFactory mWriterFactory;
+    folly::LoggerDB& mLoggerDB;
+    std::unique_ptr<folly::LogHandlerFactory> mLogHandlerFactory;
+    nlohmann::json mContextBindings;
+    folly::LogLevel mDefaultLogLevel;
+    std::string mFilename;
 
     folly::LogLevel getFollyLogRootLevel() {
         char* val = getenv(detail::envLogLevelName.data());
         if (val) {
             return detail::getFollyLogLevel(val);
         }
-        return defaultLogLevel_;
+        return mDefaultLogLevel;
     }
 
     void initialize(std::shared_ptr<folly::LogWriter> logWriter) { // NOLINT
         if (logWriter) {
-            writerFactory_ = StreamrWriterFactory(logWriter);
+            mWriterFactory = StreamrWriterFactory(logWriter);
         } else {
-            writerFactory_ = StreamrWriterFactory();
+            mWriterFactory = StreamrWriterFactory();
         }
-        logHandlerFactory_ =
-            std::make_unique<StreamrHandlerFactory>(&writerFactory_);
+        mLogHandlerFactory =
+            std::make_unique<StreamrHandlerFactory>(&mWriterFactory);
         this->initializeLoggerDB(folly::LogLevel::DBG);
     }
 
@@ -119,7 +119,7 @@ private:
         const int lineNumber) {
         auto extraArgument = streamr::json::toJson(metadata);
         changeToObjectIfNotStructured(extraArgument, "metadata");
-        extraArgument.merge_patch(contextBindings_);
+        extraArgument.merge_patch(mContextBindings);
         auto extraArgumentInString = getJsonObjectInString(extraArgument);
         logCommon(follyLogLevelLevel, msg, extraArgumentInString, lineNumber);
     }
@@ -136,7 +136,7 @@ private:
         const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
         const int lineNumber) {
-        auto extraArgumentInString{getJsonObjectInString(contextBindings_)};
+        auto extraArgumentInString{getJsonObjectInString(mContextBindings)};
         logCommon(follyLogLevelLevel, msg, extraArgumentInString, lineNumber);
     }
 
@@ -147,7 +147,7 @@ private:
         const std::string& metadata,
         const int lineNumber) {
         auto follyRootLogLevel = getFollyLogRootLevel();
-        if (follyRootLogLevel != loggerDB_.getCategory("")->getLevel()) {
+        if (follyRootLogLevel != mLoggerDB.getCategory("")->getLevel()) {
             this->initializeLoggerDB(follyRootLogLevel, true);
         }
         sendLogMessage(follyLogLevelLevel, msg, metadata, lineNumber);
@@ -172,7 +172,7 @@ private:
                     follyDetailXlogFilename, 0);
             }(),
             ::folly::detail::custom::isXlogCategoryOverridden(0),
-            filename_,
+            mFilename,
             lineNumber,
             __func__,
             ::folly::LogStreamProcessor::APPEND,
@@ -185,8 +185,8 @@ private:
         const folly::LogLevel& rootLogLevel,
         bool isSkipRegisterHandlerFactory = false) {
         if (!isSkipRegisterHandlerFactory) {
-            loggerDB_.registerHandlerFactory(
-                std::move(logHandlerFactory_), true);
+            mLoggerDB.registerHandlerFactory(
+                std::move(mLogHandlerFactory), true);
         }
         auto rootLogLevelInString = folly::logLevelToString(rootLogLevel);
         auto defaultHandlerConfig = folly::LogHandlerConfig(
@@ -198,7 +198,7 @@ private:
             folly::LogCategoryConfig(rootLogLevel, false, {"default"});
         folly::LogConfig config(
             {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
-        loggerDB_.updateConfig(config);
+        mLoggerDB.updateConfig(config);
     }
 
 public:
@@ -208,11 +208,11 @@ public:
         const T& contextBindings = std::string(""),
         detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
         std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
-        : filename_{filename},
-          defaultLogLevel_{detail::getFollyLogLevel(defaultLogLevel)},
-          loggerDB_{folly::LoggerDB::get()} {
-        contextBindings_ = streamr::json::toJson(contextBindings);
-        changeToObjectIfNotStructured(contextBindings_, "contextBindings");
+        : mFilename{filename},
+          mDefaultLogLevel{detail::getFollyLogLevel(defaultLogLevel)},
+          mLoggerDB{folly::LoggerDB::get()} {
+        mContextBindings = streamr::json::toJson(contextBindings);
+        changeToObjectIfNotStructured(mContextBindings, "contextBindings");
         initialize(std::move(logWriter));
     }
 
