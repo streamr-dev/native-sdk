@@ -13,6 +13,7 @@ private:
 
 public:
     void writeMessage(folly::StringPiece buf, uint32_t /* flags */) override {
+        std::cout << "!!!!!!!!" + buf.toString() + "\n";
         mBuffer = buf.toString();
         mIsCalled = 1;
     }
