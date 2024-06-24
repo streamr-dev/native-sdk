@@ -1,6 +1,7 @@
 #ifndef STREAMER_LOGGER_LOGGER_HPP
 #define STREAMER_LOGGER_LOGGER_HPP
 
+#include <source_location>
 #include <folly/logging/LogConfig.h>
 #include <folly/logging/LogLevel.h>
 #include <folly/logging/LogMessage.h>
@@ -75,7 +76,6 @@ private:
     std::unique_ptr<folly::LogHandlerFactory> mLogHandlerFactory;
     nlohmann::json mContextBindings;
     folly::LogLevel mDefaultLogLevel;
-    std::string mFilename;
 
     folly::LogLevel getFollyLogRootLevel() {
         char* val = getenv(detail::envLogLevelName.data());
@@ -116,12 +116,12 @@ private:
         const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
         const T& metadata,
-        const int lineNumber) {
+        const std::source_location& location) {
         auto extraArgument = streamr::json::toJson(metadata);
         changeToObjectIfNotStructured(extraArgument, "metadata");
         extraArgument.merge_patch(mContextBindings);
         auto extraArgumentInString = getJsonObjectInString(extraArgument);
-        logCommon(follyLogLevelLevel, msg, extraArgumentInString, lineNumber);
+        logCommon(follyLogLevelLevel, msg, extraArgumentInString, location);
     }
 
     std::string getJsonObjectInString(const nlohmann::json& object) {
@@ -135,9 +135,9 @@ private:
     void log(
         const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
-        const int lineNumber) {
+        const std::source_location& location) {
         auto extraArgumentInString{getJsonObjectInString(mContextBindings)};
-        logCommon(follyLogLevelLevel, msg, extraArgumentInString, lineNumber);
+        logCommon(follyLogLevelLevel, msg, extraArgumentInString, location);
     }
 
     template <typename T = std::string>
@@ -145,19 +145,19 @@ private:
         const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
         const std::string& metadata,
-        const int lineNumber) {
+        const std::source_location& location) {
         auto follyRootLogLevel = getFollyLogRootLevel();
         if (follyRootLogLevel != mLoggerDB.getCategory("")->getLevel()) {
             this->initializeLoggerDB(follyRootLogLevel, true);
         }
-        sendLogMessage(follyLogLevelLevel, msg, metadata, lineNumber);
+        sendLogMessage(follyLogLevelLevel, msg, metadata, location);
     }
 
     void sendLogMessage(
         const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
         const std::string& metadata,
-        const int lineNumber) {
+        const std::source_location& location) {
         folly::LogStreamProcessor(
             [] {
                 static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
@@ -172,8 +172,8 @@ private:
                     follyDetailXlogFilename, 0);
             }(),
             ::folly::detail::custom::isXlogCategoryOverridden(0),
-            mFilename,
-            lineNumber,
+            location.file_name(),
+            location.line(),
             __func__,
             ::folly::LogStreamProcessor::APPEND,
             msg,
@@ -204,12 +204,10 @@ private:
 public:
     template <typename T = std::string>
     explicit Logger(
-        const std::string_view filename,
         const T& contextBindings = std::string(""),
         detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
         std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
-        : mFilename{filename},
-          mDefaultLogLevel{detail::getFollyLogLevel(defaultLogLevel)},
+        : mDefaultLogLevel{detail::getFollyLogLevel(defaultLogLevel)},
           mLoggerDB{folly::LoggerDB::get()} {
         mContextBindings = streamr::json::toJson(contextBindings);
         changeToObjectIfNotStructured(mContextBindings, "contextBindings");
@@ -217,90 +215,102 @@ public:
     }
 
     template <typename T = std::string>
-    static Logger& instance(
-        std::string_view filename,
-        const T& contextBindings = std::string(""),
-        detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
-        std::shared_ptr<folly::LogWriter> logWriter = nullptr) {
-        static Logger loggerInstance{
-            filename, contextBindings, defaultLogLevel, logWriter};
-        return loggerInstance;
+    void trace(
+        const std::string& msg,
+        const T& metadata,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::DBG, msg, metadata, location);
+    }
+
+    void trace(
+        const std::string& msg,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::DBG, msg, location);
     }
 
     template <typename T = std::string>
-    void logTrace(
-        const std::string& msg, const int lineNumber, const T& metadata) {
-        log(folly::LogLevel::DBG, msg, metadata, lineNumber);
+    void debug(
+        const std::string& msg,
+        const T& metadata,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::DBG0, msg, metadata, location);
     }
 
-    void logTrace(const std::string& msg, const int lineNumber) {
-        log(folly::LogLevel::DBG, msg, lineNumber);
-    }
-
-    template <typename T = std::string>
-    void logDebug(
-        const std::string& msg, const int lineNumber, const T& metadata) {
-        log(folly::LogLevel::DBG0, msg, metadata, lineNumber);
-    }
-
-    void logDebug(const std::string& msg, const int lineNumber) {
-        log(folly::LogLevel::DBG0, msg, lineNumber);
+    void debug(
+        const std::string& msg,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::DBG0, msg, location);
     }
 
     template <typename T = std::string>
-    void logInfo(
-        const std::string& msg, const int lineNumber, const T& metadata) {
-        log(folly::LogLevel::INFO, msg, metadata, lineNumber);
+    void info(
+        const std::string& msg,
+        const T& metadata,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::INFO, msg, metadata, location);
     }
 
-    void logInfo(const std::string& msg, const int lineNumber) {
-        log(folly::LogLevel::INFO, msg, lineNumber);
-    }
-
-    template <typename T = std::string>
-    void logWarn(
-        const std::string& msg, const int lineNumber, const T& metadata) {
-        log(folly::LogLevel::WARN, msg, metadata, lineNumber);
-    }
-
-    void logWarn(const std::string& msg, const int lineNumber) {
-        log(folly::LogLevel::WARN, msg, lineNumber);
+    void info(
+        const std::string& msg,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::INFO, msg, location);
     }
 
     template <typename T = std::string>
-    void logError(
-        const std::string& msg, const int lineNumber, const T& metadata) {
-        log(folly::LogLevel::ERR, msg, metadata, lineNumber);
+    void warn(
+        const std::string& msg,
+        const T& metadata,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::WARN, msg, metadata, location);
     }
 
-    void logError(const std::string& msg, const int lineNumber) {
-        log(folly::LogLevel::ERR, msg, lineNumber);
+    void warn(
+        const std::string& msg,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::WARN, msg, location);
     }
 
     template <typename T = std::string>
-    void logFatal(
-        const std::string& msg, const int lineNumber, const T& metadata) {
-        log(folly::LogLevel::CRITICAL, msg, metadata, lineNumber);
+    void error(
+        const std::string& msg,
+        const T& metadata,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::ERR, msg, metadata, location);
     }
 
-    void logFatal(const std::string& msg, const int lineNumber) {
-        log(folly::LogLevel::CRITICAL, msg, lineNumber);
+    void error(
+        const std::string& msg,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::ERR, msg, location);
+    }
+
+    template <typename T = std::string>
+    void fatal(
+        const std::string& msg,
+        const T& metadata,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::CRITICAL, msg, metadata, location);
+    }
+
+    void fatal(
+        const std::string& msg,
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::CRITICAL, msg, location);
     }
 };
 
 }; // namespace streamr::logger
-
-#define trace(msg, ...) \
-    Logger::instance(__FILE__).logTrace(msg, __LINE__, ##__VA_ARGS__)
-#define debug(msg, ...) \
-    Logger::instance(__FILE__).logDebug(msg, __LINE__, ##__VA_ARGS__)
-#define info(msg, ...) \
-    Logger::instance(__FILE__).logInfo(msg, __LINE__, ##__VA_ARGS__)
-#define warn(msg, ...) \
-    Logger::instance(__FILE__).logWarn(msg, __LINE__, ##__VA_ARGS__)
-#define error(msg, ...) \
-    Logger::instance(__FILE__).logError(msg, __LINE__, ##__VA_ARGS__)
-#define fatal(msg, ...) \
-    Logger::instance(__FILE__).logFatal(msg, __LINE__, ##__VA_ARGS__)
 
 #endif
