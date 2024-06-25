@@ -72,6 +72,7 @@ TEMP_PROFILE_CONTENTS+="export PATH=\$VCPKG_ROOT:\$PATH\n"
 
 echo $TEMP_PROFILE_CONTENTS
 
+touch $PROFILE_FILE
 # Remove old version of the block
 sed -i '/# streamr-native-sdk added start/,/# streamr-native-sdk added end/d' $PROFILE_FILE
 # Add new block to profile file
