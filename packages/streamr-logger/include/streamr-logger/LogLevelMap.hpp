@@ -9,6 +9,8 @@
 
 #include "streamr-logger/StreamrLogLevel.hpp"
 
+constexpr folly::LogLevel defaultFollyLogLevel = folly::LogLevel::INFO;
+
 // A compile-time map between StreamrLogLevel and folly::LogLevel
 
 template <std::size_t Size>
@@ -30,7 +32,7 @@ struct LogLevelMap {
         if (itr != end(mData)) {
             return itr->second;
         }
-        throw std::range_error("Not Found");
+        return defaultFollyLogLevel;
     }
 
     [[nodiscard]] constexpr folly::LogLevel streamrLevelNameToFollyLevel(
@@ -44,7 +46,7 @@ struct LogLevelMap {
         if (itr != end(mData)) {
             return itr->second;
         }
-        throw std::range_error("Not Found");
+        return defaultFollyLogLevel;
     }
 };
 
