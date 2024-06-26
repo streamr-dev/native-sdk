@@ -12,62 +12,11 @@
 #include "StreamrWriterFactory.hpp"
 #include "streamr-json/toJson.hpp"
 #include "streamr-json/toString.hpp"
+#include "streamr-logger/LogLevelMap.hpp"
 
 namespace streamr::logger {
 
-namespace detail {
-
-static constexpr std::string_view envLogLevelName = "LOG_LEVEL";
-static constexpr std::string_view logLevelTraceName = "trace";
-static constexpr std::string_view logLevelDebugName = "debug";
-static constexpr std::string_view logLevelInfoName = "info";
-static constexpr std::string_view logLevelWarnName = "warn";
-static constexpr std::string_view logLevelErrorName = "error";
-static constexpr std::string_view logLevelFatalName = "fatal";
-
-enum class StreamrLogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL };
-
-// This function can be used at compile time
-constexpr folly::LogLevel getFollyLogLevel(StreamrLogLevel streamrLogLevel) {
-    if (streamrLogLevel == StreamrLogLevel::TRACE) {
-        return folly::LogLevel::DBG;
-    }
-    if (streamrLogLevel == StreamrLogLevel::DEBUG) {
-        return folly::LogLevel::DBG0;
-    }
-    if (streamrLogLevel == StreamrLogLevel::INFO) {
-        return folly::LogLevel::INFO;
-    }
-    if (streamrLogLevel == StreamrLogLevel::WARN) {
-        return folly::LogLevel::WARN;
-    }
-    if (streamrLogLevel == StreamrLogLevel::ERROR) {
-        return folly::LogLevel::ERR;
-    }
-    return folly::LogLevel::CRITICAL;
-}
-
-// This function can be used at compile time
-constexpr folly::LogLevel getFollyLogLevel(
-    std::string_view streamrLogLevelName) {
-    if (streamrLogLevelName == logLevelTraceName) {
-        return folly::LogLevel::DBG;
-    }
-    if (streamrLogLevelName == logLevelDebugName) {
-        return folly::LogLevel::DBG0;
-    }
-    if (streamrLogLevelName == logLevelInfoName) {
-        return folly::LogLevel::INFO;
-    }
-    if (streamrLogLevelName == logLevelWarnName) {
-        return folly::LogLevel::WARN;
-    }
-    if (streamrLogLevelName == logLevelErrorName) {
-        return folly::LogLevel::ERR;
-    }
-    return folly::LogLevel::CRITICAL;
-}
-}; // namespace detail
+constexpr std::string_view envLogLevelName = "LOG_LEVEL";
 
 class Logger {
 private:
@@ -77,10 +26,94 @@ private:
     nlohmann::json mContextBindings;
     folly::LogLevel mDefaultLogLevel;
 
+    static constexpr size_t logLevelMapSize = 6;
+    static constexpr const LogLevelMap<logLevelMapSize>& getLogLevelMap() {
+        // You can change the log level mapping
+        // between Streamr and folly by editing
+        // this magic static map
+        static constexpr LogLevelMap<logLevelMapSize> logLevelMap(
+            {{{{streamrloglevel::Trace{}, folly::LogLevel::DBG},
+               {streamrloglevel::Debug{}, folly::LogLevel::DBG0},
+               {streamrloglevel::Info{}, folly::LogLevel::INFO},
+               {streamrloglevel::Warn{}, folly::LogLevel::WARN},
+               {streamrloglevel::Error{}, folly::LogLevel::ERR},
+               {streamrloglevel::Fatal{}, folly::LogLevel::CRITICAL}}}});
+        return logLevelMap;
+    }
+
+public:
+    template <typename T = std::string>
+    explicit Logger(
+        const T& contextBindings = std::string(""),
+        StreamrLogLevel defaultLogLevel = streamrloglevel::Info{},
+        std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
+        : mLoggerDB{folly::LoggerDB::get()} {
+        mDefaultLogLevel = {
+            getLogLevelMap().streamrLevelToFollyLevel(defaultLogLevel)};
+        mContextBindings = streamr::json::toJson(contextBindings);
+        changeToObjectIfNotStructured(mContextBindings, "contextBindings");
+        initialize(std::move(logWriter));
+    }
+
+    template <typename T = std::string>
+    void trace(
+        const std::string& msg,
+        const T& metadata = std::string(""),
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::DBG, msg, metadata, location);
+    }
+
+    template <typename T = std::string>
+    void debug(
+        const std::string& msg,
+        const T& metadata = std::string(""),
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::DBG0, msg, metadata, location);
+    }
+
+    template <typename T = std::string>
+    void info(
+        const std::string& msg,
+        const T& metadata = std::string(""),
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::INFO, msg, metadata, location);
+    }
+
+    template <typename T = std::string>
+    void warn(
+        const std::string& msg,
+        const T& metadata = std::string(""),
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::WARN, msg, metadata, location);
+    }
+
+    template <typename T = std::string>
+    void error(
+        const std::string& msg,
+        const T& metadata = std::string(""),
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::ERR, msg, metadata, location);
+    }
+
+    template <typename T = std::string>
+    void fatal(
+        const std::string& msg,
+        const T& metadata = std::string(""),
+        const std::source_location& location =
+            std::source_location::current()) {
+        log(folly::LogLevel::CRITICAL, msg, metadata, location);
+    }
+
+private:
     folly::LogLevel getFollyLogRootLevel() {
-        char* val = getenv(detail::envLogLevelName.data());
+        char* val = getenv(envLogLevelName.data());
         if (val) {
-            return detail::getFollyLogLevel(val);
+            return getLogLevelMap().streamrLevelNameToFollyLevel(val);
         }
         return mDefaultLogLevel;
     }
@@ -183,73 +216,6 @@ private:
         folly::LogConfig config(
             {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
         mLoggerDB.updateConfig(config);
-    }
-
-public:
-    template <typename T = std::string>
-    explicit Logger(
-        const T& contextBindings = std::string(""),
-        detail::StreamrLogLevel defaultLogLevel = detail::StreamrLogLevel::INFO,
-        std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
-        : mDefaultLogLevel{detail::getFollyLogLevel(defaultLogLevel)},
-          mLoggerDB{folly::LoggerDB::get()} {
-        mContextBindings = streamr::json::toJson(contextBindings);
-        changeToObjectIfNotStructured(mContextBindings, "contextBindings");
-        initialize(std::move(logWriter));
-    }
-
-    template <typename T = std::string>
-    void trace(
-        const std::string& msg,
-        const T& metadata = std::string(""),
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::DBG, msg, metadata, location);
-    }
-
-    template <typename T = std::string>
-    void debug(
-        const std::string& msg,
-        const T& metadata = std::string(""),
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::DBG0, msg, metadata, location);
-    }
-
-    template <typename T = std::string>
-    void info(
-        const std::string& msg,
-        const T& metadata = std::string(""),
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::INFO, msg, metadata, location);
-    }
-
-    template <typename T = std::string>
-    void warn(
-        const std::string& msg,
-        const T& metadata = std::string(""),
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::WARN, msg, metadata, location);
-    }
-
-    template <typename T = std::string>
-    void error(
-        const std::string& msg,
-        const T& metadata = std::string(""),
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::ERR, msg, metadata, location);
-    }
-
-    template <typename T = std::string>
-    void fatal(
-        const std::string& msg,
-        const T& metadata = std::string(""),
-        const std::source_location& location =
-            std::source_location::current()) {
-        log(folly::LogLevel::CRITICAL, msg, metadata, location);
     }
 };
 
