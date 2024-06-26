@@ -4,7 +4,8 @@
 #include <streamr-logger/Logger.hpp>
 
 using streamr::logger::Logger;
-using streamr::logger::detail::StreamrLogLevel;
+using streamr::logger::StreamrLogLevel;
+namespace streamrloglevel = streamr::logger::streamrloglevel;
 
 struct LogWriterMock : public folly::LogWriter {
 private:
@@ -32,7 +33,7 @@ protected:
         std::make_shared<LogWriterMock>();
 
     Logger mLogger = // NOLINT
-        Logger(std::string(""), StreamrLogLevel::INFO, mLogWriterMock);
+        Logger(std::string(""), streamrloglevel::Info{}, mLogWriterMock);
 
     Logger& getLogger() { return mLogger; }
     std::shared_ptr<LogWriterMock> getLogWriterMock() { return mLogWriterMock; }
@@ -449,7 +450,7 @@ TEST(LoggerContextBindingAndMetadataMerge, StringsMerged) {
         std::make_shared<LogWriterMock>();
     Logger tmpLogger = Logger(
         std::string("ContextBindingText"),
-        StreamrLogLevel::INFO,
+        streamrloglevel::Info{},
         tmpLogWriterMock);
 
     tmpLogger.fatal("Testi", std::string("LogExtraArgumentText")); // NOLINT
@@ -470,7 +471,7 @@ TEST(
         std::make_shared<LogWriterMock>();
     Logger tmpLogger = Logger(
         std::string("ContextBindingText"),
-        StreamrLogLevel::INFO,
+        streamrloglevel::Info{},
         tmpLogWriterMock);
 
     tmpLogger.fatal("Testi"); // NOLINT
@@ -490,7 +491,7 @@ TEST(
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
         std::make_shared<LogWriterMock>();
     Logger tmpLogger =
-        Logger(std::string(""), StreamrLogLevel::INFO, tmpLogWriterMock);
+        Logger(std::string(""), streamrloglevel::Info{}, tmpLogWriterMock);
 
     tmpLogger.fatal("Testi", std::string("LogExtraArgumentText")); // NOLINT
 
@@ -519,7 +520,7 @@ TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
         std::string foo5 = "bar5";
     };
 
-    Logger logger{TestStruct1(), StreamrLogLevel::INFO, tmpLogWriterMock};
+    Logger logger{TestStruct1(), streamrloglevel::Info{}, tmpLogWriterMock};
 
     auto testStruct2 = TestStruct2();
     logger.fatal("Testi", testStruct2); // NOLINT
@@ -542,7 +543,7 @@ TEST(
         int foo2 = 42; // NOLINT
         std::string foo3 = "bar3";
     };
-    Logger logger{TestStruct1(), StreamrLogLevel::INFO, tmpLogWriterMock};
+    Logger logger{TestStruct1(), streamrloglevel::Info{}, tmpLogWriterMock};
 
     logger.fatal("Testi"); // NOLINT
     EXPECT_THAT(tmpLogWriterMock->getBuffer(), testing::HasSubstr("FATAL"));
@@ -565,7 +566,7 @@ TEST(
         std::string foo3 = "bar3";
     };
 
-    Logger logger{std::string(""), StreamrLogLevel::INFO, tmpLogWriterMock};
+    Logger logger{std::string(""), streamrloglevel::Info{}, tmpLogWriterMock};
 
     auto testStruct1 = TestStruct1();
     logger.fatal("Testi", testStruct1); // NOLINT
