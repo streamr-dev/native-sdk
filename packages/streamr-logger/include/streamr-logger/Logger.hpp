@@ -29,7 +29,7 @@ private:
     folly::LogLevel mDefaultLogLevel;
 
     static constexpr size_t logLevelMapSize = 6;
-    static constexpr const LogLevelMap<logLevelMapSize>& getLogLevelMap() {
+    static const LogLevelMap<logLevelMapSize>& getLogLevelMap() {
         // You can change the log level mapping
         // between Streamr and folly by editing
         // this magic static map
