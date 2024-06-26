@@ -2,6 +2,8 @@
 #define STREAMER_LOGGER_LOGGER_HPP
 
 #include <source_location>
+#include <string_view>
+#include <nlohmann/json.hpp>
 #include <folly/logging/LogConfig.h>
 #include <folly/logging/LogLevel.h>
 #include <folly/logging/LogMessage.h>
@@ -16,6 +18,7 @@
 
 namespace streamr::logger {
 
+using streamr::json::toJson;
 constexpr std::string_view envLogLevelName = "LOG_LEVEL";
 
 class Logger {
@@ -42,16 +45,20 @@ private:
     }
 
 public:
-    template <typename T = std::string>
+    // ContextBindingsType can be any type that is convertible to JSON by
+    // streamr-json
+    template <typename ContextBindingsType = std::string>
     explicit Logger(
-        const T& contextBindings = std::string(""),
+        const ContextBindingsType& contextBindings = nlohmann::json{},
         StreamrLogLevel defaultLogLevel = streamrloglevel::Info{},
-        std::shared_ptr<folly::LogWriter> logWriter = nullptr) // NOLINT
+        std::shared_ptr<folly::LogWriter> logWriter =
+            nullptr) // using std::optional will not work because
+                     // folly::LogWriter is an abstract class
         : mLoggerDB{folly::LoggerDB::get()} {
-        mDefaultLogLevel = {
-            getLogLevelMap().streamrLevelToFollyLevel(defaultLogLevel)};
-        mContextBindings = streamr::json::toJson(contextBindings);
-        changeToObjectIfNotStructured(mContextBindings, "contextBindings");
+        mDefaultLogLevel =
+            getLogLevelMap().streamrLevelToFollyLevel(defaultLogLevel);
+        mContextBindings =
+            ensureJsonObject(toJson(contextBindings), "contextBindings");
         initialize(std::move(logWriter));
     }
 
@@ -129,45 +136,40 @@ private:
         this->initializeLoggerDB(folly::LogLevel::DBG);
     }
 
-    void changeToObjectIfNotStructured(
-        nlohmann::json& element, const std::string_view name) {
-        if (!element.is_structured()) {
-            // Change to object if not structured
-            if (element.is_string() && element.dump() == "\"\"") {
-                // If empty string (default value when object is not needed),
-                // then add empty object
-                element = nlohmann::json::object({});
-            } else {
-                auto temp = element.dump();
-                element = nlohmann::json::object({{name, element}});
-            }
+    // Ensure that the given JSON element is an object
+    // If it is not, then create an object and place the given element
+    // under the given key in the object
+
+    nlohmann::json ensureJsonObject(
+        const nlohmann::json& element, const std::string_view key) {
+        if (element.is_object()) {
+            return element;
         }
+        if (element.is_null() ||
+            (element.is_string() && element.get<std::string>() == "")) {
+            return nlohmann::json::object({});
+        }
+        return nlohmann::json::object({{key, element}});
     }
 
-    template <typename T = std::string>
+    // MetadataType can be any type that is convertible to JSON by
+    // streamr-json
+    template <typename MetadataType = std::string>
     void log(
         const folly::LogLevel follyLogLevelLevel,
         const std::string& msg,
-        const T& metadata,
+        const MetadataType& metadata,
         const std::source_location& location) {
-        auto extraArgument = streamr::json::toJson(metadata);
-        changeToObjectIfNotStructured(extraArgument, "metadata");
-        extraArgument.merge_patch(mContextBindings);
-        auto extraArgumentInString = getJsonObjectInString(extraArgument);
+        auto metadataJson = ensureJsonObject(toJson(metadata), "metadata");
+        metadataJson.merge_patch(mContextBindings);
+        // auto extraArgumentInString = getJsonObjectInString(extraArgument);
+        auto metadataString =
+            metadataJson.empty() ? "" : (" " + metadataJson.dump());
         auto follyRootLogLevel = getFollyLogRootLevel();
         if (follyRootLogLevel != mLoggerDB.getCategory("")->getLevel()) {
             this->initializeLoggerDB(follyRootLogLevel, true);
         }
-        sendLogMessage(
-            follyLogLevelLevel, msg, extraArgumentInString, location);
-    }
-
-    std::string getJsonObjectInString(const nlohmann::json& object) {
-        if (object.empty()) {
-            return ("");
-        }
-        // One space because it is needed after message
-        return " " + streamr::json::toString(object);
+        sendLogMessage(follyLogLevelLevel, msg, metadataString, location);
     }
 
     void sendLogMessage(
