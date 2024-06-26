@@ -13,7 +13,6 @@
 #include "StreamrHandlerFactory.hpp"
 #include "StreamrWriterFactory.hpp"
 #include "streamr-json/toJson.hpp"
-#include "streamr-json/toString.hpp"
 #include "streamr-logger/LogLevelMap.hpp"
 
 namespace streamr::logger {
