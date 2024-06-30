@@ -6,7 +6,6 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 # make the current package a monorepo package
 include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
-
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(logger CXX)
@@ -25,7 +24,6 @@ target_include_directories(
            $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(streamr-logger INTERFACE Folly::folly INTERFACE streamr::streamr-json)
-
 # TODO: Is there a better way to do this?
 # - Apparently not: https://gitlab.kitware.com/cmake/cmake/-/issues/20511
 # - At least parse the deps from the vcpkg.json file and use them to find_package() in this file and to add the
@@ -41,18 +39,17 @@ export(TARGETS streamr-logger
   "find_package(streamr-json CONFIG REQUIRED)\n"
   "include(${CMAKE_BINARY_DIR}/streamr-logger-config-in.cmake)\n")
 
-#"list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/share)\n"
-
 enable_testing()
 find_package(GTest CONFIG REQUIRED)
 
-add_executable(streamr-logger-test-unit test/unit/LoggerTest.cpp)
+add_executable(streamr-logger-test-unit test/unit/LoggerTest.cpp test/unit/StreamrLogFormatterTest.cpp)
+
 target_link_libraries(streamr-logger-test-unit 
-  PUBLIC streamr-logger
-  PUBLIC GTest::gtest 
-  PUBLIC GTest::gtest_main 
-  PUBLIC GTest::gmock 
-  PUBLIC GTest::gmock_main)
+  PRIVATE streamr-logger
+  PRIVATE GTest::gtest 
+  PRIVATE GTest::gtest_main 
+  PRIVATE GTest::gmock 
+  PRIVATE GTest::gmock_main)
 
 include(GoogleTest)
 gtest_discover_tests(streamr-logger-test-unit)

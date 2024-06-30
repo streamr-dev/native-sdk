@@ -59,11 +59,11 @@ find_package(GTest CONFIG REQUIRED)
 
 add_executable(streamr-json-test-unit test/unit/toStringTest.cpp test/unit/toJsonTest.cpp)
 target_link_libraries(streamr-json-test-unit 
-  PUBLIC streamr-json
-  PUBLIC GTest::gtest 
-  PUBLIC GTest::gtest_main 
-  PUBLIC GTest::gmock 
-  PUBLIC GTest::gmock_main)
+  PRIVATE streamr-json
+  PRIVATE GTest::gtest 
+  PRIVATE GTest::gtest_main 
+  PRIVATE GTest::gmock 
+  PRIVATE GTest::gmock_main)
 
 include(GoogleTest)
 gtest_discover_tests(streamr-json-test-unit)
