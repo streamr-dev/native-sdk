@@ -2,9 +2,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <streamr-logger/Logger.hpp>
+#include "streamr-logger/detail/FollyLoggerImpl.hpp"
 
 using streamr::logger::Logger;
 using streamr::logger::StreamrLogLevel;
+using FollyLoggerImpl = streamr::logger::detail::FollyLoggerImpl;
 namespace streamrloglevel = streamr::logger::streamrloglevel;
 
 struct LogWriterMock : public folly::LogWriter {
@@ -32,8 +34,11 @@ protected:
     std::shared_ptr<LogWriterMock> mLogWriterMock = // NOLINT
         std::make_shared<LogWriterMock>();
 
+    std::shared_ptr<FollyLoggerImpl> mFollyLoggerImpl = // NOLINT
+        std::make_shared<FollyLoggerImpl>(mLogWriterMock);
+
     Logger mLogger = // NOLINT
-        Logger(std::string(""), streamrloglevel::Info{}, mLogWriterMock);
+        Logger(std::string(""), streamrloglevel::Info{}, mFollyLoggerImpl);
 
     Logger& getLogger() { return mLogger; }
     std::shared_ptr<LogWriterMock> getLogWriterMock() { return mLogWriterMock; }
@@ -448,10 +453,13 @@ TEST(LoggerContextBindingAndMetadataMerge, StringsMerged) {
     setenv("LOG_LEVEL", "fatal", 1);
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
         std::make_shared<LogWriterMock>();
+    std::shared_ptr<FollyLoggerImpl> tmpFollyLoggerImpl =
+        std::make_shared<FollyLoggerImpl>(tmpLogWriterMock);
+
     Logger tmpLogger = Logger(
         std::string("ContextBindingText"),
         streamrloglevel::Info{},
-        tmpLogWriterMock);
+        tmpFollyLoggerImpl);
 
     tmpLogger.fatal("Testi", std::string("LogExtraArgumentText")); // NOLINT
 
@@ -469,10 +477,13 @@ TEST(
     setenv("LOG_LEVEL", "fatal", 1);
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
         std::make_shared<LogWriterMock>();
+    std::shared_ptr<FollyLoggerImpl> tmpFollyLoggerImpl =
+        std::make_shared<FollyLoggerImpl>(tmpLogWriterMock);
+
     Logger tmpLogger = Logger(
         std::string("ContextBindingText"),
         streamrloglevel::Info{},
-        tmpLogWriterMock);
+        tmpFollyLoggerImpl);
 
     tmpLogger.fatal("Testi"); // NOLINT
 
@@ -490,8 +501,11 @@ TEST(
     setenv("LOG_LEVEL", "fatal", 1);
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
         std::make_shared<LogWriterMock>();
+    std::shared_ptr<FollyLoggerImpl> tmpFollyLoggerImpl =
+        std::make_shared<FollyLoggerImpl>(tmpLogWriterMock);
+
     Logger tmpLogger =
-        Logger(std::string(""), streamrloglevel::Info{}, tmpLogWriterMock);
+        Logger(std::string(""), streamrloglevel::Info{}, tmpFollyLoggerImpl);
 
     tmpLogger.fatal("Testi", std::string("LogExtraArgumentText")); // NOLINT
 
@@ -507,6 +521,8 @@ TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
     setenv("LOG_LEVEL", "fatal", 1);
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
         std::make_shared<LogWriterMock>();
+    std::shared_ptr<FollyLoggerImpl> tmpFollyLoggerImpl =
+        std::make_shared<FollyLoggerImpl>(tmpLogWriterMock);
 
     struct TestStruct1 {
         std::string foo1 = "bar1A";
@@ -520,7 +536,7 @@ TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
         std::string foo5 = "bar5";
     };
 
-    Logger logger{TestStruct1(), streamrloglevel::Info{}, tmpLogWriterMock};
+    Logger logger{TestStruct1(), streamrloglevel::Info{}, tmpFollyLoggerImpl};
 
     auto testStruct2 = TestStruct2();
     logger.fatal("Testi", testStruct2); // NOLINT
@@ -537,13 +553,15 @@ TEST(
     setenv("LOG_LEVEL", "fatal", 1);
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
         std::make_shared<LogWriterMock>();
+    std::shared_ptr<FollyLoggerImpl> tmpFollyLoggerImpl =
+        std::make_shared<FollyLoggerImpl>(tmpLogWriterMock);
 
     struct TestStruct1 {
         std::string foo1 = "bar1A";
         int foo2 = 42; // NOLINT
         std::string foo3 = "bar3";
     };
-    Logger logger{TestStruct1(), streamrloglevel::Info{}, tmpLogWriterMock};
+    Logger logger{TestStruct1(), streamrloglevel::Info{}, tmpFollyLoggerImpl};
 
     logger.fatal("Testi"); // NOLINT
     EXPECT_THAT(tmpLogWriterMock->getBuffer(), testing::HasSubstr("FATAL"));
@@ -559,6 +577,8 @@ TEST(
     setenv("LOG_LEVEL", "fatal", 1);
     std::shared_ptr<LogWriterMock> tmpLogWriterMock =
         std::make_shared<LogWriterMock>();
+    std::shared_ptr<FollyLoggerImpl> tmpFollyLoggerImpl =
+        std::make_shared<FollyLoggerImpl>(tmpLogWriterMock);
 
     struct TestStruct1 {
         std::string foo1 = "bar1A";
@@ -566,7 +586,7 @@ TEST(
         std::string foo3 = "bar3";
     };
 
-    Logger logger{std::string(""), streamrloglevel::Info{}, tmpLogWriterMock};
+    Logger logger{std::string(""), streamrloglevel::Info{}, tmpFollyLoggerImpl};
 
     auto testStruct1 = TestStruct1();
     logger.fatal("Testi", testStruct1); // NOLINT

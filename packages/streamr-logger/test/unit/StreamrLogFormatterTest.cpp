@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <streamr-logger/StreamrLogFormatter.hpp>
-using streamr::logger::StreamrLogFormatter;
+#include <streamr-logger/detail/StreamrLogFormatter.hpp>
+using namespace streamr::logger::detail; // NOLINT
 using namespace std::chrono; // NOLINT
 
 class StreamrLogFormatterTest : public testing::Test {

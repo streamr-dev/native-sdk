@@ -4,7 +4,7 @@
 #include <folly/logging/StandardLogHandlerFactory.h>
 #include "StreamrLogFormatter.hpp"
 
-namespace streamr::logger {
+namespace streamr::logger::detail {
 
 class StreamrLogFormatterFactory
     : public folly::StandardLogHandlerFactory::FormatterFactory {

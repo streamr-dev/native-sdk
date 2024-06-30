@@ -7,9 +7,7 @@
 #include <folly/logging/LogMessage.h>
 #include "StreamrLogColors.hpp"
 
-namespace streamr::logger {
-
-namespace detail {
+namespace streamr::logger::detail {
 
 // If you change MaxFileNameAndLineNumberLength, then please change it in
 // nonTruncatedFormatterPart too
@@ -55,8 +53,6 @@ constexpr LogLevelNameAndColor getLogLevelNameAndColor(
             break;
     }
 }
-} // namespace detail
-
 /*
 Format based on this Streamr log. The Filename and line number is fixed size
 with 36 characters. If it is longer then it is truncated
@@ -112,14 +108,14 @@ public:
         const auto lineNumberInString = std::to_string(message.lineNumber);
         const auto lineNumberLength = std::ssize(lineNumberInString);
         const auto fileNameAndLineNumberLength =
-            (fileNameLength + lineNumberLength + detail::SeparatorLength);
-        auto logLevelData = detail::getLogLevelNameAndColor(message.logLevel);
+            (fileNameLength + lineNumberLength + SeparatorLength);
+        auto logLevelData = getLogLevelNameAndColor(message.logLevel);
         const auto tmStartYear{1900};
         auto firstPartOfLogLine = folly::sformat(
-            detail::FirstPartOfLogMessageFormatter,
+            FirstPartOfLogMessageFormatter,
             logLevelData.color,
             logLevelData.logLevelName,
-            detail::colors::ResetColor,
+            colors::ResetColor,
             ltime.tm_year + tmStartYear,
             ltime.tm_mon + 1,
             ltime.tm_mday,
@@ -167,6 +163,7 @@ public:
              message.getMessage()});
     }
 };
-}; // namespace streamr::logger
+
+} // namespace streamr::logger::detail
 
 #endif
