@@ -9,8 +9,9 @@
 
 #include "streamr-logger/StreamrLogLevel.hpp"
 
-constexpr folly::LogLevel defaultFollyLogLevel = folly::LogLevel::INFO;
+namespace streamr::logger::detail {
 
+constexpr folly::LogLevel defaultFollyLogLevel = folly::LogLevel::INFO;
 // A compile-time map between StreamrLogLevel and folly::LogLevel
 
 template <std::size_t Size>
@@ -49,5 +50,7 @@ struct LogLevelMap {
         return defaultFollyLogLevel;
     }
 };
+
+} // namespace streamr::logger::detail
 
 #endif // STREAMR_LOGGER_LOG_LEVEL_MAP_HPP

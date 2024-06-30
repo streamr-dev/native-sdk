@@ -4,16 +4,10 @@
 #include <source_location>
 #include <string_view>
 #include <nlohmann/json.hpp>
-#include <folly/logging/LogConfig.h>
-#include <folly/logging/LogLevel.h>
-#include <folly/logging/LogMessage.h>
-#include <folly/logging/LogWriter.h>
-#include <folly/logging/LoggerDB.h>
-#include <folly/logging/xlog.h>
-#include "StreamrHandlerFactory.hpp"
-#include "StreamrWriterFactory.hpp"
 #include "streamr-json/toJson.hpp"
-#include "streamr-logger/LogLevelMap.hpp"
+#include "streamr-logger/LoggerImpl.hpp"
+#include "streamr-logger/StreamrLogLevel.hpp"
+#include "streamr-logger/detail/FollyLoggerImpl.hpp"
 
 namespace streamr::logger {
 
@@ -22,43 +16,27 @@ constexpr std::string_view envLogLevelName = "LOG_LEVEL";
 
 class Logger {
 private:
-    StreamrWriterFactory mWriterFactory;
-    folly::LoggerDB& mLoggerDB;
-    std::unique_ptr<folly::LogHandlerFactory> mLogHandlerFactory;
+    StreamrLogLevel mDefaultLogLevel;
+    std::shared_ptr<LoggerImpl> mLoggerImpl;
     nlohmann::json mContextBindings;
-    folly::LogLevel mDefaultLogLevel;
-
-    static constexpr size_t logLevelMapSize = 6;
-    static const LogLevelMap<logLevelMapSize>& getLogLevelMap() {
-        // You can change the log level mapping
-        // between Streamr and folly by editing
-        // this magic static map
-        static constexpr LogLevelMap<logLevelMapSize> logLevelMap(
-            {{{{streamrloglevel::Trace{}, folly::LogLevel::DBG},
-               {streamrloglevel::Debug{}, folly::LogLevel::DBG0},
-               {streamrloglevel::Info{}, folly::LogLevel::INFO},
-               {streamrloglevel::Warn{}, folly::LogLevel::WARN},
-               {streamrloglevel::Error{}, folly::LogLevel::ERR},
-               {streamrloglevel::Fatal{}, folly::LogLevel::CRITICAL}}}});
-        return logLevelMap;
-    }
 
 public:
     // ContextBindingsType can be any type that is convertible to JSON by
-    // streamr-json
+    // streamr-json, ToDo: use a Concept to enforce this
     template <typename ContextBindingsType = std::string>
     explicit Logger(
         const ContextBindingsType& contextBindings = nlohmann::json{},
         StreamrLogLevel defaultLogLevel = streamrloglevel::Info{},
-        std::shared_ptr<folly::LogWriter> logWriter =
-            nullptr) // using std::optional will not work because
-                     // folly::LogWriter is an abstract class
-        : mLoggerDB{folly::LoggerDB::get()} {
-        mDefaultLogLevel =
-            getLogLevelMap().streamrLevelToFollyLevel(defaultLogLevel);
+        std::shared_ptr<LoggerImpl> loggerImpl = nullptr)
+        : mDefaultLogLevel(defaultLogLevel) {
         mContextBindings =
             ensureJsonObject(toJson(contextBindings), "contextBindings");
-        initialize(std::move(logWriter));
+
+        if (!loggerImpl) {
+            loggerImpl = std::make_shared<detail::FollyLoggerImpl>();
+        } else {
+            mLoggerImpl = std::move(loggerImpl);
+        }
     }
 
     template <typename T = std::string>
@@ -67,7 +45,7 @@ public:
         const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
-        log(folly::LogLevel::DBG, msg, metadata, location);
+        log(streamrloglevel::Trace{}, msg, metadata, location);
     }
 
     template <typename T = std::string>
@@ -76,7 +54,7 @@ public:
         const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
-        log(folly::LogLevel::DBG0, msg, metadata, location);
+        log(streamrloglevel::Debug{}, msg, metadata, location);
     }
 
     template <typename T = std::string>
@@ -85,7 +63,7 @@ public:
         const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
-        log(folly::LogLevel::INFO, msg, metadata, location);
+        log(streamrloglevel::Info{}, msg, metadata, location);
     }
 
     template <typename T = std::string>
@@ -94,7 +72,7 @@ public:
         const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
-        log(folly::LogLevel::WARN, msg, metadata, location);
+        log(streamrloglevel::Warn{}, msg, metadata, location);
     }
 
     template <typename T = std::string>
@@ -103,7 +81,7 @@ public:
         const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
-        log(folly::LogLevel::ERR, msg, metadata, location);
+        log(streamrloglevel::Error{}, msg, metadata, location);
     }
 
     template <typename T = std::string>
@@ -112,27 +90,39 @@ public:
         const T& metadata = std::string(""),
         const std::source_location& location =
             std::source_location::current()) {
-        log(folly::LogLevel::CRITICAL, msg, metadata, location);
+        log(streamrloglevel::Fatal{}, msg, metadata, location);
     }
 
 private:
-    folly::LogLevel getFollyLogRootLevel() {
+    StreamrLogLevel getLoggerLogLevel(std::string_view fileName) {
+        // If per-file log level setting is found in env
+        // varibale of the type 'LOG_LEVEL_example.cpp=trace'
+        // return the corresponding StreamrLogLevel.
+        // If the value of the env variable exists but is not valid,
+        // return the default log level which is Info.
+
+        std::string perFileEnvName(envLogLevelName);
+        perFileEnvName = +"_" + std::string(fileName);
+
+        char* fileVal = getenv(perFileEnvName.c_str());
+        if (fileVal) {
+            return getStreamrLogLevelByName(fileVal);
+        }
+
+        // If no per-file log level setting is found,
+        // return the log level set by 'LOG_LEVEL' env variable.
+        // If 'LOG_LEVEL' is not valid, return the default log level
+        // which is Info.
+
         char* val = getenv(envLogLevelName.data());
         if (val) {
-            return getLogLevelMap().streamrLevelNameToFollyLevel(val);
+            return getStreamrLogLevelByName(val);
         }
-        return mDefaultLogLevel;
-    }
 
-    void initialize(std::shared_ptr<folly::LogWriter> logWriter) { // NOLINT
-        if (logWriter) {
-            mWriterFactory = StreamrWriterFactory(logWriter);
-        } else {
-            mWriterFactory = StreamrWriterFactory();
-        }
-        mLogHandlerFactory =
-            std::make_unique<StreamrHandlerFactory>(&mWriterFactory);
-        this->initializeLoggerDB(folly::LogLevel::DBG);
+        // If neither env variable is set, return the default
+        // log level of this Logger instance.
+
+        return mDefaultLogLevel;
     }
 
     // Ensure that the given JSON element is an object
@@ -155,68 +145,30 @@ private:
     // streamr-json
     template <typename MetadataType = std::string>
     void log(
-        const folly::LogLevel follyLogLevelLevel,
+        const StreamrLogLevel messageLogLevel,
         const std::string& msg,
         const MetadataType& metadata,
         const std::source_location& location) {
+        // Merge the possible metadata with the context bindings
+
         auto metadataJson = ensureJsonObject(toJson(metadata), "metadata");
         metadataJson.merge_patch(mContextBindings);
-        // auto extraArgumentInString = getJsonObjectInString(extraArgument);
         auto metadataString =
             metadataJson.empty() ? "" : (" " + metadataJson.dump());
-        auto follyRootLogLevel = getFollyLogRootLevel();
-        if (follyRootLogLevel != mLoggerDB.getCategory("")->getLevel()) {
-            this->initializeLoggerDB(follyRootLogLevel, true);
-        }
-        sendLogMessage(follyLogLevelLevel, msg, metadataString, location);
-    }
 
-    void sendLogMessage(
-        const folly::LogLevel follyLogLevelLevel,
-        const std::string& msg,
-        const std::string& metadata,
-        const std::source_location& location) {
-        folly::LogStreamProcessor(
-            [] {
-                static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
-                    follyDetailXlogCategory;
-                return follyDetailXlogCategory.getInfo(
-                    &::folly::detail::custom::xlogFileScopeInfo);
-            }(),
-            (follyLogLevelLevel),
-            [] {
-                constexpr auto* follyDetailXlogFilename = XLOG_FILENAME;
-                return ::folly::detail::custom::getXlogCategoryName(
-                    follyDetailXlogFilename, 0);
-            }(),
-            ::folly::detail::custom::isXlogCategoryOverridden(0),
-            location.file_name(),
-            location.line(),
-            __func__,
-            ::folly::LogStreamProcessor::APPEND,
-            msg,
-            metadata)
-            .stream();
-    }
+        auto loggerLogLevel = getLoggerLogLevel(location.file_name());
 
-    void initializeLoggerDB(
-        const folly::LogLevel& rootLogLevel,
-        bool isSkipRegisterHandlerFactory = false) {
-        if (!isSkipRegisterHandlerFactory) {
-            mLoggerDB.registerHandlerFactory(
-                std::move(mLogHandlerFactory), true);
+        auto shouldLog = std::visit(
+            [](const auto& loggerLevel, const auto& logLevel) {
+                return loggerLevel.value <= logLevel.value;
+            },
+            loggerLogLevel,
+            messageLogLevel);
+
+        if (shouldLog) {
+            mLoggerImpl->sendLogMessage(
+                messageLogLevel, msg, metadataString, location);
         }
-        auto rootLogLevelInString = folly::logLevelToString(rootLogLevel);
-        auto defaultHandlerConfig = folly::LogHandlerConfig(
-            "stream",
-            {{"stream", "stderr"},
-             {"async", "false"},
-             {"level", rootLogLevelInString}});
-        auto rootCategoryConfig =
-            folly::LogCategoryConfig(rootLogLevel, false, {"default"});
-        folly::LogConfig config(
-            {{"default", defaultHandlerConfig}}, {{"", rootCategoryConfig}});
-        mLoggerDB.updateConfig(config);
     }
 };
 

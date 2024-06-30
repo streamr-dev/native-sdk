@@ -7,7 +7,7 @@
 #include "StreamrLogFormatterFactory.hpp"
 #include "StreamrWriterFactory.hpp"
 
-namespace streamr::logger {
+namespace streamr::logger::detail {
 
 class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 private:
@@ -26,6 +26,7 @@ public:
             getType(), mWriterFactory, &formatterFactory, options);
     }
 };
-}; // namespace streamr::logger
+
+} // namespace streamr::logger::detail
 
 #endif

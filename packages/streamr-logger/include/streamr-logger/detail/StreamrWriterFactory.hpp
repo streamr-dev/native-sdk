@@ -3,7 +3,7 @@
 
 #include <folly/logging/StreamHandlerFactory.h>
 
-namespace streamr::logger {
+namespace streamr::logger::detail {
 
 class StreamrWriterFactory : public folly::StreamHandlerFactory::WriterFactory {
 private:
