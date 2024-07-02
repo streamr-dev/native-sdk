@@ -23,6 +23,6 @@ public:
     }
 };
 
-}; // namespace streamr::logger
+} // namespace streamr::logger::detail
 
 #endif

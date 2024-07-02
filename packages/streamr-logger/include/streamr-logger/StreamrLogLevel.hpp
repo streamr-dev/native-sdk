@@ -4,32 +4,48 @@
 #include <string_view>
 #include <variant>
 
+#include "detail/StreamrLogColors.hpp"
+
 namespace streamr::logger {
 
 namespace streamrloglevel {
+
+namespace colors = streamr::logger::detail::colors;
 struct Trace {
     static constexpr std::string_view name = "trace";
     static constexpr int value = 0;
+    static constexpr std::string_view displayName = "TRACE";
+    static constexpr std::string_view color = colors::gray;
 };
 struct Debug {
     static constexpr std::string_view name = "debug";
     static constexpr int value = 1;
+    static constexpr std::string_view displayName = "DEBUG";
+    static constexpr std::string_view color = colors::blue;
 };
 struct Info {
     static constexpr std::string_view name = "info";
     static constexpr int value = 2;
+    static constexpr std::string_view displayName = "INFO";
+    static constexpr std::string_view color = colors::green;
 };
 struct Warn {
     static constexpr std::string_view name = "warn";
     static constexpr int value = 3;
+    static constexpr std::string_view displayName = "WARN";
+    static constexpr std::string_view color = colors::yellow;
 };
 struct Error {
     static constexpr std::string_view name = "error";
     static constexpr int value = 4;
+    static constexpr std::string_view displayName = "ERROR";
+    static constexpr std::string_view color = colors::red;
 };
 struct Fatal {
     static constexpr std::string_view name = "fatal";
     static constexpr int value = 5;
+    static constexpr std::string_view displayName = "FATAL";
+    static constexpr std::string_view color = colors::bgRed;
 };
 } // namespace streamrloglevel
 

@@ -24,21 +24,6 @@ private:
     folly::LoggerDB& mLoggerDB;
     std::unique_ptr<folly::LogHandlerFactory> mLogHandlerFactory;
 
-    static constexpr size_t logLevelMapSize = 6;
-    static const LogLevelMap<logLevelMapSize>& getLogLevelMap() {
-        // You can change the log level mapping
-        // between Streamr and folly by editing
-        // this magic static map
-        static constexpr LogLevelMap<logLevelMapSize> logLevelMap(
-            {{{{streamrloglevel::Trace{}, folly::LogLevel::DBG},
-               {streamrloglevel::Debug{}, folly::LogLevel::DBG0},
-               {streamrloglevel::Info{}, folly::LogLevel::INFO},
-               {streamrloglevel::Warn{}, folly::LogLevel::WARN},
-               {streamrloglevel::Error{}, folly::LogLevel::ERR},
-               {streamrloglevel::Fatal{}, folly::LogLevel::CRITICAL}}}});
-        return logLevelMap;
-    }
-
 public:
     explicit FollyLoggerImpl(
         std::shared_ptr<folly::LogWriter> logWriter = nullptr)
@@ -55,7 +40,7 @@ public:
         const std::string& metadata,
         const std::source_location& location) override {
         const auto follyLogLevel =
-            getLogLevelMap().streamrLevelToFollyLevel(logLevel);
+            LogLevelMap::instance().streamrLevelToFollyLevel(logLevel);
         folly::LogStreamProcessor(
             [] {
                 static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>
