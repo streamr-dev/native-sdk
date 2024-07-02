@@ -20,6 +20,7 @@ public:
         return std::make_shared<StreamrLogFormatter>();
     }
 };
-}; // namespace streamr::logger
+
+} // namespace streamr::logger::detail
 
 #endif

@@ -5,6 +5,7 @@
 #include <folly/logging/LogFormatter.h>
 #include <folly/logging/LogLevel.h>
 #include <folly/logging/LogMessage.h>
+#include "LogLevelMap.hpp"
 #include "StreamrLogColors.hpp"
 
 namespace streamr::logger::detail {
@@ -25,34 +26,6 @@ struct LogLevelNameAndColor {
     std::string_view color;
 };
 
-// FATAL cannot be used in folly because it aborts. So CRITICAL is converted
-// to Streamr fatal. This function can be used at compile time.
-constexpr LogLevelNameAndColor getLogLevelNameAndColor(
-    const folly::LogLevel level) {
-    switch (level) {
-        case folly::LogLevel::DBG:
-            return {"TRACE", detail::colors::Gray};
-            break;
-        case folly::LogLevel::DBG0:
-            return {"DEBUG", detail::colors::Blue};
-            break;
-        case folly::LogLevel::INFO:
-            return {"INFO", detail::colors::Green};
-            break;
-        case folly::LogLevel::WARN:
-            return {"WARN", detail::colors::Yellow};
-            break;
-        case folly::LogLevel::ERR:
-            return {"ERROR", detail::colors::Red};
-            break;
-        case folly::LogLevel::CRITICAL:
-            return {"FATAL", detail::colors::BgRed};
-            break;
-        default:
-            return {"TRACE", detail::colors::Gray};
-            break;
-    }
-}
 /*
 Format based on this Streamr log. The Filename and line number is fixed size
 with 36 characters. If it is longer then it is truncated
@@ -92,6 +65,24 @@ public:
         const std::string& logMessage;
     };
 
+    // FATAL cannot be used in folly because it aborts. So CRITICAL is converted
+    // to Streamr fatal. This function can be used at compile time.
+    LogLevelNameAndColor getLogLevelNameAndColor(const folly::LogLevel level) {
+        auto streamrLevel =
+            LogLevelMap::instance().follyLevelToStreamrLevel(level);
+        std::string_view logLevelName;
+        std::string_view color;
+
+        std::visit(
+            [&](const auto& arg) {
+                logLevelName = arg.displayName;
+                color = arg.color;
+            },
+            streamrLevel);
+
+        return {logLevelName, color};
+    }
+
     std::string formatMessageInStreamrStyle(const StreamrLogMessage& message) {
         struct tm ltime;
         const auto timeSinceEpoch = message.timestamp.time_since_epoch();
@@ -115,7 +106,7 @@ public:
             FirstPartOfLogMessageFormatter,
             logLevelData.color,
             logLevelData.logLevelName,
-            colors::ResetColor,
+            colors::resetColor,
             ltime.tm_year + tmStartYear,
             ltime.tm_mon + 1,
             ltime.tm_mday,
@@ -146,9 +137,9 @@ public:
         }
         auto lastPartOfLogLine = folly::sformat(
             detail::LastPartOfLogMessageFormatter,
-            detail::colors::Cyan,
+            colors::cyan,
             message.logMessage,
-            detail::colors::ResetColor);
+            colors::resetColor);
         return firstPartOfLogLine + middlePartOfLogLine + lastPartOfLogLine;
     }
 
