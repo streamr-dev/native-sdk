@@ -1,6 +1,9 @@
 #ifndef STREAMER_LOGGER_STREAMRLOGFORMATTER_HPP
 #define STREAMER_LOGGER_STREAMRLOGFORMATTER_HPP
 
+#include <cstddef>
+#include <cstdlib>
+#include <string_view>
 #include <folly/Format.h>
 #include <folly/logging/LogFormatter.h>
 #include <folly/logging/LogLevel.h>
@@ -10,21 +13,22 @@
 
 namespace streamr::logger::detail {
 
+namespace constants {
+
+constexpr std::string_view logColorsEnvVar = "LOG_COLORS";
+
 // If you change MaxFileNameAndLineNumberLength, then please change it in
 // nonTruncatedFormatterPart too
-static constexpr int maxFileNameAndLineNumberLength{36};
-static const std::string FileNameAndLineNumberSeparator{": "};
-static const auto SeparatorLength{std::ssize(FileNameAndLineNumberSeparator)};
-static const auto FirstPartOfLogMessageFormatter =
+constexpr size_t maxFileNameAndLineNumberLength{36};
+constexpr std::string_view fileNameAndLineNumberSeparator = ": ";
+constexpr size_t separatorLength{std::ssize(fileNameAndLineNumberSeparator)};
+constexpr std::string_view firstPartOfLogMessageFormatter =
     "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] (";
-static const auto NonTruncatedFormatterPart = "{:<36}";
-static const auto TruncatedFormatterPart = "{: <*}{}{}";
-static const auto LastPartOfLogMessageFormatter = "): {}{}{}";
+constexpr std::string_view nonTruncatedFormatterPart = "{:<36}";
+constexpr std::string_view truncatedFormatterPart = "{: <*}{}{}";
+constexpr std::string_view lastPartOfLogMessageFormatter = "): {}{}{}";
 
-struct LogLevelNameAndColor {
-    std::string_view logLevelName;
-    std::string_view color;
-};
+} // namespace constants
 
 /*
 Format based on this Streamr log. The Filename and line number is fixed size
@@ -57,6 +61,20 @@ public:
     StreamrLogFormatter() = default;
     ~StreamrLogFormatter() override = default;
 
+    std::string formatMessage(
+        const folly::LogMessage& message,
+        const folly::LogCategory* /* handlerCategory */) override {
+        return formatMessageInStreamrStyle(
+            {message.getTimestamp(),
+             message.getFileBaseName(),
+             message.getLineNumber(),
+             message.getLevel(),
+             message.getMessage()});
+    }
+    struct LogLevelNameAndColor {
+        std::string_view logLevelName;
+        std::string_view color;
+    };
     struct StreamrLogMessage {
         std::chrono::system_clock::time_point timestamp;
         folly::StringPiece fileBasename;
@@ -67,7 +85,8 @@ public:
 
     // FATAL cannot be used in folly because it aborts. So CRITICAL is converted
     // to Streamr fatal. This function can be used at compile time.
-    LogLevelNameAndColor getLogLevelNameAndColor(const folly::LogLevel level) {
+    static LogLevelNameAndColor getLogLevelNameAndColor(
+        const folly::LogLevel level) {
         auto streamrLevel =
             LogLevelMap::instance().follyLevelToStreamrLevel(level);
         std::string_view logLevelName;
@@ -83,7 +102,13 @@ public:
         return {logLevelName, color};
     }
 
-    std::string formatMessageInStreamrStyle(const StreamrLogMessage& message) {
+    static bool getColorsSettingFromEnv() {
+        const auto* const env = std::getenv(constants::logColorsEnvVar.data());
+        return (env == nullptr || std::string_view(env) != "false");
+    }
+
+    static std::string formatMessageInStreamrStyle(
+        const StreamrLogMessage& message) {
         struct tm ltime;
         const auto timeSinceEpoch = message.timestamp.time_since_epoch();
         const auto epochSeconds =
@@ -99,14 +124,16 @@ public:
         const auto lineNumberInString = std::to_string(message.lineNumber);
         const auto lineNumberLength = std::ssize(lineNumberInString);
         const auto fileNameAndLineNumberLength =
-            (fileNameLength + lineNumberLength + SeparatorLength);
+            (fileNameLength + lineNumberLength + constants::separatorLength);
         auto logLevelData = getLogLevelNameAndColor(message.logLevel);
         const auto tmStartYear{1900};
+        bool colorsOn = getColorsSettingFromEnv();
+
         auto firstPartOfLogLine = folly::sformat(
-            FirstPartOfLogMessageFormatter,
-            logLevelData.color,
+            constants::firstPartOfLogMessageFormatter,
+            (colorsOn ? logLevelData.color : ""),
             logLevelData.logLevelName,
-            colors::resetColor,
+            (colorsOn ? colors::resetColor : ""),
             ltime.tm_year + tmStartYear,
             ltime.tm_mon + 1,
             ltime.tm_mday,
@@ -116,42 +143,32 @@ public:
             millisecs.count());
         std::string middlePartOfLogLine;
         if (fileNameAndLineNumberLength <=
-            detail::maxFileNameAndLineNumberLength) {
+            constants::maxFileNameAndLineNumberLength) {
             // No truncate
-            basename = basename + detail::FileNameAndLineNumberSeparator +
+            basename = basename +
+                std::string(constants::fileNameAndLineNumberSeparator) +
                 lineNumberInString;
             middlePartOfLogLine =
-                folly::sformat(detail::NonTruncatedFormatterPart, basename);
+                folly::sformat(constants::nonTruncatedFormatterPart, basename);
         } else {
             // Truncate needed
             auto lengthForTruncatedFileName =
-                detail::maxFileNameAndLineNumberLength -
-                (lineNumberLength + detail::SeparatorLength);
+                constants::maxFileNameAndLineNumberLength -
+                (lineNumberLength + constants::separatorLength);
             basename = basename.substr(0, lengthForTruncatedFileName);
             middlePartOfLogLine = folly::sformat(
-                detail::TruncatedFormatterPart,
+                constants::truncatedFormatterPart,
                 lengthForTruncatedFileName,
                 basename,
-                detail::FileNameAndLineNumberSeparator,
+                constants::fileNameAndLineNumberSeparator,
                 lineNumberInString);
         }
         auto lastPartOfLogLine = folly::sformat(
-            detail::LastPartOfLogMessageFormatter,
-            colors::cyan,
+            constants::lastPartOfLogMessageFormatter,
+            (colorsOn ? colors::cyan : ""),
             message.logMessage,
-            colors::resetColor);
+            (colorsOn ? colors::resetColor : ""));
         return firstPartOfLogLine + middlePartOfLogLine + lastPartOfLogLine;
-    }
-
-    std::string formatMessage(
-        const folly::LogMessage& message,
-        const folly::LogCategory* /* handlerCategory */) override {
-        return this->formatMessageInStreamrStyle(
-            {message.getTimestamp(),
-             message.getFileBaseName(),
-             message.getLineNumber(),
-             message.getLevel(),
-             message.getMessage()});
     }
 };
 
