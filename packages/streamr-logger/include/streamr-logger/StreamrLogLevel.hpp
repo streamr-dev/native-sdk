@@ -57,6 +57,9 @@ using StreamrLogLevel = std::variant<
     streamrloglevel::Error,
     streamrloglevel::Fatal>;
 
+template <typename T>
+concept StreamrLogLevelConcept = std::is_same_v<T, StreamrLogLevel>;
+
 constexpr StreamrLogLevel defaultLogLevel = streamrloglevel::Info{};
 
 // Disable default specialization
@@ -74,18 +77,15 @@ struct LevelGetter<std::variant<LogLevels...>> {
     }
 };
 
-/*
-template<typename ...T>
-[[nodiscard]] StreamrLogLevel getStreamrLogLevelByNameImpl(std::string_view
-levelName) { StreamrLogLevel result = defaultLogLevel;
-    ((T::name == levelName ? result = T{} : result), ...);
-    return result;
-}
-*/
 template <typename T = StreamrLogLevel>
 [[nodiscard]] StreamrLogLevel getStreamrLogLevelByName(
     std::string_view levelName) {
     return LevelGetter<T>().getStreamrLogLevelByName(levelName);
+}
+
+template <StreamrLogLevelConcept T = StreamrLogLevel>
+[[nodiscard]] int getStreamrLogLevelValue(T level) {
+    return std::visit([](const auto& level) { return level.value; }, level);
 }
 
 } // namespace streamr::logger

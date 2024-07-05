@@ -156,16 +156,14 @@ private:
         auto metadataString =
             metadataJson.empty() ? "" : (" " + metadataJson.dump());
 
+        // Get the log level of this logger, using the filename as a hint
         auto loggerLogLevel = getLoggerLogLevel(location.file_name());
 
-        auto shouldLog = std::visit(
-            [](const auto& loggerLevel, const auto& logLevel) {
-                return loggerLevel.value <= logLevel.value;
-            },
-            loggerLogLevel,
-            messageLogLevel);
+        // only send the message if the log level of this logger is less or
+        // equal to the log level of the message
 
-        if (shouldLog) {
+        if (getStreamrLogLevelValue(loggerLogLevel) <=
+            getStreamrLogLevelValue(messageLogLevel)) {
             mLoggerImpl->sendLogMessage(
                 messageLogLevel, msg, metadataString, location);
         }
