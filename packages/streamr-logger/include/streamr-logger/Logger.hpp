@@ -39,6 +39,13 @@ public:
         }
     }
 
+    // Enable singleton-like usage with default settings
+
+    static Logger& instance() {
+        static Logger instance;
+        return instance;
+    }
+
     template <typename T = std::string>
     void trace(
         const std::string& msg,
