@@ -9,7 +9,7 @@ using streamr::logger::StreamrLogLevel;
 using FollyLoggerImpl = streamr::logger::detail::FollyLoggerImpl;
 namespace streamrloglevel = streamr::logger::streamrloglevel;
 
-struct LogWriterMock : public folly::LogWriter {
+class LogWriterMock : public folly::LogWriter {
 private:
     std::string mBuffer;
     int mIsCalled{0};
@@ -37,10 +37,11 @@ protected:
     std::shared_ptr<FollyLoggerImpl> mFollyLoggerImpl = // NOLINT
         std::make_shared<FollyLoggerImpl>(mLogWriterMock);
 
-    Logger mLogger = // NOLINT
-        Logger(std::string(""), streamrloglevel::Info{}, mFollyLoggerImpl);
+    Logger getLogger() {
+        return Logger(
+            std::string(""), streamrloglevel::Info{}, mFollyLoggerImpl);
+    }
 
-    Logger& getLogger() { return mLogger; }
     std::shared_ptr<LogWriterMock> getLogWriterMock() { return mLogWriterMock; }
 };
 

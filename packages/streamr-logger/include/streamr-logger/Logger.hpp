@@ -13,10 +13,9 @@ namespace streamr::logger {
 
 using streamr::json::toJson;
 constexpr std::string_view envLogLevelName = "LOG_LEVEL";
-
 class Logger {
 private:
-    StreamrLogLevel mDefaultLogLevel;
+    StreamrLogLevel mLoggerLogLevel;
     std::shared_ptr<LoggerImpl> mLoggerImpl;
     nlohmann::json mContextBindings;
 
@@ -26,9 +25,19 @@ public:
     template <typename ContextBindingsType = std::string>
     explicit Logger(
         const ContextBindingsType& contextBindings = nlohmann::json{},
-        StreamrLogLevel defaultLogLevel = streamrloglevel::Info{},
-        std::shared_ptr<LoggerImpl> loggerImpl = nullptr)
-        : mDefaultLogLevel(defaultLogLevel) {
+        StreamrLogLevel defaultLogLevel = systemDefaultLogLevel,
+        std::shared_ptr<LoggerImpl> loggerImpl = nullptr) {
+        // If LOG_LEVEL env variable is set and is valid,
+        // use it as the default log level for this logger.
+        // Otherwise, use the defaultLogLevel.
+
+        char* val = getenv(envLogLevelName.data());
+        if (val) {
+            mLoggerLogLevel = getStreamrLogLevelByName(val, defaultLogLevel);
+        } else {
+            mLoggerLogLevel = defaultLogLevel;
+        }
+
         mContextBindings =
             ensureJsonObject(toJson(contextBindings), "contextBindings");
 
@@ -101,42 +110,27 @@ public:
     }
 
 private:
-    StreamrLogLevel getLoggerLogLevel(std::string_view fileName) {
+    StreamrLogLevel getLogLevelToUse(std::string_view fileName) {
         // If per-file log level setting is found in env
-        // varibale of the type 'LOG_LEVEL_example.cpp=trace'
-        // return the corresponding StreamrLogLevel.
-        // If the value of the env variable exists but is not valid,
-        // return the default log level which is Info.
+        // variable of the type 'LOG_LEVEL_example.cpp=trace',
+        // use it, otherwise use default.
 
         std::string perFileEnvName(envLogLevelName);
         perFileEnvName = +"_" + std::string(fileName);
 
         char* fileVal = getenv(perFileEnvName.c_str());
         if (fileVal) {
-            return getStreamrLogLevelByName(fileVal);
+            return getStreamrLogLevelByName(fileVal, mLoggerLogLevel);
         }
 
-        // If no per-file log level setting is found,
-        // return the log level set by 'LOG_LEVEL' env variable.
-        // If 'LOG_LEVEL' is not valid, return the default log level
-        // which is Info.
-
-        char* val = getenv(envLogLevelName.data());
-        if (val) {
-            return getStreamrLogLevelByName(val);
-        }
-
-        // If neither env variable is set, return the default
-        // log level of this Logger instance.
-
-        return mDefaultLogLevel;
+        return mLoggerLogLevel;
     }
 
     // Ensure that the given JSON element is an object
     // If it is not, then create an object and place the given element
     // under the given key in the object
 
-    nlohmann::json ensureJsonObject(
+    static nlohmann::json ensureJsonObject(
         const nlohmann::json& element, const std::string_view key) {
         if (element.is_object()) {
             return element;
@@ -163,8 +157,9 @@ private:
         auto metadataString =
             metadataJson.empty() ? "" : (" " + metadataJson.dump());
 
-        // Get the log level of this logger, using the filename as a hint
-        auto loggerLogLevel = getLoggerLogLevel(location.file_name());
+        // Get the logger log level to use this time, using the filename as a
+        // hint
+        auto loggerLogLevel = getLogLevelToUse(location.file_name());
 
         // only send the message if the log level of this logger is less or
         // equal to the log level of the message
