@@ -1,6 +1,7 @@
 #ifndef STREAMR_LOGGER_DETAIL_FOLLY_LOGGER_IMPL_HPP
 #define STREAMR_LOGGER_DETAIL_FOLLY_LOGGER_IMPL_HPP
 
+#include <memory>
 #include <source_location>
 #include <folly/logging/LogConfig.h>
 #include <folly/logging/LogLevel.h>
@@ -20,17 +21,18 @@ using LoggerImpl = streamr::logger::LoggerImpl;
 
 class FollyLoggerImpl : public LoggerImpl {
 private:
-    StreamrWriterFactory mWriterFactory;
+    std::shared_ptr<StreamrWriterFactory> mWriterFactory;
     folly::LoggerDB& mLoggerDB;
     std::unique_ptr<folly::LogHandlerFactory> mLogHandlerFactory;
 
 public:
     explicit FollyLoggerImpl(
         std::shared_ptr<folly::LogWriter> logWriter = nullptr)
-        : mWriterFactory(std::move(logWriter)),
-          mLoggerDB{folly::LoggerDB::get()} {
+        : mLoggerDB{folly::LoggerDB::get()} {
+        mWriterFactory =
+            std::make_shared<StreamrWriterFactory>(std::move(logWriter));
         mLogHandlerFactory =
-            std::make_unique<StreamrHandlerFactory>(&mWriterFactory);
+            std::make_unique<StreamrHandlerFactory>(mWriterFactory.get());
         this->initializeLoggerDB(folly::LogLevel::DBG);
     }
 

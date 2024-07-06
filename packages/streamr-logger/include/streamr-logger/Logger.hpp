@@ -47,7 +47,7 @@ public:
             ensureJsonObject(toJson(contextBindings), "contextBindings");
 
         if (!loggerImpl) {
-            loggerImpl = std::make_shared<detail::FollyLoggerImpl>();
+            mLoggerImpl = std::make_shared<detail::FollyLoggerImpl>();
         } else {
             mLoggerImpl = std::move(loggerImpl);
         }

@@ -168,7 +168,8 @@ public:
             (colorsOn ? colors::cyan : ""),
             message.logMessage,
             (colorsOn ? colors::resetColor : ""));
-        return firstPartOfLogLine + middlePartOfLogLine + lastPartOfLogLine;
+        return firstPartOfLogLine + middlePartOfLogLine + lastPartOfLogLine +
+            "\n";
     }
 };
 
