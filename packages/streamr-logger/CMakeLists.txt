@@ -53,3 +53,6 @@ target_link_libraries(streamr-logger-test-unit
 
 include(GoogleTest)
 gtest_discover_tests(streamr-logger-test-unit)
+
+add_executable(streamr-logger-example src/examples/LoggerExample.cpp)
+target_link_libraries(streamr-logger-example PRIVATE streamr-logger)
