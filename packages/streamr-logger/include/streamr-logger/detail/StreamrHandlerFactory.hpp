@@ -12,6 +12,7 @@ namespace streamr::logger::detail {
 class StreamrHandlerFactory : public folly::StreamHandlerFactory {
 private:
     StreamrWriterFactory* mWriterFactory;
+    StreamrLogFormatterFactory formatterFactory;
 
 public:
     StreamrHandlerFactory() = default;
@@ -21,7 +22,6 @@ public:
 
     std::shared_ptr<folly::LogHandler> createHandler(
         const Options& options) override {
-        StreamrLogFormatterFactory formatterFactory;
         return folly::StandardLogHandlerFactory::createHandler(
             getType(), mWriterFactory, &formatterFactory, options);
     }

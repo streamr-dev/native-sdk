@@ -25,13 +25,14 @@ public:
         Logger localLogger("MyLoopLogger", streamrloglevel::Info{});
         for (int i = 0; i < loopCount; i++) {
             localLogger.info(
-                "Logging something using logger with context bindings {}", i);
+                "Logging something using logger with context bindings", i);
         }
 
-        Logger localLogger2({"jsonKey", "jsonValue"}, streamrloglevel::Info{});
+        Logger localLogger2(
+            {{"jsonKey", "jsonValue"}}, streamrloglevel::Info{});
         for (int i = 0; i < loopCount; i++) {
             localLogger2.info(
-                "Logging something using logger with context bindings given as JSON {}",
+                "Logging something using logger with context bindings given as JSON",
                 i);
         }
 
@@ -42,7 +43,7 @@ public:
 
         mLogger.info(
             "Logging something using a member reference with metadata given as JSON that contains a struct",
-            {"data", data});
+            {{"data", data}});
     }
 };
 
