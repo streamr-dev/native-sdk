@@ -12,6 +12,9 @@
 namespace streamr::logger::detail {
 
 constexpr folly::LogLevel defaultFollyLogLevel = folly::LogLevel::INFO;
+constexpr StreamrLogLevel defaultStreamrLogLevel =
+    streamr::logger::systemDefaultLogLevel;
+
 // A compile-time map between StreamrLogLevel and folly::LogLevel
 
 struct LogLevelMap {
@@ -61,7 +64,7 @@ struct LogLevelMap {
         if (itr != end(mData)) {
             return itr->first;
         }
-        return defaultLogLevel;
+        return defaultStreamrLogLevel;
     }
 
     [[nodiscard]] constexpr folly::LogLevel streamrLevelNameToFollyLevel(

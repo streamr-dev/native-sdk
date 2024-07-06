@@ -57,10 +57,9 @@ using StreamrLogLevel = std::variant<
     streamrloglevel::Error,
     streamrloglevel::Fatal>;
 
+constexpr StreamrLogLevel systemDefaultLogLevel = streamrloglevel::Info{};
 template <typename T>
 concept StreamrLogLevelConcept = std::is_same_v<T, StreamrLogLevel>;
-
-constexpr StreamrLogLevel defaultLogLevel = streamrloglevel::Info{};
 
 // Disable default specialization
 template <typename... LogLevels>
@@ -70,7 +69,7 @@ struct LevelGetter;
 template <typename... LogLevels>
 struct LevelGetter<std::variant<LogLevels...>> {
     [[nodiscard]] StreamrLogLevel getStreamrLogLevelByName(
-        std::string_view levelName) {
+        std::string_view levelName, StreamrLogLevel defaultLogLevel) {
         StreamrLogLevel result = defaultLogLevel;
         ((LogLevels::name == levelName ? result = LogLevels{} : result), ...);
         return result;
@@ -79,8 +78,9 @@ struct LevelGetter<std::variant<LogLevels...>> {
 
 template <typename T = StreamrLogLevel>
 [[nodiscard]] StreamrLogLevel getStreamrLogLevelByName(
-    std::string_view levelName) {
-    return LevelGetter<T>().getStreamrLogLevelByName(levelName);
+    std::string_view levelName, StreamrLogLevel defaultLogLevel) {
+    return LevelGetter<T>().getStreamrLogLevelByName(
+        levelName, defaultLogLevel);
 }
 
 template <StreamrLogLevelConcept T = StreamrLogLevel>
