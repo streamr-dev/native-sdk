@@ -1,7 +1,7 @@
+#include "streamr-logger/Logger.hpp"
 #include <string>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <streamr-logger/Logger.hpp>
 #include "streamr-logger/detail/FollyLoggerImpl.hpp"
 
 using streamr::logger::Logger;

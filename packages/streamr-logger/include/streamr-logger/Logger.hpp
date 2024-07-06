@@ -1,17 +1,22 @@
 #ifndef STREAMER_LOGGER_LOGGER_HPP
 #define STREAMER_LOGGER_LOGGER_HPP
 
+#include <initializer_list>
 #include <source_location>
 #include <string_view>
 #include <nlohmann/json.hpp>
 #include "streamr-json/toJson.hpp"
+// #include "streamr-json/JsonBuilder.hpp"
 #include "streamr-logger/LoggerImpl.hpp"
 #include "streamr-logger/StreamrLogLevel.hpp"
 #include "streamr-logger/detail/FollyLoggerImpl.hpp"
 
 namespace streamr::logger {
 
+using streamr::json::AssignableToJsonBuilder;
+using streamr::json::JsonBuilder;
 using streamr::json::toJson;
+
 constexpr std::string_view envLogLevelName = "LOG_LEVEL";
 class Logger {
 private:
@@ -22,9 +27,9 @@ private:
 public:
     // ContextBindingsType can be any type that is convertible to JSON by
     // streamr-json, ToDo: use a Concept to enforce this
-    template <typename ContextBindingsType = std::string>
+    template <typename ContextBindingsType = nlohmann::json>
     explicit Logger(
-        const ContextBindingsType& contextBindings = nlohmann::json{},
+        ContextBindingsType contextBindings = nlohmann::json{},
         StreamrLogLevel defaultLogLevel = systemDefaultLogLevel,
         std::shared_ptr<LoggerImpl> loggerImpl = nullptr) {
         // If LOG_LEVEL env variable is set and is valid,
@@ -55,55 +60,55 @@ public:
         return instance;
     }
 
-    template <typename T = std::string>
+    template <typename T = std::initializer_list<JsonBuilder>>
     void trace(
         const std::string& msg,
-        const T& metadata = std::string(""),
+        T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
         log(streamrloglevel::Trace{}, msg, metadata, location);
     }
 
-    template <typename T = std::string>
+    template <typename T = std::initializer_list<JsonBuilder>>
     void debug(
-        const std::string& msg,
-        const T& metadata = std::string(""),
+        const char* msg,
+        T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
         log(streamrloglevel::Debug{}, msg, metadata, location);
     }
 
-    template <typename T = std::string>
+    template <typename T = std::initializer_list<JsonBuilder>>
     void info(
-        const std::string& msg,
-        const T& metadata = std::string(""),
+        const char* msg,
+        T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
         log(streamrloglevel::Info{}, msg, metadata, location);
     }
 
-    template <typename T = std::string>
+    template <typename T = std::initializer_list<JsonBuilder>>
     void warn(
-        const std::string& msg,
-        const T& metadata = std::string(""),
+        const char* msg,
+        T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
         log(streamrloglevel::Warn{}, msg, metadata, location);
     }
 
-    template <typename T = std::string>
+    template <typename T = std::initializer_list<JsonBuilder>>
     void error(
-        const std::string& msg,
-        const T& metadata = std::string(""),
+        const char* msg,
+        T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
         log(streamrloglevel::Error{}, msg, metadata, location);
     }
 
-    template <typename T = std::string>
+    template <typename T = std::initializer_list<JsonBuilder>>
     void fatal(
-        const std::string& msg,
-        const T& metadata = std::string(""),
+        const char* msg,
+        T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
         log(streamrloglevel::Fatal{}, msg, metadata, location);
@@ -144,11 +149,11 @@ private:
 
     // MetadataType can be any type that is convertible to JSON by
     // streamr-json
-    template <typename MetadataType = std::string>
+    template <typename MetadataType>
     void log(
         const StreamrLogLevel messageLogLevel,
         const std::string& msg,
-        const MetadataType& metadata,
+        MetadataType metadata,
         const std::source_location& location) {
         // Merge the possible metadata with the context bindings
 
