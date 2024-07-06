@@ -27,9 +27,9 @@ private:
 public:
     // ContextBindingsType can be any type that is convertible to JSON by
     // streamr-json, ToDo: use a Concept to enforce this
-    template <typename ContextBindingsType = nlohmann::json>
+    template <typename ContextBindingsType = std::initializer_list<JsonBuilder>>
     explicit Logger(
-        ContextBindingsType contextBindings = nlohmann::json{},
+        ContextBindingsType contextBindings = {},
         StreamrLogLevel defaultLogLevel = systemDefaultLogLevel,
         std::shared_ptr<LoggerImpl> loggerImpl = nullptr) {
         // If LOG_LEVEL env variable is set and is valid,

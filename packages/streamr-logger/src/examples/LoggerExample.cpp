@@ -37,6 +37,21 @@ public:
         }
 
         auto data = MyDataStruct{"count", loopCount};
+
+        Logger localLogger3(data, streamrloglevel::Info{});
+        for (int i = 0; i < loopCount; i++) {
+            localLogger3.info(
+                "Logging something using logger with context bindings given as struct",
+                i);
+        }
+
+        Logger localLogger4({{"contextData", data}}, streamrloglevel::Info{});
+        for (int i = 0; i < loopCount; i++) {
+            localLogger4.info(
+                "Logging something using logger with context bindings given as JSON  that contains a struct",
+                i);
+        }
+
         Logger::instance().info(
             "Logging something using the static instance with metadata given as a struct",
             data);
