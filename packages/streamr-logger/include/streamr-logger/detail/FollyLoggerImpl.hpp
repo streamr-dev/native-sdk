@@ -59,20 +59,17 @@ public:
         this->setFileLogCategoriesFromEnv(std::string(fileCategoryName));
 
         auto* fileCategory = mLoggerDB.getCategory(fileCategoryName);
-        auto effectiveCategoryLogLevel = fileCategory->getEffectiveLevel();
 
-        if (effectiveCategoryLogLevel <= messageFollyLogLevel) {
-            folly::LogStreamProcessor(
-                fileCategory,
-                messageFollyLogLevel,
-                location.file_name(),
-                location.line(),
-                location.function_name(),
-                ::folly::LogStreamProcessor::APPEND,
-                msg,
-                metadata)
-                .stream();
-        }
+        folly::LogStreamProcessor(
+            fileCategory,
+            messageFollyLogLevel,
+            location.file_name(),
+            location.line(),
+            location.function_name(),
+            ::folly::LogStreamProcessor::APPEND,
+            msg,
+            metadata)
+            .stream();
     }
 
 private:
@@ -93,6 +90,7 @@ private:
                 // fileCategories are dot-separated full file paths
                 // envCategories are simple words such as 'MyComponent'
                 // check if envCategory partially matches fileCategory
+
                 auto pos = fileCategory.rfind(envCategory);
 
                 if (pos != std::string::npos) {
@@ -107,14 +105,29 @@ private:
 
                     if (!mLoggerDB.getCategoryOrNull(matchingCategoryName)) {
                         // if category is not previously added, add it
+
+                        auto categoryLogLevelAsString =
+                            folly::logLevelToString(categoryLogLevel);
+                        auto newHandlerConfig = folly::LogHandlerConfig(
+                            "stream",
+                            {{"stream", "stdout"},
+                             {"async", "false"},
+                             {"level", categoryLogLevelAsString}});
+
                         folly::LogConfig::CategoryConfigMap newCategoryConfigs;
                         newCategoryConfigs[matchingCategoryName] =
                             folly::LogCategoryConfig(
-                                categoryLogLevel, false, {"default"});
+                                categoryLogLevel,
+                                false,
+                                {matchingCategoryName});
                         newCategoryConfigs[matchingCategoryName]
                             .propagateLevelMessagesToParent =
                             folly::LogLevel::MAX_LEVEL;
-                        folly::LogConfig config({}, newCategoryConfigs);
+
+                        folly::LogConfig config(
+                            {{matchingCategoryName, newHandlerConfig}},
+                            newCategoryConfigs);
+
                         mLoggerDB.updateConfig(config);
                     }
                 }
