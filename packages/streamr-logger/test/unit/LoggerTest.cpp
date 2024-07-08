@@ -2,6 +2,7 @@
 #include <string>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "streamr-logger/StreamrLogLevel.hpp"
 #include "streamr-logger/detail/FollyLoggerImpl.hpp"
 
 using streamr::logger::Logger;
