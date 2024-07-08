@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
+include(homebrewClang.cmake)
+
 set(CMAKE_CXX_STANDARD 26)
 #set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)
 
