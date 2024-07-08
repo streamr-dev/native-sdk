@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <string_view>
 #include <folly/Format.h>
+#include <folly/logging/LogCategory.h>
 #include <folly/logging/LogFormatter.h>
 #include <folly/logging/LogLevel.h>
 #include <folly/logging/LogMessage.h>

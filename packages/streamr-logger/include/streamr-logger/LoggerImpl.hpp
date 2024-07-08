@@ -14,6 +14,8 @@ class LoggerImpl {
 public:
     virtual ~LoggerImpl() = default;
 
+    virtual void init(StreamrLogLevel defaultLogLevel) = 0;
+
     virtual void sendLogMessage(
         StreamrLogLevel logLevel,
         const std::string& msg,

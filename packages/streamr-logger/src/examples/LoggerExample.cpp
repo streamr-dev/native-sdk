@@ -18,7 +18,7 @@ public:
     LoggerExample() : mLogger(Logger::instance()) {}
 
     void doSomething() {
-        Logger::instance().info("Logging something using the static instance");
+        Logger::instance().warn("Logging something using the static instance");
 
         mLogger.info("Logging something using a member reference");
 
