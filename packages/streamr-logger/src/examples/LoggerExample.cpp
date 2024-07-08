@@ -18,9 +18,9 @@ public:
     LoggerExample() : mLogger(Logger::instance()) {}
 
     void doSomething() {
-        Logger::instance().warn("Logging something using the static instance");
+        Logger::instance().trace("Logging something using the static instance");
 
-        mLogger.info("Logging something using a member reference");
+        mLogger.debug("Logging something using a member reference");
 
         Logger localLogger("MyLoopLogger", streamrloglevel::Info{});
         for (int i = 0; i < loopCount; i++) {
@@ -31,7 +31,7 @@ public:
         Logger localLogger2(
             {{"jsonKey", "jsonValue"}}, streamrloglevel::Info{});
         for (int i = 0; i < loopCount; i++) {
-            localLogger2.info(
+            localLogger2.warn(
                 "Logging something using logger with context bindings given as JSON",
                 i);
         }
@@ -40,23 +40,23 @@ public:
 
         Logger localLogger3(data, streamrloglevel::Info{});
         for (int i = 0; i < loopCount; i++) {
-            localLogger3.info(
+            localLogger3.error(
                 "Logging something using logger with context bindings given as struct",
                 i);
         }
 
         Logger localLogger4({{"contextData", data}}, streamrloglevel::Info{});
         for (int i = 0; i < loopCount; i++) {
-            localLogger4.info(
+            localLogger4.fatal(
                 "Logging something using logger with context bindings given as JSON  that contains a struct",
                 i);
         }
 
-        Logger::instance().info(
+        Logger::instance().trace(
             "Logging something using the static instance with metadata given as a struct",
             data);
 
-        mLogger.info(
+        mLogger.debug(
             "Logging something using a member reference with metadata given as JSON that contains a struct",
             {{"data", data}});
     }
