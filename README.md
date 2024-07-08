@@ -15,7 +15,7 @@ cd native-sdk
 source install-prerequisites.sh
 ```
 
-This script will recognize the operating system type and install the prerequisites for the SDK.
+This script will recognize the operating system type and install the prerequisites for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal. 
 
 ## Install all the dependencies and build the SDK
 
@@ -36,4 +36,10 @@ This script will recognize the operating system type and install the prerequisit
 
 This script loops through packages listed in `MonorepoPackages.cmake` and cleans the build folders of each package except for the `.gitignore` files. It also cleans the root build folder.
 
+## Resuming development in a new terminal
 
+To resume development in a new terminal, run the following command:
+
+```bash
+source setenvs.sh
+```
