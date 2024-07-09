@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
+set(CMAKE_CXX_STANDARD 26)
+include(homebrewClang.cmake)
+
 enable_testing()
 
 include(MonorepoPackages.cmake)
