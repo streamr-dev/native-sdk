@@ -21,6 +21,28 @@ set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 26)
 
 add_library(streamr::streamr-logger ALIAS streamr-logger)
 
+add_executable(env_category_tests test/unit/LoggerEnvTest.cpp)
+target_link_libraries(env_category_tests PRIVATE streamr-logger)
+enable_testing()
+add_test(
+  NAME env_category_fatal_and_info_log_test
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 1
+  )
+set_property(TEST env_category_fatal_and_info_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
+add_test(
+  NAME env_category_fatal_and_fatal_log_test
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 2
+  )
+set_property(TEST env_category_fatal_and_fatal_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
+add_test(
+  NAME env_category_fatal_and_error_log_test
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 3
+  )
+set_property(TEST env_category_fatal_and_error_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
+target_include_directories(
+  streamr-logger INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:include>)
+
 target_include_directories(
   streamr-logger INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
