@@ -1,8 +1,7 @@
 if (${APPLE})
-    set(HOMEBREW_PREFIX "/opt/homebrew")
+    set(HOMEBREW_PREFIX $ENV{HOMEBREW_PREFIX})
 
-    set(LLVM_PREFIX "/opt/homebrew/opt/llvm")
-
+    set(LLVM_PREFIX "${HOMEBREW_PREFIX}/opt/llvm")
     set(CMAKE_C_COMPILER "${LLVM_PREFIX}/bin/clang")
     set(CMAKE_CXX_COMPILER "${LLVM_PREFIX}/bin/clang++")
     set(ENV{CC} "${CMAKE_C_COMPILER}")
