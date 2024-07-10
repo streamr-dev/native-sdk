@@ -15,13 +15,13 @@ cd native-sdk
 source install-prerequisites.sh
 ```
 
-This script will recognize the operating system type and install the prerequisites for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal. 
+This script will recognize the operating system type and install the prerequisites for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal.
 
 ## Install all the dependencies and build the SDK
 
 ```bash
 ./install.sh
-``` 
+```
 
 `install.sh` does the following:
 
@@ -43,3 +43,8 @@ To resume development in a new terminal, run the following command:
 ```bash
 source setenvs.sh
 ```
+
+# Troubleshooting
+
+## Installation
+Apple Silicon ARM: If you encounter CMake errors early in `./install.sh` step (installing vcpkg), check your brew version and brew directories. If your brew was installed originally on Intel Mac, the homebrew directory is under `/usr/local`, while under ARM it is under `/opt/homebrew`. [You may need to re-install brew](https://apple.stackexchange.com/questions/410825/apple-silicon-port-all-homebrew-packages-under-usr-local-opt-to-opt-homebrew).
