@@ -6,15 +6,15 @@ using FollyLoggerImpl = streamr::logger::detail::FollyLoggerImpl;
 
 class LogWriterMock : public folly::LogWriter {
 private:
-    int mIsCalled{0};
+    bool mIsCalled{false};
 
 public:
     void writeMessage(
         folly::StringPiece /* buf */, uint32_t /* flags */) override {
-        mIsCalled = 1;
+        mIsCalled = true;
     }
 
-    [[nodiscard]] int getIsCalled() const { return mIsCalled; }
+    [[nodiscard]] bool getIsCalled() const { return mIsCalled; }
     [[nodiscard]] bool ttyOutput() const override { return true; }
 
     void flush() override {}
@@ -27,47 +27,49 @@ private:
         std::make_shared<FollyLoggerImpl>(mock);
 
 public:
-    int testInfoLogWritten() {
+    bool testInfoLogWritten() {
         Logger logger{
             std::string(""), streamrloglevel::Info{}, tmpFollyLoggerImpl};
         logger.info("Testi");
-        if (mock->getIsCalled()) {
-            return 1;
-        }
-        return 0;
+        return mock->getIsCalled();
     }
 
-    int testFatalLogWritten() {
+    bool testFatalLogWritten() {
         Logger logger{
             std::string(""), streamrloglevel::Info{}, tmpFollyLoggerImpl};
         logger.fatal("Testi");
-        if (mock->getIsCalled()) {
-            return 0;
-        }
-        return 1;
+        return mock->getIsCalled();
     }
 
-    int testErrorLogWritten() {
+    bool testErrorLogWritten() {
         Logger logger{
             std::string(""), streamrloglevel::Info{}, tmpFollyLoggerImpl};
         logger.error("Testi");
-        if (mock->getIsCalled()) {
-            return 1;
-        }
-        return 0;
+        return mock->getIsCalled();
+    }
+
+    bool testInfoLogWrittenWhenDefaultLogLevelIsWarn() {
+        Logger logger{
+            std::string(""), streamrloglevel::Warn{}, tmpFollyLoggerImpl};
+        logger.info("Testi");
+        return mock->getIsCalled();
     }
 };
 
 int main(int /* argc */, char* argv[]) {
     LoggerEnvTest loggerEnvTest;
     if (argv[1] == std::string("1")) {
-        return loggerEnvTest.testInfoLogWritten();
+        return static_cast<int>(loggerEnvTest.testInfoLogWritten());
     }
     if (argv[1] == std::string("2")) {
-        return loggerEnvTest.testFatalLogWritten();
+        return static_cast<int>(!loggerEnvTest.testFatalLogWritten());
     }
     if (argv[1] == std::string("3")) {
-        return loggerEnvTest.testErrorLogWritten();
+        return static_cast<int>(loggerEnvTest.testErrorLogWritten());
+    }
+    if (argv[1] == std::string("4")) {
+        return static_cast<int>(
+            loggerEnvTest.testInfoLogWrittenWhenDefaultLogLevelIsWarn());
     }
     return 1;
 }
