@@ -9,7 +9,8 @@ private:
     int mIsCalled{0};
 
 public:
-    void writeMessage(folly::StringPiece /* buf */, uint32_t /* flags */) override {
+    void writeMessage(
+        folly::StringPiece /* buf */, uint32_t /* flags */) override {
         mIsCalled = 1;
     }
 
@@ -21,20 +22,11 @@ public:
 
 class LoggerEnvTest {
 private:
-    constexpr static int loopCount = 2;
-    Logger& mLogger;
     std::shared_ptr<LogWriterMock> mock = std::make_shared<LogWriterMock>();
     std::shared_ptr<FollyLoggerImpl> tmpFollyLoggerImpl =
         std::make_shared<FollyLoggerImpl>(mock);
 
-    struct MyDataStruct {
-        std::string name;
-        int value;
-    };
-
 public:
-    LoggerEnvTest() : mLogger(Logger::instance()) {}
-
     int testInfoLogWritten() {
         Logger logger{
             std::string(""), streamrloglevel::Info{}, tmpFollyLoggerImpl};
@@ -51,7 +43,7 @@ public:
         logger.fatal("Testi");
         if (mock->getIsCalled()) {
             return 0;
-        } 
+        }
         return 1;
     }
 
@@ -61,7 +53,7 @@ public:
         logger.error("Testi");
         if (mock->getIsCalled()) {
             return 1;
-        } 
+        }
         return 0;
     }
 };
@@ -70,10 +62,10 @@ int main(int /* argc */, char* argv[]) {
     LoggerEnvTest loggerEnvTest;
     if (argv[1] == std::string("1")) {
         return loggerEnvTest.testInfoLogWritten();
-    } 
+    }
     if (argv[1] == std::string("2")) {
         return loggerEnvTest.testFatalLogWritten();
-    } 
+    }
     if (argv[1] == std::string("3")) {
         return loggerEnvTest.testErrorLogWritten();
     }
