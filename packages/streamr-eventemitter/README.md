@@ -5,7 +5,7 @@ Streamr EventEmitter is a C++20 adaptation of the [eventemitter3](https://www.np
 ## Differences from the original typescript API
 
 * Event types are defined as structs or classes that inherit from `Event` as C++ does not have literal types of typescript.
-* As pointers to lambdas seem to work differently on different compilers, removing a listener is done by saving the token retuned by the `on` or `once` method, and calling `off` with it. 
+* Removing a listener is done by saving the token retuned by the `on` or `once` method, and calling `off` with it. (Pointers to lambdas seem to work differently on different compilers, so it is not possible to use function pointers as removal tokens) 
 * The following methods of the original [typescript API](https://www.npmjs.com/package/eventemitter3/index.d.ts) are not supported:
 
 - `eventNames()` (a debugging method - use a debugger instead)
@@ -86,12 +86,11 @@ size_t count = myEventEmitter.listenerCount<Message>();
 
 ## Implementation
 
-Because C++ does not have the [literal types of typescript](https://www.typescriptlang.org/docs/handbook/literal-types.html), in Streamr EventImitter events are implemented as stucts or classes that inherit from `Event`. This keeps the implementation type-safe and allows compact definition of the event types together with the listener argument types of the format `struct MyEvent: Event<int, bool> {}`. Event types supported by a certain `EventEmitter` instance are grouped together as a `std::tuple<EventType...>` of the event types as in `using MyEvents = std::tuple<Message, Error>`. 
+Because C++ does not have the [literal types of typescript](https://www.typescriptlang.org/docs/handbook/literal-types.html), events are implemented as stucts or classes that inherit from `Event`. This keeps the implementation type-safe and allows compact definition of the event types together with the listener argument types of the format `struct MyEvent: Event<int, bool> {}`. Event types supported by a certain `EventEmitter` instance are grouped together as a `std::tuple<EventType...>` of the event types as in `using MyEvents = std::tuple<Message, Error>`. 
 
 `EventEmitter<std::tuple<EventTypes...>>` is implemented as a template class that takes an `std::tuple` of event types as its template parameter. Following the Mixin design pattern, `EventEmitter` template creates a `EventEmitterImpl<EventType>` for each event type in the tuple and inherits from them all to implement methods with the signatures of the `on<EventType>()` format. This design keeps the implementation of `EventEmitterImpl` very simple, as it only needs to handle events of one event type.   
 
-Thread safety is ensured by using a single mutex for each `EventEmitter` instance. The mutex is shared by all `EventEmitterImpl` instances that a `EventEmitter` instance inherits from. Sharing the mutex between the `EventEmitterImpl`s is implemented using the [Curiously Recurring Template Pattern (CRTP)](https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern) where the  type of the `EventEmitter` instance is passed as the `HostEventEmitter` template parameter to all of the `EventEmitterImpl`s it inherits from. All EventEmitter methods are protected by the mutex, which ensures that all operations take place atomically in the order they were called regardless of which thread they were called from and how long they take (especially the `emit` method can take a long time to execute if the listeners are slow). 
-
+Thread safety is ensured by protecting the internal data structures of `EventEmitterImpl` with two mutexes. The locks on these mutexes are kept as short as strictly necessary to protect the data structures. Additionally, the event-emitting loop of `EventEmitterImpl` is protected by a third mutex to ensure that the events of a single event type are emitted in order to all listeners even if some listeners take a long time to execute their callback. (See the test case `EventsAreReceivedInOrderEvenIfListenersAreSlow` in [EventEmitterTest.cpp](test/unit/EventEmitterTest.cpp) for an example of how this works.)
 
 
 
