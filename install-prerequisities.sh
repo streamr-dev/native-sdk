@@ -17,11 +17,13 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     brew install cmake
     brew install pkg-config
    
-    rm -f /opt/homebrew/bin/clang-format
-    rm -f /opt/homebrew/bin/clangd
-    ln -s /opt/homebrew/opt/llvm/bin/clang-format /opt/homebrew/bin/clang-format
-    ln -s /opt/homebrew/opt/llvm/bin/clangd /opt/homebrew/bin/clangd
-    rm -f /opt/homebrew/bin/clang-tidy
+    rm -f $HOMEBREW_PREFIX/bin/clang-format
+    rm -f $HOMEBREW_PREFIX/bin/clangd
+    rm -f $HOMEBREW_PREFIX/bin/lldb
+    ln -s $HOMEBREW_PREFIX/opt/llvm/bin/clang-format $HOMEBREW_PREFIX/bin/clang-format
+    ln -s $HOMEBREW_PREFIX/opt/llvm/bin/clangd $HOMEBREW_PREFIX/bin/clangd
+    ln -s $HOMEBREW_PREFIX/opt/llvm/bin/lldb $HOMEBREW_PREFIX/bin/lldb
+    rm -f $HOMEBREW_PREFIX/bin/clang-tidy
 
 else
     #PROFILE_FILE=~/.profile

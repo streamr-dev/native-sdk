@@ -5,7 +5,7 @@
  * Convert (almost) any struct to string in C++20.
  **/
 
-#include "streamr-json/JsonBuilder.hpp"
+// #include "streamr-json/JsonBuilder.hpp"
 #include "streamr-json/jsonConcepts.hpp"
 #include "streamr-json/toJson.hpp"
 
