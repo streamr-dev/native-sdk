@@ -246,6 +246,8 @@ json toJson(const T& value) {
     return JsonBuilder(value).getJson();
 }
 
+using StreamrJsonInitializerList = std::initializer_list<JsonBuilder>;
+
 } // namespace streamr::json
 
 #endif
