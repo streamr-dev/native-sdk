@@ -56,4 +56,4 @@ Linter is run when doing a git commit. If you get lots of errors like such as th
 packages/streamr-json/include/streamr-json/JsonBuilder.hpp:5:10: Error: In included file: a space is required between consecutive right angle brackets (use '> >') [two_right_angle_brackets_need_space]
 ```
 
-the problem could be outdated clang version, or perhaps the clang is not found from homebrew's path. Check `clangd --version` (should be 18.1.* or newer) and `which clangd` (should be `/opt/homebrew/bin/clangd`). If clangd is found in `/usr/bin/clangd`, check that your path has `/opt/homebrew/bin` before `/usr/bin` (this should be set if your .zprofile or .zshrc).
+the problem could be outdated clangd version, or perhaps the clangd is not found from homebrew's path. Check `clangd --version` (should be 18.1.* or newer) and `which clangd` (should be `/opt/homebrew/bin/clangd`). If clangd is found in `/usr/bin/clangd`, check that your path has `/opt/homebrew/bin` before `/usr/bin` (this should be set if your .zprofile or .zshrc).
