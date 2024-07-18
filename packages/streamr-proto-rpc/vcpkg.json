@@ -2,7 +2,7 @@
     "name": "streamr-proto-rpc",
     "version": "1.0.0",
     "dependencies": [
-        "folly"
+        "protobuf","folly"
     ],
     "features": {
         "monorepo": {
