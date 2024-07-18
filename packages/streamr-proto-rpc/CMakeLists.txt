@@ -12,9 +12,16 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 project(proto-rpc CXX)
 
 find_package(streamr-logger CONFIG REQUIRED)
+find_package(protobuf REQUIRED)
 #find_package(streamr-utils CONFIG REQUIRED)
 
 add_executable(proto-rpc src/main.cpp)
-
 target_link_libraries(proto-rpc 
     PRIVATE streamr::streamr-logger)
+
+
+#add_executable(protobuf-streamr-plugin include/protobuf-streamr-plugin/main.cpp include/protobuf-streamr-plugin/PluginCodeGenerator.hpp)
+#target_link_libraries(protobuf-streamr-plugin PRIVATE protobuf::libprotobuf protobuf::libprotoc)
+
+add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp include/protobuf-streamr-plugin/PluginCodeGenerator.hpp)
+target_link_libraries(protobuf-streamr-plugin PRIVATE protobuf::libprotobuf protobuf::libprotoc)

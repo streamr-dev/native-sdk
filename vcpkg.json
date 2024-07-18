@@ -6,6 +6,7 @@
     "boost-pfr",
     "folly",
     "gtest",
-    "nlohmann-json"
+    "nlohmann-json",
+    "protobuf"
   ]
 }
