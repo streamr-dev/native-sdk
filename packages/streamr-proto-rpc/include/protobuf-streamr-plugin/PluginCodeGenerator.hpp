@@ -55,9 +55,9 @@ private:
         const std::string& proto_filename = file->name();
         const std::string proto_filename_we =
             this->getFilenameWithoutExtension(proto_filename);
-        const std::string header_filename = proto_filename_we + ".hpp";
+        const std::string header_filename = proto_filename_we + ".client.hpp";
         const std::string header_guard =
-            "_" + toUpperCase(proto_filename_we) + "_HPP";
+            "STREAMR_PROTORPC_" + toUpperCase(proto_filename_we) + "_CLIENT_HPP";
 
         std::stringstream ss;
 
@@ -67,6 +67,7 @@ private:
         ss << "#ifndef " << header_guard << "\n";
         ss << "#define " << header_guard << "\n";
         ss << "\n";
+        /**
         ss << "#include \"" << proto_filename_we << ".pb.h\"\n";
         ss << "\n";
         ss << "#include \"pbop/Status.h\"\n";
@@ -75,7 +76,8 @@ private:
         ss << "\n";
         ss << "#include <string>\n";
         ss << "\n";
-        ss << "namespace " << file->package() << " {\n";
+        */
+        ss << "namespace streamr::protorpc::" << file->package() << " {\n";
 
         // for each services
         int num_services = file->service_count();
@@ -88,9 +90,6 @@ private:
             ss << "  class " << service_name << " {\n";
             ss << "    public:\n";
             ss << "    \n";
-            ss << "    class StubInterface {\n";
-            ss << "    public:\n";
-            ss << "      virtual ~StubInterface() {}\n";
             // for each methods
             int num_methods = service->method_count();
             for (int j = 0; j < num_methods; j++) {
@@ -111,10 +110,11 @@ private:
                     method_output->full_name();
                 const std::string& method_output_name = method_output->name();
 
-                ss << "      virtual pbop::Status " << method_name << "(const "
-                   << method_input_name << " & request, " << method_output_name
-                   << " & response) = 0;\n";
+                ss << "       virtual folly::task<" + method_output_name + "> " << method_name << "(const "
+                   << method_input_name << "& request) = 0;\n";
             }
+
+            /*
             ss << "    }; // class StubInterface\n";
             ss << "  \n";
             ss << "    class Client : public virtual StubInterface {\n";
@@ -184,14 +184,15 @@ private:
             }
             ss << "    };  // class Service\n";
             ss << "  \n";
+            */
             ss << "  }; // class " << service_name << "\n";
         }
 
         ss << "}; //namespace " << file->package() << "\n";
         ss << "\n";
         ss << "#endif //" << header_guard << "\n";
- std::cout << ss.str() << std::endl;
-/*
+ //std::cout << ss.str() << std::endl;
+
         // output to header file
         google::protobuf::io::ZeroCopyOutputStream* stream =
             generator_context->Open(header_filename.c_str());
@@ -201,7 +202,7 @@ private:
         printer.print(
             reinterpret_cast<const unsigned char*>(buffer.c_str()),
             buffer.size());
-            */
+            
         return true;
     }
 
