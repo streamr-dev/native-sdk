@@ -20,8 +20,17 @@ target_link_libraries(proto-rpc
     PRIVATE streamr::streamr-logger)
 
 
+   
 #add_executable(protobuf-streamr-plugin include/protobuf-streamr-plugin/main.cpp include/protobuf-streamr-plugin/PluginCodeGenerator.hpp)
 #target_link_libraries(protobuf-streamr-plugin PRIVATE protobuf::libprotobuf protobuf::libprotoc)
 
+#include_directories(${CMAKE_SOURCE_DIR}/include)
+
+
 add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp include/protobuf-streamr-plugin/PluginCodeGenerator.hpp)
+
+target_include_directories(
+    protobuf-streamr-plugin PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:include>)
+
 target_link_libraries(protobuf-streamr-plugin PRIVATE protobuf::libprotobuf protobuf::libprotoc)
