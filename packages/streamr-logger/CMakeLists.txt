@@ -21,6 +21,15 @@ set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 26)
 
 add_library(streamr::streamr-logger ALIAS streamr-logger)
 
+add_library(streamr-slogger INTERFACE)
+set_property(TARGET streamr-slogger PROPERTY CXX_STANDARD 26)
+#add_library(streamr::streamr-slogger ALIAS streamr-slogger)
+
+
+
+
+
+
 add_executable(env_category_tests test/unit/LoggerEnvTest.cpp)
 target_link_libraries(env_category_tests PRIVATE streamr-logger)
 enable_testing()
@@ -53,10 +62,11 @@ target_include_directories(
            $<INSTALL_INTERFACE:include>)
 
 target_include_directories(
-  streamr-logger INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  streamr-slogger INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(streamr-logger INTERFACE Folly::folly INTERFACE streamr::streamr-json)
+target_link_libraries(streamr-slogger INTERFACE streamr-logger)
 # TODO: Is there a better way to do this?
 # - Apparently not: https://gitlab.kitware.com/cmake/cmake/-/issues/20511
 # - At least parse the deps from the vcpkg.json file and use them to find_package() in this file and to add the
