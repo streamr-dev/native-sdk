@@ -8,7 +8,7 @@
 #include <google/protobuf/compiler/code_generator.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/io/zero_copy_stream.h>
-#include "protobuf-streamr-plugin/StreamPrinter.hpp"
+#include "streamr-proto-rpc/StreamPrinter.hpp"
 
 namespace streamr::protorpc {
 
@@ -23,6 +23,13 @@ public:
         google::protobuf::compiler::GeneratorContext* generatorContext,
         std::string* error) const override {
         return GenerateHeader(file, parameter, generatorContext, error);
+    }
+
+    uint64_t GetSupportedFeatures() const override { // NOLINT
+        // Indicate that this code generator supports proto3 optional fields.
+        // (Note: don't release your code generator with this flag set until you
+        // have actually added and tested your proto3 support!)
+        return FEATURE_PROTO3_OPTIONAL;
     }
 
 private:
@@ -66,7 +73,7 @@ private:
         ss << "#ifndef " << headerGuard << "\n";
         ss << "#define " << headerGuard << "\n";
         ss << "\n";
-        ss << "namespace streamr::protorpc::" << file->package() << " {\n";
+        ss << "namespace streamr::protorpc {\n";
 
         // for each services
         int numServices = file->service_count();
