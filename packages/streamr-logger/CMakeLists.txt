@@ -52,7 +52,6 @@ target_include_directories(
            $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(streamr-logger INTERFACE Folly::folly INTERFACE streamr::streamr-json)
-
 # TODO: Is there a better way to do this?
 # - Apparently not: https://gitlab.kitware.com/cmake/cmake/-/issues/20511
 # - At least parse the deps from the vcpkg.json file and use them to find_package() in this file and to add the

@@ -1,13 +1,13 @@
 #ifndef STREAMER_LOGGER_SLOGGER_HPP
 #define STREAMER_LOGGER_SLOGGER_HPP
 
-#include <initializer_list>
 #include <source_location>
 #include <nlohmann/json.hpp>
 #include "streamr-logger/Logger.hpp"
 
 namespace streamr::logger {
 
+using streamr::json::StreamrJsonInitializerList;
 class SLogger {
 public:
     /**
@@ -17,7 +17,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     static void trace(
         const char* msg,
         T metadata = {},
@@ -33,7 +33,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     static void debug(
         const char* msg,
         T metadata = {},
@@ -49,7 +49,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     static void info(
         const char* msg,
         T metadata = {},
@@ -65,7 +65,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     static void warn(
         const char* msg,
         T metadata = {},
@@ -81,7 +81,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     static void error(
         const char* msg,
         T metadata = {},
@@ -97,7 +97,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     static void fatal(
         const char* msg,
         T metadata = {},

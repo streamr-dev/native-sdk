@@ -12,8 +12,7 @@
 
 namespace streamr::logger {
 
-using streamr::json::AssignableToJsonBuilder;
-using streamr::json::JsonBuilder;
+using streamr::json::StreamrJsonInitializerList;
 using streamr::json::toJson;
 
 constexpr std::string_view envLogLevelName = "LOG_LEVEL";
@@ -39,7 +38,7 @@ public:
 
     // ContextBindingsType can be any type that is convertible to JSON by
     // streamr-json (= any type without private sections)
-    template <typename ContextBindingsType = std::initializer_list<JsonBuilder>>
+    template <typename ContextBindingsType = StreamrJsonInitializerList>
     explicit Logger(
         ContextBindingsType contextBindings = {},
         StreamrLogLevel defaultLogLevel = systemDefaultLogLevel,
@@ -86,7 +85,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     void trace(
         const char* msg,
         T metadata = {},
@@ -102,7 +101,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     void debug(
         const char* msg,
         T metadata = {},
@@ -118,7 +117,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     void info(
         const char* msg,
         T metadata = {},
@@ -134,7 +133,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     void warn(
         const char* msg,
         T metadata = {},
@@ -150,7 +149,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     void error(
         const char* msg,
         T metadata = {},
@@ -166,7 +165,7 @@ public:
      * Metadata to add to the log message.
      */
 
-    template <typename T = std::initializer_list<JsonBuilder>>
+    template <typename T = StreamrJsonInitializerList>
     void fatal(
         const char* msg,
         T metadata = {},
