@@ -17,7 +17,7 @@
 #include "StreamrWriterFactory.hpp"
 #include "streamr-logger/LoggerImpl.hpp"
 
-extern char** environ;
+extern char** environ; // NOLINT (readability-redundant-declaration)
 namespace streamr::logger::detail {
 
 using LoggerImpl = streamr::logger::LoggerImpl;
