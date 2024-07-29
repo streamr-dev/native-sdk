@@ -32,10 +32,10 @@ public:
 
 class LoggerTest : public testing::Test {
 protected:
-    std::shared_ptr<LogWriterMock> mLogWriterMock = // NOLINT
+    std::shared_ptr<LogWriterMock> mLogWriterMock =
         std::make_shared<LogWriterMock>();
 
-    std::shared_ptr<FollyLoggerImpl> mFollyLoggerImpl = // NOLINT
+    std::shared_ptr<FollyLoggerImpl> mFollyLoggerImpl =
         std::make_shared<FollyLoggerImpl>(mLogWriterMock);
 
     Logger getLogger() {
@@ -440,7 +440,7 @@ TEST_F(LoggerTest, FatalLogWithExtraArgumentObject) {
 
     struct TestData {
         std::string value1{"TestString"};
-        int value2{42}; // NOLINT
+        int value2{42};
     };
 
     auto testData = TestData();
@@ -463,7 +463,7 @@ TEST(LoggerContextBindingAndMetadataMerge, StringsMerged) {
         streamrloglevel::Info{},
         tmpFollyLoggerImpl);
 
-    tmpLogger.fatal("Testi", std::string("LogExtraArgumentText")); // NOLINT
+    tmpLogger.fatal("Testi", std::string("LogExtraArgumentText"));
 
     EXPECT_THAT(tmpLogWriterMock->getBuffer(), testing::HasSubstr("FATAL"));
 
@@ -487,7 +487,7 @@ TEST(
         streamrloglevel::Info{},
         tmpFollyLoggerImpl);
 
-    tmpLogger.fatal("Testi"); // NOLINT
+    tmpLogger.fatal("Testi");
 
     EXPECT_THAT(tmpLogWriterMock->getBuffer(), testing::HasSubstr("FATAL"));
 
@@ -509,7 +509,7 @@ TEST(
     Logger tmpLogger =
         Logger(std::string(""), streamrloglevel::Info{}, tmpFollyLoggerImpl);
 
-    tmpLogger.fatal("Testi", std::string("LogExtraArgumentText")); // NOLINT
+    tmpLogger.fatal("Testi", std::string("LogExtraArgumentText"));
 
     EXPECT_THAT(tmpLogWriterMock->getBuffer(), testing::HasSubstr("FATAL"));
 
@@ -528,20 +528,20 @@ TEST(LoggerContextBindingAndMetadataMerge, ObjectsMerged) {
 
     struct TestStruct1 {
         std::string foo1 = "bar1A";
-        int foo2 = 42; // NOLINT
+        int foo2 = 42;
         std::string foo3 = "bar3";
     };
 
     struct TestStruct2 {
         std::string foo1 = "Bar1B";
-        int foo4 = 24; // NOLINT
+        int foo4 = 24;
         std::string foo5 = "bar5";
     };
 
     Logger logger{TestStruct1(), streamrloglevel::Info{}, tmpFollyLoggerImpl};
 
     auto testStruct2 = TestStruct2();
-    logger.fatal("Testi", testStruct2); // NOLINT
+    logger.fatal("Testi", testStruct2);
     EXPECT_THAT(tmpLogWriterMock->getBuffer(), testing::HasSubstr("FATAL"));
 
     EXPECT_THAT(
@@ -560,12 +560,12 @@ TEST(
 
     struct TestStruct1 {
         std::string foo1 = "bar1A";
-        int foo2 = 42; // NOLINT
+        int foo2 = 42;
         std::string foo3 = "bar3";
     };
     Logger logger{TestStruct1(), streamrloglevel::Info{}, tmpFollyLoggerImpl};
 
-    logger.fatal("Testi"); // NOLINT
+    logger.fatal("Testi");
     EXPECT_THAT(tmpLogWriterMock->getBuffer(), testing::HasSubstr("FATAL"));
 
     EXPECT_THAT(
@@ -584,14 +584,14 @@ TEST(
 
     struct TestStruct1 {
         std::string foo1 = "bar1A";
-        int foo2 = 42; // NOLINT
+        int foo2 = 42;
         std::string foo3 = "bar3";
     };
 
     Logger logger{std::string(""), streamrloglevel::Info{}, tmpFollyLoggerImpl};
 
     auto testStruct1 = TestStruct1();
-    logger.fatal("Testi", testStruct1); // NOLINT
+    logger.fatal("Testi", testStruct1);
     EXPECT_THAT(tmpLogWriterMock->getBuffer(), testing::HasSubstr("FATAL"));
 
     EXPECT_THAT(
