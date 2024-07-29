@@ -4,6 +4,22 @@ This is the ongoing development repository for the Streamr Native SDK, a native 
 
 ## Getting started
 
+### Recommended development environment
+
+* [Cursor editor](https://cursor.sh/) with a copilot++ subscription 
+* Recommended Cursor extensions:
+  * C/C++ Extension Pack (includes clang-format support with shift+option+f)
+  * clangd (better highlighting and auto-completion than IntelliSense)
+  * CMake
+  * CMake Tools
+  * CMake Test Explorer (allows running individual test cases from UI)
+  * Test Explorer UI
+  * Better C++ Syntax
+  * vscode-proto3
+  * Doxygen Documentation Generator
+  
+  
+
 ### Clone the repository
 
 ```bash
@@ -14,7 +30,7 @@ git clone git@github.com:streamr-dev/native-sdk.git
 
 ```bash
 cd native-sdk
-source install-prerequisites.sh
+source install-prerequisities.sh
 ```
 
 This script will recognize the operating system type and install the prerequisites for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal.
