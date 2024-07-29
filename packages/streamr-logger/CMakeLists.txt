@@ -46,11 +46,6 @@ add_test(
   NAME env_category_wrongly_written_as_fatal_and_info_log_test
   COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 4
   )
-#set_property(TEST env_category_wrongly_written_as_fatal_and_info_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_testNotFound=fatal")
-
-target_include_directories(
-  streamr-logger INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-           $<INSTALL_INTERFACE:include>)
 
 target_include_directories(
   streamr-logger INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
