@@ -14,12 +14,12 @@ private:
 public:
     [[nodiscard]] int getA() const { return a; }
     [[nodiscard]] std::string getB() const { return b; }
+    // NOLINTNEXTLINE (readability-convert-member-functions-to-static)
     [[nodiscard]] std::string toString() const {
         return std::string("Hello world!");
-    } // NOLINT
-    [[nodiscard]] json toJson() const { // NOLINT
-        return json{{"a", a}, {"b", b}};
     }
+    // NOLINTNEXTLINE (readability-convert-member-functions-to-static)
+    [[nodiscard]] json toJson() const { return json{{"a", a}, {"b", b}}; }
 };
 
 #endif
