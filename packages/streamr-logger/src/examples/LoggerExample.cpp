@@ -1,7 +1,9 @@
 #include "streamr-logger/Logger.hpp"
+#include "streamr-logger/SLogger.hpp"
 #include "streamr-logger/StreamrLogLevel.hpp"
 
 using Logger = streamr::logger::Logger;
+using SLogger = streamr::logger::SLogger;
 namespace streamrloglevel = streamr::logger::streamrloglevel;
 
 class LoggerExample {
@@ -18,7 +20,12 @@ public:
     LoggerExample() : mLogger(Logger::instance()) {}
 
     void doSomething() {
-        Logger::instance().trace("Logging something using the static instance");
+        SLogger::trace("Logging something using the static function: trace");
+        SLogger::debug("Logging something using the static function: debug");
+        SLogger::info("Logging something using the static function: info");
+        SLogger::warn("Logging something using the static function: warn");
+        SLogger::error("Logging something using the static function: error");
+        SLogger::fatal("Logging something using the static function: fatal");
 
         mLogger.debug("Logging something using a member reference");
 
