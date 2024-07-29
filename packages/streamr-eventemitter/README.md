@@ -84,6 +84,13 @@ The method `listenerCount` returns the number of listeners for a specific event 
 size_t count = myEventEmitter.listenerCount<Message>();
 ```
 
+**Emit events.**
+
+```cpp
+myEventEmitter.emit<Message>("Hello, world!");
+myEventEmitter.emit<Error>("Not found", 404);
+```
+
 ## Implementation
 
 Because C++ does not have the [literal types of typescript](https://www.typescriptlang.org/docs/handbook/literal-types.html), events are implemented as stucts or classes that inherit from `Event`. This keeps the implementation type-safe and allows compact definition of the event types together with the listener argument types of the format `struct MyEvent: Event<int, bool> {}`. Event types supported by a certain `EventEmitter` instance are grouped together as a `std::tuple<EventType...>` of the event types as in `using MyEvents = std::tuple<Message, Error>`. 
