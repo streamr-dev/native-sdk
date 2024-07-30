@@ -26,20 +26,22 @@ This is the ongoing development repository for the Streamr Native SDK, a native 
 git clone git@github.com:streamr-dev/native-sdk.git
 ```
 
-### Install Prerequisites
+### Install Prerequisities
 
 ```bash
 cd native-sdk
 source install-prerequisities.sh
 ```
 
-This script will recognize the operating system type and install the prerequisites for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal.
+This script will recognize the operating system type and install the prerequisities for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal.
 
 ### Install all the dependencies and build the SDK
 
 ```bash
 ./install.sh
 ```
+
+The `install.sh` script supports an optional `--prod` parameter. When this parameter is provided, the script will build the SDK in Release mode. If the `--prod` parameter is not provided, the script will default to building the SDK in Debug mode.
 
 `install.sh` does the following:
 
