@@ -10,13 +10,8 @@
 #include <boost/pfr/traits.hpp>
 #include <boost/pfr/tuple_size.hpp>
 #include <nlohmann/json.hpp>
-<<<<<<< HEAD
-// #include <streamr-json/JsonBuilder.hpp>
-#include <streamr-json/jsonConcepts.hpp>
-=======
 
 #include "streamr-json/jsonConcepts.hpp"
->>>>>>> module1
 
 namespace streamr::json {
 

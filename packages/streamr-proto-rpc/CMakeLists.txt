@@ -12,7 +12,7 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 project(proto-rpc CXX)
 
 find_package(streamr-logger CONFIG REQUIRED)
-find_package(protobuf REQUIRED)
+find_package(Protobuf REQUIRED)
 #find_package(streamr-utils CONFIG REQUIRED)
 
 add_executable(proto-rpc src/main.cpp)
