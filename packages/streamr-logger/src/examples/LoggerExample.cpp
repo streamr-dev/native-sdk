@@ -26,7 +26,9 @@ public:
         SLogger::warn("Logging something using the static function: warn");
         SLogger::error("Logging something using the static function: error");
         SLogger::fatal("Logging something using the static function: fatal");
-
+        std::string testString =
+            "Logging something using the static function: error and testString";
+        SLogger::error(testString);
         mLogger.debug("Logging something using a member reference");
 
         Logger localLogger("MyLoopLogger", streamrloglevel::Info{});
