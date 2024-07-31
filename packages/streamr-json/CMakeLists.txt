@@ -68,3 +68,6 @@ target_link_libraries(streamr-json-test-unit
 
 include(GoogleTest)
 gtest_discover_tests(streamr-json-test-unit)
+
+add_executable(streamr-json-example src/examples/JsonExample.cpp)
+target_link_libraries(streamr-json-example PRIVATE streamr-json)

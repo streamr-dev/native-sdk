@@ -9,7 +9,9 @@ Checks: >
   readability-*,
   -readability-identifier-length,
   -modernize-use-trailing-return-type,
-  -modernize-return-braced-init-list
+  -modernize-return-braced-init-list,
+  -misc-non-private-member-variables-in-classes
+  
 # Turn all the warnings from the checks above into errors.
 WarningsAsErrors: "*"
 HeaderFilterRegex: ".*$"

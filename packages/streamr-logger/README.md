@@ -27,14 +27,14 @@ The level can be one of the following: `trace`, `debug`, `info`, `warn`, `error`
 
 A complete usage example can be found in [src/examples/LoggerExample.cpp](src/examples/LoggerExample.cpp).
 
-Using the static Logger instance
+Using the static Logger functions:
 
 ```cpp
-#include <streamr-logger/Logger.hpp>
+#include <streamr-logger/SLogger.hpp>
 
-using Logger = streamr::logger::Logger;
+using SLogger = streamr::logger::SLogger;
 
-Logger::instance().info("Hello, world!");
+SLogger::info("Hello, world!");
 ```
 
 Using a local Logger instance with contextBindings
@@ -51,9 +51,15 @@ logger.info("Hello, world!");
 Logging with metadata given as JSON that contains a struct
 
 ```cpp
+<<<<<<< HEAD
 #include <streamr-logger/Logger.hpp>
 
 using Logger = streamr::logger::Logger;
+=======
+#include <streamr-logger/SLogger.hpp>
+
+using SLogger = streamr::logger::SLogger;
+>>>>>>> module1
 
 struct MyDataStruct {
     std::string name;
@@ -61,7 +67,11 @@ struct MyDataStruct {
 };
 
 auto data = MyDataStruct{"count", 9};
+<<<<<<< HEAD
 Logger::instance().info("Program state", {{"data", data}});
+=======
+SLogger::info("Program state", {{"data", data}});
+>>>>>>> module1
 ```
 
 ## Implementation details

@@ -20,6 +20,7 @@ if (${APPLE})
     set(CMAKE_FIND_FRAMEWORK LAST)
     set(CMAKE_FIND_APPBUNDLE LAST)
 
+    add_link_options("-L/opt/homebrew/opt/llvm/lib/c++" "-Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++")
     #set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)
     #set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH FALSE)
 endif()
