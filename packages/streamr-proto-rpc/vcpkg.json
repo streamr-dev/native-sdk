@@ -2,13 +2,17 @@
     "name": "streamr-proto-rpc",
     "version": "1.0.0",
     "dependencies": [
-        "protobuf","folly"
+        "protobuf",
+        "folly",
+        "boost-uuid",
+        "magic-enum"
     ],
     "features": {
         "monorepo": {
             "description": "Monorepo dependencies",
             "dependencies": [
-                "streamr-logger"
+                "streamr-logger",
+                "streamr-eventemitter"
             ]
         }
     }

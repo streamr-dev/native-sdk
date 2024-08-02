@@ -12,12 +12,38 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 project(proto-rpc CXX)
 
 find_package(streamr-logger CONFIG REQUIRED)
+find_package(streamr-eventemitter CONFIG REQUIRED)
 find_package(Protobuf REQUIRED)
-#find_package(streamr-utils CONFIG REQUIRED)
+find_package(Boost CONFIG REQUIRED)
+find_package(magic_enum CONFIG REQUIRED)
+find_package(folly REQUIRED)
 
-add_executable(proto-rpc src/main.cpp)
-target_link_libraries(proto-rpc 
-    PRIVATE streamr::streamr-logger)
+if(NOT TARGET Boost::uuid)
+  add_library(Boost::uuid INTERFACE IMPORTED)
+  set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+endif()
+
+add_library(streamr-proto-rpc)
+set_property(TARGET streamr-proto-rpc PROPERTY CXX_STANDARD 26)
+add_library(streamr::streamr-proto-rpc ALIAS streamr-proto-rpc)
+target_include_directories(streamr-proto-rpc 
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<INSTALL_INTERFACE:include>
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
+    )
+
+target_sources(streamr-proto-rpc 
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/ProtoRpc.pb.cc)
+
+target_link_libraries(streamr-proto-rpc 
+    INTERFACE streamr::streamr-logger
+    INTERFACE streamr::streamr-eventemitter
+    PRIVATE protobuf::libprotobuf
+    PRIVATE protobuf::libprotoc
+    INTERFACE Boost::uuid
+    PRIVATE magic_enum::magic_enum
+    PUBLIC Folly::folly
+    )
 
 add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp include/streamr-proto-rpc/PluginCodeGenerator.hpp)
 
@@ -25,4 +51,32 @@ target_include_directories(
     protobuf-streamr-plugin PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(protobuf-streamr-plugin PRIVATE protobuf::libprotobuf protobuf::libprotoc)
+target_link_libraries(protobuf-streamr-plugin 
+    PRIVATE protobuf::libprotobuf protobuf::libprotoc)
+
+enable_testing()
+find_package(GTest CONFIG REQUIRED)
+    
+add_executable(streamr-proto-rpc-test-unit 
+    test/proto/HelloRpc.pb.cc   
+    test/proto/TestProtos.pb.cc 
+    test/proto/WakeUpRpc.pb.cc
+    test/unit/ServerRegistryTest.cpp
+    test/unit/RpcCommunicatorTest.cpp
+)
+
+target_include_directories(streamr-proto-rpc-test-unit 
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/proto>
+)
+
+target_link_libraries(streamr-proto-rpc-test-unit 
+    PUBLIC streamr-proto-rpc
+    PUBLIC GTest::gtest 
+    PUBLIC GTest::gtest_main 
+    PUBLIC GTest::gmock 
+    PUBLIC GTest::gmock_main
+    PUBLIC Folly::folly
+    )
+    
+include(GoogleTest)
+gtest_discover_tests(streamr-proto-rpc-test-unit)
