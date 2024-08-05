@@ -54,7 +54,7 @@ private:
         virtual ~OngoingRequestBase() = default;
         virtual void resolveRequest(const RpcMessage& response) = 0;
         virtual void resolveNotification() = 0;
-        virtual void rejectRequest(const Err& error) = 0;
+        virtual void rejectRequest(const std::exception& error) = 0;
     };
 
     template <typename ResultType>
@@ -86,7 +86,7 @@ private:
             mPromiseContract.first.setValue();
         }
 
-        virtual void rejectRequest(const Err& error) {
+        virtual void rejectRequest(const std::exception& error) {
             this->rejectPromise(error);
         }
 
@@ -110,7 +110,7 @@ private:
             }
         }
 
-        void rejectPromise(const Err& error) {
+        void rejectPromise(const std::exception& error) {
             mPromiseContract.first.setException(error);
         }
     };
@@ -161,22 +161,43 @@ public:
     }
 
     // Client-side API
-
+    // This method is for making RPC calls only, not notifications
     template <typename ReturnType, typename RequestType>
     Task<ReturnType> callRemote(
         const std::string& methodName,
         const RequestType& methodParam,
         const CallContextType& callContext) {
+        SLogger::info("callRemote()");
         auto task = folly::coro::co_invoke(
             [&methodName, &methodParam, &callContext, this]()
                 -> folly::coro::Task<ReturnType> {
-                auto ongoingRequest = std::make_shared<OngoingRequest<ReturnType>>();
-                this->mOngoingRequests.emplace(methodName, ongoingRequest);
-
+                SLogger::info("callRemote() 1");
+                
                 auto requestMessage =
                     this->createRequestRpcMessage(methodName, methodParam);
+                
+                auto ongoingRequest =
+                    std::make_shared<OngoingRequest<ReturnType>>();
+                this->mOngoingRequests.emplace(requestMessage.requestid(), ongoingRequest);
+                
                 this->template emit<OutgoingMessage<CallContextType>>(
                     requestMessage, requestMessage.requestid(), callContext);
+
+                if (mOutgoingMessageListener) {
+                    try {
+                        mOutgoingMessageListener(
+                            requestMessage,
+                            requestMessage.requestid(),
+                            callContext);
+                    } catch (const std::exception& clientSideException) {
+                        if (mOngoingRequests.find(requestMessage.requestid()) !=
+                            mOngoingRequests.end()) {
+                            this->handleClientError(
+                                requestMessage.requestid(),
+                                clientSideException);
+                        }
+                    }
+                }
 
                 auto reply = co_await std::move(ongoingRequest->getFuture());
                 co_return reply;
@@ -197,11 +218,16 @@ private:
 
     static RpcMessage createResponseRpcMessage(
         const RpcResponseParams& params) {
+
+        SLogger::info("createResponseRpcMessage()");
+        params.body.value().PrintDebugString();
+        SLogger::info("createResponseRpcMessage() 1");
         RpcMessage ret;
 
         if (params.body.has_value()) {
-            auto body = params.body.value();
-            ret.set_allocated_body(&body);
+            SLogger::info("createResponseRpcMessage() body has value");
+            auto* body = new Any(params.body.value());
+            ret.set_allocated_body(body);   // protobuf will take ownership
         }
 
         ret.mutable_header()->insert({"response", "response"});
@@ -229,17 +255,34 @@ private:
     void onIncomingMessage(
         const RpcMessage& rpcMessage, const CallContextType& callContext) {
         SLogger::debug("onIncomingMessage", rpcMessage.requestid());
-
+        rpcMessage.PrintDebugString();
+        SLogger::info("onIncomingMessage() 1");
         const auto& header = rpcMessage.header();
+        SLogger::info("onIncomingMessage() 2", header);
+        if (header.find("response") != header.end()) {
+            SLogger::info("onIncomingMessage() found response in msg");
+        } else {
+            SLogger::info("onIncomingMessage() 'response' not found in msg");
+        }
+
+        SLogger::info("onIncomingMessage() requestId", rpcMessage.requestid());
+        SLogger::info("Printing all keys of mOngoingRequests:");
+        for (const auto& ongoingRequest : mOngoingRequests) {
+            SLogger::info("Key: ", ongoingRequest.first);
+        }
         if (header.find("response") != header.end() &&
             mOngoingRequests.find(rpcMessage.requestid()) !=
                 mOngoingRequests.end()) {
+            SLogger::info("onIncomingMessage() found response in msg");
             if (rpcMessage.has_errortype()) {
+                SLogger::info("onIncomingMessage() rejecting ongoing request");
                 this->rejectOngoingRequest(rpcMessage);
             } else {
+                SLogger::info("onIncomingMessage() resolving ongoing request");
                 this->resolveOngoingRequest(rpcMessage);
             }
         } else if (
+            SLogger::info("onIncomingMessage() 'response not 'found in msg");
             header.find("request") != header.end() &&
             header.find("method") != header.end()) {
             if (header.find("notification") != header.end()) {
@@ -258,11 +301,14 @@ private:
 
         RpcMessage response;
         try {
+            SLogger::info("handleRequest() 1");
             auto bytes = mServerRegistry.handleRequest(rpcMessage, callContext);
-
+            SLogger::info("handleRequest() 2", bytes.GetTypeName());
+            SLogger::info("handleRequest() creating response message");
             response = RpcCommunicator::createResponseRpcMessage(
                 {.request = rpcMessage, .body = bytes});
         } catch (const Err& err) {
+            SLogger::info("handleRequest() exception ", err.what());
             RpcResponseParams errorParams = {.request = rpcMessage};
             if (err.code == ErrorCode::UNKNOWN_RPC_METHOD) {
                 errorParams.errorType = RpcErrorType::UNKNOWN_RPC_METHOD;
@@ -276,10 +322,23 @@ private:
                 errorParams.errorCode = magic_enum::enum_name(err.code);
                 errorParams.errorMessage = err.what();
             }
-
+            SLogger::info("handleRequest() creating response message for error");
             response = this->createResponseRpcMessage(errorParams);
         }
-        // this.onOutgoingMessage(response, undefined, callContext)
+        SLogger::info("handleRequest() emitting outgoing message");
+        this->template emit<OutgoingMessage<CallContextType>>(
+            response, response.requestid(), callContext);
+
+        if (mOutgoingMessageListener) {
+            try {
+                mOutgoingMessageListener(
+                    response, response.requestid(), callContext);
+            } catch (const std::exception& clientSideException) {
+                SLogger::debug(
+                    "error when calling outgoing message listener from server",
+                    clientSideException.what());
+            }
+        }
     }
 
     void handleNotification(
@@ -296,6 +355,20 @@ private:
 
     // Client-side functions
 
+    void handleClientError(
+        const std::string& requestId, const std::exception& error) {
+        if (mStopped) {
+            return;
+        }
+
+        const auto& ongoingRequest = mOngoingRequests.at(requestId);
+
+        if (ongoingRequest) {
+            ongoingRequest->rejectRequest(error);
+            mOngoingRequests.erase(requestId);
+        }
+    }
+
     template <typename RequestType>
     RpcMessage createRequestRpcMessage(
         const std::string& methodName,
@@ -308,9 +381,11 @@ private:
         if (notification) {
             header->insert({"notification", "notification"});
         }
-        Any body;
-        body.PackFrom(request);
-        ret.set_allocated_body(&body);
+        Any* body = new Any();
+        body->PackFrom(request);
+        ret.set_allocated_body(body);   // protobuf will take ownership
+        SLogger::info("createRequestRpcMessage() printed request Any:");
+        body->PrintDebugString();
 
         boost::uuids::uuid uuid;
         ret.set_requestid(boost::uuids::to_string(uuid));
