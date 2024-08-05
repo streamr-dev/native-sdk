@@ -44,28 +44,39 @@ TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
         [](const HelloRequest& request,
            const ProtoCallContext& /* context */) -> HelloResponse {
             HelloResponse response;
+            SLogger::info("TestCanMakeRpcCall request.myname():", request.myname());
             response.set_greeting("Hello, " + request.myname());
             return response;
         });
-
+    SLogger::info("TestCanMakeRpcCall recisterRpcMethod called");
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
             const RpcMessage& message,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
+            SLogger::info("onOutgoingMessageListener()");
             communicator1.handleIncomingMessage(message, ProtoCallContext());
         });
+    communicator1.setOutgoingMessageListener(
+        [&communicator2](
+            const RpcMessage& message,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            SLogger::info("onOutgoingMessageListener()");
+            communicator2.handleIncomingMessage(message, ProtoCallContext());
+        });
 
+    SLogger::info("TestCanMakeRpcCall setOutgoingMessageListener called");
     HelloRequest request;
     request.set_myname("Test");
-
+    SLogger::info("TestCanMakeRpcCall set_myname called");
     auto result = folly::coro::blockingWait(
         communicator2
             .callRemote<HelloResponse, HelloRequest>(
-                "testFunction", HelloRequest(), ProtoCallContext())
+                "testFunction", request, ProtoCallContext())
             .scheduleOn(folly::getGlobalCPUExecutor().get()));
-
+    SLogger::info("TestCanMakeRpcCall callRemote called");
     EXPECT_EQ("Hello, Test", result.greeting());
 }
 
