@@ -172,14 +172,15 @@ public:
             [&methodName, &methodParam, &callContext, this]()
                 -> folly::coro::Task<ReturnType> {
                 SLogger::info("callRemote() 1");
-                
+
                 auto requestMessage =
                     this->createRequestRpcMessage(methodName, methodParam);
-                
+
                 auto ongoingRequest =
                     std::make_shared<OngoingRequest<ReturnType>>();
-                this->mOngoingRequests.emplace(requestMessage.requestid(), ongoingRequest);
-                
+                this->mOngoingRequests.emplace(
+                    requestMessage.requestid(), ongoingRequest);
+
                 this->template emit<OutgoingMessage<CallContextType>>(
                     requestMessage, requestMessage.requestid(), callContext);
 
@@ -206,6 +207,32 @@ public:
         return std::move(task);
     }
 
+    template <typename RequestType>
+    Task<void> notifyRemote(
+        const std::string& methodName,
+        const RequestType& methodParam,
+        const CallContextType& callContext) {
+        SLogger::info("notifyRemote()");
+        auto task = folly::coro::co_invoke(
+            [&methodName, &methodParam, &callContext, this]()
+                -> folly::coro::Task<void> {
+                SLogger::info("notifyRemote() 1");
+                auto requestMessage = this->createRequestRpcMessage(
+                    methodName, methodParam, true);
+                this->template emit<OutgoingMessage<CallContextType>>(
+                    requestMessage, requestMessage.requestid(), callContext);
+
+                if (mOutgoingMessageListener) {
+                    mOutgoingMessageListener(
+                        requestMessage,
+                        requestMessage.requestid(),
+                        callContext);
+                }
+                co_return;
+            });
+        return std::move(task);
+    }
+
 private:
     struct RpcResponseParams {
         RpcMessage request;
@@ -218,7 +245,6 @@ private:
 
     static RpcMessage createResponseRpcMessage(
         const RpcResponseParams& params) {
-
         SLogger::info("createResponseRpcMessage()");
         params.body.value().PrintDebugString();
         SLogger::info("createResponseRpcMessage() 1");
@@ -227,7 +253,7 @@ private:
         if (params.body.has_value()) {
             SLogger::info("createResponseRpcMessage() body has value");
             auto* body = new Any(params.body.value());
-            ret.set_allocated_body(body);   // protobuf will take ownership
+            ret.set_allocated_body(body); // protobuf will take ownership
         }
 
         ret.mutable_header()->insert({"response", "response"});
@@ -281,10 +307,10 @@ private:
                 SLogger::info("onIncomingMessage() resolving ongoing request");
                 this->resolveOngoingRequest(rpcMessage);
             }
-        } else if (
-            SLogger::info("onIncomingMessage() 'response not 'found in msg");
-            header.find("request") != header.end() &&
-            header.find("method") != header.end()) {
+        } else if (SLogger::info(
+                       "onIncomingMessage() 'response not 'found in msg");
+                   header.find("request") != header.end() &&
+                   header.find("method") != header.end()) {
             if (header.find("notification") != header.end()) {
                 this->handleNotification(rpcMessage, callContext);
             } else {
@@ -322,7 +348,8 @@ private:
                 errorParams.errorCode = magic_enum::enum_name(err.code);
                 errorParams.errorMessage = err.what();
             }
-            SLogger::info("handleRequest() creating response message for error");
+            SLogger::info(
+                "handleRequest() creating response message for error");
             response = this->createResponseRpcMessage(errorParams);
         }
         SLogger::info("handleRequest() emitting outgoing message");
@@ -383,7 +410,7 @@ private:
         }
         Any* body = new Any();
         body->PackFrom(request);
-        ret.set_allocated_body(body);   // protobuf will take ownership
+        ret.set_allocated_body(body); // protobuf will take ownership
         SLogger::info("createRequestRpcMessage() printed request Any:");
         body->PrintDebugString();
 
