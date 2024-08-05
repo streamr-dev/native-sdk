@@ -1,7 +1,6 @@
 #ifndef STREAMR_JSON_JSONCONCEPTS_HPP
 #define STREAMR_JSON_JSONCONCEPTS_HPP
 
-#include <ranges>
 #include <boost/pfr/traits.hpp>
 #include <nlohmann/json.hpp>
 
@@ -9,11 +8,12 @@ namespace streamr::json {
 
 template <typename T>
 concept AssignableToNlohmannJson =
-    std::is_assignable<nlohmann::json&, T>::value;
+    std::is_assignable_v<nlohmann::json&, T>;
 
 template <typename T>
 concept NotAssignableToNlohmannJson =
-    !std::is_assignable<nlohmann::json&, T>::value;
+    !std::is_assignable_v<nlohmann::json&, T>;
+
 template <typename Ptr>
 concept PointerLike = std::is_pointer_v<Ptr> || requires(Ptr p) {
     { *p };
@@ -52,8 +52,8 @@ concept InitializerList = requires(T) {
 template <typename T>
 concept IterableType = requires(T container) {
     requires std::ranges::range<T>;
-    requires(not std::is_same<T, std::string>::value);
-    requires(not std::is_same<T, std::string_view>::value);
+    requires(not std::is_same_v<T, std::string>);
+    requires(not std::is_same_v<T, std::string_view>);
     requires(not AssociativeType<T>);
     requires(not AssignableToNlohmannJson<T>);
     requires(not PointerType<T>);

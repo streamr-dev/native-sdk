@@ -135,9 +135,9 @@ public:
     // Server-side registration of RPC methods and listeners
 
     template <typename RequestType, typename ReturnType, typename F>
-        requires std::is_assignable<
+        requires std::is_assignable_v<
             std::function<ReturnType(RequestType, CallContextType)>,
-            F>::value
+            F>
     void registerRpcMethod(
         const std::string& name, const F& fn, MethodOptions options = {}) {
         mServerRegistry.registerRpcMethod<RequestType, ReturnType, F>(
@@ -145,9 +145,9 @@ public:
     }
 
     template <typename RequestType, typename F>
-        requires std::is_assignable<
+        requires std::is_assignable_v<
             std::function<void(RequestType, CallContextType)>,
-            F>::value
+            F>
     void registerRpcNotification(
         const std::string& name, const F& fn, MethodOptions options = {}) {
         mServerRegistry.registerRpcNotification<RequestType, F>(
@@ -155,7 +155,7 @@ public:
     }
 
     template <typename F>
-        requires std::is_assignable<OutgoingMessageListenerType, F>::value
+        requires std::is_assignable_v<OutgoingMessageListenerType, F>
     void setOutgoingMessageListener(F&& listener) {
         mOutgoingMessageListener = std::forward<F>(listener);
     }
