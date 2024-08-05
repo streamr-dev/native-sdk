@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
+
+set (VCPKG_OVERLAY_TRIPLETS ENV{VCPKG_OVERLAY_TRIPLETS})
 set(CMAKE_CXX_STANDARD 26)
 include(homebrewClang.cmake)
 

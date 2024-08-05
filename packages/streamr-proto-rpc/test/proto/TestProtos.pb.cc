@@ -4,1292 +4,1272 @@
 #include "TestProtos.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
+namespace _pb = ::google::protobuf;
+namespace _pbi = ::google::protobuf::internal;
 
-namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
+inline constexpr PingResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : requestid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        _cached_size_{0} {}
 
-PROTOBUF_CONSTEXPR RouteMessageWrapper::RouteMessageWrapper(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.requestid_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.sourcepeer_)*/nullptr
-  , /*decltype(_impl_.destinationpeer_)*/nullptr
-  , /*decltype(_impl_.previouspeer_)*/nullptr
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct RouteMessageWrapperDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RouteMessageWrapperDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~RouteMessageWrapperDefaultTypeInternal() {}
-  union {
-    RouteMessageWrapper _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouteMessageWrapperDefaultTypeInternal _RouteMessageWrapper_default_instance_;
-PROTOBUF_CONSTEXPR RouteMessageAck::RouteMessageAck(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.requestid_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.error_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.sourcepeer_)*/nullptr
-  , /*decltype(_impl_.destinationpeer_)*/nullptr
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct RouteMessageAckDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR RouteMessageAckDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~RouteMessageAckDefaultTypeInternal() {}
-  union {
-    RouteMessageAck _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouteMessageAckDefaultTypeInternal _RouteMessageAck_default_instance_;
-PROTOBUF_CONSTEXPR PingRequest::PingRequest(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.requestid_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct PingRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR PingRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~PingRequestDefaultTypeInternal() {}
-  union {
-    PingRequest _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PingRequestDefaultTypeInternal _PingRequest_default_instance_;
-PROTOBUF_CONSTEXPR PingResponse::PingResponse(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.requestid_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+template <typename>
+PROTOBUF_CONSTEXPR PingResponse::PingResponse(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct PingResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR PingResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR PingResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~PingResponseDefaultTypeInternal() {}
   union {
     PingResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PingResponseDefaultTypeInternal _PingResponse_default_instance_;
-PROTOBUF_CONSTEXPR ClosestPeersRequest::ClosestPeersRequest(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.requestid_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.peerdescriptor_)*/nullptr
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct ClosestPeersRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ClosestPeersRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~ClosestPeersRequestDefaultTypeInternal() {}
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PingResponseDefaultTypeInternal _PingResponse_default_instance_;
+
+inline constexpr PingRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : requestid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR PingRequest::PingRequest(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct PingRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR PingRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~PingRequestDefaultTypeInternal() {}
   union {
-    ClosestPeersRequest _instance;
+    PingRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ClosestPeersRequestDefaultTypeInternal _ClosestPeersRequest_default_instance_;
-PROTOBUF_CONSTEXPR ClosestPeersResponse::ClosestPeersResponse(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.peers_)*/{}
-  , /*decltype(_impl_.requestid_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct ClosestPeersResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ClosestPeersResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~ClosestPeersResponseDefaultTypeInternal() {}
-  union {
-    ClosestPeersResponse _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ClosestPeersResponseDefaultTypeInternal _ClosestPeersResponse_default_instance_;
-PROTOBUF_CONSTEXPR PeerDescriptor::PeerDescriptor(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_._has_bits_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}
-  , /*decltype(_impl_.nodeid_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.udp_)*/nullptr
-  , /*decltype(_impl_.tcp_)*/nullptr
-  , /*decltype(_impl_.websocket_)*/nullptr
-  , /*decltype(_impl_.type_)*/0
-  , /*decltype(_impl_.openinternet_)*/false} {}
-struct PeerDescriptorDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR PeerDescriptorDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~PeerDescriptorDefaultTypeInternal() {}
-  union {
-    PeerDescriptor _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PeerDescriptorDefaultTypeInternal _PeerDescriptor_default_instance_;
-PROTOBUF_CONSTEXPR ConnectivityMethod::ConnectivityMethod(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.ip_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.port_)*/0u
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct ConnectivityMethodDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ConnectivityMethodDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~ConnectivityMethodDefaultTypeInternal() {}
-  union {
-    ConnectivityMethod _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectivityMethodDefaultTypeInternal _ConnectivityMethod_default_instance_;
-PROTOBUF_CONSTEXPR OptionalRequest::OptionalRequest(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_._has_bits_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}
-  , /*decltype(_impl_.someoptionalfield_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}} {}
-struct OptionalRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR OptionalRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~OptionalRequestDefaultTypeInternal() {}
-  union {
-    OptionalRequest _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OptionalRequestDefaultTypeInternal _OptionalRequest_default_instance_;
-PROTOBUF_CONSTEXPR OptionalResponse::OptionalResponse(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_._has_bits_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}
-  , /*decltype(_impl_.someoptionalfield_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}} {}
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PingRequestDefaultTypeInternal _PingRequest_default_instance_;
+
+inline constexpr OptionalResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        someoptionalfield_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()) {}
+
+template <typename>
+PROTOBUF_CONSTEXPR OptionalResponse::OptionalResponse(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct OptionalResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR OptionalResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR OptionalResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~OptionalResponseDefaultTypeInternal() {}
   union {
     OptionalResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OptionalResponseDefaultTypeInternal _OptionalResponse_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OptionalResponseDefaultTypeInternal _OptionalResponse_default_instance_;
+
+inline constexpr OptionalRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        someoptionalfield_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()) {}
+
+template <typename>
+PROTOBUF_CONSTEXPR OptionalRequest::OptionalRequest(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct OptionalRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR OptionalRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~OptionalRequestDefaultTypeInternal() {}
+  union {
+    OptionalRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OptionalRequestDefaultTypeInternal _OptionalRequest_default_instance_;
+
+inline constexpr ConnectivityMethod::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : ip_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        port_{0u},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ConnectivityMethod::ConnectivityMethod(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct ConnectivityMethodDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ConnectivityMethodDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ConnectivityMethodDefaultTypeInternal() {}
+  union {
+    ConnectivityMethod _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ConnectivityMethodDefaultTypeInternal _ConnectivityMethod_default_instance_;
+
+inline constexpr PeerDescriptor::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        nodeid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        udp_{nullptr},
+        tcp_{nullptr},
+        websocket_{nullptr},
+        type_{static_cast< ::NodeType >(0)},
+        openinternet_{false} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR PeerDescriptor::PeerDescriptor(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct PeerDescriptorDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR PeerDescriptorDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~PeerDescriptorDefaultTypeInternal() {}
+  union {
+    PeerDescriptor _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PeerDescriptorDefaultTypeInternal _PeerDescriptor_default_instance_;
+
+inline constexpr RouteMessageWrapper::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        requestid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        message_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        sourcepeer_{nullptr},
+        destinationpeer_{nullptr},
+        previouspeer_{nullptr} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR RouteMessageWrapper::RouteMessageWrapper(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct RouteMessageWrapperDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RouteMessageWrapperDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RouteMessageWrapperDefaultTypeInternal() {}
+  union {
+    RouteMessageWrapper _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouteMessageWrapperDefaultTypeInternal _RouteMessageWrapper_default_instance_;
+
+inline constexpr RouteMessageAck::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        requestid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        error_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        sourcepeer_{nullptr},
+        destinationpeer_{nullptr} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR RouteMessageAck::RouteMessageAck(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct RouteMessageAckDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RouteMessageAckDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RouteMessageAckDefaultTypeInternal() {}
+  union {
+    RouteMessageAck _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RouteMessageAckDefaultTypeInternal _RouteMessageAck_default_instance_;
+
+inline constexpr ClosestPeersResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : peers_{},
+        requestid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ClosestPeersResponse::ClosestPeersResponse(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct ClosestPeersResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ClosestPeersResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ClosestPeersResponseDefaultTypeInternal() {}
+  union {
+    ClosestPeersResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ClosestPeersResponseDefaultTypeInternal _ClosestPeersResponse_default_instance_;
+
+inline constexpr ClosestPeersRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        requestid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        peerdescriptor_{nullptr} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ClosestPeersRequest::ClosestPeersRequest(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct ClosestPeersRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ClosestPeersRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ClosestPeersRequestDefaultTypeInternal() {}
+  union {
+    ClosestPeersRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ClosestPeersRequestDefaultTypeInternal _ClosestPeersRequest_default_instance_;
 static ::_pb::Metadata file_level_metadata_TestProtos_2eproto[10];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_TestProtos_2eproto[1];
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_TestProtos_2eproto = nullptr;
-
-const uint32_t TableStruct_TestProtos_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.sourcepeer_),
-  PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.requestid_),
-  PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.destinationpeer_),
-  PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.previouspeer_),
-  PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.message_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_.sourcepeer_),
-  PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_.requestid_),
-  PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_.destinationpeer_),
-  PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_.error_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::PingRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::PingRequest, _impl_.requestid_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::PingResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::PingResponse, _impl_.requestid_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::ClosestPeersRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::ClosestPeersRequest, _impl_.peerdescriptor_),
-  PROTOBUF_FIELD_OFFSET(::ClosestPeersRequest, _impl_.requestid_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::ClosestPeersResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::ClosestPeersResponse, _impl_.peers_),
-  PROTOBUF_FIELD_OFFSET(::ClosestPeersResponse, _impl_.requestid_),
-  PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_._has_bits_),
-  PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.nodeid_),
-  PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.type_),
-  PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.udp_),
-  PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.tcp_),
-  PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.websocket_),
-  PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.openinternet_),
-  ~0u,
-  ~0u,
-  ~0u,
-  ~0u,
-  ~0u,
-  0,
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::ConnectivityMethod, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::ConnectivityMethod, _impl_.port_),
-  PROTOBUF_FIELD_OFFSET(::ConnectivityMethod, _impl_.ip_),
-  PROTOBUF_FIELD_OFFSET(::OptionalRequest, _impl_._has_bits_),
-  PROTOBUF_FIELD_OFFSET(::OptionalRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::OptionalRequest, _impl_.someoptionalfield_),
-  0,
-  PROTOBUF_FIELD_OFFSET(::OptionalResponse, _impl_._has_bits_),
-  PROTOBUF_FIELD_OFFSET(::OptionalResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::OptionalResponse, _impl_.someoptionalfield_),
-  0,
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_TestProtos_2eproto = nullptr;
+const ::uint32_t TableStruct_TestProtos_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.sourcepeer_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.requestid_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.destinationpeer_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.previouspeer_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageWrapper, _impl_.message_),
+    0,
+    ~0u,
+    1,
+    2,
+    ~0u,
+    PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_.sourcepeer_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_.requestid_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_.destinationpeer_),
+    PROTOBUF_FIELD_OFFSET(::RouteMessageAck, _impl_.error_),
+    0,
+    ~0u,
+    1,
+    ~0u,
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::PingRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::PingRequest, _impl_.requestid_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::PingResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::PingResponse, _impl_.requestid_),
+    PROTOBUF_FIELD_OFFSET(::ClosestPeersRequest, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::ClosestPeersRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::ClosestPeersRequest, _impl_.peerdescriptor_),
+    PROTOBUF_FIELD_OFFSET(::ClosestPeersRequest, _impl_.requestid_),
+    0,
+    ~0u,
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::ClosestPeersResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::ClosestPeersResponse, _impl_.peers_),
+    PROTOBUF_FIELD_OFFSET(::ClosestPeersResponse, _impl_.requestid_),
+    PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.nodeid_),
+    PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.type_),
+    PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.udp_),
+    PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.tcp_),
+    PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.websocket_),
+    PROTOBUF_FIELD_OFFSET(::PeerDescriptor, _impl_.openinternet_),
+    ~0u,
+    ~0u,
+    0,
+    1,
+    2,
+    3,
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::ConnectivityMethod, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::ConnectivityMethod, _impl_.port_),
+    PROTOBUF_FIELD_OFFSET(::ConnectivityMethod, _impl_.ip_),
+    PROTOBUF_FIELD_OFFSET(::OptionalRequest, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::OptionalRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::OptionalRequest, _impl_.someoptionalfield_),
+    0,
+    PROTOBUF_FIELD_OFFSET(::OptionalResponse, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::OptionalResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::OptionalResponse, _impl_.someoptionalfield_),
+    0,
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::RouteMessageWrapper)},
-  { 11, -1, -1, sizeof(::RouteMessageAck)},
-  { 21, -1, -1, sizeof(::PingRequest)},
-  { 28, -1, -1, sizeof(::PingResponse)},
-  { 35, -1, -1, sizeof(::ClosestPeersRequest)},
-  { 43, -1, -1, sizeof(::ClosestPeersResponse)},
-  { 51, 63, -1, sizeof(::PeerDescriptor)},
-  { 69, -1, -1, sizeof(::ConnectivityMethod)},
-  { 77, 84, -1, sizeof(::OptionalRequest)},
-  { 85, 92, -1, sizeof(::OptionalResponse)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        {0, 13, -1, sizeof(::RouteMessageWrapper)},
+        {18, 30, -1, sizeof(::RouteMessageAck)},
+        {34, -1, -1, sizeof(::PingRequest)},
+        {43, -1, -1, sizeof(::PingResponse)},
+        {52, 62, -1, sizeof(::ClosestPeersRequest)},
+        {64, -1, -1, sizeof(::ClosestPeersResponse)},
+        {74, 88, -1, sizeof(::PeerDescriptor)},
+        {94, -1, -1, sizeof(::ConnectivityMethod)},
+        {104, 113, -1, sizeof(::OptionalRequest)},
+        {114, 123, -1, sizeof(::OptionalResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::_RouteMessageWrapper_default_instance_._instance,
-  &::_RouteMessageAck_default_instance_._instance,
-  &::_PingRequest_default_instance_._instance,
-  &::_PingResponse_default_instance_._instance,
-  &::_ClosestPeersRequest_default_instance_._instance,
-  &::_ClosestPeersResponse_default_instance_._instance,
-  &::_PeerDescriptor_default_instance_._instance,
-  &::_ConnectivityMethod_default_instance_._instance,
-  &::_OptionalRequest_default_instance_._instance,
-  &::_OptionalResponse_default_instance_._instance,
+    &::_RouteMessageWrapper_default_instance_._instance,
+    &::_RouteMessageAck_default_instance_._instance,
+    &::_PingRequest_default_instance_._instance,
+    &::_PingResponse_default_instance_._instance,
+    &::_ClosestPeersRequest_default_instance_._instance,
+    &::_ClosestPeersResponse_default_instance_._instance,
+    &::_PeerDescriptor_default_instance_._instance,
+    &::_ConnectivityMethod_default_instance_._instance,
+    &::_OptionalRequest_default_instance_._instance,
+    &::_OptionalResponse_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_TestProtos_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\020TestProtos.proto\"\257\001\n\023RouteMessageWrapp"
-  "er\022#\n\nsourcePeer\030\001 \001(\0132\017.PeerDescriptor\022"
-  "\021\n\trequestId\030\002 \001(\t\022(\n\017destinationPeer\030\003 "
-  "\001(\0132\017.PeerDescriptor\022%\n\014previousPeer\030\004 \001"
-  "(\0132\017.PeerDescriptor\022\017\n\007message\030\005 \001(\014\"\202\001\n"
-  "\017RouteMessageAck\022#\n\nsourcePeer\030\001 \001(\0132\017.P"
-  "eerDescriptor\022\021\n\trequestId\030\002 \001(\t\022(\n\017dest"
-  "inationPeer\030\003 \001(\0132\017.PeerDescriptor\022\r\n\005er"
-  "ror\030\004 \001(\t\" \n\013PingRequest\022\021\n\trequestId\030\001 "
-  "\001(\t\"!\n\014PingResponse\022\021\n\trequestId\030\001 \001(\t\"Q"
-  "\n\023ClosestPeersRequest\022\'\n\016peerDescriptor\030"
-  "\001 \001(\0132\017.PeerDescriptor\022\021\n\trequestId\030\002 \001("
-  "\t\"I\n\024ClosestPeersResponse\022\036\n\005peers\030\001 \003(\013"
-  "2\017.PeerDescriptor\022\021\n\trequestId\030\002 \001(\t\"\321\001\n"
-  "\016PeerDescriptor\022\016\n\006nodeId\030\001 \001(\014\022\027\n\004type\030"
-  "\002 \001(\0162\t.NodeType\022 \n\003udp\030\003 \001(\0132\023.Connecti"
-  "vityMethod\022 \n\003tcp\030\004 \001(\0132\023.ConnectivityMe"
-  "thod\022&\n\twebsocket\030\005 \001(\0132\023.ConnectivityMe"
-  "thod\022\031\n\014openInternet\030\006 \001(\010H\000\210\001\001B\017\n\r_open"
-  "Internet\".\n\022ConnectivityMethod\022\014\n\004port\030\002"
-  " \001(\r\022\n\n\002ip\030\003 \001(\t\"G\n\017OptionalRequest\022\036\n\021s"
-  "omeOptionalField\030\001 \001(\tH\000\210\001\001B\024\n\022_someOpti"
-  "onalField\"H\n\020OptionalResponse\022\036\n\021someOpt"
-  "ionalField\030\001 \001(\tH\000\210\001\001B\024\n\022_someOptionalFi"
-  "eld*#\n\010NodeType\022\n\n\006NODEJS\020\000\022\013\n\007BROWSER\020\001"
-  "2\254\001\n\rDhtRpcService\022>\n\017getClosestPeers\022\024."
-  "ClosestPeersRequest\032\025.ClosestPeersRespon"
-  "se\022#\n\004ping\022\014.PingRequest\032\r.PingResponse\022"
-  "6\n\014routeMessage\022\024.RouteMessageWrapper\032\020."
-  "RouteMessageAck2E\n\017OptionalService\0222\n\013ge"
-  "tOptional\022\020.OptionalRequest\032\021.OptionalRe"
-  "sponseB\002H\002b\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_TestProtos_2eproto_once;
+const char descriptor_table_protodef_TestProtos_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\020TestProtos.proto\"\257\001\n\023RouteMessageWrapp"
+    "er\022#\n\nsourcePeer\030\001 \001(\0132\017.PeerDescriptor\022"
+    "\021\n\trequestId\030\002 \001(\t\022(\n\017destinationPeer\030\003 "
+    "\001(\0132\017.PeerDescriptor\022%\n\014previousPeer\030\004 \001"
+    "(\0132\017.PeerDescriptor\022\017\n\007message\030\005 \001(\014\"\202\001\n"
+    "\017RouteMessageAck\022#\n\nsourcePeer\030\001 \001(\0132\017.P"
+    "eerDescriptor\022\021\n\trequestId\030\002 \001(\t\022(\n\017dest"
+    "inationPeer\030\003 \001(\0132\017.PeerDescriptor\022\r\n\005er"
+    "ror\030\004 \001(\t\" \n\013PingRequest\022\021\n\trequestId\030\001 "
+    "\001(\t\"!\n\014PingResponse\022\021\n\trequestId\030\001 \001(\t\"Q"
+    "\n\023ClosestPeersRequest\022\'\n\016peerDescriptor\030"
+    "\001 \001(\0132\017.PeerDescriptor\022\021\n\trequestId\030\002 \001("
+    "\t\"I\n\024ClosestPeersResponse\022\036\n\005peers\030\001 \003(\013"
+    "2\017.PeerDescriptor\022\021\n\trequestId\030\002 \001(\t\"\321\001\n"
+    "\016PeerDescriptor\022\016\n\006nodeId\030\001 \001(\014\022\027\n\004type\030"
+    "\002 \001(\0162\t.NodeType\022 \n\003udp\030\003 \001(\0132\023.Connecti"
+    "vityMethod\022 \n\003tcp\030\004 \001(\0132\023.ConnectivityMe"
+    "thod\022&\n\twebsocket\030\005 \001(\0132\023.ConnectivityMe"
+    "thod\022\031\n\014openInternet\030\006 \001(\010H\000\210\001\001B\017\n\r_open"
+    "Internet\".\n\022ConnectivityMethod\022\014\n\004port\030\002"
+    " \001(\r\022\n\n\002ip\030\003 \001(\t\"G\n\017OptionalRequest\022\036\n\021s"
+    "omeOptionalField\030\001 \001(\tH\000\210\001\001B\024\n\022_someOpti"
+    "onalField\"H\n\020OptionalResponse\022\036\n\021someOpt"
+    "ionalField\030\001 \001(\tH\000\210\001\001B\024\n\022_someOptionalFi"
+    "eld*#\n\010NodeType\022\n\n\006NODEJS\020\000\022\013\n\007BROWSER\020\001"
+    "2\254\001\n\rDhtRpcService\022>\n\017getClosestPeers\022\024."
+    "ClosestPeersRequest\032\025.ClosestPeersRespon"
+    "se\022#\n\004ping\022\014.PingRequest\032\r.PingResponse\022"
+    "6\n\014routeMessage\022\024.RouteMessageWrapper\032\020."
+    "RouteMessageAck2E\n\017OptionalService\0222\n\013ge"
+    "tOptional\022\020.OptionalRequest\032\021.OptionalRe"
+    "sponseB\002H\002b\006proto3"
+};
+static ::absl::once_flag descriptor_table_TestProtos_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_TestProtos_2eproto = {
-    false, false, 1258, descriptor_table_protodef_TestProtos_2eproto,
+    false,
+    false,
+    1258,
+    descriptor_table_protodef_TestProtos_2eproto,
     "TestProtos.proto",
-    &descriptor_table_TestProtos_2eproto_once, nullptr, 0, 10,
-    schemas, file_default_instances, TableStruct_TestProtos_2eproto::offsets,
-    file_level_metadata_TestProtos_2eproto, file_level_enum_descriptors_TestProtos_2eproto,
+    &descriptor_table_TestProtos_2eproto_once,
+    nullptr,
+    0,
+    10,
+    schemas,
+    file_default_instances,
+    TableStruct_TestProtos_2eproto::offsets,
+    file_level_metadata_TestProtos_2eproto,
+    file_level_enum_descriptors_TestProtos_2eproto,
     file_level_service_descriptors_TestProtos_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_TestProtos_2eproto_getter() {
   return &descriptor_table_TestProtos_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_TestProtos_2eproto(&descriptor_table_TestProtos_2eproto);
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* NodeType_descriptor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_TestProtos_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_TestProtos_2eproto(&descriptor_table_TestProtos_2eproto);
+const ::google::protobuf::EnumDescriptor* NodeType_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_TestProtos_2eproto);
   return file_level_enum_descriptors_TestProtos_2eproto[0];
 }
+PROTOBUF_CONSTINIT const uint32_t NodeType_internal_data_[] = {
+    131072u, 0u, };
 bool NodeType_IsValid(int value) {
-  switch (value) {
-    case 0:
-    case 1:
-      return true;
-    default:
-      return false;
-  }
+  return 0 <= value && value <= 1;
 }
-
-
 // ===================================================================
 
 class RouteMessageWrapper::_Internal {
  public:
+  using HasBits = decltype(std::declval<RouteMessageWrapper>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(RouteMessageWrapper, _impl_._has_bits_);
   static const ::PeerDescriptor& sourcepeer(const RouteMessageWrapper* msg);
+  static void set_has_sourcepeer(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
   static const ::PeerDescriptor& destinationpeer(const RouteMessageWrapper* msg);
+  static void set_has_destinationpeer(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
   static const ::PeerDescriptor& previouspeer(const RouteMessageWrapper* msg);
+  static void set_has_previouspeer(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
 };
 
-const ::PeerDescriptor&
-RouteMessageWrapper::_Internal::sourcepeer(const RouteMessageWrapper* msg) {
+const ::PeerDescriptor& RouteMessageWrapper::_Internal::sourcepeer(const RouteMessageWrapper* msg) {
   return *msg->_impl_.sourcepeer_;
 }
-const ::PeerDescriptor&
-RouteMessageWrapper::_Internal::destinationpeer(const RouteMessageWrapper* msg) {
+const ::PeerDescriptor& RouteMessageWrapper::_Internal::destinationpeer(const RouteMessageWrapper* msg) {
   return *msg->_impl_.destinationpeer_;
 }
-const ::PeerDescriptor&
-RouteMessageWrapper::_Internal::previouspeer(const RouteMessageWrapper* msg) {
+const ::PeerDescriptor& RouteMessageWrapper::_Internal::previouspeer(const RouteMessageWrapper* msg) {
   return *msg->_impl_.previouspeer_;
 }
-RouteMessageWrapper::RouteMessageWrapper(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RouteMessageWrapper::RouteMessageWrapper(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:RouteMessageWrapper)
 }
-RouteMessageWrapper::RouteMessageWrapper(const RouteMessageWrapper& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  RouteMessageWrapper* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , decltype(_impl_.message_){}
-    , decltype(_impl_.sourcepeer_){nullptr}
-    , decltype(_impl_.destinationpeer_){nullptr}
-    , decltype(_impl_.previouspeer_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE RouteMessageWrapper::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        requestid_(arena, from.requestid_),
+        message_(arena, from.message_) {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_requestid().empty()) {
-    _this->_impl_.requestid_.Set(from._internal_requestid(), 
-      _this->GetArenaForAllocation());
-  }
-  _impl_.message_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_message().empty()) {
-    _this->_impl_.message_.Set(from._internal_message(), 
-      _this->GetArenaForAllocation());
-  }
-  if (from._internal_has_sourcepeer()) {
-    _this->_impl_.sourcepeer_ = new ::PeerDescriptor(*from._impl_.sourcepeer_);
-  }
-  if (from._internal_has_destinationpeer()) {
-    _this->_impl_.destinationpeer_ = new ::PeerDescriptor(*from._impl_.destinationpeer_);
-  }
-  if (from._internal_has_previouspeer()) {
-    _this->_impl_.previouspeer_ = new ::PeerDescriptor(*from._impl_.previouspeer_);
-  }
+RouteMessageWrapper::RouteMessageWrapper(
+    ::google::protobuf::Arena* arena,
+    const RouteMessageWrapper& from)
+    : ::google::protobuf::Message(arena) {
+  RouteMessageWrapper* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.sourcepeer_ = (cached_has_bits & 0x00000001u)
+                ? CreateMaybeMessage<::PeerDescriptor>(arena, *from._impl_.sourcepeer_)
+                : nullptr;
+  _impl_.destinationpeer_ = (cached_has_bits & 0x00000002u)
+                ? CreateMaybeMessage<::PeerDescriptor>(arena, *from._impl_.destinationpeer_)
+                : nullptr;
+  _impl_.previouspeer_ = (cached_has_bits & 0x00000004u)
+                ? CreateMaybeMessage<::PeerDescriptor>(arena, *from._impl_.previouspeer_)
+                : nullptr;
+
   // @@protoc_insertion_point(copy_constructor:RouteMessageWrapper)
 }
+inline PROTOBUF_NDEBUG_INLINE RouteMessageWrapper::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        requestid_(arena),
+        message_(arena) {}
 
-inline void RouteMessageWrapper::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , decltype(_impl_.message_){}
-    , decltype(_impl_.sourcepeer_){nullptr}
-    , decltype(_impl_.destinationpeer_){nullptr}
-    , decltype(_impl_.previouspeer_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.message_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.message_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void RouteMessageWrapper::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, sourcepeer_),
+           0,
+           offsetof(Impl_, previouspeer_) -
+               offsetof(Impl_, sourcepeer_) +
+               sizeof(Impl_::previouspeer_));
 }
-
 RouteMessageWrapper::~RouteMessageWrapper() {
   // @@protoc_insertion_point(destructor:RouteMessageWrapper)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void RouteMessageWrapper::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.requestid_.Destroy();
   _impl_.message_.Destroy();
-  if (this != internal_default_instance()) delete _impl_.sourcepeer_;
-  if (this != internal_default_instance()) delete _impl_.destinationpeer_;
-  if (this != internal_default_instance()) delete _impl_.previouspeer_;
+  delete _impl_.sourcepeer_;
+  delete _impl_.destinationpeer_;
+  delete _impl_.previouspeer_;
+  _impl_.~Impl_();
 }
 
-void RouteMessageWrapper::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* RouteMessageWrapper::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void RouteMessageWrapper::InternalSwap(RouteMessageWrapper* other) {
+void RouteMessageWrapper::InternalSwap(RouteMessageWrapper* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata RouteMessageWrapper::GetMetadata() const {
+::google::protobuf::Metadata RouteMessageWrapper::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[0]);
 }
-
 // ===================================================================
 
 class RouteMessageAck::_Internal {
  public:
+  using HasBits = decltype(std::declval<RouteMessageAck>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(RouteMessageAck, _impl_._has_bits_);
   static const ::PeerDescriptor& sourcepeer(const RouteMessageAck* msg);
+  static void set_has_sourcepeer(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
   static const ::PeerDescriptor& destinationpeer(const RouteMessageAck* msg);
+  static void set_has_destinationpeer(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
 };
 
-const ::PeerDescriptor&
-RouteMessageAck::_Internal::sourcepeer(const RouteMessageAck* msg) {
+const ::PeerDescriptor& RouteMessageAck::_Internal::sourcepeer(const RouteMessageAck* msg) {
   return *msg->_impl_.sourcepeer_;
 }
-const ::PeerDescriptor&
-RouteMessageAck::_Internal::destinationpeer(const RouteMessageAck* msg) {
+const ::PeerDescriptor& RouteMessageAck::_Internal::destinationpeer(const RouteMessageAck* msg) {
   return *msg->_impl_.destinationpeer_;
 }
-RouteMessageAck::RouteMessageAck(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+RouteMessageAck::RouteMessageAck(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:RouteMessageAck)
 }
-RouteMessageAck::RouteMessageAck(const RouteMessageAck& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  RouteMessageAck* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , decltype(_impl_.error_){}
-    , decltype(_impl_.sourcepeer_){nullptr}
-    , decltype(_impl_.destinationpeer_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE RouteMessageAck::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        requestid_(arena, from.requestid_),
+        error_(arena, from.error_) {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_requestid().empty()) {
-    _this->_impl_.requestid_.Set(from._internal_requestid(), 
-      _this->GetArenaForAllocation());
-  }
-  _impl_.error_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.error_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_error().empty()) {
-    _this->_impl_.error_.Set(from._internal_error(), 
-      _this->GetArenaForAllocation());
-  }
-  if (from._internal_has_sourcepeer()) {
-    _this->_impl_.sourcepeer_ = new ::PeerDescriptor(*from._impl_.sourcepeer_);
-  }
-  if (from._internal_has_destinationpeer()) {
-    _this->_impl_.destinationpeer_ = new ::PeerDescriptor(*from._impl_.destinationpeer_);
-  }
+RouteMessageAck::RouteMessageAck(
+    ::google::protobuf::Arena* arena,
+    const RouteMessageAck& from)
+    : ::google::protobuf::Message(arena) {
+  RouteMessageAck* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.sourcepeer_ = (cached_has_bits & 0x00000001u)
+                ? CreateMaybeMessage<::PeerDescriptor>(arena, *from._impl_.sourcepeer_)
+                : nullptr;
+  _impl_.destinationpeer_ = (cached_has_bits & 0x00000002u)
+                ? CreateMaybeMessage<::PeerDescriptor>(arena, *from._impl_.destinationpeer_)
+                : nullptr;
+
   // @@protoc_insertion_point(copy_constructor:RouteMessageAck)
 }
+inline PROTOBUF_NDEBUG_INLINE RouteMessageAck::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        requestid_(arena),
+        error_(arena) {}
 
-inline void RouteMessageAck::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , decltype(_impl_.error_){}
-    , decltype(_impl_.sourcepeer_){nullptr}
-    , decltype(_impl_.destinationpeer_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.error_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.error_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void RouteMessageAck::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, sourcepeer_),
+           0,
+           offsetof(Impl_, destinationpeer_) -
+               offsetof(Impl_, sourcepeer_) +
+               sizeof(Impl_::destinationpeer_));
 }
-
 RouteMessageAck::~RouteMessageAck() {
   // @@protoc_insertion_point(destructor:RouteMessageAck)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void RouteMessageAck::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.requestid_.Destroy();
   _impl_.error_.Destroy();
-  if (this != internal_default_instance()) delete _impl_.sourcepeer_;
-  if (this != internal_default_instance()) delete _impl_.destinationpeer_;
+  delete _impl_.sourcepeer_;
+  delete _impl_.destinationpeer_;
+  _impl_.~Impl_();
 }
 
-void RouteMessageAck::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* RouteMessageAck::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void RouteMessageAck::InternalSwap(RouteMessageAck* other) {
+void RouteMessageAck::InternalSwap(RouteMessageAck* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata RouteMessageAck::GetMetadata() const {
+::google::protobuf::Metadata RouteMessageAck::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[1]);
 }
-
 // ===================================================================
 
 class PingRequest::_Internal {
  public:
 };
 
-PingRequest::PingRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+PingRequest::PingRequest(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:PingRequest)
 }
-PingRequest::PingRequest(const PingRequest& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  PingRequest* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE PingRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : requestid_(arena, from.requestid_),
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_requestid().empty()) {
-    _this->_impl_.requestid_.Set(from._internal_requestid(), 
-      _this->GetArenaForAllocation());
-  }
+PingRequest::PingRequest(
+    ::google::protobuf::Arena* arena,
+    const PingRequest& from)
+    : ::google::protobuf::Message(arena) {
+  PingRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:PingRequest)
 }
+inline PROTOBUF_NDEBUG_INLINE PingRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : requestid_(arena),
+        _cached_size_{0} {}
 
-inline void PingRequest::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void PingRequest::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 PingRequest::~PingRequest() {
   // @@protoc_insertion_point(destructor:PingRequest)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void PingRequest::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.requestid_.Destroy();
+  _impl_.~Impl_();
 }
 
-void PingRequest::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* PingRequest::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void PingRequest::InternalSwap(PingRequest* other) {
+void PingRequest::InternalSwap(PingRequest* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata PingRequest::GetMetadata() const {
+::google::protobuf::Metadata PingRequest::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[2]);
 }
-
 // ===================================================================
 
 class PingResponse::_Internal {
  public:
 };
 
-PingResponse::PingResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+PingResponse::PingResponse(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:PingResponse)
 }
-PingResponse::PingResponse(const PingResponse& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  PingResponse* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE PingResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : requestid_(arena, from.requestid_),
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_requestid().empty()) {
-    _this->_impl_.requestid_.Set(from._internal_requestid(), 
-      _this->GetArenaForAllocation());
-  }
+PingResponse::PingResponse(
+    ::google::protobuf::Arena* arena,
+    const PingResponse& from)
+    : ::google::protobuf::Message(arena) {
+  PingResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:PingResponse)
 }
+inline PROTOBUF_NDEBUG_INLINE PingResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : requestid_(arena),
+        _cached_size_{0} {}
 
-inline void PingResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void PingResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 PingResponse::~PingResponse() {
   // @@protoc_insertion_point(destructor:PingResponse)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void PingResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.requestid_.Destroy();
+  _impl_.~Impl_();
 }
 
-void PingResponse::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* PingResponse::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void PingResponse::InternalSwap(PingResponse* other) {
+void PingResponse::InternalSwap(PingResponse* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata PingResponse::GetMetadata() const {
+::google::protobuf::Metadata PingResponse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[3]);
 }
-
 // ===================================================================
 
 class ClosestPeersRequest::_Internal {
  public:
+  using HasBits = decltype(std::declval<ClosestPeersRequest>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(ClosestPeersRequest, _impl_._has_bits_);
   static const ::PeerDescriptor& peerdescriptor(const ClosestPeersRequest* msg);
+  static void set_has_peerdescriptor(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
 };
 
-const ::PeerDescriptor&
-ClosestPeersRequest::_Internal::peerdescriptor(const ClosestPeersRequest* msg) {
+const ::PeerDescriptor& ClosestPeersRequest::_Internal::peerdescriptor(const ClosestPeersRequest* msg) {
   return *msg->_impl_.peerdescriptor_;
 }
-ClosestPeersRequest::ClosestPeersRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ClosestPeersRequest::ClosestPeersRequest(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:ClosestPeersRequest)
 }
-ClosestPeersRequest::ClosestPeersRequest(const ClosestPeersRequest& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  ClosestPeersRequest* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , decltype(_impl_.peerdescriptor_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE ClosestPeersRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        requestid_(arena, from.requestid_) {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_requestid().empty()) {
-    _this->_impl_.requestid_.Set(from._internal_requestid(), 
-      _this->GetArenaForAllocation());
-  }
-  if (from._internal_has_peerdescriptor()) {
-    _this->_impl_.peerdescriptor_ = new ::PeerDescriptor(*from._impl_.peerdescriptor_);
-  }
+ClosestPeersRequest::ClosestPeersRequest(
+    ::google::protobuf::Arena* arena,
+    const ClosestPeersRequest& from)
+    : ::google::protobuf::Message(arena) {
+  ClosestPeersRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.peerdescriptor_ = (cached_has_bits & 0x00000001u)
+                ? CreateMaybeMessage<::PeerDescriptor>(arena, *from._impl_.peerdescriptor_)
+                : nullptr;
+
   // @@protoc_insertion_point(copy_constructor:ClosestPeersRequest)
 }
+inline PROTOBUF_NDEBUG_INLINE ClosestPeersRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        requestid_(arena) {}
 
-inline void ClosestPeersRequest::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.requestid_){}
-    , decltype(_impl_.peerdescriptor_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void ClosestPeersRequest::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.peerdescriptor_ = {};
 }
-
 ClosestPeersRequest::~ClosestPeersRequest() {
   // @@protoc_insertion_point(destructor:ClosestPeersRequest)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void ClosestPeersRequest::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.requestid_.Destroy();
-  if (this != internal_default_instance()) delete _impl_.peerdescriptor_;
+  delete _impl_.peerdescriptor_;
+  _impl_.~Impl_();
 }
 
-void ClosestPeersRequest::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* ClosestPeersRequest::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void ClosestPeersRequest::InternalSwap(ClosestPeersRequest* other) {
+void ClosestPeersRequest::InternalSwap(ClosestPeersRequest* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata ClosestPeersRequest::GetMetadata() const {
+::google::protobuf::Metadata ClosestPeersRequest::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[4]);
 }
-
 // ===================================================================
 
 class ClosestPeersResponse::_Internal {
  public:
 };
 
-ClosestPeersResponse::ClosestPeersResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ClosestPeersResponse::ClosestPeersResponse(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:ClosestPeersResponse)
 }
-ClosestPeersResponse::ClosestPeersResponse(const ClosestPeersResponse& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  ClosestPeersResponse* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.peers_){from._impl_.peers_}
-    , decltype(_impl_.requestid_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE ClosestPeersResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : peers_{visibility, arena, from.peers_},
+        requestid_(arena, from.requestid_),
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_requestid().empty()) {
-    _this->_impl_.requestid_.Set(from._internal_requestid(), 
-      _this->GetArenaForAllocation());
-  }
+ClosestPeersResponse::ClosestPeersResponse(
+    ::google::protobuf::Arena* arena,
+    const ClosestPeersResponse& from)
+    : ::google::protobuf::Message(arena) {
+  ClosestPeersResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:ClosestPeersResponse)
 }
+inline PROTOBUF_NDEBUG_INLINE ClosestPeersResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : peers_{visibility, arena},
+        requestid_(arena),
+        _cached_size_{0} {}
 
-inline void ClosestPeersResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.peers_){arena}
-    , decltype(_impl_.requestid_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.requestid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.requestid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void ClosestPeersResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 ClosestPeersResponse::~ClosestPeersResponse() {
   // @@protoc_insertion_point(destructor:ClosestPeersResponse)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void ClosestPeersResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.peers_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.requestid_.Destroy();
+  _impl_.~Impl_();
 }
 
-void ClosestPeersResponse::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* ClosestPeersResponse::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void ClosestPeersResponse::InternalSwap(ClosestPeersResponse* other) {
+void ClosestPeersResponse::InternalSwap(ClosestPeersResponse* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata ClosestPeersResponse::GetMetadata() const {
+::google::protobuf::Metadata ClosestPeersResponse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[5]);
 }
-
 // ===================================================================
 
 class PeerDescriptor::_Internal {
  public:
   using HasBits = decltype(std::declval<PeerDescriptor>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(PeerDescriptor, _impl_._has_bits_);
   static const ::ConnectivityMethod& udp(const PeerDescriptor* msg);
-  static const ::ConnectivityMethod& tcp(const PeerDescriptor* msg);
-  static const ::ConnectivityMethod& websocket(const PeerDescriptor* msg);
-  static void set_has_openinternet(HasBits* has_bits) {
+  static void set_has_udp(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
+  }
+  static const ::ConnectivityMethod& tcp(const PeerDescriptor* msg);
+  static void set_has_tcp(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static const ::ConnectivityMethod& websocket(const PeerDescriptor* msg);
+  static void set_has_websocket(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_openinternet(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
   }
 };
 
-const ::ConnectivityMethod&
-PeerDescriptor::_Internal::udp(const PeerDescriptor* msg) {
+const ::ConnectivityMethod& PeerDescriptor::_Internal::udp(const PeerDescriptor* msg) {
   return *msg->_impl_.udp_;
 }
-const ::ConnectivityMethod&
-PeerDescriptor::_Internal::tcp(const PeerDescriptor* msg) {
+const ::ConnectivityMethod& PeerDescriptor::_Internal::tcp(const PeerDescriptor* msg) {
   return *msg->_impl_.tcp_;
 }
-const ::ConnectivityMethod&
-PeerDescriptor::_Internal::websocket(const PeerDescriptor* msg) {
+const ::ConnectivityMethod& PeerDescriptor::_Internal::websocket(const PeerDescriptor* msg) {
   return *msg->_impl_.websocket_;
 }
-PeerDescriptor::PeerDescriptor(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+PeerDescriptor::PeerDescriptor(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:PeerDescriptor)
 }
-PeerDescriptor::PeerDescriptor(const PeerDescriptor& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  PeerDescriptor* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){from._impl_._has_bits_}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.nodeid_){}
-    , decltype(_impl_.udp_){nullptr}
-    , decltype(_impl_.tcp_){nullptr}
-    , decltype(_impl_.websocket_){nullptr}
-    , decltype(_impl_.type_){}
-    , decltype(_impl_.openinternet_){}};
+inline PROTOBUF_NDEBUG_INLINE PeerDescriptor::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        nodeid_(arena, from.nodeid_) {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.nodeid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.nodeid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_nodeid().empty()) {
-    _this->_impl_.nodeid_.Set(from._internal_nodeid(), 
-      _this->GetArenaForAllocation());
-  }
-  if (from._internal_has_udp()) {
-    _this->_impl_.udp_ = new ::ConnectivityMethod(*from._impl_.udp_);
-  }
-  if (from._internal_has_tcp()) {
-    _this->_impl_.tcp_ = new ::ConnectivityMethod(*from._impl_.tcp_);
-  }
-  if (from._internal_has_websocket()) {
-    _this->_impl_.websocket_ = new ::ConnectivityMethod(*from._impl_.websocket_);
-  }
-  ::memcpy(&_impl_.type_, &from._impl_.type_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.openinternet_) -
-    reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.openinternet_));
+PeerDescriptor::PeerDescriptor(
+    ::google::protobuf::Arena* arena,
+    const PeerDescriptor& from)
+    : ::google::protobuf::Message(arena) {
+  PeerDescriptor* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.udp_ = (cached_has_bits & 0x00000001u)
+                ? CreateMaybeMessage<::ConnectivityMethod>(arena, *from._impl_.udp_)
+                : nullptr;
+  _impl_.tcp_ = (cached_has_bits & 0x00000002u)
+                ? CreateMaybeMessage<::ConnectivityMethod>(arena, *from._impl_.tcp_)
+                : nullptr;
+  _impl_.websocket_ = (cached_has_bits & 0x00000004u)
+                ? CreateMaybeMessage<::ConnectivityMethod>(arena, *from._impl_.websocket_)
+                : nullptr;
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, type_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, type_),
+           offsetof(Impl_, openinternet_) -
+               offsetof(Impl_, type_) +
+               sizeof(Impl_::openinternet_));
+
   // @@protoc_insertion_point(copy_constructor:PeerDescriptor)
 }
+inline PROTOBUF_NDEBUG_INLINE PeerDescriptor::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        nodeid_(arena) {}
 
-inline void PeerDescriptor::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.nodeid_){}
-    , decltype(_impl_.udp_){nullptr}
-    , decltype(_impl_.tcp_){nullptr}
-    , decltype(_impl_.websocket_){nullptr}
-    , decltype(_impl_.type_){0}
-    , decltype(_impl_.openinternet_){false}
-  };
-  _impl_.nodeid_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.nodeid_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void PeerDescriptor::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, udp_),
+           0,
+           offsetof(Impl_, openinternet_) -
+               offsetof(Impl_, udp_) +
+               sizeof(Impl_::openinternet_));
 }
-
 PeerDescriptor::~PeerDescriptor() {
   // @@protoc_insertion_point(destructor:PeerDescriptor)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void PeerDescriptor::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.nodeid_.Destroy();
-  if (this != internal_default_instance()) delete _impl_.udp_;
-  if (this != internal_default_instance()) delete _impl_.tcp_;
-  if (this != internal_default_instance()) delete _impl_.websocket_;
+  delete _impl_.udp_;
+  delete _impl_.tcp_;
+  delete _impl_.websocket_;
+  _impl_.~Impl_();
 }
 
-void PeerDescriptor::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* PeerDescriptor::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void PeerDescriptor::InternalSwap(PeerDescriptor* other) {
+void PeerDescriptor::InternalSwap(PeerDescriptor* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata PeerDescriptor::GetMetadata() const {
+::google::protobuf::Metadata PeerDescriptor::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[6]);
 }
-
 // ===================================================================
 
 class ConnectivityMethod::_Internal {
  public:
 };
 
-ConnectivityMethod::ConnectivityMethod(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ConnectivityMethod::ConnectivityMethod(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:ConnectivityMethod)
 }
-ConnectivityMethod::ConnectivityMethod(const ConnectivityMethod& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  ConnectivityMethod* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.ip_){}
-    , decltype(_impl_.port_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE ConnectivityMethod::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : ip_(arena, from.ip_),
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.ip_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.ip_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_ip().empty()) {
-    _this->_impl_.ip_.Set(from._internal_ip(), 
-      _this->GetArenaForAllocation());
-  }
-  _this->_impl_.port_ = from._impl_.port_;
+ConnectivityMethod::ConnectivityMethod(
+    ::google::protobuf::Arena* arena,
+    const ConnectivityMethod& from)
+    : ::google::protobuf::Message(arena) {
+  ConnectivityMethod* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  _impl_.port_ = from._impl_.port_;
+
   // @@protoc_insertion_point(copy_constructor:ConnectivityMethod)
 }
+inline PROTOBUF_NDEBUG_INLINE ConnectivityMethod::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : ip_(arena),
+        _cached_size_{0} {}
 
-inline void ConnectivityMethod::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.ip_){}
-    , decltype(_impl_.port_){0u}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.ip_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.ip_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void ConnectivityMethod::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.port_ = {};
 }
-
 ConnectivityMethod::~ConnectivityMethod() {
   // @@protoc_insertion_point(destructor:ConnectivityMethod)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void ConnectivityMethod::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.ip_.Destroy();
+  _impl_.~Impl_();
 }
 
-void ConnectivityMethod::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* ConnectivityMethod::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void ConnectivityMethod::InternalSwap(ConnectivityMethod* other) {
+void ConnectivityMethod::InternalSwap(ConnectivityMethod* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata ConnectivityMethod::GetMetadata() const {
+::google::protobuf::Metadata ConnectivityMethod::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[7]);
 }
-
 // ===================================================================
 
 class OptionalRequest::_Internal {
  public:
   using HasBits = decltype(std::declval<OptionalRequest>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(OptionalRequest, _impl_._has_bits_);
   static void set_has_someoptionalfield(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
 };
 
-OptionalRequest::OptionalRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+OptionalRequest::OptionalRequest(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:OptionalRequest)
 }
-OptionalRequest::OptionalRequest(const OptionalRequest& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  OptionalRequest* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){from._impl_._has_bits_}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.someoptionalfield_){}};
+inline PROTOBUF_NDEBUG_INLINE OptionalRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        someoptionalfield_(arena, from.someoptionalfield_) {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.someoptionalfield_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.someoptionalfield_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (from._internal_has_someoptionalfield()) {
-    _this->_impl_.someoptionalfield_.Set(from._internal_someoptionalfield(), 
-      _this->GetArenaForAllocation());
-  }
+OptionalRequest::OptionalRequest(
+    ::google::protobuf::Arena* arena,
+    const OptionalRequest& from)
+    : ::google::protobuf::Message(arena) {
+  OptionalRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:OptionalRequest)
 }
+inline PROTOBUF_NDEBUG_INLINE OptionalRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        someoptionalfield_(arena) {}
 
-inline void OptionalRequest::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.someoptionalfield_){}
-  };
-  _impl_.someoptionalfield_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.someoptionalfield_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void OptionalRequest::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 OptionalRequest::~OptionalRequest() {
   // @@protoc_insertion_point(destructor:OptionalRequest)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void OptionalRequest::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.someoptionalfield_.Destroy();
+  _impl_.~Impl_();
 }
 
-void OptionalRequest::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* OptionalRequest::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void OptionalRequest::InternalSwap(OptionalRequest* other) {
+void OptionalRequest::InternalSwap(OptionalRequest* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata OptionalRequest::GetMetadata() const {
+::google::protobuf::Metadata OptionalRequest::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[8]);
 }
-
 // ===================================================================
 
 class OptionalResponse::_Internal {
  public:
   using HasBits = decltype(std::declval<OptionalResponse>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(OptionalResponse, _impl_._has_bits_);
   static void set_has_someoptionalfield(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
 };
 
-OptionalResponse::OptionalResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+OptionalResponse::OptionalResponse(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:OptionalResponse)
 }
-OptionalResponse::OptionalResponse(const OptionalResponse& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  OptionalResponse* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){from._impl_._has_bits_}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.someoptionalfield_){}};
+inline PROTOBUF_NDEBUG_INLINE OptionalResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        someoptionalfield_(arena, from.someoptionalfield_) {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.someoptionalfield_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.someoptionalfield_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (from._internal_has_someoptionalfield()) {
-    _this->_impl_.someoptionalfield_.Set(from._internal_someoptionalfield(), 
-      _this->GetArenaForAllocation());
-  }
+OptionalResponse::OptionalResponse(
+    ::google::protobuf::Arena* arena,
+    const OptionalResponse& from)
+    : ::google::protobuf::Message(arena) {
+  OptionalResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:OptionalResponse)
 }
+inline PROTOBUF_NDEBUG_INLINE OptionalResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        someoptionalfield_(arena) {}
 
-inline void OptionalResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.someoptionalfield_){}
-  };
-  _impl_.someoptionalfield_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.someoptionalfield_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void OptionalResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 OptionalResponse::~OptionalResponse() {
   // @@protoc_insertion_point(destructor:OptionalResponse)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void OptionalResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.someoptionalfield_.Destroy();
+  _impl_.~Impl_();
 }
 
-void OptionalResponse::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* OptionalResponse::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void OptionalResponse::InternalSwap(OptionalResponse* other) {
+void OptionalResponse::InternalSwap(OptionalResponse* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata OptionalResponse::GetMetadata() const {
+::google::protobuf::Metadata OptionalResponse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_TestProtos_2eproto_getter, &descriptor_table_TestProtos_2eproto_once,
       file_level_metadata_TestProtos_2eproto[9]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
-PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::RouteMessageWrapper*
-Arena::CreateMaybeMessage< ::RouteMessageWrapper >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::RouteMessageWrapper >(arena);
-}
-template<> PROTOBUF_NOINLINE ::RouteMessageAck*
-Arena::CreateMaybeMessage< ::RouteMessageAck >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::RouteMessageAck >(arena);
-}
-template<> PROTOBUF_NOINLINE ::PingRequest*
-Arena::CreateMaybeMessage< ::PingRequest >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::PingRequest >(arena);
-}
-template<> PROTOBUF_NOINLINE ::PingResponse*
-Arena::CreateMaybeMessage< ::PingResponse >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::PingResponse >(arena);
-}
-template<> PROTOBUF_NOINLINE ::ClosestPeersRequest*
-Arena::CreateMaybeMessage< ::ClosestPeersRequest >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::ClosestPeersRequest >(arena);
-}
-template<> PROTOBUF_NOINLINE ::ClosestPeersResponse*
-Arena::CreateMaybeMessage< ::ClosestPeersResponse >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::ClosestPeersResponse >(arena);
-}
-template<> PROTOBUF_NOINLINE ::PeerDescriptor*
-Arena::CreateMaybeMessage< ::PeerDescriptor >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::PeerDescriptor >(arena);
-}
-template<> PROTOBUF_NOINLINE ::ConnectivityMethod*
-Arena::CreateMaybeMessage< ::ConnectivityMethod >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::ConnectivityMethod >(arena);
-}
-template<> PROTOBUF_NOINLINE ::OptionalRequest*
-Arena::CreateMaybeMessage< ::OptionalRequest >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::OptionalRequest >(arena);
-}
-template<> PROTOBUF_NOINLINE ::OptionalResponse*
-Arena::CreateMaybeMessage< ::OptionalResponse >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::OptionalResponse >(arena);
-}
-PROTOBUF_NAMESPACE_CLOSE
-
+namespace google {
+namespace protobuf {
+}  // namespace protobuf
+}  // namespace google
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"

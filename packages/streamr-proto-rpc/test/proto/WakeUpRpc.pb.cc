@@ -4,162 +4,179 @@
 #include "WakeUpRpc.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
+namespace _pb = ::google::protobuf;
+namespace _pbi = ::google::protobuf::internal;
 
-namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
+inline constexpr WakeUpRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : reason_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        _cached_size_{0} {}
 
-PROTOBUF_CONSTEXPR WakeUpRequest::WakeUpRequest(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.reason_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+template <typename>
+PROTOBUF_CONSTEXPR WakeUpRequest::WakeUpRequest(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct WakeUpRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR WakeUpRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR WakeUpRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~WakeUpRequestDefaultTypeInternal() {}
   union {
     WakeUpRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 WakeUpRequestDefaultTypeInternal _WakeUpRequest_default_instance_;
-static ::_pb::Metadata file_level_metadata_WakeUpRpc_2eproto[1];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_WakeUpRpc_2eproto = nullptr;
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_WakeUpRpc_2eproto = nullptr;
 
-const uint32_t TableStruct_WakeUpRpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::WakeUpRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::WakeUpRequest, _impl_.reason_),
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 WakeUpRequestDefaultTypeInternal _WakeUpRequest_default_instance_;
+static ::_pb::Metadata file_level_metadata_WakeUpRpc_2eproto[1];
+static constexpr const ::_pb::EnumDescriptor**
+    file_level_enum_descriptors_WakeUpRpc_2eproto = nullptr;
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_WakeUpRpc_2eproto = nullptr;
+const ::uint32_t TableStruct_WakeUpRpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::WakeUpRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::WakeUpRequest, _impl_.reason_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::WakeUpRequest)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        {0, -1, -1, sizeof(::WakeUpRequest)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::_WakeUpRequest_default_instance_._instance,
+    &::_WakeUpRequest_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_WakeUpRpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\017WakeUpRpc.proto\032\033google/protobuf/empty"
-  ".proto\"\037\n\rWakeUpRequest\022\016\n\006reason\030\001 \001(\t2"
-  "D\n\020WakeUpRpcService\0220\n\006wakeUp\022\016.WakeUpRe"
-  "quest\032\026.google.protobuf.EmptyB\002H\002b\006proto"
-  "3"
-  ;
-static const ::_pbi::DescriptorTable* const descriptor_table_WakeUpRpc_2eproto_deps[1] = {
-  &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
+const char descriptor_table_protodef_WakeUpRpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\017WakeUpRpc.proto\032\033google/protobuf/empty"
+    ".proto\"\037\n\rWakeUpRequest\022\016\n\006reason\030\001 \001(\t2"
+    "D\n\020WakeUpRpcService\0220\n\006wakeUp\022\016.WakeUpRe"
+    "quest\032\026.google.protobuf.EmptyB\002H\002b\006proto"
+    "3"
 };
-static ::_pbi::once_flag descriptor_table_WakeUpRpc_2eproto_once;
+static const ::_pbi::DescriptorTable* const descriptor_table_WakeUpRpc_2eproto_deps[1] =
+    {
+        &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
+};
+static ::absl::once_flag descriptor_table_WakeUpRpc_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_WakeUpRpc_2eproto = {
-    false, false, 161, descriptor_table_protodef_WakeUpRpc_2eproto,
+    false,
+    false,
+    161,
+    descriptor_table_protodef_WakeUpRpc_2eproto,
     "WakeUpRpc.proto",
-    &descriptor_table_WakeUpRpc_2eproto_once, descriptor_table_WakeUpRpc_2eproto_deps, 1, 1,
-    schemas, file_default_instances, TableStruct_WakeUpRpc_2eproto::offsets,
-    file_level_metadata_WakeUpRpc_2eproto, file_level_enum_descriptors_WakeUpRpc_2eproto,
+    &descriptor_table_WakeUpRpc_2eproto_once,
+    descriptor_table_WakeUpRpc_2eproto_deps,
+    1,
+    1,
+    schemas,
+    file_default_instances,
+    TableStruct_WakeUpRpc_2eproto::offsets,
+    file_level_metadata_WakeUpRpc_2eproto,
+    file_level_enum_descriptors_WakeUpRpc_2eproto,
     file_level_service_descriptors_WakeUpRpc_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_WakeUpRpc_2eproto_getter() {
   return &descriptor_table_WakeUpRpc_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_WakeUpRpc_2eproto(&descriptor_table_WakeUpRpc_2eproto);
-
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_WakeUpRpc_2eproto(&descriptor_table_WakeUpRpc_2eproto);
 // ===================================================================
 
 class WakeUpRequest::_Internal {
  public:
 };
 
-WakeUpRequest::WakeUpRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+WakeUpRequest::WakeUpRequest(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:WakeUpRequest)
 }
-WakeUpRequest::WakeUpRequest(const WakeUpRequest& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  WakeUpRequest* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.reason_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE WakeUpRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : reason_(arena, from.reason_),
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.reason_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.reason_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_reason().empty()) {
-    _this->_impl_.reason_.Set(from._internal_reason(), 
-      _this->GetArenaForAllocation());
-  }
+WakeUpRequest::WakeUpRequest(
+    ::google::protobuf::Arena* arena,
+    const WakeUpRequest& from)
+    : ::google::protobuf::Message(arena) {
+  WakeUpRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:WakeUpRequest)
 }
+inline PROTOBUF_NDEBUG_INLINE WakeUpRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : reason_(arena),
+        _cached_size_{0} {}
 
-inline void WakeUpRequest::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.reason_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.reason_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.reason_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void WakeUpRequest::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 WakeUpRequest::~WakeUpRequest() {
   // @@protoc_insertion_point(destructor:WakeUpRequest)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void WakeUpRequest::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.reason_.Destroy();
+  _impl_.~Impl_();
 }
 
-void WakeUpRequest::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* WakeUpRequest::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void WakeUpRequest::InternalSwap(WakeUpRequest* other) {
+void WakeUpRequest::InternalSwap(WakeUpRequest* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata WakeUpRequest::GetMetadata() const {
+::google::protobuf::Metadata WakeUpRequest::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_WakeUpRpc_2eproto_getter, &descriptor_table_WakeUpRpc_2eproto_once,
       file_level_metadata_WakeUpRpc_2eproto[0]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
-PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::WakeUpRequest*
-Arena::CreateMaybeMessage< ::WakeUpRequest >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::WakeUpRequest >(arena);
-}
-PROTOBUF_NAMESPACE_CLOSE
-
+namespace google {
+namespace protobuf {
+}  // namespace protobuf
+}  // namespace google
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"
