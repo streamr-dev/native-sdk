@@ -5,6 +5,8 @@
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-proto-rpc/ServerRegistry.hpp"
 
+// NOLINTBEGIN
+
 namespace streamr::protorpc {
 
 // using google::protobuf::Any;
@@ -138,3 +140,5 @@ TEST_F(ServerRegistryTest, HandleNotificationWithMissingMethodHeader) {
 }
 
 } // namespace streamr::protorpc
+
+// NOLINTEND
