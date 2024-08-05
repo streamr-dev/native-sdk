@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
-include(homebrewClang.cmake)
+#include(homebrewClang.cmake)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # makes the current package a monorepo package
 include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
+set (VCPKG_OVERLAY_TRIPLETS ENV{VCPKG_OVERLAY_TRIPLETS})
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 

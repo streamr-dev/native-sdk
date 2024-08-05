@@ -4,257 +4,267 @@
 #include "HelloRpc.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
+namespace _pb = ::google::protobuf;
+namespace _pbi = ::google::protobuf::internal;
 
-namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
+inline constexpr HelloResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : greeting_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        _cached_size_{0} {}
 
-PROTOBUF_CONSTEXPR HelloRequest::HelloRequest(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.myname_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
-struct HelloRequestDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR HelloRequestDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~HelloRequestDefaultTypeInternal() {}
-  union {
-    HelloRequest _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HelloRequestDefaultTypeInternal _HelloRequest_default_instance_;
-PROTOBUF_CONSTEXPR HelloResponse::HelloResponse(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.greeting_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+template <typename>
+PROTOBUF_CONSTEXPR HelloResponse::HelloResponse(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct HelloResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR HelloResponseDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR HelloResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~HelloResponseDefaultTypeInternal() {}
   union {
     HelloResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HelloResponseDefaultTypeInternal _HelloResponse_default_instance_;
-static ::_pb::Metadata file_level_metadata_HelloRpc_2eproto[2];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_HelloRpc_2eproto = nullptr;
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_HelloRpc_2eproto = nullptr;
 
-const uint32_t TableStruct_HelloRpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::HelloRequest, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::HelloRequest, _impl_.myname_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::HelloResponse, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::HelloResponse, _impl_.greeting_),
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HelloResponseDefaultTypeInternal _HelloResponse_default_instance_;
+
+inline constexpr HelloRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : myname_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR HelloRequest::HelloRequest(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct HelloRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR HelloRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~HelloRequestDefaultTypeInternal() {}
+  union {
+    HelloRequest _instance;
+  };
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::HelloRequest)},
-  { 7, -1, -1, sizeof(::HelloResponse)},
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HelloRequestDefaultTypeInternal _HelloRequest_default_instance_;
+static ::_pb::Metadata file_level_metadata_HelloRpc_2eproto[2];
+static constexpr const ::_pb::EnumDescriptor**
+    file_level_enum_descriptors_HelloRpc_2eproto = nullptr;
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_HelloRpc_2eproto = nullptr;
+const ::uint32_t TableStruct_HelloRpc_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::HelloRequest, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::HelloRequest, _impl_.myname_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::HelloResponse, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::HelloResponse, _impl_.greeting_),
+};
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        {0, -1, -1, sizeof(::HelloRequest)},
+        {9, -1, -1, sizeof(::HelloResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::_HelloRequest_default_instance_._instance,
-  &::_HelloResponse_default_instance_._instance,
+    &::_HelloRequest_default_instance_._instance,
+    &::_HelloResponse_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_HelloRpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\016HelloRpc.proto\"\036\n\014HelloRequest\022\016\n\006myNa"
-  "me\030\001 \001(\t\"!\n\rHelloResponse\022\020\n\010greeting\030\001 "
-  "\001(\t2<\n\017HelloRpcService\022)\n\010sayHello\022\r.Hel"
-  "loRequest\032\016.HelloResponseB\002H\002b\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_HelloRpc_2eproto_once;
+const char descriptor_table_protodef_HelloRpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\016HelloRpc.proto\"\036\n\014HelloRequest\022\016\n\006myNa"
+    "me\030\001 \001(\t\"!\n\rHelloResponse\022\020\n\010greeting\030\001 "
+    "\001(\t2<\n\017HelloRpcService\022)\n\010sayHello\022\r.Hel"
+    "loRequest\032\016.HelloResponseB\002H\002b\006proto3"
+};
+static ::absl::once_flag descriptor_table_HelloRpc_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_HelloRpc_2eproto = {
-    false, false, 157, descriptor_table_protodef_HelloRpc_2eproto,
+    false,
+    false,
+    157,
+    descriptor_table_protodef_HelloRpc_2eproto,
     "HelloRpc.proto",
-    &descriptor_table_HelloRpc_2eproto_once, nullptr, 0, 2,
-    schemas, file_default_instances, TableStruct_HelloRpc_2eproto::offsets,
-    file_level_metadata_HelloRpc_2eproto, file_level_enum_descriptors_HelloRpc_2eproto,
+    &descriptor_table_HelloRpc_2eproto_once,
+    nullptr,
+    0,
+    2,
+    schemas,
+    file_default_instances,
+    TableStruct_HelloRpc_2eproto::offsets,
+    file_level_metadata_HelloRpc_2eproto,
+    file_level_enum_descriptors_HelloRpc_2eproto,
     file_level_service_descriptors_HelloRpc_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_HelloRpc_2eproto_getter() {
   return &descriptor_table_HelloRpc_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_HelloRpc_2eproto(&descriptor_table_HelloRpc_2eproto);
-
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_HelloRpc_2eproto(&descriptor_table_HelloRpc_2eproto);
 // ===================================================================
 
 class HelloRequest::_Internal {
  public:
 };
 
-HelloRequest::HelloRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+HelloRequest::HelloRequest(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:HelloRequest)
 }
-HelloRequest::HelloRequest(const HelloRequest& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  HelloRequest* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.myname_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE HelloRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : myname_(arena, from.myname_),
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.myname_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.myname_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_myname().empty()) {
-    _this->_impl_.myname_.Set(from._internal_myname(), 
-      _this->GetArenaForAllocation());
-  }
+HelloRequest::HelloRequest(
+    ::google::protobuf::Arena* arena,
+    const HelloRequest& from)
+    : ::google::protobuf::Message(arena) {
+  HelloRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:HelloRequest)
 }
+inline PROTOBUF_NDEBUG_INLINE HelloRequest::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : myname_(arena),
+        _cached_size_{0} {}
 
-inline void HelloRequest::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.myname_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.myname_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.myname_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void HelloRequest::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 HelloRequest::~HelloRequest() {
   // @@protoc_insertion_point(destructor:HelloRequest)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void HelloRequest::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.myname_.Destroy();
+  _impl_.~Impl_();
 }
 
-void HelloRequest::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* HelloRequest::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void HelloRequest::InternalSwap(HelloRequest* other) {
+void HelloRequest::InternalSwap(HelloRequest* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata HelloRequest::GetMetadata() const {
+::google::protobuf::Metadata HelloRequest::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_HelloRpc_2eproto_getter, &descriptor_table_HelloRpc_2eproto_once,
       file_level_metadata_HelloRpc_2eproto[0]);
 }
-
 // ===================================================================
 
 class HelloResponse::_Internal {
  public:
 };
 
-HelloResponse::HelloResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+HelloResponse::HelloResponse(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:HelloResponse)
 }
-HelloResponse::HelloResponse(const HelloResponse& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  HelloResponse* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.greeting_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE HelloResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : greeting_(arena, from.greeting_),
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.greeting_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.greeting_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_greeting().empty()) {
-    _this->_impl_.greeting_.Set(from._internal_greeting(), 
-      _this->GetArenaForAllocation());
-  }
+HelloResponse::HelloResponse(
+    ::google::protobuf::Arena* arena,
+    const HelloResponse& from)
+    : ::google::protobuf::Message(arena) {
+  HelloResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:HelloResponse)
 }
+inline PROTOBUF_NDEBUG_INLINE HelloResponse::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : greeting_(arena),
+        _cached_size_{0} {}
 
-inline void HelloResponse::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.greeting_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.greeting_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.greeting_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void HelloResponse::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 HelloResponse::~HelloResponse() {
   // @@protoc_insertion_point(destructor:HelloResponse)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void HelloResponse::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.greeting_.Destroy();
+  _impl_.~Impl_();
 }
 
-void HelloResponse::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+::_pbi::CachedSize* HelloResponse::AccessCachedSize() const {
+  return &_impl_._cached_size_;
 }
-
-void HelloResponse::InternalSwap(HelloResponse* other) {
+void HelloResponse::InternalSwap(HelloResponse* PROTOBUF_RESTRICT other) {
   using std::swap;
   GetReflection()->Swap(this, other);}
 
-::PROTOBUF_NAMESPACE_ID::Metadata HelloResponse::GetMetadata() const {
+::google::protobuf::Metadata HelloResponse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_HelloRpc_2eproto_getter, &descriptor_table_HelloRpc_2eproto_once,
       file_level_metadata_HelloRpc_2eproto[1]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
-PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::HelloRequest*
-Arena::CreateMaybeMessage< ::HelloRequest >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::HelloRequest >(arena);
-}
-template<> PROTOBUF_NOINLINE ::HelloResponse*
-Arena::CreateMaybeMessage< ::HelloResponse >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::HelloResponse >(arena);
-}
-PROTOBUF_NAMESPACE_CLOSE
-
+namespace google {
+namespace protobuf {
+}  // namespace protobuf
+}  // namespace google
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"

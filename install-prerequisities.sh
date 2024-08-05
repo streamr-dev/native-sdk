@@ -13,16 +13,19 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     
     xcode-select --install
     brew install jq
-    brew install llvm
+    brew uninstall llvm
+    brew install llvm@17
     brew install cmake
     brew install pkg-config
    
-    rm -f $HOMEBREW_PREFIX/bin/clang-format
-    rm -f $HOMEBREW_PREFIX/bin/clangd
-    rm -f $HOMEBREW_PREFIX/bin/lldb
-    ln -s $HOMEBREW_PREFIX/opt/llvm/bin/clang-format $HOMEBREW_PREFIX/bin/clang-format
-    ln -s $HOMEBREW_PREFIX/opt/llvm/bin/clangd $HOMEBREW_PREFIX/bin/clangd
-    ln -s $HOMEBREW_PREFIX/opt/llvm/bin/lldb $HOMEBREW_PREFIX/bin/lldb
+    brew link --overwrite --force llvm@17
+    #rm -f $HOMEBREW_PREFIX/bin/clang-format
+    #rm -f $HOMEBREW_PREFIX/bin/clangd
+    #rm -f $HOMEBREW_PREFIX/bin/lldb
+    #ln -s $HOMEBREW_PREFIX/bin/clang-format $HOMEBREW_PREFIX/bin/clang-format
+    #ln -s $HOMEBREW_PREFIX/bin/clangd $HOMEBREW_PREFIX/bin/clangd
+    #ln -s $HOMEBREW_PREFIX/bin/lldb $HOMEBREW_PREFIX/bin/lldb
+    
     rm -f $HOMEBREW_PREFIX/bin/clang-tidy
 
 else
@@ -59,6 +62,11 @@ if [[ -n "$GITHUB_ENV" ]]; then
     echo "VCPKG_ROOT=$VCPKG_ROOT" >> $GITHUB_ENV
 fi
 
+export VCPKG_OVERLAY_TRIPLETS=$(pwd)/overlaytriplets
+if [[ -n "$GITHUB_ENV" ]]; then
+    echo "VCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS" >> $GITHUB_ENV
+fi
+
 if [[ ":$PATH:" != *":$VCPKG_ROOT:"* ]]; then
     export PATH=$PATH:$VCPKG_ROOT
     if [[ -n "$GITHUB_PATH" ]]; then
@@ -71,6 +79,9 @@ TEMP_PROFILE_CONTENTS+="export VCPKG_ROOT=$(pwd)/vcpkg\n"
 
 # Add PATH environment variable to include VCPKG_ROOT
 TEMP_PROFILE_CONTENTS+="export PATH=\$VCPKG_ROOT:\$PATH\n"
+
+# Add VCPKG_OVERLAY_TRIPLETS environment variable
+TEMP_PROFILE_CONTENTS+="export VCPKG_OVERLAY_TRIPLETS=$(pwd)/overlaytriplets\n"
 
 echo $TEMP_PROFILE_CONTENTS
 
