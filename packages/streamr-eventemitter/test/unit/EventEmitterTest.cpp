@@ -98,11 +98,11 @@ TEST_F(EventEmitterTest, TestListenerCount) {
     EventEmitter<Events> eventEmitter;
 
     eventEmitter.on<Greeting>([](std::string_view message) -> void {
-        std::cout << "listener1: " << message << std::endl;
+        std::cout << "listener1: " << message << '\n';
     });
 
     eventEmitter.on<Greeting>([](std::string_view message) -> void {
-        std::cout << "listener2: " << message << std::endl;
+        std::cout << "listener2: " << message << '\n';
     });
 
     ASSERT_EQ(eventEmitter.listenerCount<Greeting>(), 2);
@@ -115,11 +115,11 @@ TEST_F(EventEmitterTest, TestOff) {
     EventEmitter<Events> eventEmitter;
 
     auto listener1 = [](std::string_view message) -> void {
-        std::cout << "listener1: " << message << std::endl;
+        std::cout << "listener1: " << message << '\n';
     };
 
     auto listener2 = [](std::string_view message) -> void {
-        std::cout << "listener2: " << message << std::endl;
+        std::cout << "listener2: " << message << '\n';
     };
 
     auto listener1Reference = eventEmitter.on<Greeting>(listener1);
@@ -158,11 +158,11 @@ TEST_F(EventEmitterTest, TestRemoveAllListeners) {
     EventEmitter<Events> eventEmitter;
 
     auto listener1 = [](std::string_view message) -> void {
-        std::cout << "listener1: " << message << std::endl;
+        std::cout << "listener1: " << message << '\n';
     };
 
     auto listener2 = [](std::string_view message) -> void {
-        std::cout << "listener2: " << message << std::endl;
+        std::cout << "listener2: " << message << '\n';
     };
 
     eventEmitter.on<Greeting>(listener1);
@@ -183,11 +183,11 @@ TEST_F(EventEmitterTest, TestRemoveAllListenersWithoutEventType) {
     EventEmitter<Events> eventEmitter;
 
     auto listener1 = [](std::string_view message) -> void {
-        std::cout << "listener1: " << message << std::endl;
+        std::cout << "listener1: " << message << '\n';
     };
 
     auto listener2 = [](std::string_view message) -> void {
-        std::cout << "listener2: " << message << std::endl;
+        std::cout << "listener2: " << message << '\n';
     };
 
     eventEmitter.on<Greeting>(listener1);
@@ -234,7 +234,7 @@ TEST_F(EventEmitterTest, TestOffCalledTwice) {
     EventEmitter<Events> eventEmitter;
 
     auto listener1 = [](std::string_view message) -> void {
-        std::cout << "listener1: " << message << std::endl;
+        std::cout << "listener1: " << message << '\n';
     };
 
     auto listener1Reference = eventEmitter.on<Greeting>(listener1);
@@ -359,7 +359,7 @@ TEST_F(EventEmitterTest, EventsAreReceivedInOrderEvenIfListenersAreSlow) {
                       &listenerBEventOrderMutex,
                       &listenerBEventOrder](int eventNum) -> void {
         if (eventNum == 1) {
-            std::cout << "event1 arrived at listener B" << std::endl;
+            std::cout << "event1 arrived at listener B" << '\n';
             std::lock_guard<std::mutex> lock(listenerBEventOrderMutex);
             listenerBEventOrder.push_back(eventNum);
             promiseB1.set_value();
@@ -367,7 +367,7 @@ TEST_F(EventEmitterTest, EventsAreReceivedInOrderEvenIfListenersAreSlow) {
             // Without mutex lock, this event will arrive first
             // because there is a long delay for the firt event
             // at listenerA
-            std::cout << "event2 arrived at listener B" << std::endl;
+            std::cout << "event2 arrived at listener B" << '\n';
             std::lock_guard<std::mutex> lock(listenerBEventOrderMutex);
             listenerBEventOrder.push_back(eventNum);
             promiseB2.set_value();

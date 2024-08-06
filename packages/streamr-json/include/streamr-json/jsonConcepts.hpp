@@ -5,14 +5,16 @@
 #include <nlohmann/json.hpp>
 
 namespace streamr::json {
+namespace suppresslint { // linter does not support concepts, and thinks this
+                         // file is unused
+using SuppressLint = void;
+} // namespace suppresslint
 
 template <typename T>
-concept AssignableToNlohmannJson =
-    std::is_assignable_v<nlohmann::json&, T>;
+concept AssignableToNlohmannJson = std::is_assignable_v<nlohmann::json&, T>;
 
 template <typename T>
-concept NotAssignableToNlohmannJson =
-    !std::is_assignable_v<nlohmann::json&, T>;
+concept NotAssignableToNlohmannJson = !std::is_assignable_v<nlohmann::json&, T>;
 
 template <typename Ptr>
 concept PointerLike = std::is_pointer_v<Ptr> || requires(Ptr p) {

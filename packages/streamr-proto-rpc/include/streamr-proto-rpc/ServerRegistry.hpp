@@ -26,11 +26,11 @@ using RpcNotificationType =
 // using ParseFunctionType = std::function<void(Any request)>;
 
 template <typename T>
-concept AssignableToRpcMethod = std::is_assignable<RpcMethodType, T>::value;
+concept AssignableToRpcMethod = std::is_assignable_v<RpcMethodType, T>;
 
 template <typename T>
 concept AssignableToRpcNotification =
-    std::is_assignable<RpcNotificationType, T>::value;
+    std::is_assignable_v<RpcNotificationType, T>;
 
 // template <typename T>
 // concept AssignableToParseFunction = std::is_assignable<ParseFunctionType,

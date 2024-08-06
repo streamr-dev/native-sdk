@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 #include <streamr-proto-rpc/RpcCommunicator.hpp>
-#include <folly/experimental/coro/BlockingWait.h>
 #include <folly/Portability.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/ManualExecutor.h>
 #include <folly/experimental/coro/Baton.h>
+#include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/CurrentExecutor.h>
 #include <folly/experimental/coro/Generator.h>
@@ -44,7 +44,8 @@ TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
         [](const HelloRequest& request,
            const ProtoCallContext& /* context */) -> HelloResponse {
             HelloResponse response;
-            SLogger::info("TestCanMakeRpcCall request.myname():", request.myname());
+            SLogger::info(
+                "TestCanMakeRpcCall request.myname():", request.myname());
             response.set_greeting("Hello, " + request.myname());
             return response;
         });

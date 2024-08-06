@@ -12,9 +12,9 @@
 #include <nlohmann/json.hpp>
 
 #include "streamr-json/jsonConcepts.hpp"
-
 namespace streamr::json {
-
+using suppresslint::SuppressLint; // otherwise linter thinks jsonConcepts.hpp
+                                  // is unused
 using json = nlohmann::json;
 using JsonInitializerList = nlohmann::json::initializer_list_t;
 
@@ -227,7 +227,7 @@ public:
 
 template <typename T>
 concept AssignableToJsonBuilder =
-    std::is_same<std::initializer_list<JsonBuilder>, T>::value;
+    std::is_same_v<std::initializer_list<JsonBuilder>, T>;
 
 /**
  * @brief Specialization to initializer_lists. The initializer lists should be
