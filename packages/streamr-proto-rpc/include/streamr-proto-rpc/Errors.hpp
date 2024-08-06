@@ -80,7 +80,6 @@ struct RpcServerError : public Err {
           errorCode(errorCode) {}
 };
 
-
 /*
 export class RpcTimeout extends Err { constructor(message?: string,
 originalError?: Error | string) { super(ErrorCode.RPC_TIMEOUT, message,
