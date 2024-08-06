@@ -58,8 +58,8 @@ target_link_libraries(protobuf-streamr-plugin
 enable_testing()
 find_package(GTest CONFIG REQUIRED)
     
-add_executable(streamr-proto-rpc-test-unit 
-    test/proto/HelloRpc.pb.cc   
+add_executable(streamr-proto-rpc-test-unit
+    test/proto/HelloRpc.pb.cc
     test/proto/TestProtos.pb.cc 
     test/proto/WakeUpRpc.pb.cc
     test/unit/ServerRegistryTest.cpp
