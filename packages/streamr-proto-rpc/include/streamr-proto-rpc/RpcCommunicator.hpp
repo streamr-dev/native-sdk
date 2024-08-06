@@ -37,16 +37,14 @@ enum class StatusCode { OK, STOPPED, DEADLINE_EXCEEDED, SERVER_ERROR };
 // NOLINTEND
 
 // RpcCommunicator events
-template <typename CallContextType>
 struct OutgoingMessage
-    : Event<RpcMessage, std::string /*requestId*/, CallContextType> {};
+    : Event<RpcMessage, std::string /*requestId*/, ProtoCallContext> {};
 
-template <typename CallContextType = ProtoCallContext>
-class RpcCommunicator
-    : public EventEmitter<std::tuple<OutgoingMessage<CallContextType>>> {
+using RpcCommunicatorEvents = std::tuple<OutgoingMessage>;
+class RpcCommunicator : public EventEmitter<RpcCommunicatorEvents> {
 public:
     using OutgoingMessageListenerType = std::function<void(
-        RpcMessage, std::string /*requestId*/, CallContextType)>;
+        RpcMessage, std::string /*requestId*/, ProtoCallContext)>;
 
 private:
     class OngoingRequestBase {
@@ -78,15 +76,15 @@ private:
             return std::move(mPromiseContract.second);
         }
 
-        virtual void resolveRequest(const RpcMessage& response) {
+        void resolveRequest(const RpcMessage& response) override {
             this->resolvePromise(response);
         }
 
-        virtual void resolveNotification() {
+        void resolveNotification() override {
             mPromiseContract.first.setValue();
         }
 
-        virtual void rejectRequest(const std::exception& error) {
+        void rejectRequest(const std::exception& error) override {
             this->rejectPromise(error);
         }
 
@@ -125,7 +123,7 @@ public:
     // Public API for both client and server
 
     void handleIncomingMessage(
-        const RpcMessage& message, CallContextType callContext) {
+        const RpcMessage& message, const ProtoCallContext& callContext) {
         if (mStopped) {
             return;
         }
@@ -136,7 +134,7 @@ public:
 
     template <typename RequestType, typename ReturnType, typename F>
         requires std::is_assignable_v<
-            std::function<ReturnType(RequestType, CallContextType)>,
+            std::function<ReturnType(RequestType, ProtoCallContext)>,
             F>
     void registerRpcMethod(
         const std::string& name, const F& fn, MethodOptions options = {}) {
@@ -146,7 +144,7 @@ public:
 
     template <typename RequestType, typename F>
         requires std::is_assignable_v<
-            std::function<void(RequestType, CallContextType)>,
+            std::function<void(RequestType, ProtoCallContext)>,
             F>
     void registerRpcNotification(
         const std::string& name, const F& fn, MethodOptions options = {}) {
@@ -166,7 +164,7 @@ public:
     Task<ReturnType> callRemote(
         const std::string& methodName,
         const RequestType& methodParam,
-        const CallContextType& callContext) {
+        const ProtoCallContext& callContext) {
         SLogger::info("callRemote()");
         auto task = folly::coro::co_invoke(
             [&methodName, &methodParam, &callContext, this]()
@@ -181,7 +179,7 @@ public:
                 this->mOngoingRequests.emplace(
                     requestMessage.requestid(), ongoingRequest);
 
-                this->template emit<OutgoingMessage<CallContextType>>(
+                this->template emit<OutgoingMessage>(
                     requestMessage, requestMessage.requestid(), callContext);
 
                 if (mOutgoingMessageListener) {
@@ -211,7 +209,7 @@ public:
     Task<void> notifyRemote(
         const std::string& methodName,
         const RequestType& methodParam,
-        const CallContextType& callContext) {
+        const ProtoCallContext& callContext) {
         SLogger::info("notifyRemote()");
         auto task = folly::coro::co_invoke(
             [&methodName, &methodParam, &callContext, this]()
@@ -219,7 +217,7 @@ public:
                 SLogger::info("notifyRemote() 1");
                 auto requestMessage = this->createRequestRpcMessage(
                     methodName, methodParam, true);
-                this->template emit<OutgoingMessage<CallContextType>>(
+                this->template emit<OutgoingMessage>(
                     requestMessage, requestMessage.requestid(), callContext);
 
                 if (mOutgoingMessageListener) {
@@ -279,7 +277,7 @@ private:
     }
 
     void onIncomingMessage(
-        const RpcMessage& rpcMessage, const CallContextType& callContext) {
+        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
         SLogger::debug("onIncomingMessage", rpcMessage.requestid());
         rpcMessage.PrintDebugString();
         SLogger::info("onIncomingMessage() 1");
@@ -320,7 +318,7 @@ private:
     }
 
     void handleRequest(
-        const RpcMessage& rpcMessage, CallContextType callContext) {
+        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
         if (mStopped) {
             return;
         }
@@ -350,10 +348,10 @@ private:
             }
             SLogger::info(
                 "handleRequest() creating response message for error");
-            response = this->createResponseRpcMessage(errorParams);
+            response = RpcCommunicator::createResponseRpcMessage(errorParams);
         }
         SLogger::info("handleRequest() emitting outgoing message");
-        this->template emit<OutgoingMessage<CallContextType>>(
+        this->template emit<OutgoingMessage>(
             response, response.requestid(), callContext);
 
         if (mOutgoingMessageListener) {
@@ -369,7 +367,7 @@ private:
     }
 
     void handleNotification(
-        const RpcMessage& rpcMessage, CallContextType callContext) {
+        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
         if (mStopped) {
             return;
         }
