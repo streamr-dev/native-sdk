@@ -193,6 +193,7 @@ private:
         headerSs << "#include <folly/experimental/coro/Task.h>\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
         headerSs << "#include \"streamr-proto-rpc/ProtoCallContext.hpp\"\n";
+        headerSs << "#include \"streamr-proto-rpc/RpcCommunicator.hpp\"\n";
 
         headerSs << "\n";
 
@@ -211,16 +212,14 @@ private:
                 file->service(i);
             const std::string serviceFullname = service->full_name();
             const std::string& serviceName = service->name();
-            sourceSs << "template <typename T>"
-                     << "\n";
             sourceSs << "class " << serviceName << "Client"
                      << " {\n";
             sourceSs << "private:\n";
-            sourceSs << "T& communicator;\n";
+            sourceSs << "RpcCommunicator& communicator;\n";
             sourceSs << "public:\n";
             sourceSs
                 << "    " << serviceName
-                << "Client(T& communicator) : communicator(communicator) {}\n";
+                << "Client(RpcCommunicator& communicator) : communicator(communicator) {}\n";
             // sourceSs << "    \n";
             // for each methods
             int numMethods = service->method_count();
