@@ -109,7 +109,7 @@ private:
         }
 
         void rejectPromise(const std::exception& error) {
-            mPromiseContract.first.setException(error);
+            mPromiseContract.first.setException(std::runtime_error(error.what()));
         }
     };
 
