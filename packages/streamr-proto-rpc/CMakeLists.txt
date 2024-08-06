@@ -81,3 +81,29 @@ target_link_libraries(streamr-proto-rpc-test-unit
     
 include(GoogleTest)
 gtest_discover_tests(streamr-proto-rpc-test-unit)
+
+add_executable(streamr-proto-rpc-test-integration
+    test/proto/HelloRpc.pb.cc
+    test/proto/HelloRpc.client.pb.h
+    test/proto/TestProtos.pb.cc 
+    test/proto/WakeUpRpc.pb.cc
+    test/integration/toProtoRpcClient.cpp
+)
+
+target_include_directories(streamr-proto-rpc-test-integration 
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/proto>
+)
+
+target_link_libraries(streamr-proto-rpc-test-integration 
+    PUBLIC streamr-proto-rpc
+    PUBLIC GTest::gtest 
+    PUBLIC GTest::gtest_main 
+    PUBLIC GTest::gmock 
+    PUBLIC GTest::gmock_main
+    PUBLIC Folly::folly
+    )
+    
+include(GoogleTest)
+gtest_discover_tests(streamr-proto-rpc-test-integration)
+
+
