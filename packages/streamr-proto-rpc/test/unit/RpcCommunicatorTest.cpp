@@ -21,12 +21,12 @@ namespace streamr::protorpc {
 
 class RpcCommunicatorTest : public ::testing::Test {
 protected:
-    RpcCommunicator<ProtoCallContext> communicator;
+    RpcCommunicator communicator;
 
     void SetUp() override {}
 };
 
-void registerTestRcpMethod(RpcCommunicator<ProtoCallContext>& communicator) {
+void registerTestRcpMethod(RpcCommunicator& communicator) {
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
         "testFunction",
         [](const HelloRequest& request,
