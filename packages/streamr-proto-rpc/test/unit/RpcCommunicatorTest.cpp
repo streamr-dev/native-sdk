@@ -26,22 +26,8 @@ protected:
     void SetUp() override {}
 };
 
-TEST_F(RpcCommunicatorTest, TestCanRegisterRpcMethod) {
-    RpcCommunicator communicator;
+void registerTestRcpMethod(RpcCommunicator<ProtoCallContext>& communicator) {
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
-        "test",
-        [](const HelloRequest& request,
-           const ProtoCallContext& /* context */) -> HelloResponse {
-            HelloResponse response;
-            response.set_greeting("Hello, " + request.myname());
-            return response;
-        });
-    EXPECT_EQ(true, true);
-}
-
-TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
-    RpcCommunicator communicator1;
-    communicator1.registerRpcMethod<HelloRequest, HelloResponse>(
         "testFunction",
         [](const HelloRequest& request,
            const ProtoCallContext& /* context */) -> HelloResponse {
@@ -51,7 +37,17 @@ TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
             response.set_greeting("Hello, " + request.myname());
             return response;
         });
-    SLogger::info("TestCanMakeRpcCall recisterRpcMethod called");
+}
+
+TEST_F(RpcCommunicatorTest, TestCanRegisterRpcMethod) {
+    RpcCommunicator communicator;
+    registerTestRcpMethod(communicator);
+    EXPECT_EQ(true, true);
+}
+
+TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
+    RpcCommunicator communicator1;
+    registerTestRcpMethod(communicator1);
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
@@ -83,19 +79,10 @@ TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
     EXPECT_EQ("Hello, Test", result.greeting());
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteThrow) {
+TEST_F(RpcCommunicatorTest, TestCanCallRemoteWhichThrows) {
     RpcCommunicator communicator1;
-    communicator1.registerRpcMethod<HelloRequest, HelloResponse>(
-        "testFunction",
-        [](const HelloRequest& request,
-           const ProtoCallContext& /* context */) -> HelloResponse {
-            HelloResponse response;
-            SLogger::info(
-                "TestCanMakeRpcCall request.myname():", request.myname());
-            response.set_greeting("Hello, " + request.myname());
-            return response;
-        });
-    SLogger::info("TestCanMakeRpcCall recisterRpcMethod called");
+    registerTestRcpMethod(communicator1);
+    SLogger::info("TestCanCallRemoteWhichThrows registerRpcMethod called");
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
@@ -104,45 +91,36 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteThrow) {
             const ProtoCallContext& /* context */) -> void {
             SLogger::info("setOutgoingMessageListener() Before Exception:");
             throw std::runtime_error("TestException");
-            //  throw UnknownRpcMethod(
-            //     "Header \"method\" missing from RPC message");
-        });
-    communicator1.setOutgoingMessageListener(
-        [&communicator2](
-            const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener()");
-            communicator2.handleIncomingMessage(message, ProtoCallContext());
         });
 
-    SLogger::info("TestCanMakeRpcCall setOutgoingMessageListener called");
+    SLogger::info(
+        "TestCanCallRemoteWhichThrows setOutgoingMessageListener called");
     HelloRequest request;
     request.set_myname("Test");
-    SLogger::info("TestCanMakeRpcCall set_myname called");
+    SLogger::info("TestCanCallRemoteWhichThrows set_myname called");
     EXPECT_THROW(
-       folly::coro::blockingWait(
+        folly::coro::blockingWait(
             communicator2
                 .callRemote<HelloResponse, HelloRequest>(
                     "testFunction", request, ProtoCallContext())
-                .scheduleOn(folly::getGlobalCPUExecutor().get())), std::exception);
-
+                .scheduleOn(folly::getGlobalCPUExecutor().get())),
+        std::exception);
 }
 
-TEST_F(RpcCommunicatorTest, TestNotifyRemote) {
+TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
     RpcCommunicator communicator1;
     std::string requestMsg = "";
     communicator1.registerRpcNotification<HelloRequest>(
         "testFunction",
         [&requestMsg](
             const HelloRequest& request,
-            const ProtoCallContext& /* context */) -> void {
+            const ProtoCallContext& context) -> void {
             requestMsg = request.DebugString();
             SLogger::info(
-                "TestCanMakeRpcNotification request:", request.DebugString());
+                "TestCanNotifyRemote request:", request.DebugString());
         });
 
-    SLogger::info("TestCanMakeRpcNotification registerRpcNotification called");
+    SLogger::info("TestCanNotifyRemote registerRpcNotification called");
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
@@ -155,17 +133,17 @@ TEST_F(RpcCommunicatorTest, TestNotifyRemote) {
 
     HelloRequest request;
     request.set_myname("Test");
-    SLogger::info("TestCanMakeRpcNotification set_myname called");
+    SLogger::info("TestCanNotifyRemote set_myname called");
     folly::coro::blockingWait(
         communicator2
             .notifyRemote<HelloRequest>(
                 "testFunction", request, ProtoCallContext())
             .scheduleOn(folly::getGlobalCPUExecutor().get()));
-    SLogger::info("TestCanMakeRpcNotification callRemote called");
+    SLogger::info("TestCanNotifyRemote callRemote called");
     EXPECT_EQ(requestMsg, "myName: \"Test\"\n");
 }
 
-TEST_F(RpcCommunicatorTest, TestNotifyRemoteThrow) {
+TEST_F(RpcCommunicatorTest, TestCanNotifyRemoteWhichThrows) {
     RpcCommunicator communicator1;
     std::string requestMsg = "";
     communicator1.registerRpcNotification<HelloRequest>(
@@ -175,10 +153,12 @@ TEST_F(RpcCommunicatorTest, TestNotifyRemoteThrow) {
             const ProtoCallContext& /* context */) -> void {
             requestMsg = request.DebugString();
             SLogger::info(
-                "TestNotifyRemoteThrow request:", request.DebugString());
+                "TestCanNotifyRemoteWhichThrows request:",
+                request.DebugString());
         });
 
-    SLogger::info("TestNotifyRemoteThrow registerRpcNotification called");
+    SLogger::info(
+        "TestCanNotifyRemoteWhichThrows registerRpcNotification called");
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
@@ -191,13 +171,14 @@ TEST_F(RpcCommunicatorTest, TestNotifyRemoteThrow) {
 
     HelloRequest request;
     request.set_myname("Test");
-    SLogger::info("TestNotifyRemoteThrow set_myname called");
+    SLogger::info("TestCanNotifyRemoteWhichThrows set_myname called");
     EXPECT_THROW(
-         folly::coro::blockingWait(
+        folly::coro::blockingWait(
             communicator2
                 .notifyRemote<HelloRequest>(
                     "testFunction", request, ProtoCallContext())
-                .scheduleOn(folly::getGlobalCPUExecutor().get())), std::exception);
+                .scheduleOn(folly::getGlobalCPUExecutor().get())),
+        std::exception);
 }
 
 } // namespace streamr::protorpc
