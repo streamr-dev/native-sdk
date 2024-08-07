@@ -21,7 +21,7 @@ namespace streamr::protorpc {
 
 class RpcCommunicatorTest : public ::testing::Test {
 protected:
-    RpcCommunicator communicator;
+    RpcCommunicator communicator; // NOLINT
 
     void SetUp() override {}
 };
@@ -86,7 +86,7 @@ TEST_F(RpcCommunicatorTest, TestCanCallRemoteWhichThrows) {
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
-            const RpcMessage& message,
+            const RpcMessage& /* message */,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
             SLogger::info("setOutgoingMessageListener() Before Exception:");
@@ -109,12 +109,12 @@ TEST_F(RpcCommunicatorTest, TestCanCallRemoteWhichThrows) {
 
 TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
     RpcCommunicator communicator1;
-    std::string requestMsg = "";
+    std::string requestMsg;
     communicator1.registerRpcNotification<HelloRequest>(
         "testFunction",
         [&requestMsg](
             const HelloRequest& request,
-            const ProtoCallContext& context) -> void {
+            const ProtoCallContext& /* context */) -> void {
             requestMsg = request.DebugString();
             SLogger::info(
                 "TestCanNotifyRemote request:", request.DebugString());
@@ -145,7 +145,7 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
 
 TEST_F(RpcCommunicatorTest, TestCanNotifyRemoteWhichThrows) {
     RpcCommunicator communicator1;
-    std::string requestMsg = "";
+    std::string requestMsg;
     communicator1.registerRpcNotification<HelloRequest>(
         "testFunction",
         [&requestMsg](
@@ -162,7 +162,7 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemoteWhichThrows) {
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
-            const RpcMessage& message,
+            const RpcMessage& /* message */,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
             SLogger::info("onOutgoingMessageListener()");
