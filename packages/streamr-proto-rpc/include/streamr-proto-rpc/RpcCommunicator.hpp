@@ -217,7 +217,7 @@ public:
         const ProtoCallContext& callContext) {
         SLogger::info("notifyRemote()");
         auto task = folly::coro::co_invoke(
-            [&methodName, &methodParam, &callContext, this]()
+            [methodName, methodParam, callContext, this]()
                 -> folly::coro::Task<void> {
                 SLogger::info("notifyRemote() 1");
                 auto requestMessage = this->createRequestRpcMessage(
