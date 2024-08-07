@@ -86,7 +86,9 @@ private:
 
         void rejectRequest(const RpcException& error) override {
             std::visit(
-                [this](auto&& arg) { this->mPromiseContract.first.setException(arg); },
+                [this](auto&& arg) {
+                    this->mPromiseContract.first.setException(arg);
+                },
                 error);
         }
 

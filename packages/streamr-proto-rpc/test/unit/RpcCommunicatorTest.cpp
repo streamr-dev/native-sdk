@@ -90,7 +90,7 @@ TEST_F(RpcCommunicatorTest, TestCanCallRemoteWhichThrows) {
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
             SLogger::info("setOutgoingMessageListener() Before Exception:");
-            //throw std::runtime_error("TestException");
+            // throw std::runtime_error("TestException");
             throw UnknownRpcMethod("TestException");
         });
 

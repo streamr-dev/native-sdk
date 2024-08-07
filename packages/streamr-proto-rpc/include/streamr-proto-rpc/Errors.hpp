@@ -88,7 +88,14 @@ struct RpcServerError : public Err {
           errorCode(errorCode) {}
 };
 
-using RpcException = std::variant<RpcTimeout, RpcRequestError, RpcServerError, RpcClientError, UnknownRpcMethod, FailedToParse, FailedToSerialize>;
+using RpcException = std::variant<
+    RpcTimeout,
+    RpcRequestError,
+    RpcServerError,
+    RpcClientError,
+    UnknownRpcMethod,
+    FailedToParse,
+    FailedToSerialize>;
 
 /*
 export class RpcTimeout extends Err { constructor(message?: string,
