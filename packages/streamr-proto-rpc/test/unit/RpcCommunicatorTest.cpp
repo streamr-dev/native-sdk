@@ -90,7 +90,8 @@ TEST_F(RpcCommunicatorTest, TestCanCallRemoteWhichThrows) {
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
             SLogger::info("setOutgoingMessageListener() Before Exception:");
-            throw std::runtime_error("TestException");
+            //throw std::runtime_error("TestException");
+            throw UnknownRpcMethod("TestException");
         });
 
     SLogger::info(
@@ -104,7 +105,7 @@ TEST_F(RpcCommunicatorTest, TestCanCallRemoteWhichThrows) {
                 .callRemote<HelloResponse, HelloRequest>(
                     "testFunction", request, ProtoCallContext())
                 .scheduleOn(folly::getGlobalCPUExecutor().get())),
-        std::exception);
+        RpcClientError);
 }
 
 TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {

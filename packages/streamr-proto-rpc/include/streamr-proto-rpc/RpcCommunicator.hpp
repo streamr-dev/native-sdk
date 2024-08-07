@@ -52,7 +52,7 @@ private:
         virtual ~OngoingRequestBase() = default;
         virtual void resolveRequest(const RpcMessage& response) = 0;
         virtual void resolveNotification() = 0;
-        virtual void rejectRequest(const std::exception& error) = 0;
+        virtual void rejectRequest(const RpcException& error) = 0;
     };
 
     template <typename ResultType>
@@ -84,8 +84,10 @@ private:
             mPromiseContract.first.setValue();
         }
 
-        void rejectRequest(const std::exception& error) override {
-            this->rejectPromise(error);
+        void rejectRequest(const RpcException& error) override {
+            std::visit(
+                [this](auto&& arg) { this->mPromiseContract.first.setException(arg); },
+                error);
         }
 
     private:
@@ -95,7 +97,7 @@ private:
                 response.body().UnpackTo(&result);
 
                 mPromiseContract.first.setValue(result);
-            } catch (...) {
+            } catch (const std::exception& err) {
                 SLogger::debug(
                     "Could not parse response, Failed to parse received response, \
                      network protocol version is probably incompatible");
@@ -104,12 +106,8 @@ private:
                     "Failed to parse received response, network protocol version \
                      is likely incompatible");
 
-                this->rejectPromise(error);
+                mPromiseContract.first.setException(error);
             }
-        }
-
-        void rejectPromise(const std::exception& error) {
-            mPromiseContract.first.setException(std::runtime_error(error.what()));
         }
     };
 
@@ -191,9 +189,14 @@ public:
                     } catch (const std::exception& clientSideException) {
                         if (mOngoingRequests.find(requestMessage.requestid()) !=
                             mOngoingRequests.end()) {
-                            this->handleClientError(
-                                requestMessage.requestid(),
+                            SLogger::debug(
+                                "Error when calling outgoing message listener from client",
+                                clientSideException.what());
+                            RpcClientError error(
+                                "Error when calling outgoing message listener from client",
                                 clientSideException);
+                            this->handleClientError(
+                                requestMessage.requestid(), error);
                         }
                     }
                 }
@@ -340,16 +343,23 @@ private:
                 errorParams.errorType = RpcErrorType::SERVER_TIMEOUT;
             } else {
                 errorParams.errorType = RpcErrorType::SERVER_ERROR;
-
                 errorParams.errorClassName = typeid(err).name();
-
                 errorParams.errorCode = magic_enum::enum_name(err.code);
                 errorParams.errorMessage = err.what();
             }
             SLogger::info(
                 "handleRequest() creating response message for error");
             response = RpcCommunicator::createResponseRpcMessage(errorParams);
+        } catch (const std::exception& err) {
+            SLogger::debug(
+                "Non-RpcCommunicator error when handling request", err.what());
+            RpcResponseParams errorParams = {.request = rpcMessage};
+            errorParams.errorType = RpcErrorType::SERVER_ERROR;
+            errorParams.errorClassName = typeid(err).name();
+            errorParams.errorMessage = err.what();
+            response = RpcCommunicator::createResponseRpcMessage(errorParams);
         }
+
         SLogger::info("handleRequest() emitting outgoing message");
         this->template emit<OutgoingMessage>(
             response, response.requestid(), callContext);
@@ -381,7 +391,7 @@ private:
     // Client-side functions
 
     void handleClientError(
-        const std::string& requestId, const std::exception& error) {
+        const std::string& requestId, const RpcException& error) {
         if (mStopped) {
             return;
         }
@@ -436,21 +446,20 @@ private:
 
         const auto& header = response.header();
 
-        std::unique_ptr<Err> error;
         if (response.errortype() == RpcErrorType::SERVER_TIMEOUT) {
-            error = std::make_unique<RpcTimeout>("Server timed out on request");
+            ongoingRequest->rejectRequest(
+                RpcTimeout("Server timed out on request"));
         } else if (response.errortype() == RpcErrorType::UNKNOWN_RPC_METHOD) {
-            error = std::make_unique<UnknownRpcMethod>(
-                "Server does not implement method " + header.at("method"));
+            ongoingRequest->rejectRequest(UnknownRpcMethod(
+                "Server does not implement method " + header.at("method")));
         } else if (response.errortype() == RpcErrorType::SERVER_ERROR) {
-            error = std::make_unique<RpcServerError>(
+            ongoingRequest->rejectRequest(RpcServerError(
                 response.errormessage(),
                 response.errorclassname(),
-                response.errorcode());
+                response.errorcode()));
         } else {
-            error = std::make_unique<RpcRequestError>("Unknown RPC Error");
+            ongoingRequest->rejectRequest(RpcRequestError("Unknown RPC Error"));
         }
-        ongoingRequest->rejectRequest(*error);
         mOngoingRequests.erase(response.requestid());
     }
 };
