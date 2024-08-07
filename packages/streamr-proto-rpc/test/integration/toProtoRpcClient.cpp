@@ -13,12 +13,15 @@
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/experimental/coro/Task.h>
 #include <folly/io/async/Request.h>
-#include "HelloRpc.pb.h"
 #include "HelloRpc.client.pb.h"
+<<<<<<< HEAD
 #include "TestProtos.client.pb.h"
 #include "WakeUpRpc.client.pb.h"
 #include "WakeUpRpc.server.pb.h"
 #include "streamr-proto-rpc/Errors.hpp"
+=======
+#include "HelloRpc.pb.h"
+>>>>>>> b4cbcb472f96e84b77c9eff64bd994c1899760be
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
 
 // NOLINTBEGIN
@@ -56,6 +59,7 @@ void registerTestRcpMethod(RpcCommunicator& communicator) {
         });
 }
 
+<<<<<<< HEAD
 void registerTestRcpMethodWithOptionalFields(RpcCommunicator& communicator) {
     communicator.registerRpcMethod<OptionalRequest, OptionalResponse>(
         "getOptional",
@@ -66,6 +70,8 @@ void registerTestRcpMethodWithOptionalFields(RpcCommunicator& communicator) {
         });
 }
 
+=======
+>>>>>>> b4cbcb472f96e84b77c9eff64bd994c1899760be
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
     RpcCommunicator communicator1;
     registerTestRcpMethod(communicator1);
@@ -92,7 +98,8 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
-    auto result = folly::coro::blockingWait(client.sayHello(request, ProtoCallContext()));
+    auto result =
+        folly::coro::blockingWait(client.sayHello(request, ProtoCallContext()));
     SLogger::info("TestCanMakeRpcCall callRemote called");
     EXPECT_EQ("Hello, Test", result.greeting());
 }
@@ -144,9 +151,12 @@ TEST_F(ProtoRpcClientTest, TestCanCallRemoteWhichThrows) {
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
-    EXPECT_THROW(folly::coro::blockingWait(client.sayHello(request, ProtoCallContext())),  std::exception); 
+    EXPECT_THROW(
+        folly::coro::blockingWait(client.sayHello(request, ProtoCallContext())),
+        std::exception);
 }
 
+<<<<<<< HEAD
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
     RpcCommunicator communicator1;
     registerTestRcpMethodWithOptionalFields(communicator1);
@@ -178,6 +188,8 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
 }
 
 
+=======
+>>>>>>> b4cbcb472f96e84b77c9eff64bd994c1899760be
 } // namespace streamr::protorpc
 
 // NOLINTEND
