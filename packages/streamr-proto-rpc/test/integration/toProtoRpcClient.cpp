@@ -13,9 +13,8 @@
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/experimental/coro/Task.h>
 #include <folly/io/async/Request.h>
-#include "HelloRpc.pb.h"
 #include "HelloRpc.client.pb.h"
-#include "streamr-proto-rpc/Errors.hpp"
+#include "HelloRpc.pb.h"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
 
 // NOLINTBEGIN
@@ -41,7 +40,6 @@ void registerTestRcpMethod(RpcCommunicator& communicator) {
 }
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
-
     RpcCommunicator communicator1;
     registerTestRcpMethod(communicator1);
     RpcCommunicator communicator2;
@@ -67,7 +65,8 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
-    auto result = folly::coro::blockingWait(client.sayHello(request, ProtoCallContext()));
+    auto result =
+        folly::coro::blockingWait(client.sayHello(request, ProtoCallContext()));
     SLogger::info("TestCanMakeRpcCall callRemote called");
     EXPECT_EQ("Hello, Test", result.greeting());
 }
@@ -90,10 +89,10 @@ TEST_F(ProtoRpcClientTest, TestCanCallRemoteWhichThrows) {
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
-    EXPECT_THROW(folly::coro::blockingWait(client.sayHello(request, ProtoCallContext())),  std::exception); 
+    EXPECT_THROW(
+        folly::coro::blockingWait(client.sayHello(request, ProtoCallContext())),
+        std::exception);
 }
-
-
 
 } // namespace streamr::protorpc
 
