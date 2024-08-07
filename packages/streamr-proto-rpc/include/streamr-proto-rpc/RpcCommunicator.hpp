@@ -165,11 +165,11 @@ public:
         const std::string& methodName,
         const RequestType& methodParam,
         const ProtoCallContext& callContext) {
-        SLogger::info("callRemote()");
+        SLogger::info("callRemote(): methodName:", methodName);
         auto task = folly::coro::co_invoke(
-            [&methodName, &methodParam, &callContext, this]()
+            [methodName, methodParam, callContext, this]()
                 -> folly::coro::Task<ReturnType> {
-                SLogger::info("callRemote() 1");
+                SLogger::info("callRemote() 1: methodName:", methodName);
 
                 auto requestMessage =
                     this->createRequestRpcMessage(methodName, methodParam);
@@ -403,6 +403,7 @@ private:
         const auto& header = ret.mutable_header();
         header->insert({"request", "request"});
         header->insert({"method", methodName});
+        SLogger::info("createRequestRpcMessage() methodName:", methodName);
         if (notification) {
             header->insert({"notification", "notification"});
         }
