@@ -4,6 +4,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <variant>
 
 namespace streamr::protorpc {
 
@@ -22,11 +23,11 @@ enum class ErrorCode {
 
 struct Err : public std::runtime_error {
     ErrorCode code; // NOLINT
-    std::optional<std::runtime_error> originalError; // NOLINT
+    std::optional<std::exception> originalError; // NOLINT
 
     Err(ErrorCode code,
         const std::string& message,
-        const std::optional<std::runtime_error>& originalError = std::nullopt)
+        const std::optional<std::exception>& originalError = std::nullopt)
         : std::runtime_error(message),
           code(code),
           originalError(originalError) {}
@@ -35,36 +36,43 @@ struct Err : public std::runtime_error {
 struct RpcTimeout : public Err {
     explicit RpcTimeout(
         const std::string& message,
-        const std::optional<std::runtime_error>& originalError = std::nullopt)
+        const std::optional<std::exception>& originalError = std::nullopt)
         : Err(ErrorCode::RPC_TIMEOUT, message, originalError) {}
 };
 
 struct FailedToParse : public Err {
     explicit FailedToParse(
         const std::string& message,
-        const std::optional<std::runtime_error>& originalError = std::nullopt)
+        const std::optional<std::exception>& originalError = std::nullopt)
         : Err(ErrorCode::FAILED_TO_PARSE, message, originalError) {}
 };
 
 struct FailedToSerialize : public Err {
     explicit FailedToSerialize(
         const std::string& message,
-        const std::optional<std::runtime_error>& originalError = std::nullopt)
+        const std::optional<std::exception>& originalError = std::nullopt)
         : Err(ErrorCode::FAILED_TO_SERIALIZE, message, originalError) {}
 };
 
 struct UnknownRpcMethod : public Err {
     explicit UnknownRpcMethod(
         const std::string& message,
-        const std::optional<std::runtime_error>& originalError = std::nullopt)
+        const std::optional<std::exception>& originalError = std::nullopt)
         : Err(ErrorCode::UNKNOWN_RPC_METHOD, message, originalError) {}
 };
 
 struct RpcRequestError : public Err {
     explicit RpcRequestError(
         const std::string& message,
-        const std::optional<std::runtime_error>& originalError = std::nullopt)
+        const std::optional<std::exception>& originalError = std::nullopt)
         : Err(ErrorCode::RPC_REQUEST, message, originalError) {}
+};
+
+struct RpcClientError : public Err {
+    explicit RpcClientError(
+        const std::string& message,
+        const std::optional<std::exception>& originalError = std::nullopt)
+        : Err(ErrorCode::RPC_CLIENT_ERROR, message, originalError) {}
 };
 
 struct RpcServerError : public Err {
@@ -79,6 +87,15 @@ struct RpcServerError : public Err {
           errorClassName(errorClassName),
           errorCode(errorCode) {}
 };
+
+using RpcException = std::variant<
+    RpcTimeout,
+    RpcRequestError,
+    RpcServerError,
+    RpcClientError,
+    UnknownRpcMethod,
+    FailedToParse,
+    FailedToSerialize>;
 
 /*
 export class RpcTimeout extends Err { constructor(message?: string,
