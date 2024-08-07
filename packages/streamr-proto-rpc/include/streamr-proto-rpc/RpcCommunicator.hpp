@@ -85,8 +85,10 @@ private:
         }
 
         void rejectRequest(const RpcException& error) override {
+            
             std::visit(
                 [this](auto&& arg) {
+                    SLogger::info("rejectRequest() ", arg.originalErrorInfo.value());
                     this->mPromiseContract.first.setException(arg);
                 },
                 error);
@@ -196,7 +198,13 @@ public:
                                 clientSideException.what());
                             RpcClientError error(
                                 "Error when calling outgoing message listener from client",
-                                clientSideException);
+                                clientSideException.what());
+
+                            SLogger::debug(
+                                "Old exception:",
+                                error.originalErrorInfo);
+
+
                             this->handleClientError(
                                 requestMessage.requestid(), error);
                         }
