@@ -196,16 +196,17 @@ public:
         auto task = folly::coro::co_invoke(
             [requestMessage, callContext, timeout, this]()
                 -> folly::coro::Task<ReturnType> {
-                //SLogger::info("callRemote() 1: methodName:", methodName);
+                // SLogger::info("callRemote() 1: methodName:", methodName);
 
                 // auto subtask = folly::coro::co_invoke(
                 //     [methodName, methodParam, callContext, this]()
                 //         -> folly::coro::Task<ReturnType> {
                 auto callMakingTask = folly::coro::co_invoke(
-                    [requestMessage, callContext, this]()
-                        -> folly::coro::Task<ReturnType> {
-                        auto ongoingRequest =
-                            this->makeRpcCall<ReturnType>(requestMessage, callContext);
+                    [requestMessage,
+                     callContext,
+                     this]() -> folly::coro::Task<ReturnType> {
+                        auto ongoingRequest = this->makeRpcCall<ReturnType>(
+                            requestMessage, callContext);
                         co_return co_await std::move(
                             ongoingRequest->getFuture());
                     });
@@ -229,9 +230,11 @@ public:
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace("caught folly::FutureTimeout", e.what());
+                    mOngoingRequests.erase(requestMessage.requestid());
                     throw RpcTimeout("RPC call timed out");
                 } catch (...) {
                     SLogger::info("caught other exception");
+                    mOngoingRequests.erase(requestMessage.requestid());
                     throw;
                 }
             });
@@ -347,45 +350,45 @@ private:
 
     void onIncomingMessage(
         const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
-        SLogger::debug("onIncomingMessage", rpcMessage.DebugString());
-        SLogger::info("onIncomingMessage() 1");
+        SLogger::trace("onIncomingMessage", rpcMessage.DebugString());
         const auto& header = rpcMessage.header();
-        SLogger::info("onIncomingMessage() 2", header);
-        if (header.find("response") != header.end()) {
-            SLogger::info("onIncomingMessage() found response in msg");
-        } else {
-            SLogger::info("onIncomingMessage() 'response' not found in msg");
-        }
 
-        SLogger::info("onIncomingMessage() requestId", rpcMessage.requestid());
-        SLogger::info("Printing all keys of mOngoingRequests:");
+        SLogger::trace("onIncomingMessage() requestId", rpcMessage.requestid());
+        SLogger::trace("Printing all keys of mOngoingRequests:");
         for (const auto& ongoingRequest : mOngoingRequests) {
             SLogger::info("Key: ", ongoingRequest.first);
         }
-        if (header.find("response") != header.end() &&
-            mOngoingRequests.find(rpcMessage.requestid()) !=
+        if (header.find("response") != header.end()) {
+            SLogger::info("onIncomingMessage() message is a response");
+            if (mOngoingRequests.find(rpcMessage.requestid()) !=
                 mOngoingRequests.end()) {
-            SLogger::info("onIncomingMessage() found response in msg");
-            if (rpcMessage.has_errortype()) {
-                SLogger::info("onIncomingMessage() rejecting ongoing request");
-                this->rejectOngoingRequest(rpcMessage);
+                SLogger::trace("onIncomingMessage() ongoing request found");
+                if (rpcMessage.has_errortype()) {
+                    SLogger::info(
+                        "onIncomingMessage() rejecting ongoing request");
+                    this->rejectOngoingRequest(rpcMessage);
+                } else {
+                    SLogger::info(
+                        "onIncomingMessage() resolving ongoing request");
+                    this->resolveOngoingRequest(rpcMessage);
+                }
             } else {
-                SLogger::info("onIncomingMessage() resolving ongoing request");
-                this->resolveOngoingRequest(rpcMessage);
+                SLogger::trace("onIncomingMessage() no ongoing request found for requestId, probably the request has timed out");
             }
-        } else if (SLogger::info(
-                       "onIncomingMessage() 'response not 'found in msg");
-                   header.find("request") != header.end() &&
+        } else if (header.find("request") != header.end() &&
                    header.find("method") != header.end()) {
+            SLogger::trace("onIncomingMessage() message is a request");
             if (header.find("notification") != header.end()) {
-                SLogger::info(
+                SLogger::trace(
                     "onIncomingMessage() calling handleNotification()");
                 this->handleNotification(rpcMessage, callContext);
             } else {
-                SLogger::info("onIncomingMessage() calling handleRequest()");
+                SLogger::trace("onIncomingMessage() calling handleRequest()");
                 this->handleRequest(rpcMessage, callContext);
             }
-        }
+        } else {
+            SLogger::debug("onIncomingMessage() message is not a valid request or response");
+        } 
     }
 
     void handleRequest(
