@@ -17,7 +17,6 @@
 #include "TestProtos.client.pb.h"
 #include "WakeUpRpc.client.pb.h"
 #include "WakeUpRpc.server.pb.h"
-#include "streamr-proto-rpc/Errors.hpp"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
 
 // NOLINTBEGIN
