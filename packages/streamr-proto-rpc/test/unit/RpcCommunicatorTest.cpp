@@ -61,41 +61,41 @@ void registerThrowingTestRcpMethodUnknown(RpcCommunicator& communicator) {
         });
 }
 
-void setOutgoingListener(RpcCommunicator& sender, RpcCommunicator& receiver) {
-    sender.setOutgoingMessageListener(
+void setOutgoingCallback(RpcCommunicator& sender, RpcCommunicator& receiver) {
+    sender.setOutgoingMessageCallback(
         [&receiver](
             const RpcMessage& message,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener()");
+            SLogger::info("onOutgoingMessageCallback()");
             receiver.handleIncomingMessage(message, ProtoCallContext());
         });
 }
 
-void setOutgoingListeners(
+void setOutgoingCallbacks(
     RpcCommunicator& communicator1, RpcCommunicator& communicator2) {
-    setOutgoingListener(communicator2, communicator1);
-    setOutgoingListener(communicator1, communicator2);
+    setOutgoingCallback(communicator2, communicator1);
+    setOutgoingCallback(communicator1, communicator2);
 }
 
 template <typename T>
-void setOutgoingListenerWithException(RpcCommunicator& sender) {
-    sender.setOutgoingMessageListener(
+void setOutgoingCallbackWithException(RpcCommunicator& sender) {
+    sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener() throws");
+            SLogger::info("onOutgoingMessageCallback() throws");
             throw T("TestException");
         });
 }
 
-void setOutgoingListenerWithThrownUnknown(RpcCommunicator& sender) {
+void setOutgoingCallbackWithThrownUnknown(RpcCommunicator& sender) {
     const int unknownThrow = 42;
-    sender.setOutgoingMessageListener(
+    sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener() throws");
+            SLogger::info("onOutgoingMessageCallback() throws");
             throw unknownThrow; // NOLINT
         });
 }
@@ -151,14 +151,14 @@ TEST_F(RpcCommunicatorTest, TestCanRegisterRpcMethod) {
 
 TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
     registerTestRcpMethod(communicator1);
-    setOutgoingListeners(communicator1, communicator2);
+    setOutgoingCallbacks(communicator1, communicator2);
     auto result = sendHelloRequest(communicator2);
     EXPECT_EQ("Hello, Test", result.greeting());
 }
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsRuntimeError) {
     registerTestRcpMethod(communicator1);
-    setOutgoingListenerWithException<std::runtime_error>(communicator2);
+    setOutgoingCallbackWithException<std::runtime_error>(communicator2);
     try {
         sendHelloRequest(communicator2);
         EXPECT_TRUE(false);
@@ -171,7 +171,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsRuntimeError) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsFailedToParse) {
     registerTestRcpMethod(communicator1);
-    setOutgoingListenerWithException<FailedToParse>(communicator2);
+    setOutgoingCallbackWithException<FailedToParse>(communicator2);
     try {
         sendHelloRequest(communicator2);
         EXPECT_TRUE(false);
@@ -187,7 +187,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsFailedToParse) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsUnknownError) {
     registerTestRcpMethod(communicator1);
-    setOutgoingListenerWithThrownUnknown(communicator2);
+    setOutgoingCallbackWithThrownUnknown(communicator2);
     try {
         sendHelloRequest(communicator2);
         EXPECT_TRUE(false);
@@ -198,7 +198,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsUnknownError) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRuntimeError) {
     registerThrowingRcpMethod<std::runtime_error>(communicator1);
-    setOutgoingListeners(communicator1, communicator2);
+    setOutgoingCallbacks(communicator1, communicator2);
     try {
         sendHelloRequest(communicator2);
         EXPECT_TRUE(false);
@@ -214,7 +214,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRuntimeError) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknownRpcMethod) {
     registerThrowingRcpMethod<UnknownRpcMethod>(communicator1);
-    setOutgoingListeners(communicator1, communicator2);
+    setOutgoingCallbacks(communicator1, communicator2);
     try {
         sendHelloRequest(communicator2);
         EXPECT_TRUE(false);
@@ -227,7 +227,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknownRpcMethod) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRcpTimeout) {
     registerThrowingRcpMethod<RpcTimeout>(communicator1);
-    setOutgoingListeners(communicator1, communicator2);
+    setOutgoingCallbacks(communicator1, communicator2);
     try {
         sendHelloRequest(communicator2);
         EXPECT_TRUE(false);
@@ -240,7 +240,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRcpTimeout) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsFailedToParse) {
     registerThrowingRcpMethod<FailedToParse>(communicator1);
-    setOutgoingListeners(communicator1, communicator2);
+    setOutgoingCallbacks(communicator1, communicator2);
     try {
         sendHelloRequest(communicator2);
         EXPECT_TRUE(false);
@@ -256,7 +256,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsFailedToParse) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknown) {
     registerThrowingTestRcpMethodUnknown(communicator1);
-    setOutgoingListeners(communicator1, communicator2);
+    setOutgoingCallbacks(communicator1, communicator2);
     try {
         sendHelloRequest(communicator2);
         EXPECT_TRUE(false);
@@ -272,13 +272,13 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
         [&requestMsg](
             const HelloRequest& request, const ProtoCallContext& /* context */)
             -> void { requestMsg = request.DebugString(); });
-    setOutgoingListener(communicator2, communicator1);
+    setOutgoingCallback(communicator2, communicator1);
     sendHelloNotification(communicator2);
     EXPECT_EQ(requestMsg, "myName: \"Test\"\n");
 }
 
 TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsRuntimeError) {
-    setOutgoingListenerWithException<std::runtime_error>(communicator2);
+    setOutgoingCallbackWithException<std::runtime_error>(communicator2);
     try {
         sendHelloNotification(communicator2);
         EXPECT_TRUE(false);
@@ -290,7 +290,7 @@ TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsRuntimeError) {
 }
 
 TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsFailedToParse) {
-    setOutgoingListenerWithException<FailedToParse>(communicator2);
+    setOutgoingCallbackWithException<FailedToParse>(communicator2);
     try {
         sendHelloNotification(communicator2);
         EXPECT_TRUE(false);
@@ -309,12 +309,12 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
     registerTestRcpMethod(communicator1);
 
     RpcCommunicator communicator2;
-    communicator2.setOutgoingMessageListener(
+    communicator2.setOutgoingMessageCallback(
         [&communicator1](
             const RpcMessage& /* message */,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
-            SLogger::info("setOutgoingMessageListener() sleeping 5s");
+            SLogger::info("setOutgoingMessageCallback() sleeping 5s");
             std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
         });
 
@@ -346,7 +346,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
     RpcCommunicator communicator2;
     std::shared_ptr<std::thread> thread;
 
-    communicator2.setOutgoingMessageListener(
+    communicator2.setOutgoingMessageCallback(
         [&communicator1, &thread](
             const RpcMessage& message,
             const std::string& /* requestId */,
@@ -357,7 +357,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
                     communicator1.handleIncomingMessage(message, context);
                 });
         });
-    communicator1.setOutgoingMessageListener(
+    communicator1.setOutgoingMessageCallback(
         [&communicator2](
             const RpcMessage& message,
             const std::string& /* requestId */,
@@ -400,12 +400,12 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
     HelloRequest request;
     request.set_myname("Test");
 
-    communicator2.setOutgoingMessageListener(
+    communicator2.setOutgoingMessageCallback(
         [&communicator1](
             const RpcMessage& /* message */,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
-            SLogger::info("setOutgoingMessageListener() sleeping 5s");
+            SLogger::info("setOutgoingMessageCallback() sleeping 5s");
             std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
         });
     try {

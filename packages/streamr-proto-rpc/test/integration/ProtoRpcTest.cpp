@@ -23,31 +23,31 @@
 namespace streamr::protorpc {
 
 template <typename T>
-void setOutgoingListenerWithException(RpcCommunicator& sender) {
-    sender.setOutgoingMessageListener(
+void setOutgoingCallbackWithException(RpcCommunicator& sender) {
+    sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener() throws");
+            SLogger::info("onOutgoingMessageCallback() throws");
             throw T("TestException");
         });
 }
 
-void setOutgoingListener(RpcCommunicator& sender, RpcCommunicator& receiver) {
-    sender.setOutgoingMessageListener(
+void setOutgoingCallback(RpcCommunicator& sender, RpcCommunicator& receiver) {
+    sender.setOutgoingMessageCallback(
         [&receiver](
             const RpcMessage& message,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener()");
+            SLogger::info("onOutgoingMessageCallback()");
             receiver.handleIncomingMessage(message, ProtoCallContext());
         });
 }
 
-void setOutgoingListeners(
+void setOutgoingCallbacks(
     RpcCommunicator& communicator1, RpcCommunicator& communicator2) {
-    setOutgoingListener(communicator2, communicator1);
-    setOutgoingListener(communicator1, communicator2);
+    setOutgoingCallback(communicator2, communicator1);
+    setOutgoingCallback(communicator1, communicator2);
 }
 
 void verifyClientError(
@@ -107,7 +107,7 @@ void registerTestRcpMethodWithOptionalFields(RpcCommunicator& communicator) {
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
     registerTestRcpMethod(communicator1);
-    setOutgoingListeners(communicator1, communicator2);
+    setOutgoingCallbacks(communicator1, communicator2);
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
@@ -126,7 +126,7 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
             &wakeUpService,
             _1,
             _2));
-    setOutgoingListener(communicator2, communicator1);
+    setOutgoingCallback(communicator2, communicator1);
     std::string reasonResult;
     wakeUpService.on<WakeUpCalled>(
         [&reasonResult](std::string_view reason) -> void {
@@ -142,7 +142,7 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
     registerTestRcpMethodWithOptionalFields(communicator1);
-    setOutgoingListeners(communicator1, communicator2);
+    setOutgoingCallbacks(communicator1, communicator2);
     OptionalServiceClient client(communicator2);
     OptionalRequest request;
     request.set_someoptionalfield("something");
@@ -155,7 +155,7 @@ TEST_F(
     ProtoRpcClientTest,
     TestHandlesClientSideExceptionOnRPCCallsWithRuntimeError) {
     registerTestRcpMethod(communicator1);
-    setOutgoingListenerWithException<std::runtime_error>(communicator2);
+    setOutgoingCallbackWithException<std::runtime_error>(communicator2);
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
