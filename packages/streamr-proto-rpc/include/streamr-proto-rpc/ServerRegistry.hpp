@@ -23,19 +23,12 @@ using RpcMethodType =
 using RpcNotificationType =
     std::function<Empty(Any request, ProtoCallContext callContext)>;
 
-// using ParseFunctionType = std::function<void(Any request)>;
-
 template <typename T>
 concept AssignableToRpcMethod = std::is_assignable_v<RpcMethodType, T>;
 
 template <typename T>
 concept AssignableToRpcNotification =
     std::is_assignable_v<RpcNotificationType, T>;
-
-// template <typename T>
-// concept AssignableToParseFunction = std::is_assignable<ParseFunctionType,
-// T>::value;
-
 struct MethodOptions {
     size_t timeout = 0;
 };
@@ -58,9 +51,6 @@ private:
     template <typename T>
     T getImplementation(
         const RpcMessage& rpcMessage, const std::map<std::string, T>& map) {
-        // std::cout << "getImplementation()" << rpcMessage.header() <<
-        // std::endl;
-        SLogger::info("header length", rpcMessage.header().size());
         if (!rpcMessage.header().contains("method")) {
             throw UnknownRpcMethod(
                 "Header \"method\" missing from RPC message");
@@ -85,20 +75,6 @@ public:
         }
     }
 
-    /*
-    public async handleRequest(rpcMessage: RpcMessage, callContext?:
-    ProtoCallContext): Promise<Any> {
-
-        logger.trace(`Server processing RPC call ${rpcMessage.requestId}`)
-
-        const implementation = this.getImplementation(rpcMessage, this.methods)
-        const timeout = implementation.options.timeout!
-        return await promiseTimeout(timeout, implementation.fn(rpcMessage.body!,
-    callContext ? callContext : new ProtoCallContext()))
-    }
-
-    */
-
     Any handleRequest(
         const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
         SLogger::trace(
@@ -112,30 +88,6 @@ public:
         auto implementation = getImplementation(rpcMessage, mNotifications);
         return implementation.fn(rpcMessage.body(), callContext);
     }
-
-    /*
-    public registerRpcMethod<RequestClass extends IMessageType<RequestType>,
-        ReturnClass extends IMessageType<ReturnType>,
-        RequestType extends object,
-        ReturnType extends object>(
-        requestClass: RequestClass,
-        returnClass: ReturnClass,
-        name: string,
-        fn: (rq: RequestType, _context: ProtoCallContext) =>
-    Promise<ReturnType>, opts: MethodOptions = {}
-    ): void {
-        const options = parseOptions(opts)
-        const method = {
-            fn: async (data: Any, callContext: ProtoCallContext) => {
-                const request = parseWrapper(() => Any.unpack(data,
-    requestClass)) const response = await fn(request, callContext) return
-    Any.pack(response, returnClass)
-            },
-            options
-        }
-        this.methods.set(name, method)
-    }
-    */
 
     template <typename RequestType, typename ReturnType, typename F>
     void registerRpcMethod(

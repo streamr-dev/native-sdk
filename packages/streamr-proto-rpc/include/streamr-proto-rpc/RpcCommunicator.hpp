@@ -91,8 +91,8 @@ private:
         void rejectRequest(const RpcException& error) override {
             std::visit(
                 [this](auto&& arg) {
-                    SLogger::info(
-                        "rejectRequest() ",
+                    SLogger::trace(
+                        "rejectRequest()",
                         arg.originalErrorInfo.has_value()
                             ? arg.originalErrorInfo.value()
                             : "");
@@ -184,7 +184,7 @@ public:
         const std::string& methodName,
         const RequestType& methodParam,
         const ProtoCallContext& callContext) {
-        SLogger::info("callRemote(): methodName:", methodName);
+        SLogger::trace("callRemote(): methodName:", methodName);
 
         size_t timeout = mRpcRequestTimeout;
         if (callContext.timeout.has_value()) {
@@ -215,12 +215,12 @@ public:
                                     folly::getGlobalCPUExecutor().get())),
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
-                    SLogger::trace("caught folly::FutureTimeout", e.what());
+                    SLogger::trace("callRemote() caught folly::FutureTimeout", e.what());
                     std::lock_guard lock(mOngoingRequestsMutex);
                     mOngoingRequests.erase(requestMessage.requestid());
                     throw RpcTimeout("RPC call timed out");
                 } catch (...) {
-                    SLogger::info("caught other exception");
+                    SLogger::trace("callRemote() caught other exception");
                     std::lock_guard lock(mOngoingRequestsMutex);
                     mOngoingRequests.erase(requestMessage.requestid());
                     throw;
@@ -275,10 +275,10 @@ public:
                                     folly::getGlobalCPUExecutor().get())),
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
-                    SLogger::trace("caught folly::FutureTimeout", e.what());
+                    SLogger::trace("notifyRemote() caught folly::FutureTimeout", e.what());
                     throw RpcTimeout("RPC notification timed out");
                 } catch (...) {
-                    SLogger::info("caught other exception when making RPC notification");
+                    SLogger::trace("notifyRemote() caught other exception");
                     throw;
                 }
             });
@@ -330,11 +330,11 @@ private:
 
     static RpcMessage createResponseRpcMessage(
         const RpcResponseParams& params) {
-        SLogger::info("createResponseRpcMessage()");
+        SLogger::trace("createResponseRpcMessage()");
         RpcMessage ret;
 
         if (params.body.has_value()) {
-            SLogger::info(
+            SLogger::trace(
                 "createResponseRpcMessage() body has value",
                 params.body->DebugString());
             auto* body = new Any(params.body.value());
@@ -373,10 +373,10 @@ private:
         SLogger::trace("onIncomingMessage() requestId", rpcMessage.requestid());
         SLogger::trace("Printing all keys of mOngoingRequests:");
         for (const auto& ongoingRequest : mOngoingRequests) {
-            SLogger::info("Key: ", ongoingRequest.first);
+            SLogger::trace("Key: ", ongoingRequest.first);
         }
         if (header.find("response") != header.end()) {
-            SLogger::info("onIncomingMessage() message is a response");
+            SLogger::trace("onIncomingMessage() message is a response");
             if (mOngoingRequests.find(rpcMessage.requestid()) !=
                 mOngoingRequests.end()) {
                 SLogger::trace("onIncomingMessage() ongoing request found");
@@ -419,14 +419,12 @@ private:
 
         RpcMessage response;
         try {
-            SLogger::info("handleRequest() 1");
+            SLogger::trace("handleRequest()");
             auto bytes = mServerRegistry.handleRequest(rpcMessage, callContext);
-            SLogger::info("handleRequest() 2", bytes.GetTypeName());
-            SLogger::info("handleRequest() creating response message");
             response = RpcCommunicator::createResponseRpcMessage(
                 {.request = rpcMessage, .body = bytes});
         } catch (const Err& err) {
-            SLogger::info("handleRequest() exception ", err.what());
+            SLogger::debug("handleRequest() exception ", err.what());
             RpcResponseParams errorParams = {.request = rpcMessage};
             if (err.code == ErrorCode::UNKNOWN_RPC_METHOD) {
                 errorParams.errorType = RpcErrorType::UNKNOWN_RPC_METHOD;
@@ -438,7 +436,7 @@ private:
                 errorParams.errorCode = magic_enum::enum_name(err.code);
                 errorParams.errorMessage = err.what();
             }
-            SLogger::info(
+            SLogger::trace(
                 "handleRequest() creating response message for error");
             response = RpcCommunicator::createResponseRpcMessage(errorParams);
         } catch (const std::exception& err) {
@@ -503,14 +501,14 @@ private:
         const auto& header = ret.mutable_header();
         header->insert({"request", "request"});
         header->insert({"method", methodName});
-        SLogger::info("createRequestRpcMessage() methodName:", methodName);
+        SLogger::trace("createRequestRpcMessage() methodName:", methodName);
         if (notification) {
             header->insert({"notification", "notification"});
         }
         Any* body = new Any();
         body->PackFrom(request);
         ret.set_allocated_body(body); // protobuf will take ownership
-        SLogger::info(
+        SLogger::trace(
             "createRequestRpcMessage() printed request Any: ",
             body->DebugString());
         boost::uuids::uuid uuid;
@@ -532,7 +530,7 @@ private:
         if (mStopped) {
             return;
         }
-        SLogger::info("rejectOngoingRequest()", response.DebugString());
+        SLogger::trace("rejectOngoingRequest()", response.DebugString());
         std::lock_guard lock(mOngoingRequestsMutex);
 
         const auto& ongoingRequest = mOngoingRequests.at(response.requestid());
