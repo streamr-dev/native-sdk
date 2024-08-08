@@ -16,6 +16,8 @@
 #include "HelloRpc.pb.h"
 #include "streamr-proto-rpc/Errors.hpp"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
+#include <exception>
+#include <thread>
 
 namespace streamr::protorpc {
 
@@ -47,6 +49,19 @@ void registerThrowingTestRcpMethod(RpcCommunicator& communicator) {
             throw std::runtime_error("TestServerException");
             // HelloResponse response;
             //  return response;
+        });
+}
+
+void registerSleepingTestRcpMethod(RpcCommunicator& communicator) {
+    communicator.registerRpcMethod<HelloRequest, HelloResponse>(
+        "testFunction",
+        [](const HelloRequest&  request,
+           const ProtoCallContext& /* context */) -> HelloResponse {
+            SLogger::info("TestSleepingRpcMethod sleeping 1s");
+            std::this_thread::sleep_for(std::chrono::seconds(1)); //NOLINT
+            HelloResponse response;
+            response.set_greeting("Hello, " + request.myname());
+            return response;
         });
 }
 
@@ -242,6 +257,82 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemoteWhichThrows) {
                     "testFunction", request, ProtoCallContext())
                 .scheduleOn(folly::getGlobalCPUExecutor().get())),
         std::exception);
+}
+
+TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
+    RpcCommunicator communicator1;
+    registerTestRcpMethod(communicator1);
+    
+    RpcCommunicator communicator2;
+    communicator2.setOutgoingMessageListener(
+        [&communicator1](
+            const RpcMessage& /* message */,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            SLogger::info("setOutgoingMessageListener() sleeping 5s");
+            std::this_thread::sleep_for(std::chrono::seconds(1)); //NOLINT
+        });
+
+    HelloRequest request;
+    request.set_myname("Test");
+
+    try {
+        folly::coro::blockingWait(
+            communicator2
+                .callRemote<HelloResponse, HelloRequest>(
+                    "testFunction", request, ProtoCallContext{.timeout = 50 }) //NOLINT
+                .scheduleOn(folly::getGlobalCPUExecutor().get()));
+        // Test fails here
+        EXPECT_TRUE(false);
+    } catch (const RpcTimeout& ex) {
+        SLogger::info(
+            "TestRpcTimeout caught RpcTimeout", ex.what());
+    } catch (const std::exception& ex) {
+        SLogger::info("TestRpcTimeoutOnClientSide caught unknown exception", ex.what());
+        EXPECT_TRUE(false);
+    }
+}
+
+TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
+    RpcCommunicator communicator1;
+    registerSleepingTestRcpMethod(communicator1);
+    RpcCommunicator communicator2;
+    std::shared_ptr<std::thread> thread;
+
+    communicator2.setOutgoingMessageListener(
+        [&communicator1, &thread](
+            const RpcMessage& message,
+            const std::string& /* requestId */,
+            const ProtoCallContext& context ) -> void {
+            thread = std::make_shared<std::thread>([&communicator1, message, context]() {
+                SLogger::info("Starting thread for server");
+                communicator1.handleIncomingMessage(message, context);
+            });
+        });
+    communicator1.setOutgoingMessageListener(
+        [&communicator2](
+            const RpcMessage& message,
+            const std::string& /* requestId */,
+            const ProtoCallContext& context) -> void {
+            communicator2.handleIncomingMessage(message, context);
+        });
+
+    HelloRequest request;
+    request.set_myname("Test");
+    try {
+    auto result = folly::coro::blockingWait(
+        communicator2
+            .callRemote<HelloResponse, HelloRequest>(
+                "testFunction", request, ProtoCallContext{.timeout = 50}) // NOLINT
+                .scheduleOn(folly::getGlobalCPUExecutor().get()));
+        EXPECT_EQ(true, false);
+    } catch (const RpcTimeout& ex) {
+        SLogger::info("TestRpcTimeoutOnServerSide caught RpcTimeout", ex.what());
+    } catch (...) {
+        SLogger::info("TestRpcTimeoutOnServerSide caught unknown exception");
+        EXPECT_EQ(true, false);
+    } 
+    thread->join();
 }
 
 } // namespace streamr::protorpc
