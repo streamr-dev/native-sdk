@@ -204,7 +204,8 @@ public:
                                 auto ongoingRequest =
                                     this->makeRpcCall<ReturnType, RequestType>(
                                         methodName, methodParam, callContext);
-                                co_return co_await std::move(ongoingRequest->getFuture());
+                                co_return co_await std::move(
+                                    ongoingRequest->getFuture());
                             });
 
                         try {
