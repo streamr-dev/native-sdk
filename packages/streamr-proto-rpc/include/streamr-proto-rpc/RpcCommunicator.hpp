@@ -196,11 +196,6 @@ public:
         auto task = folly::coro::co_invoke(
             [requestMessage, callContext, timeout, this]()
                 -> folly::coro::Task<ReturnType> {
-                // SLogger::info("callRemote() 1: methodName:", methodName);
-
-                // auto subtask = folly::coro::co_invoke(
-                //     [methodName, methodParam, callContext, this]()
-                //         -> folly::coro::Task<ReturnType> {
                 auto callMakingTask = folly::coro::co_invoke(
                     [requestMessage,
                      callContext,
@@ -211,16 +206,6 @@ public:
                             ongoingRequest->getFuture());
                     });
 
-                //   try {
-                //       co_return co_await folly::coro::detachOnCancel(
-                //           std::move(callMakingTask)
-                //               .scheduleOn(
-                //                   folly::getGlobalCPUExecutor().get()));
-                //   } catch (const folly::OperationCancelled&) {
-                //       SLogger::info("folly::OperationCancelled");
-                //       throw RpcTimeout("RPC call timed out");
-                //   }
-                //});
                 try {
                     co_return co_await folly::coro::timeout(
                         folly::coro::detachOnCancel(
@@ -247,28 +232,52 @@ public:
         const std::string& methodName,
         const RequestType& methodParam,
         const ProtoCallContext& callContext) {
-        SLogger::info("notifyRemote()");
+        SLogger::trace("notifyRemote()");
+
+        size_t timeout = mRpcRequestTimeout;
+        if (callContext.timeout.has_value()) {
+            timeout = callContext.timeout.value();
+        }
+
+        auto requestMessage =
+            this->createRequestRpcMessage(methodName, methodParam, true);
+
         auto task = folly::coro::co_invoke(
-            [methodName, methodParam, callContext, this]()
-                -> folly::coro::Task<void> {
-                SLogger::info("notifyRemote() 1");
-                auto requestMessage = this->createRequestRpcMessage(
-                    methodName, methodParam, true);
+            [requestMessage, callContext, timeout, this]() -> folly::coro::Task<void> {
+                auto callMakingTask = folly::coro::co_invoke(
+                    [requestMessage,
+                     callContext, timeout,
+                     this]() -> folly::coro::Task<void> {
+                        try {
+                            mOutgoingMessageListener(
+                                requestMessage,
+                                requestMessage.requestid(),
+                                callContext);
+                        } catch (const std::exception& clientSideException) {
+                            SLogger::debug(
+                                "Error when calling outgoing message listener from client for sending notification",
+                                clientSideException.what());
+                            throw RpcClientError(
+                                "Error when calling outgoing message listener from client for sending notification",
+                                clientSideException.what());
+                        }
+                        co_return;
+                    });
 
                 try {
-                    mOutgoingMessageListener(
-                        requestMessage,
-                        requestMessage.requestid(),
-                        callContext);
-                } catch (const std::exception& clientSideException) {
-                    SLogger::debug(
-                        "Error when calling outgoing message listener from client",
-                        clientSideException.what());
-                    throw RpcClientError(
-                        "Error when calling outgoing message listener from client",
-                        clientSideException.what());
+                    co_return co_await folly::coro::timeout(
+                        folly::coro::detachOnCancel(
+                            std::move(callMakingTask)
+                                .scheduleOn(
+                                    folly::getGlobalCPUExecutor().get())),
+                        std::chrono::milliseconds(timeout));
+                } catch (const folly::FutureTimeout& e) {
+                    SLogger::trace("caught folly::FutureTimeout", e.what());
+                    throw RpcTimeout("RPC notification timed out");
+                } catch (...) {
+                    SLogger::info("caught other exception when making RPC notification");
+                    throw;
                 }
-                co_return;
             });
         return std::move(task);
     }
@@ -364,19 +373,21 @@ private:
                 mOngoingRequests.end()) {
                 SLogger::trace("onIncomingMessage() ongoing request found");
                 if (rpcMessage.has_errortype()) {
-                    SLogger::info(
+                    SLogger::trace(
                         "onIncomingMessage() rejecting ongoing request");
                     this->rejectOngoingRequest(rpcMessage);
                 } else {
-                    SLogger::info(
+                    SLogger::trace(
                         "onIncomingMessage() resolving ongoing request");
                     this->resolveOngoingRequest(rpcMessage);
                 }
             } else {
-                SLogger::trace("onIncomingMessage() no ongoing request found for requestId, probably the request has timed out");
+                SLogger::trace(
+                    "onIncomingMessage() no ongoing request found for requestId, probably the request has timed out");
             }
-        } else if (header.find("request") != header.end() &&
-                   header.find("method") != header.end()) {
+        } else if (
+            header.find("request") != header.end() &&
+            header.find("method") != header.end()) {
             SLogger::trace("onIncomingMessage() message is a request");
             if (header.find("notification") != header.end()) {
                 SLogger::trace(
@@ -387,8 +398,9 @@ private:
                 this->handleRequest(rpcMessage, callContext);
             }
         } else {
-            SLogger::debug("onIncomingMessage() message is not a valid request or response");
-        } 
+            SLogger::debug(
+                "onIncomingMessage() message is not a valid request or response");
+        }
     }
 
     void handleRequest(

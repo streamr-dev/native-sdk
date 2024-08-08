@@ -386,4 +386,45 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
     thread->join();
 }
 
+TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
+    RpcCommunicator communicator1;
+    RpcCommunicator communicator2;
+    std::string requestMsg;
+    
+    communicator1.registerRpcNotification<HelloRequest>(
+        "testFunction",
+        [&requestMsg](
+            const HelloRequest& request, const ProtoCallContext& /* context */)
+            -> void { requestMsg = request.DebugString(); });
+        
+    HelloRequest request;
+    request.set_myname("Test");
+
+    communicator2.setOutgoingMessageListener(
+        [&communicator1](
+            const RpcMessage& /* message */,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            SLogger::info("setOutgoingMessageListener() sleeping 5s");
+            std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
+        });
+    try {
+        folly::coro::blockingWait(
+            communicator2
+                .notifyRemote<HelloRequest>(
+                    "testFunction",
+                    request,
+                    ProtoCallContext{.timeout = 50}) // NOLINT
+                .scheduleOn(folly::getGlobalCPUExecutor().get()));
+        // Test fails here
+        EXPECT_TRUE(false);
+    } catch (const RpcTimeout& ex) {
+        SLogger::info("TestRpcTimeoutOnClientSideForNotification caught RpcTimeout", ex.what());
+    } catch (const std::exception& ex) {
+        SLogger::info(
+            "TestRpcTimeoutOnClientSideForNotification caught unknown exception", ex.what());
+        EXPECT_TRUE(false);
+    }
+}
+
 } // namespace streamr::protorpc
