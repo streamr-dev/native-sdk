@@ -26,15 +26,15 @@ namespace streamr::protorpc {
 struct WakeUpCalled : public Event<std::string_view> {};
 using WakeUpEvents = std::tuple<WakeUpCalled>;
 
-
-class WakeUpRpcServiceImpl : public WakeUpRpcService, public EventEmitter<WakeUpEvents>  {
-    public:
-    void wakeUp(const WakeUpRequest& request, const ProtoCallContext& callContext) override {
-         this->emit<WakeUpCalled>(request.reason());
+class WakeUpRpcServiceImpl : public WakeUpRpcService,
+                             public EventEmitter<WakeUpEvents> {
+public:
+    void wakeUp(
+        const WakeUpRequest& request,
+        const ProtoCallContext& callContext) override {
+        this->emit<WakeUpCalled>(request.reason());
     }
-
 };
-
 
 class ProtoRpcClientTest : public ::testing::Test {
 protected:
@@ -101,23 +101,24 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
     WakeUpRpcServiceImpl wakeUpService;
     using namespace std::placeholders;
     communicator1.registerRpcNotification<WakeUpRequest>(
-        "wakeUp", 
+        "wakeUp",
         std::bind(&WakeUpRpcServiceImpl::wakeUp, &wakeUpService, _1, _2));
 
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
             const RpcMessage& message,
-            const std::string&  requestId ,
-            const ProtoCallContext&  context ) -> void {
+            const std::string& requestId,
+            const ProtoCallContext& context) -> void {
             SLogger::info("communicator2: onOutgoingMessageListener()");
             communicator1.handleIncomingMessage(message, ProtoCallContext());
-        });   
+        });
     std::string reasonResult;
-    wakeUpService.on<WakeUpCalled>([&reasonResult](std::string_view reason) -> void {
-        reasonResult = std::string(reason);
-        SLogger::info("wakeUpService: called with", reason);  
-    });
+    wakeUpService.on<WakeUpCalled>(
+        [&reasonResult](std::string_view reason) -> void {
+            reasonResult = std::string(reason);
+            SLogger::info("wakeUpService: called with", reason);
+        });
     WakeUpRpcServiceClient client(communicator2);
     WakeUpRequest request;
     request.set_reason("School");
@@ -169,15 +170,16 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
             communicator2.handleIncomingMessage(message, ProtoCallContext());
         });
 
-    SLogger::info("TestCanMakeRpcCallWithOptionalFields setOutgoingMessageListeners called");
+    SLogger::info(
+        "TestCanMakeRpcCallWithOptionalFields setOutgoingMessageListeners called");
     OptionalServiceClient client(communicator2);
     OptionalRequest request;
     request.set_someoptionalfield("something");
-    auto result = folly::coro::blockingWait(client.getOptional(request, ProtoCallContext()));
+    auto result = folly::coro::blockingWait(
+        client.getOptional(request, ProtoCallContext()));
     SLogger::info("TestCanMakeRpcCallWithOptionalFields callRemote called");
     EXPECT_EQ(false, result.has_someoptionalfield());
 }
-
 
 } // namespace streamr::protorpc
 

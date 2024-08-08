@@ -135,8 +135,8 @@ private:
                 }
 
                 sourceSs
-                    << "   virtual " << methodOutputName + " "
-                    << methodName << "(const " << methodInputName
+                    << "   virtual " << methodOutputName + " " << methodName
+                    << "(const " << methodInputName
                     << "& request, const ProtoCallContext& callContext) = 0;\n";
             }
             sourceSs << "}; // class " << serviceName << "\n";
