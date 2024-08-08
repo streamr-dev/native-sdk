@@ -85,10 +85,13 @@ private:
         }
 
         void rejectRequest(const RpcException& error) override {
-            
             std::visit(
                 [this](auto&& arg) {
-                    SLogger::info("rejectRequest() ", arg.originalErrorInfo.value());
+                    SLogger::info(
+                        "rejectRequest() ",
+                        arg.originalErrorInfo.has_value()
+                            ? arg.originalErrorInfo.value()
+                            : "");
                     this->mPromiseContract.first.setException(arg);
                 },
                 error);
@@ -201,9 +204,7 @@ public:
                                 clientSideException.what());
 
                             SLogger::debug(
-                                "Old exception:",
-                                error.originalErrorInfo);
-
+                                "Old exception:", error.originalErrorInfo);
 
                             this->handleClientError(
                                 requestMessage.requestid(), error);
@@ -257,12 +258,12 @@ private:
     static RpcMessage createResponseRpcMessage(
         const RpcResponseParams& params) {
         SLogger::info("createResponseRpcMessage()");
-        params.body.value().PrintDebugString();
-        SLogger::info("createResponseRpcMessage() 1");
         RpcMessage ret;
 
         if (params.body.has_value()) {
-            SLogger::info("createResponseRpcMessage() body has value");
+            SLogger::info(
+                "createResponseRpcMessage() body has value",
+                params.body->DebugString());
             auto* body = new Any(params.body.value());
             ret.set_allocated_body(body); // protobuf will take ownership
         }
@@ -291,8 +292,7 @@ private:
 
     void onIncomingMessage(
         const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
-        SLogger::debug("onIncomingMessage", rpcMessage.requestid());
-        rpcMessage.PrintDebugString();
+        SLogger::debug("onIncomingMessage", rpcMessage.DebugString());
         SLogger::info("onIncomingMessage() 1");
         const auto& header = rpcMessage.header();
         SLogger::info("onIncomingMessage() 2", header);
@@ -323,8 +323,11 @@ private:
                    header.find("request") != header.end() &&
                    header.find("method") != header.end()) {
             if (header.find("notification") != header.end()) {
+                SLogger::info(
+                    "onIncomingMessage() calling handleNotification()");
                 this->handleNotification(rpcMessage, callContext);
             } else {
+                SLogger::info("onIncomingMessage() calling handleRequest()");
                 this->handleRequest(rpcMessage, callContext);
             }
         }
@@ -366,6 +369,8 @@ private:
             RpcResponseParams errorParams = {.request = rpcMessage};
             errorParams.errorType = RpcErrorType::SERVER_ERROR;
             errorParams.errorClassName = typeid(err).name();
+            errorParams.errorCode =
+                magic_enum::enum_name(ErrorCode::RPC_SERVER_ERROR);
             errorParams.errorMessage = err.what();
             response = RpcCommunicator::createResponseRpcMessage(errorParams);
         }
@@ -430,9 +435,9 @@ private:
         Any* body = new Any();
         body->PackFrom(request);
         ret.set_allocated_body(body); // protobuf will take ownership
-        SLogger::info("createRequestRpcMessage() printed request Any:");
-        body->PrintDebugString();
-
+        SLogger::info(
+            "createRequestRpcMessage() printed request Any: ",
+            body->DebugString());
         boost::uuids::uuid uuid;
         ret.set_requestid(boost::uuids::to_string(uuid));
         return ret;
@@ -451,7 +456,7 @@ private:
         if (mStopped) {
             return;
         }
-
+        SLogger::info("rejectOngoingRequest()", response.DebugString());
         const auto& ongoingRequest = mOngoingRequests.at(response.requestid());
 
         const auto& header = response.header();
@@ -464,9 +469,9 @@ private:
                 "Server does not implement method " + header.at("method")));
         } else if (response.errortype() == RpcErrorType::SERVER_ERROR) {
             ongoingRequest->rejectRequest(RpcServerError(
-                response.errormessage(),
-                response.errorclassname(),
-                response.errorcode()));
+                response.has_errormessage() ? response.errormessage() : "",
+                response.has_errorclassname() ? response.errorclassname() : "",
+                response.has_errorcode() ? response.errorcode() : ""));
         } else {
             ongoingRequest->rejectRequest(RpcRequestError("Unknown RPC Error"));
         }
