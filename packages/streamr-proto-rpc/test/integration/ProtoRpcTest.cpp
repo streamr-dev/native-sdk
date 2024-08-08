@@ -19,14 +19,12 @@
 #include "WakeUpRpc.server.pb.h"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
 
-// NOLINTBEGIN
-
 namespace streamr::protorpc {
 
 template <typename T>
 void setOutgoingListenerWithException(RpcCommunicator& sender) {
     sender.setOutgoingMessageListener(
-        [](const RpcMessage& message,
+        [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
            const ProtoCallContext& /* context */) -> void {
             SLogger::info("onOutgoingMessageListener() throws");
@@ -54,7 +52,7 @@ void setOutgoingListeners(
 void verifyClientError(
     const RpcClientError& ex,
     const ErrorCode expectedErrorCode,
-    const std::string expectedOriginalErrorInfo) {
+    const std::string& expectedOriginalErrorInfo) {
     SLogger::info("Caught RpcClientError", ex.what());
     EXPECT_EQ(ex.code, expectedErrorCode);
     EXPECT_TRUE(ex.originalErrorInfo.has_value());
@@ -69,15 +67,15 @@ class WakeUpRpcServiceImpl : public WakeUpRpcService,
 public:
     void wakeUp(
         const WakeUpRequest& request,
-        const ProtoCallContext& callContext) override {
+        const ProtoCallContext& /* callContext */) override {
         this->emit<WakeUpCalled>(request.reason());
     }
 };
 
 class ProtoRpcClientTest : public ::testing::Test {
 protected:
-    RpcCommunicator communicator1;
-    RpcCommunicator communicator2;
+    RpcCommunicator communicator1; // NOLINT
+    RpcCommunicator communicator2; // NOLINT
     void SetUp() override {}
 };
 
@@ -97,7 +95,7 @@ void registerTestRcpMethod(RpcCommunicator& communicator) {
 void registerTestRcpMethodWithOptionalFields(RpcCommunicator& communicator) {
     communicator.registerRpcMethod<OptionalRequest, OptionalResponse>(
         "getOptional",
-        [](const OptionalRequest& request,
+        [](const OptionalRequest& /* request */,
            const ProtoCallContext& /* context */) -> OptionalResponse {
             OptionalResponse response;
             return response;
@@ -117,10 +115,14 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
     WakeUpRpcServiceImpl wakeUpService;
-    using namespace std::placeholders;
+    using namespace std::placeholders; // NOLINT
     communicator1.registerRpcNotification<WakeUpRequest>(
         "wakeUp",
-        std::bind(&WakeUpRpcServiceImpl::wakeUp, &wakeUpService, _1, _2));
+        std::bind( // NOLINT
+            &WakeUpRpcServiceImpl::wakeUp,
+            &wakeUpService,
+            _1,
+            _2));
     setOutgoingListener(communicator2, communicator1);
     std::string reasonResult;
     wakeUpService.on<WakeUpCalled>(
@@ -166,5 +168,3 @@ TEST_F(
 }
 
 } // namespace streamr::protorpc
-
-// NOLINTEND

@@ -21,9 +21,8 @@ namespace streamr::protorpc {
 
 class RpcCommunicatorTest : public ::testing::Test {
 protected:
-    RpcCommunicator communicator1;
-    RpcCommunicator communicator2;
-    // RpcCommunicator communicator; // NOLINT
+    RpcCommunicator communicator1; // NOLINT
+    RpcCommunicator communicator2; // NOLINT
     void SetUp() override {}
 };
 
@@ -51,11 +50,12 @@ void registerThrowingRcpMethod(RpcCommunicator& communicator) {
 }
 
 void registerThrowingTestRcpMethodUnknown(RpcCommunicator& communicator) {
+    const int unknownThrow = 42;
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
         "testFunction",
         [](const HelloRequest& /* request */,
            const ProtoCallContext& /* context */) -> HelloResponse {
-            throw 42;
+            throw unknownThrow; // NOLINT
         });
 }
 
@@ -72,7 +72,6 @@ void setOutgoingListener(RpcCommunicator& sender, RpcCommunicator& receiver) {
 
 void setOutgoingListeners(
     RpcCommunicator& communicator1, RpcCommunicator& communicator2) {
-
     setOutgoingListener(communicator2, communicator1);
     setOutgoingListener(communicator1, communicator2);
 }
@@ -80,7 +79,7 @@ void setOutgoingListeners(
 template <typename T>
 void setOutgoingListenerWithException(RpcCommunicator& sender) {
     sender.setOutgoingMessageListener(
-        [](const RpcMessage& message,
+        [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
            const ProtoCallContext& /* context */) -> void {
             SLogger::info("onOutgoingMessageListener() throws");
@@ -89,12 +88,13 @@ void setOutgoingListenerWithException(RpcCommunicator& sender) {
 }
 
 void setOutgoingListenerWithThrownUnknown(RpcCommunicator& sender) {
+    const int unknownThrow = 42;
     sender.setOutgoingMessageListener(
-        [](const RpcMessage& message,
+        [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
            const ProtoCallContext& /* context */) -> void {
             SLogger::info("onOutgoingMessageListener() throws");
-            throw 42;
+            throw unknownThrow; // NOLINT
         });
 }
 
@@ -121,7 +121,7 @@ auto sendHelloNotification(RpcCommunicator& sender) {
 void verifyClientError(
     const RpcClientError& ex,
     const ErrorCode expectedErrorCode,
-    const std::string expectedOriginalErrorInfo) {
+    const std::string& expectedOriginalErrorInfo) {
     SLogger::info("Caught RpcClientError", ex.what());
     EXPECT_EQ(ex.code, expectedErrorCode);
     EXPECT_TRUE(ex.originalErrorInfo.has_value());
