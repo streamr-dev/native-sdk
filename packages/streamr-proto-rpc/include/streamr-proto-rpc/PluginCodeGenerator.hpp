@@ -135,7 +135,7 @@ private:
                 }
 
                 sourceSs
-                    << "   virtual folly::coro::Task<" + methodOutputName + "> "
+                    << "   virtual " << methodOutputName + " "
                     << methodName << "(const " << methodInputName
                     << "& request, const ProtoCallContext& callContext) = 0;\n";
             }

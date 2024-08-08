@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <variant>
+#include <magic_enum.hpp>
 
 namespace streamr::protorpc {
 
@@ -21,61 +22,88 @@ enum class ErrorCode {
 };
 // NOLINTEND
 
-struct Err : public std::runtime_error {
+class Err : public std::runtime_error {
+public:
     ErrorCode code; // NOLINT
-    std::optional<std::exception> originalError; // NOLINT
+    std::string message; // NOLINT
+    std::optional<std::string> originalErrorInfo; // NOLINT
 
     Err(ErrorCode code,
         const std::string& message,
-        const std::optional<std::exception>& originalError = std::nullopt)
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
         : std::runtime_error(message),
           code(code),
-          originalError(originalError) {}
+          message(message),
+          originalErrorInfo(originalErrorInfo) {
+        createStringRepresentation();
+    }
+
+    [[nodiscard]] virtual std::string toString() const {
+        return stringRepresentation;
+    }
+
+    [[nodiscard]] const char* what() const noexcept override {
+        return stringRepresentation.c_str();
+    }
+
+private:
+    std::string stringRepresentation; // NOLINT
+
+    void createStringRepresentation() {
+        stringRepresentation =
+            "code: " + std::string(magic_enum::enum_name(code));
+        stringRepresentation += ", message: " + message;
+        if (originalErrorInfo.has_value()) {
+            stringRepresentation +=
+                ", originalErrorInfo: " + originalErrorInfo.value();
+        }
+    }
 };
 
 struct RpcTimeout : public Err {
     explicit RpcTimeout(
         const std::string& message,
-        const std::optional<std::exception>& originalError = std::nullopt)
-        : Err(ErrorCode::RPC_TIMEOUT, message, originalError) {}
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
+        : Err(ErrorCode::RPC_TIMEOUT, message, originalErrorInfo) {}
 };
 
 struct FailedToParse : public Err {
     explicit FailedToParse(
         const std::string& message,
-        const std::optional<std::exception>& originalError = std::nullopt)
-        : Err(ErrorCode::FAILED_TO_PARSE, message, originalError) {}
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
+        : Err(ErrorCode::FAILED_TO_PARSE, message, originalErrorInfo) {}
 };
 
 struct FailedToSerialize : public Err {
     explicit FailedToSerialize(
         const std::string& message,
-        const std::optional<std::exception>& originalError = std::nullopt)
-        : Err(ErrorCode::FAILED_TO_SERIALIZE, message, originalError) {}
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
+        : Err(ErrorCode::FAILED_TO_SERIALIZE, message, originalErrorInfo) {}
 };
 
 struct UnknownRpcMethod : public Err {
     explicit UnknownRpcMethod(
         const std::string& message,
-        const std::optional<std::exception>& originalError = std::nullopt)
-        : Err(ErrorCode::UNKNOWN_RPC_METHOD, message, originalError) {}
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
+        : Err(ErrorCode::UNKNOWN_RPC_METHOD, message, originalErrorInfo) {}
 };
 
 struct RpcRequestError : public Err {
     explicit RpcRequestError(
         const std::string& message,
-        const std::optional<std::exception>& originalError = std::nullopt)
-        : Err(ErrorCode::RPC_REQUEST, message, originalError) {}
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
+        : Err(ErrorCode::RPC_REQUEST, message, originalErrorInfo) {}
 };
 
 struct RpcClientError : public Err {
     explicit RpcClientError(
         const std::string& message,
-        const std::optional<std::exception>& originalError = std::nullopt)
-        : Err(ErrorCode::RPC_CLIENT_ERROR, message, originalError) {}
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
+        : Err(ErrorCode::RPC_CLIENT_ERROR, message, originalErrorInfo) {}
 };
 
-struct RpcServerError : public Err {
+class RpcServerError : public Err {
+public:
     std::string errorClassName; // NOLINT
     std::string errorCode; // NOLINT
 
@@ -85,7 +113,26 @@ struct RpcServerError : public Err {
         const std::string& errorCode) // NOLINT
         : Err(ErrorCode::RPC_SERVER_ERROR, errorMessage),
           errorClassName(errorClassName),
-          errorCode(errorCode) {}
+          errorCode(errorCode) {
+        createStringRepresentation();
+    }
+
+    [[nodiscard]] std::string toString() const override {
+        return stringRepresentation;
+    }
+
+    [[nodiscard]] const char* what() const noexcept override {
+        return stringRepresentation.c_str();
+    }
+
+private:
+    std::string stringRepresentation; // NOLINT
+
+    void createStringRepresentation() {
+        stringRepresentation = Err::toString();
+        stringRepresentation += ", errorClassName: " + errorClassName;
+        stringRepresentation += ", errorCode: " + errorCode;
+    }
 };
 
 using RpcException = std::variant<
