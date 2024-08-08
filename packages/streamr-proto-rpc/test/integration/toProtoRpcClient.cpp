@@ -126,29 +126,6 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
     EXPECT_EQ("School", reasonResult);
 }
 
-TEST_F(ProtoRpcClientTest, TestCanCallRemoteWhichThrows) {
-    RpcCommunicator communicator1;
-    registerTestRcpMethod(communicator1);
-    SLogger::info("TestCanCallRemoteWhichThrows registerRpcMethod called");
-    RpcCommunicator communicator2;
-    communicator2.setOutgoingMessageListener(
-        [&communicator1](
-            const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("setOutgoingMessageListener() Before Exception:");
-            throw std::runtime_error("TestException");
-        });
-    SLogger::info(
-        "TestCanCallRemoteWhichThrows setOutgoingMessageListener called");
-    HelloRpcServiceClient client(communicator2);
-    HelloRequest request;
-    request.set_myname("Test");
-    EXPECT_THROW(
-        folly::coro::blockingWait(client.sayHello(request, ProtoCallContext())),
-        std::exception);
-}
-
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
     RpcCommunicator communicator1;
     registerTestRcpMethodWithOptionalFields(communicator1);
@@ -180,6 +157,46 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
     SLogger::info("TestCanMakeRpcCallWithOptionalFields callRemote called");
     EXPECT_EQ(false, result.has_someoptionalfield());
 }
+
+TEST_F(ProtoRpcClientTest, TestHandlesClientSideExceptionOnRPCCallsWithRuntimeError) {
+    RpcCommunicator communicator1;
+    registerTestRcpMethod(communicator1);
+    SLogger::info("TestHandlesClientSideExceptionsOnRPCCalls registerRpcMethod called");
+    RpcCommunicator communicator2;
+    communicator2.setOutgoingMessageListener(
+        [&communicator1](
+            const RpcMessage& message,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            SLogger::info("setOutgoingMessageListener() Before Exception:");
+            throw std::runtime_error("TestClientException");
+        });
+    SLogger::info(
+        "TestHandlesClientSideExceptionsOnRPCCalls setOutgoingMessageListener called");
+    HelloRpcServiceClient client(communicator2);
+    HelloRequest request;
+    request.set_myname("Test");
+
+    try {
+        folly::coro::blockingWait(
+           client.sayHello(request, ProtoCallContext()));
+        // Test fails here
+        EXPECT_TRUE(false);
+    } catch (const RpcClientError& ex) {
+        SLogger::info(
+            "TestCanCallRemoteWhichThrows caught RpcClientError", ex.what());
+        EXPECT_EQ(ex.code, ErrorCode::RPC_CLIENT_ERROR);
+        EXPECT_TRUE(ex.originalErrorInfo.has_value());
+        EXPECT_EQ(ex.originalErrorInfo.value(), "TestClientException");
+    } catch (...) {
+        EXPECT_TRUE(false);
+    }
+
+   // EXPECT_THROW(
+     //   folly::coro::blockingWait(client.sayHello(request, ProtoCallContext())),
+       // std::exception);
+}
+
 
 } // namespace streamr::protorpc
 
