@@ -135,8 +135,8 @@ void registerSleepingTestRcpMethod(RpcCommunicator& communicator) {
         "testFunction",
         [](const HelloRequest& request,
            const ProtoCallContext& /* context */) -> HelloResponse {
-            SLogger::info("TestSleepingRpcMethod sleeping 1s");
-            std::this_thread::sleep_for(std::chrono::seconds(1)); // NOLINT
+            SLogger::info("TestSleepingRpcMethod sleeping 5s");
+            std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
             HelloResponse response;
             response.set_greeting("Hello, " + request.myname());
             return response;
@@ -315,7 +315,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
             SLogger::info("setOutgoingMessageListener() sleeping 5s");
-            std::this_thread::sleep_for(std::chrono::seconds(1)); // NOLINT
+            std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
         });
 
     HelloRequest request;

@@ -190,41 +190,49 @@ public:
             timeout = callContext.timeout.value();
         }
 
+        auto requestMessage =
+            this->createRequestRpcMessage(methodName, methodParam);
+
         auto task = folly::coro::co_invoke(
-            [methodName, methodParam, callContext, timeout, this]()
+            [requestMessage, callContext, timeout, this]()
                 -> folly::coro::Task<ReturnType> {
-                SLogger::info("callRemote() 1: methodName:", methodName);
+                //SLogger::info("callRemote() 1: methodName:", methodName);
 
-                auto subtask = folly::coro::co_invoke(
-                    [methodName, methodParam, callContext, this]()
+                // auto subtask = folly::coro::co_invoke(
+                //     [methodName, methodParam, callContext, this]()
+                //         -> folly::coro::Task<ReturnType> {
+                auto callMakingTask = folly::coro::co_invoke(
+                    [requestMessage, callContext, this]()
                         -> folly::coro::Task<ReturnType> {
-                        auto callMakingTask = folly::coro::co_invoke(
-                            [methodName, methodParam, callContext, this]()
-                                -> folly::coro::Task<ReturnType> {
-                                auto ongoingRequest =
-                                    this->makeRpcCall<ReturnType, RequestType>(
-                                        methodName, methodParam, callContext);
-                                co_return co_await std::move(
-                                    ongoingRequest->getFuture());
-                            });
-
-                        try {
-                            co_return co_await folly::coro::detachOnCancel(
-                                std::move(callMakingTask)
-                                    .scheduleOn(
-                                        folly::getGlobalCPUExecutor().get()));
-                        } catch (const folly::OperationCancelled&) {
-                            SLogger::info("folly::OperationCancelled");
-                            throw RpcTimeout("RPC call timed out");
-                        }
+                        auto ongoingRequest =
+                            this->makeRpcCall<ReturnType>(requestMessage, callContext);
+                        co_return co_await std::move(
+                            ongoingRequest->getFuture());
                     });
+
+                //   try {
+                //       co_return co_await folly::coro::detachOnCancel(
+                //           std::move(callMakingTask)
+                //               .scheduleOn(
+                //                   folly::getGlobalCPUExecutor().get()));
+                //   } catch (const folly::OperationCancelled&) {
+                //       SLogger::info("folly::OperationCancelled");
+                //       throw RpcTimeout("RPC call timed out");
+                //   }
+                //});
                 try {
                     co_return co_await folly::coro::timeout(
-                        folly::coro::detachOnCancel(std::move(subtask)),
+                        folly::coro::detachOnCancel(
+                            std::move(callMakingTask)
+                                .scheduleOn(
+                                    folly::getGlobalCPUExecutor().get())),
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
-                    SLogger::info("folly::FutureTimeout2 oli", e.what());
+                    SLogger::trace("caught folly::FutureTimeout", e.what());
                     throw RpcTimeout("RPC call timed out");
+                } catch (...) {
+                    SLogger::info("caught other exception");
+                    throw;
                 }
             });
 
@@ -272,14 +280,9 @@ private:
         std::optional<std::string> errorMessage;
     };
 
-    template <typename ReturnType, typename RequestType>
+    template <typename ReturnType>
     std::shared_ptr<OngoingRequest<ReturnType>> makeRpcCall(
-        const std::string& methodName,
-        const RequestType& methodParam,
-        const ProtoCallContext& callContext) {
-        auto requestMessage =
-            this->createRequestRpcMessage(methodName, methodParam);
-
+        const RpcMessage& requestMessage, const ProtoCallContext& callContext) {
         auto ongoingRequest = std::make_shared<OngoingRequest<ReturnType>>();
         this->mOngoingRequests.emplace(
             requestMessage.requestid(), ongoingRequest);
