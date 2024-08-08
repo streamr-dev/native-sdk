@@ -127,6 +127,7 @@ private:
     ServerRegistry mServerRegistry;
     std::unordered_map<std::string, std::shared_ptr<OngoingRequestBase>>
         mOngoingRequests;
+    std::recursive_mutex mOngoingRequestsMutex;
     size_t mRpcRequestTimeout;
 
 public:
@@ -215,10 +216,12 @@ public:
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace("caught folly::FutureTimeout", e.what());
+                    std::lock_guard lock(mOngoingRequestsMutex);
                     mOngoingRequests.erase(requestMessage.requestid());
                     throw RpcTimeout("RPC call timed out");
                 } catch (...) {
                     SLogger::info("caught other exception");
+                    std::lock_guard lock(mOngoingRequestsMutex);
                     mOngoingRequests.erase(requestMessage.requestid());
                     throw;
                 }
@@ -296,14 +299,17 @@ private:
     std::shared_ptr<OngoingRequest<ReturnType>> makeRpcCall(
         const RpcMessage& requestMessage, const ProtoCallContext& callContext) {
         auto ongoingRequest = std::make_shared<OngoingRequest<ReturnType>>();
-        this->mOngoingRequests.emplace(
-            requestMessage.requestid(), ongoingRequest);
-
+        {
+            std::lock_guard lock(mOngoingRequestsMutex);
+            this->mOngoingRequests.emplace(
+                requestMessage.requestid(), ongoingRequest);
+        }
         if (mOutgoingMessageListener) {
             try {
                 mOutgoingMessageListener(
                     requestMessage, requestMessage.requestid(), callContext);
             } catch (const std::exception& clientSideException) {
+                std::lock_guard lock(mOngoingRequestsMutex);
                 if (mOngoingRequests.find(requestMessage.requestid()) !=
                     mOngoingRequests.end()) {
                     SLogger::debug(
@@ -360,6 +366,8 @@ private:
     void onIncomingMessage(
         const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
         SLogger::trace("onIncomingMessage", rpcMessage.DebugString());
+        std::lock_guard lock(mOngoingRequestsMutex);
+
         const auto& header = rpcMessage.header();
 
         SLogger::trace("onIncomingMessage() requestId", rpcMessage.requestid());
@@ -477,6 +485,7 @@ private:
             return;
         }
 
+        std::lock_guard lock(mOngoingRequestsMutex);
         const auto& ongoingRequest = mOngoingRequests.at(requestId);
 
         if (ongoingRequest) {
@@ -513,6 +522,7 @@ private:
         if (mStopped) {
             return;
         }
+        std::lock_guard lock(mOngoingRequestsMutex);
         auto& ongoingRequest = mOngoingRequests.at(response.requestid());
         ongoingRequest->resolveRequest(response);
         mOngoingRequests.erase(response.requestid());
@@ -523,6 +533,8 @@ private:
             return;
         }
         SLogger::info("rejectOngoingRequest()", response.DebugString());
+        std::lock_guard lock(mOngoingRequestsMutex);
+        
         const auto& ongoingRequest = mOngoingRequests.at(response.requestid());
 
         const auto& header = response.header();
