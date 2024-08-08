@@ -47,7 +47,7 @@ struct RpcCommunicatorConfig {
 };
 class RpcCommunicator {
 public:
-    using OutgoingMessageListenerType = std::function<void(
+    using OutgoingMessageCallbackType = std::function<void(
         RpcMessage, std::string /*requestId*/, ProtoCallContext)>;
 
 private:
@@ -123,7 +123,7 @@ private:
     };
 
     bool mStopped = false;
-    OutgoingMessageListenerType mOutgoingMessageListener;
+    OutgoingMessageCallbackType mOutgoingMessageCallback;
     ServerRegistry mServerRegistry;
     std::unordered_map<std::string, std::shared_ptr<OngoingRequestBase>>
         mOngoingRequests;
@@ -149,7 +149,7 @@ public:
         this->onIncomingMessage(message, callContext);
     }
 
-    // Server-side registration of RPC methods and listeners
+    // Server-side registration of RPC methods and callbacks
 
     template <typename RequestType, typename ReturnType, typename F>
         requires std::is_assignable_v<
@@ -172,9 +172,9 @@ public:
     }
 
     template <typename F>
-        requires std::is_assignable_v<OutgoingMessageListenerType, F>
-    void setOutgoingMessageListener(F&& listener) {
-        mOutgoingMessageListener = std::forward<F>(listener);
+        requires std::is_assignable_v<OutgoingMessageCallbackType, F>
+    void setOutgoingMessageCallback(F&& callback) {
+        mOutgoingMessageCallback = std::forward<F>(callback);
     }
 
     // Client-side API
@@ -252,16 +252,16 @@ public:
                      callContext, timeout,
                      this]() -> folly::coro::Task<void> {
                         try {
-                            mOutgoingMessageListener(
+                            mOutgoingMessageCallback(
                                 requestMessage,
                                 requestMessage.requestid(),
                                 callContext);
                         } catch (const std::exception& clientSideException) {
                             SLogger::debug(
-                                "Error when calling outgoing message listener from client for sending notification",
+                                "Error when calling outgoing message callback from client for sending notification",
                                 clientSideException.what());
                             throw RpcClientError(
-                                "Error when calling outgoing message listener from client for sending notification",
+                                "Error when calling outgoing message callback from client for sending notification",
                                 clientSideException.what());
                         }
                         co_return;
@@ -304,19 +304,19 @@ private:
             this->mOngoingRequests.emplace(
                 requestMessage.requestid(), ongoingRequest);
         }
-        if (mOutgoingMessageListener) {
+        if (mOutgoingMessageCallback) {
             try {
-                mOutgoingMessageListener(
+                mOutgoingMessageCallback(
                     requestMessage, requestMessage.requestid(), callContext);
             } catch (const std::exception& clientSideException) {
                 std::lock_guard lock(mOngoingRequestsMutex);
                 if (mOngoingRequests.find(requestMessage.requestid()) !=
                     mOngoingRequests.end()) {
                     SLogger::debug(
-                        "Error when calling outgoing message listener from client",
+                        "Error when calling outgoing message callback from client",
                         clientSideException.what());
                     RpcClientError error(
-                        "Error when calling outgoing message listener from client",
+                        "Error when calling outgoing message callback from client",
                         clientSideException.what());
 
                     SLogger::debug("Old exception:", error.originalErrorInfo);
@@ -453,13 +453,13 @@ private:
             response = RpcCommunicator::createResponseRpcMessage(errorParams);
         }
 
-        if (mOutgoingMessageListener) {
+        if (mOutgoingMessageCallback) {
             try {
-                mOutgoingMessageListener(
+                mOutgoingMessageCallback(
                     response, response.requestid(), callContext);
             } catch (const std::exception& clientSideException) {
                 SLogger::debug(
-                    "error when calling outgoing message listener from server",
+                    "error when calling outgoing message callback from server",
                     clientSideException.what());
             }
         }
@@ -534,7 +534,7 @@ private:
         }
         SLogger::info("rejectOngoingRequest()", response.DebugString());
         std::lock_guard lock(mOngoingRequestsMutex);
-        
+
         const auto& ongoingRequest = mOngoingRequests.at(response.requestid());
 
         const auto& header = response.header();
