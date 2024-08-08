@@ -239,11 +239,12 @@ public:
                         requestMessage,
                         requestMessage.requestid(),
                         callContext);
-                } catch (const std::exception& clientSideException) {              
+                } catch (const std::exception& clientSideException) {
                     SLogger::debug(
                         "Error when calling outgoing message listener from client",
                         clientSideException.what());
-                    throw RpcClientError("Error when calling outgoing message listener from client",
+                    throw RpcClientError(
+                        "Error when calling outgoing message listener from client",
                         clientSideException.what());
                 }
                 co_return;
