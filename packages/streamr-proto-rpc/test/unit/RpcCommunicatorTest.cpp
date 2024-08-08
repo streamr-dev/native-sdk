@@ -390,13 +390,13 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
     RpcCommunicator communicator1;
     RpcCommunicator communicator2;
     std::string requestMsg;
-    
+
     communicator1.registerRpcNotification<HelloRequest>(
         "testFunction",
         [&requestMsg](
             const HelloRequest& request, const ProtoCallContext& /* context */)
             -> void { requestMsg = request.DebugString(); });
-        
+
     HelloRequest request;
     request.set_myname("Test");
 
@@ -419,10 +419,13 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {
-        SLogger::info("TestRpcTimeoutOnClientSideForNotification caught RpcTimeout", ex.what());
+        SLogger::info(
+            "TestRpcTimeoutOnClientSideForNotification caught RpcTimeout",
+            ex.what());
     } catch (const std::exception& ex) {
         SLogger::info(
-            "TestRpcTimeoutOnClientSideForNotification caught unknown exception", ex.what());
+            "TestRpcTimeoutOnClientSideForNotification caught unknown exception",
+            ex.what());
         EXPECT_TRUE(false);
     }
 }

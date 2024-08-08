@@ -215,7 +215,8 @@ public:
                                     folly::getGlobalCPUExecutor().get())),
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
-                    SLogger::trace("callRemote() caught folly::FutureTimeout", e.what());
+                    SLogger::trace(
+                        "callRemote() caught folly::FutureTimeout", e.what());
                     std::lock_guard lock(mOngoingRequestsMutex);
                     mOngoingRequests.erase(requestMessage.requestid());
                     throw RpcTimeout("RPC call timed out");
@@ -246,11 +247,11 @@ public:
             this->createRequestRpcMessage(methodName, methodParam, true);
 
         auto task = folly::coro::co_invoke(
-            [requestMessage, callContext, timeout, this]() -> folly::coro::Task<void> {
+            [requestMessage, callContext, timeout, this]()
+                -> folly::coro::Task<void> {
                 auto callMakingTask = folly::coro::co_invoke(
-                    [requestMessage,
-                     callContext, timeout,
-                     this]() -> folly::coro::Task<void> {
+                    [requestMessage, callContext, timeout, this]()
+                        -> folly::coro::Task<void> {
                         try {
                             mOutgoingMessageCallback(
                                 requestMessage,
@@ -275,7 +276,8 @@ public:
                                     folly::getGlobalCPUExecutor().get())),
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
-                    SLogger::trace("notifyRemote() caught folly::FutureTimeout", e.what());
+                    SLogger::trace(
+                        "notifyRemote() caught folly::FutureTimeout", e.what());
                     throw RpcTimeout("RPC notification timed out");
                 } catch (...) {
                     SLogger::trace("notifyRemote() caught other exception");
