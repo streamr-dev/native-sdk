@@ -17,6 +17,7 @@
 #include "TestProtos.client.pb.h"
 #include "WakeUpRpc.client.pb.h"
 #include "WakeUpRpc.server.pb.h"
+#include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
 
 namespace streamr::protorpc {
@@ -58,6 +59,8 @@ void verifyClientError(
     EXPECT_TRUE(ex.originalErrorInfo.has_value());
     EXPECT_EQ(ex.originalErrorInfo.value(), expectedOriginalErrorInfo);
 }
+using streamr::eventemitter::Event;
+using streamr::eventemitter::EventEmitter;
 
 struct WakeUpCalled : public Event<std::string_view> {};
 using WakeUpEvents = std::tuple<WakeUpCalled>;
