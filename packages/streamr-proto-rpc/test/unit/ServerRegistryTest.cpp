@@ -2,20 +2,20 @@
 
 #include <google/protobuf/any.pb.h>
 #include "HelloRpc.pb.h"
-#include "streamr-logger/SLogger.hpp"
 #include "streamr-proto-rpc/ServerRegistry.hpp"
 
-// NOLINTBEGIN
+// BEGINNOLINT
 
 namespace streamr::protorpc {
 
 class ServerRegistryTest : public ::testing::Test {
 protected:
-    ServerRegistry registry;
+    ServerRegistry registry; // NOLINT
     void SetUp() override {}
 };
 
-RpcMessage createHelloRcpMessage(std::optional<std::string_view> method = "sayHello") {
+RpcMessage createHelloRcpMessage(
+    std::optional<std::string_view> method = "sayHello") {
     HelloRequest request;
     request.set_myname("testUser");
     RpcMessage requestWrapper;
@@ -84,4 +84,4 @@ TEST_F(ServerRegistryTest, HandleNotificationWithMissingMethodHeader) {
 
 } // namespace streamr::protorpc
 
-// NOLINTEND
+// ENDNOLINT
