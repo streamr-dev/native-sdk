@@ -18,10 +18,14 @@
 #include "WakeUpRpc.client.pb.h"
 #include "WakeUpRpc.server.pb.h"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
+#include "streamr-eventemitter/EventEmitter.hpp"
 
 // NOLINTBEGIN
 
 namespace streamr::protorpc {
+
+using streamr::eventemitter::Event;
+using streamr::eventemitter::EventEmitter;
 
 struct WakeUpCalled : public Event<std::string_view> {};
 using WakeUpEvents = std::tuple<WakeUpCalled>;
