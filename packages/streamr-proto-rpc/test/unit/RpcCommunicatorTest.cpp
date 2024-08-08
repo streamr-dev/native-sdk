@@ -1,3 +1,5 @@
+#include <exception>
+#include <thread>
 #include <gtest/gtest.h>
 #include <streamr-proto-rpc/RpcCommunicator.hpp>
 #include <folly/Portability.h>
@@ -16,8 +18,6 @@
 #include "HelloRpc.pb.h"
 #include "streamr-proto-rpc/Errors.hpp"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
-#include <exception>
-#include <thread>
 
 namespace streamr::protorpc {
 
@@ -55,10 +55,10 @@ void registerThrowingTestRcpMethod(RpcCommunicator& communicator) {
 void registerSleepingTestRcpMethod(RpcCommunicator& communicator) {
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
         "testFunction",
-        [](const HelloRequest&  request,
+        [](const HelloRequest& request,
            const ProtoCallContext& /* context */) -> HelloResponse {
             SLogger::info("TestSleepingRpcMethod sleeping 1s");
-            std::this_thread::sleep_for(std::chrono::seconds(1)); //NOLINT
+            std::this_thread::sleep_for(std::chrono::seconds(1)); // NOLINT
             HelloResponse response;
             response.set_greeting("Hello, " + request.myname());
             return response;
@@ -262,7 +262,7 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemoteWhichThrows) {
 TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
     RpcCommunicator communicator1;
     registerTestRcpMethod(communicator1);
-    
+
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
@@ -270,7 +270,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
             SLogger::info("setOutgoingMessageListener() sleeping 5s");
-            std::this_thread::sleep_for(std::chrono::seconds(1)); //NOLINT
+            std::this_thread::sleep_for(std::chrono::seconds(1)); // NOLINT
         });
 
     HelloRequest request;
@@ -280,15 +280,17 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
         folly::coro::blockingWait(
             communicator2
                 .callRemote<HelloResponse, HelloRequest>(
-                    "testFunction", request, ProtoCallContext{.timeout = 50 }) //NOLINT
+                    "testFunction",
+                    request,
+                    ProtoCallContext{.timeout = 50}) // NOLINT
                 .scheduleOn(folly::getGlobalCPUExecutor().get()));
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {
-        SLogger::info(
-            "TestRpcTimeout caught RpcTimeout", ex.what());
+        SLogger::info("TestRpcTimeout caught RpcTimeout", ex.what());
     } catch (const std::exception& ex) {
-        SLogger::info("TestRpcTimeoutOnClientSide caught unknown exception", ex.what());
+        SLogger::info(
+            "TestRpcTimeoutOnClientSide caught unknown exception", ex.what());
         EXPECT_TRUE(false);
     }
 }
@@ -303,11 +305,12 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
         [&communicator1, &thread](
             const RpcMessage& message,
             const std::string& /* requestId */,
-            const ProtoCallContext& context ) -> void {
-            thread = std::make_shared<std::thread>([&communicator1, message, context]() {
-                SLogger::info("Starting thread for server");
-                communicator1.handleIncomingMessage(message, context);
-            });
+            const ProtoCallContext& context) -> void {
+            thread = std::make_shared<std::thread>(
+                [&communicator1, message, context]() {
+                    SLogger::info("Starting thread for server");
+                    communicator1.handleIncomingMessage(message, context);
+                });
         });
     communicator1.setOutgoingMessageListener(
         [&communicator2](
@@ -320,18 +323,21 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
     HelloRequest request;
     request.set_myname("Test");
     try {
-    auto result = folly::coro::blockingWait(
-        communicator2
-            .callRemote<HelloResponse, HelloRequest>(
-                "testFunction", request, ProtoCallContext{.timeout = 50}) // NOLINT
+        auto result = folly::coro::blockingWait(
+            communicator2
+                .callRemote<HelloResponse, HelloRequest>(
+                    "testFunction",
+                    request,
+                    ProtoCallContext{.timeout = 50}) // NOLINT
                 .scheduleOn(folly::getGlobalCPUExecutor().get()));
         EXPECT_EQ(true, false);
     } catch (const RpcTimeout& ex) {
-        SLogger::info("TestRpcTimeoutOnServerSide caught RpcTimeout", ex.what());
+        SLogger::info(
+            "TestRpcTimeoutOnServerSide caught RpcTimeout", ex.what());
     } catch (...) {
         SLogger::info("TestRpcTimeoutOnServerSide caught unknown exception");
         EXPECT_EQ(true, false);
-    } 
+    }
     thread->join();
 }
 
