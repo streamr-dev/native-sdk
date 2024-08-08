@@ -429,7 +429,6 @@ TEST_F(RpcCommunicatorTest, TestCanCallRemoteServerThrowsUnknown) {
     }
 }
 
-
 TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
     RpcCommunicator communicator1;
     std::string requestMsg;
@@ -466,7 +465,7 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
     EXPECT_EQ(requestMsg, "myName: \"Test\"\n");
 }
 
-TEST_F(RpcCommunicatorTest, TestCanNotifyRemoteWhichThrows) {
+TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsRuntimeError) {
     RpcCommunicator communicator1;
     std::string requestMsg;
     communicator1.registerRpcNotification<HelloRequest>(
@@ -481,7 +480,7 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemoteWhichThrows) {
         });
 
     SLogger::info(
-        "TestCanNotifyRemoteWhichThrows registerRpcNotification called");
+        "TestNotifyRemoteClientThrowsRuntimeError registerRpcNotification called");
     RpcCommunicator communicator2;
     communicator2.setOutgoingMessageListener(
         [&communicator1](
@@ -494,14 +493,71 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemoteWhichThrows) {
 
     HelloRequest request;
     request.set_myname("Test");
-    SLogger::info("TestCanNotifyRemoteWhichThrows set_myname called");
-    EXPECT_THROW(
+    SLogger::info("TestNotifyRemoteClientThrowsRuntimeError set_myname called");
+    try {
         folly::coro::blockingWait(
             communicator2
                 .notifyRemote<HelloRequest>(
                     "testFunction", request, ProtoCallContext())
-                .scheduleOn(folly::getGlobalCPUExecutor().get())),
-        std::exception);
+                .scheduleOn(folly::getGlobalCPUExecutor().get()));
+        EXPECT_TRUE(false);
+    } catch (const RpcClientError& ex) {
+        SLogger::info(
+            "TestNotifyRemoteClientThrowsRuntimeError caught RpcClientError", ex.what());
+        EXPECT_EQ(ex.code, ErrorCode::RPC_CLIENT_ERROR);
+        EXPECT_TRUE(ex.originalErrorInfo.has_value());
+        EXPECT_EQ(ex.originalErrorInfo.value(), "TestException");
+    } catch (...) {
+        EXPECT_TRUE(false);
+    }
+
 }
+
+TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsUnknownRpcMethod) {
+    RpcCommunicator communicator1;
+    std::string requestMsg;
+    communicator1.registerRpcNotification<HelloRequest>(
+        "testFunction",
+        [&requestMsg](
+            const HelloRequest& request,
+            const ProtoCallContext& /* context */) -> void {
+            requestMsg = request.DebugString();
+            throw UnknownRpcMethod("TestUnknownRpcMethodException");
+        });
+
+    SLogger::info(
+        "TestNotifyRemoteClientThrowsUnknownRpcMethod registerRpcNotification called");
+    RpcCommunicator communicator2;
+    communicator2.setOutgoingMessageListener(
+        [&communicator1](
+            const RpcMessage& /* message */,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            SLogger::info("onOutgoingMessageListener()");
+            throw std::runtime_error("TestUnknownRpcMethodException");
+        });
+
+    HelloRequest request;
+    request.set_myname("Test");
+    SLogger::info("TestNotifyRemoteClientThrowsUnknownRpcMethod set_myname called");
+    try {
+        folly::coro::blockingWait(
+            communicator2
+                .notifyRemote<HelloRequest>(
+                    "testFunction", request, ProtoCallContext())
+                .scheduleOn(folly::getGlobalCPUExecutor().get()));
+        EXPECT_TRUE(false);
+    } catch (const RpcClientError& ex) {
+        SLogger::info(
+            "TestNotifyRemoteClientThrowsUnknownRpcMethod caught RpcClientError", ex.what());
+        EXPECT_EQ(ex.code, ErrorCode::RPC_CLIENT_ERROR);
+        EXPECT_TRUE(ex.originalErrorInfo.has_value());
+        EXPECT_EQ(ex.originalErrorInfo.value(), "TestUnknownRpcMethodException");
+    } catch (...) {
+        EXPECT_TRUE(false);
+    }
+
+}
+
 
 } // namespace streamr::protorpc

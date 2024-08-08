@@ -234,11 +234,17 @@ public:
                 this->template emit<OutgoingMessage>(
                     requestMessage, requestMessage.requestid(), callContext);
 
-                if (mOutgoingMessageListener) {
+                try {
                     mOutgoingMessageListener(
                         requestMessage,
                         requestMessage.requestid(),
                         callContext);
+                } catch (const std::exception& clientSideException) {              
+                    SLogger::debug(
+                        "Error when calling outgoing message listener from client",
+                        clientSideException.what());
+                    throw RpcClientError("Error when calling outgoing message listener from client",
+                        clientSideException.what());
                 }
                 co_return;
             });
