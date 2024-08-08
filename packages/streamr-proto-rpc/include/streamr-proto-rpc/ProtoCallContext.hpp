@@ -6,6 +6,7 @@
 namespace streamr::protorpc {
 
 struct ProtoCallContext : public std::map<std::string, std::string> {
+    std::optional<size_t> timeout;
     bool notification = false;
 };
 

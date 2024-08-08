@@ -1,6 +1,7 @@
 #ifndef STREAMR_PROTO_RPC_RPC_COMMUNICATOR_HPP
 #define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_HPP
 
+#include <chrono>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -8,7 +9,13 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <folly/coro/Collect.h>
+#include <folly/coro/DetachOnCancel.h>
+#include <folly/coro/Timeout.h>
+#include <folly/experimental/coro/Collect.h>
+#include <folly/experimental/coro/DetachOnCancel.h>
 #include <folly/experimental/coro/Promise.h>
+#include <folly/experimental/coro/Sleep.h>
 #include <folly/experimental/coro/Task.h>
 #include <folly/experimental/coro/Timeout.h>
 
@@ -18,30 +25,27 @@
 #include "ProtoCallContext.hpp"
 #include "ProtoRpc.pb.h"
 #include "ServerRegistry.hpp"
-#include "streamr-eventemitter/EventEmitter.hpp"
 
 #include "streamr-logger/SLogger.hpp"
 
 namespace streamr::protorpc {
 
 using google::protobuf::Any;
-using streamr::eventemitter::Event;
-using streamr::eventemitter::EventEmitter;
 using streamr::logger::SLogger;
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 using folly::coro::Task;
 
+constexpr size_t defaultRpcRequestTimeout = 5000;
+
 // NOLINTBEGIN
 enum class StatusCode { OK, STOPPED, DEADLINE_EXCEEDED, SERVER_ERROR };
 // NOLINTEND
 
-// RpcCommunicator events
-struct OutgoingMessage
-    : Event<RpcMessage, std::string /*requestId*/, ProtoCallContext> {};
-
-using RpcCommunicatorEvents = std::tuple<OutgoingMessage>;
-class RpcCommunicator : public EventEmitter<RpcCommunicatorEvents> {
+struct RpcCommunicatorConfig {
+    size_t rpcRequestTimeout;
+};
+class RpcCommunicator {
 public:
     using OutgoingMessageListenerType = std::function<void(
         RpcMessage, std::string /*requestId*/, ProtoCallContext)>;
@@ -119,12 +123,21 @@ private:
     };
 
     bool mStopped = false;
+    OutgoingMessageListenerType mOutgoingMessageListener;
     ServerRegistry mServerRegistry;
     std::unordered_map<std::string, std::shared_ptr<OngoingRequestBase>>
         mOngoingRequests;
-    OutgoingMessageListenerType mOutgoingMessageListener;
+    size_t mRpcRequestTimeout;
 
 public:
+    explicit RpcCommunicator(
+        std::optional<RpcCommunicatorConfig> config = std::nullopt) {
+        if (config.has_value()) {
+            mRpcRequestTimeout = config.value().rpcRequestTimeout;
+        } else {
+            mRpcRequestTimeout = defaultRpcRequestTimeout;
+        }
+    }
     // Public API for both client and server
 
     void handleIncomingMessage(
@@ -171,52 +184,51 @@ public:
         const RequestType& methodParam,
         const ProtoCallContext& callContext) {
         SLogger::info("callRemote(): methodName:", methodName);
+
+        size_t timeout = mRpcRequestTimeout;
+        if (callContext.timeout.has_value()) {
+            timeout = callContext.timeout.value();
+        }
+
         auto task = folly::coro::co_invoke(
-            [methodName, methodParam, callContext, this]()
+            [methodName, methodParam, callContext, timeout, this]()
                 -> folly::coro::Task<ReturnType> {
                 SLogger::info("callRemote() 1: methodName:", methodName);
 
-                auto requestMessage =
-                    this->createRequestRpcMessage(methodName, methodParam);
+                auto subtask = folly::coro::co_invoke(
+                    [methodName, methodParam, callContext, this]()
+                        -> folly::coro::Task<ReturnType> {
+                        auto callMakingTask = folly::coro::co_invoke(
+                            [methodName, methodParam, callContext, this]()
+                                -> folly::coro::Task<ReturnType> {
+                                auto ongoingRequest =
+                                    this->makeRpcCall<ReturnType, RequestType>(
+                                        methodName, methodParam, callContext);
+                                co_return co_await std::move(
+                                    ongoingRequest->getFuture());
+                            });
 
-                auto ongoingRequest =
-                    std::make_shared<OngoingRequest<ReturnType>>();
-                this->mOngoingRequests.emplace(
-                    requestMessage.requestid(), ongoingRequest);
-
-                this->template emit<OutgoingMessage>(
-                    requestMessage, requestMessage.requestid(), callContext);
-
-                if (mOutgoingMessageListener) {
-                    try {
-                        mOutgoingMessageListener(
-                            requestMessage,
-                            requestMessage.requestid(),
-                            callContext);
-                    } catch (const std::exception& clientSideException) {
-                        if (mOngoingRequests.find(requestMessage.requestid()) !=
-                            mOngoingRequests.end()) {
-                            SLogger::debug(
-                                "Error when calling outgoing message listener from client",
-                                clientSideException.what());
-                            RpcClientError error(
-                                "Error when calling outgoing message listener from client",
-                                clientSideException.what());
-
-                            SLogger::debug(
-                                "Old exception:", error.originalErrorInfo);
-
-                            this->handleClientError(
-                                requestMessage.requestid(), error);
+                        try {
+                            co_return co_await folly::coro::detachOnCancel(
+                                std::move(callMakingTask)
+                                    .scheduleOn(
+                                        folly::getGlobalCPUExecutor().get()));
+                        } catch (const folly::OperationCancelled&) {
+                            SLogger::info("folly::OperationCancelled");
+                            throw RpcTimeout("RPC call timed out");
                         }
-                    }
+                    });
+                try {
+                    co_return co_await folly::coro::timeout(
+                        folly::coro::detachOnCancel(std::move(subtask)),
+                        std::chrono::milliseconds(timeout));
+                } catch (const folly::FutureTimeout& e) {
+                    SLogger::info("folly::FutureTimeout2 oli", e.what());
+                    throw RpcTimeout("RPC call timed out");
                 }
-
-                auto reply = co_await std::move(ongoingRequest->getFuture());
-                co_return reply;
             });
 
-        return std::move(task);
+        return task;
     }
 
     template <typename RequestType>
@@ -231,8 +243,6 @@ public:
                 SLogger::info("notifyRemote() 1");
                 auto requestMessage = this->createRequestRpcMessage(
                     methodName, methodParam, true);
-                this->template emit<OutgoingMessage>(
-                    requestMessage, requestMessage.requestid(), callContext);
 
                 try {
                     mOutgoingMessageListener(
@@ -261,6 +271,41 @@ private:
         std::optional<std::string> errorCode;
         std::optional<std::string> errorMessage;
     };
+
+    template <typename ReturnType, typename RequestType>
+    std::shared_ptr<OngoingRequest<ReturnType>> makeRpcCall(
+        const std::string& methodName,
+        const RequestType& methodParam,
+        const ProtoCallContext& callContext) {
+        auto requestMessage =
+            this->createRequestRpcMessage(methodName, methodParam);
+
+        auto ongoingRequest = std::make_shared<OngoingRequest<ReturnType>>();
+        this->mOngoingRequests.emplace(
+            requestMessage.requestid(), ongoingRequest);
+
+        if (mOutgoingMessageListener) {
+            try {
+                mOutgoingMessageListener(
+                    requestMessage, requestMessage.requestid(), callContext);
+            } catch (const std::exception& clientSideException) {
+                if (mOngoingRequests.find(requestMessage.requestid()) !=
+                    mOngoingRequests.end()) {
+                    SLogger::debug(
+                        "Error when calling outgoing message listener from client",
+                        clientSideException.what());
+                    RpcClientError error(
+                        "Error when calling outgoing message listener from client",
+                        clientSideException.what());
+
+                    SLogger::debug("Old exception:", error.originalErrorInfo);
+
+                    this->handleClientError(requestMessage.requestid(), error);
+                }
+            }
+        }
+        return ongoingRequest;
+    }
 
     static RpcMessage createResponseRpcMessage(
         const RpcResponseParams& params) {
@@ -381,10 +426,6 @@ private:
             errorParams.errorMessage = err.what();
             response = RpcCommunicator::createResponseRpcMessage(errorParams);
         }
-
-        SLogger::info("handleRequest() emitting outgoing message");
-        this->template emit<OutgoingMessage>(
-            response, response.requestid(), callContext);
 
         if (mOutgoingMessageListener) {
             try {
