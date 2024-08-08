@@ -87,7 +87,7 @@ add_executable(streamr-proto-rpc-test-integration
     test/proto/HelloRpc.client.pb.h
     test/proto/TestProtos.pb.cc 
     test/proto/WakeUpRpc.pb.cc
-    test/integration/toProtoRpcClient.cpp
+    test/integration/ProtoRpcTest.cpp
 )
 
 target_include_directories(streamr-proto-rpc-test-integration 

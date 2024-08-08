@@ -23,6 +23,44 @@
 
 namespace streamr::protorpc {
 
+template <typename T>
+void setOutgoingListenerWithException(RpcCommunicator& sender) {
+    sender.setOutgoingMessageListener(
+        [](const RpcMessage& message,
+           const std::string& /* requestId */,
+           const ProtoCallContext& /* context */) -> void {
+            SLogger::info("onOutgoingMessageListener() throws");
+            throw T("TestException");
+        });
+}
+
+void setOutgoingListener(RpcCommunicator& sender, RpcCommunicator& receiver) {
+    sender.setOutgoingMessageListener(
+        [&receiver](
+            const RpcMessage& message,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            SLogger::info("onOutgoingMessageListener()");
+            receiver.handleIncomingMessage(message, ProtoCallContext());
+        });
+}
+
+void setOutgoingListeners(
+    RpcCommunicator& communicator1, RpcCommunicator& communicator2) {
+    setOutgoingListener(communicator2, communicator1);
+    setOutgoingListener(communicator1, communicator2);
+}
+
+void verifyClientError(
+    const RpcClientError& ex,
+    const ErrorCode expectedErrorCode,
+    const std::string expectedOriginalErrorInfo) {
+    SLogger::info("Caught RpcClientError", ex.what());
+    EXPECT_EQ(ex.code, expectedErrorCode);
+    EXPECT_TRUE(ex.originalErrorInfo.has_value());
+    EXPECT_EQ(ex.originalErrorInfo.value(), expectedOriginalErrorInfo);
+}
+
 struct WakeUpCalled : public Event<std::string_view> {};
 using WakeUpEvents = std::tuple<WakeUpCalled>;
 
@@ -38,6 +76,8 @@ public:
 
 class ProtoRpcClientTest : public ::testing::Test {
 protected:
+    RpcCommunicator communicator1;
+    RpcCommunicator communicator2;
     void SetUp() override {}
 };
 
@@ -65,54 +105,23 @@ void registerTestRcpMethodWithOptionalFields(RpcCommunicator& communicator) {
 }
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
-    RpcCommunicator communicator1;
     registerTestRcpMethod(communicator1);
-    RpcCommunicator communicator2;
-    communicator2.setOutgoingMessageListener(
-        [&communicator1](
-            const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener()");
-            communicator1.handleIncomingMessage(message, ProtoCallContext());
-        });
-    communicator1.setOutgoingMessageListener(
-        [&communicator2](
-            const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener()");
-            communicator2.handleIncomingMessage(message, ProtoCallContext());
-        });
-
-    SLogger::info("TestCanMakeRpcCall setOutgoingMessageListener called");
-
+    setOutgoingListeners(communicator1, communicator2);
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
     auto result =
         folly::coro::blockingWait(client.sayHello(request, ProtoCallContext()));
-    SLogger::info("TestCanMakeRpcCall callRemote called");
     EXPECT_EQ("Hello, Test", result.greeting());
 }
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
-    RpcCommunicator communicator1;
     WakeUpRpcServiceImpl wakeUpService;
     using namespace std::placeholders;
     communicator1.registerRpcNotification<WakeUpRequest>(
         "wakeUp",
         std::bind(&WakeUpRpcServiceImpl::wakeUp, &wakeUpService, _1, _2));
-
-    RpcCommunicator communicator2;
-    communicator2.setOutgoingMessageListener(
-        [&communicator1](
-            const RpcMessage& message,
-            const std::string& requestId,
-            const ProtoCallContext& context) -> void {
-            SLogger::info("communicator2: onOutgoingMessageListener()");
-            communicator1.handleIncomingMessage(message, ProtoCallContext());
-        });
+    setOutgoingListener(communicator2, communicator1);
     std::string reasonResult;
     wakeUpService.on<WakeUpCalled>(
         [&reasonResult](std::string_view reason) -> void {
@@ -127,76 +136,34 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
 }
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
-    RpcCommunicator communicator1;
     registerTestRcpMethodWithOptionalFields(communicator1);
-    RpcCommunicator communicator2;
-    communicator2.setOutgoingMessageListener(
-        [&communicator1](
-            const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener()");
-            communicator1.handleIncomingMessage(message, ProtoCallContext());
-        });
-    communicator1.setOutgoingMessageListener(
-        [&communicator2](
-            const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageListener()");
-            communicator2.handleIncomingMessage(message, ProtoCallContext());
-        });
-
-    SLogger::info(
-        "TestCanMakeRpcCallWithOptionalFields setOutgoingMessageListeners called");
+    setOutgoingListeners(communicator1, communicator2);
     OptionalServiceClient client(communicator2);
     OptionalRequest request;
     request.set_someoptionalfield("something");
     auto result = folly::coro::blockingWait(
         client.getOptional(request, ProtoCallContext()));
-    SLogger::info("TestCanMakeRpcCallWithOptionalFields callRemote called");
     EXPECT_EQ(false, result.has_someoptionalfield());
 }
 
-TEST_F(ProtoRpcClientTest, TestHandlesClientSideExceptionOnRPCCallsWithRuntimeError) {
-    RpcCommunicator communicator1;
+TEST_F(
+    ProtoRpcClientTest,
+    TestHandlesClientSideExceptionOnRPCCallsWithRuntimeError) {
     registerTestRcpMethod(communicator1);
-    SLogger::info("TestHandlesClientSideExceptionsOnRPCCalls registerRpcMethod called");
-    RpcCommunicator communicator2;
-    communicator2.setOutgoingMessageListener(
-        [&communicator1](
-            const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("setOutgoingMessageListener() Before Exception:");
-            throw std::runtime_error("TestClientException");
-        });
-    SLogger::info(
-        "TestHandlesClientSideExceptionsOnRPCCalls setOutgoingMessageListener called");
+    setOutgoingListenerWithException<std::runtime_error>(communicator2);
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
-
     try {
-        folly::coro::blockingWait(
-           client.sayHello(request, ProtoCallContext()));
+        folly::coro::blockingWait(client.sayHello(request, ProtoCallContext()));
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcClientError& ex) {
-        SLogger::info(
-            "TestCanCallRemoteWhichThrows caught RpcClientError", ex.what());
-        EXPECT_EQ(ex.code, ErrorCode::RPC_CLIENT_ERROR);
-        EXPECT_TRUE(ex.originalErrorInfo.has_value());
-        EXPECT_EQ(ex.originalErrorInfo.value(), "TestClientException");
+        verifyClientError(ex, ErrorCode::RPC_CLIENT_ERROR, "TestException");
     } catch (...) {
         EXPECT_TRUE(false);
     }
-
-   // EXPECT_THROW(
-     //   folly::coro::blockingWait(client.sayHello(request, ProtoCallContext())),
-       // std::exception);
 }
-
 
 } // namespace streamr::protorpc
 

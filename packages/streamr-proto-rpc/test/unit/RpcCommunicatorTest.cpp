@@ -77,7 +77,6 @@ void setOutgoingListeners(
     setOutgoingListener(communicator1, communicator2);
 }
 
-
 template <typename T>
 void setOutgoingListenerWithException(RpcCommunicator& sender) {
     sender.setOutgoingMessageListener(
