@@ -23,10 +23,6 @@
 #include <folly/portability/GTest.h>
 #include <folly/test/TestUtils.h>
 
-using folly::initLogging;
-using folly::LoggerDB;
-using folly::parseLogConfig;
-
 namespace {
 // A counter to help confirm that our getBaseLoggingConfigCalled() was invoked
 // rather than the default implementation that folly exports as a weak symbol.
