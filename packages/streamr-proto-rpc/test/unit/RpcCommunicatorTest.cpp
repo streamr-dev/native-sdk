@@ -34,8 +34,7 @@ void registerTestRcpMethod(RpcCommunicator& communicator) {
         [](const HelloRequest& request,
            const ProtoCallContext& /* context */) -> HelloResponse {
             HelloResponse response;
-            SLogger::info(
-                "TestCanMakeRpcCall request.myname():", request.myname());
+            SLogger::info("testFunction() request.myname():", request.myname());
             response.set_greeting("Hello, " + request.myname());
             return response;
         });
