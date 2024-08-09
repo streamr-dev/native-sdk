@@ -57,7 +57,16 @@ target_link_libraries(protobuf-streamr-plugin
 
 enable_testing()
 find_package(GTest CONFIG REQUIRED)
-    
+
+add_library(streamr-proto-rpc-test-main
+    src/CustomGtestMain.cpp
+)
+
+target_link_libraries(streamr-proto-rpc-test-main
+    PUBLIC Folly::folly
+    PUBLIC GTest::gtest
+)
+
 add_executable(streamr-proto-rpc-test-unit
     test/proto/HelloRpc.pb.cc
     test/proto/TestProtos.pb.cc 
@@ -73,9 +82,8 @@ target_include_directories(streamr-proto-rpc-test-unit
 target_link_libraries(streamr-proto-rpc-test-unit 
     PUBLIC streamr-proto-rpc
     PUBLIC GTest::gtest 
-    PUBLIC GTest::gtest_main 
+    PUBLIC streamr-proto-rpc-test-main
     PUBLIC GTest::gmock 
-    PUBLIC GTest::gmock_main
     PUBLIC Folly::folly
     )
     
@@ -97,9 +105,8 @@ target_include_directories(streamr-proto-rpc-test-integration
 target_link_libraries(streamr-proto-rpc-test-integration 
     PUBLIC streamr-proto-rpc
     PUBLIC GTest::gtest 
-    PUBLIC GTest::gtest_main 
+    PUBLIC streamr-proto-rpc-test-main 
     PUBLIC GTest::gmock 
-    PUBLIC GTest::gmock_main
     PUBLIC Folly::folly
     )
     
