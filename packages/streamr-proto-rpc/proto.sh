@@ -6,3 +6,6 @@ mkdir -p ./test/proto
 ${PROTOC} -I=test/protos --cpp_out=./test/proto test/protos/*.proto --experimental_allow_proto3_optional
 ${PROTOC} --plugin=protoc-gen-streamr=./build/protobuf-streamr-plugin --streamr_out=./test/proto --proto_path=test/protos test/protos/*.proto --experimental_allow_proto3_optional
 
+mkdir -p ./examples/hello/proto
+${PROTOC} -I=examples/hello --cpp_out=./examples/hello/proto examples/hello/*.proto --experimental_allow_proto3_optional
+${PROTOC} --plugin=protoc-gen-streamr=./build/protobuf-streamr-plugin --streamr_out=./examples/hello/proto --proto_path=examples/hello examples/hello/*.proto --experimental_allow_proto3_optional

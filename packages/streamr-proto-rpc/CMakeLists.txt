@@ -106,4 +106,16 @@ target_link_libraries(streamr-proto-rpc-test-integration
 include(GoogleTest)
 gtest_discover_tests(streamr-proto-rpc-test-integration)
 
+add_executable(streamr-proto-rpc-example-hello
+    examples/hello/hello.cpp
+    examples/hello/proto/HelloRpc.pb.cc
+)
 
+target_link_libraries(streamr-proto-rpc-example-hello 
+    PUBLIC streamr-proto-rpc
+    PUBLIC Folly::folly
+)
+
+target_include_directories(streamr-proto-rpc-example-hello 
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/examples/hello/proto>
+)
