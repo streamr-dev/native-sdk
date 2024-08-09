@@ -24,7 +24,11 @@ RpcMessage createHelloRcpMessage(
         header["method"] = method.value();
     }
     header["request"] = "request";
-    requestWrapper.mutable_body()->PackFrom(request);
+
+    Any* body = new Any();
+    body->PackFrom(request);
+    requestWrapper.set_allocated_body(body); // protobuf will take ownership
+
     requestWrapper.set_requestid("request-id");
     return requestWrapper;
 }
@@ -33,8 +37,8 @@ TEST_F(ServerRegistryTest, TestCanHandleRequest) {
     RpcMessage requestWrapper = createHelloRcpMessage();
     registry.registerRpcMethod<HelloRequest, HelloResponse>(
         "sayHello",
-        +[](const HelloRequest& request,
-            const ProtoCallContext& /* callContext */) -> HelloResponse {
+        [](const HelloRequest& request,
+           const ProtoCallContext& /* callContext */) -> HelloResponse {
             HelloResponse response;
             response.set_greeting("hello " + request.myname());
 
