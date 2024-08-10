@@ -278,7 +278,8 @@ public:
             timeout = callContext.timeout.value();
         }
 
-        SLogger::trace("notifyRemote() creating request message, methodName:", methodName);
+        SLogger::trace(
+            "notifyRemote() creating request message, methodName:", methodName);
         auto requestMessage =
             this->createRequestRpcMessage(methodName, methodParam, true);
 

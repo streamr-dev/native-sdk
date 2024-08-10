@@ -128,10 +128,11 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
             _2));
     setOutgoingCallback(communicator2, communicator1);
     std::promise<std::string> promise;
-    wakeUpService.on<WakeUpCalled>([&promise](const std::string& reason) -> void {
-        SLogger::info("wakeUpService: called with", reason);
-        promise.set_value(reason);
-    });
+    wakeUpService.on<WakeUpCalled>(
+        [&promise](const std::string& reason) -> void {
+            SLogger::info("wakeUpService: called with", reason);
+            promise.set_value(reason);
+        });
     WakeUpRpcServiceClient client(communicator2);
     WakeUpRequest request;
     request.set_reason("School");
