@@ -250,7 +250,8 @@ public:
         return task;
     }
 
-    Task<void> doNotifyTask(RpcMessage requestMessage, ProtoCallContext callContext) {
+    Task<void> doNotifyTask(
+        RpcMessage requestMessage, ProtoCallContext callContext) {
         try {
             mOutgoingMessageCallback(
                 requestMessage, requestMessage.requestid(), callContext);
@@ -294,10 +295,12 @@ public:
                                 callContext);
                         } catch (const std::exception& clientSideException) {
                             SLogger::debug(
-                                "Error when calling outgoing message callback from client for sending notification",
+                                "Error when calling outgoing message callback
+                from client for sending notification",
                                 clientSideException.what());
                             throw RpcClientError(
-                                "Error when calling outgoing message callback from client for sending notification",
+                                "Error when calling outgoing message callback
+                from client for sending notification",
                                 clientSideException.what());
                         }
                         co_return;
