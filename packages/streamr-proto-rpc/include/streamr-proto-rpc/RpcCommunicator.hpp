@@ -38,6 +38,25 @@ using folly::coro::Task;
 
 constexpr size_t defaultRpcRequestTimeout = 5000;
 
+/*
+Task<int> co_answerToLife() {
+  int answer = co_await co_generateFortyTwo();
+  co_return answer;
+}
+*/
+/* try {
+     mOutgoingMessageCallback(
+         requestMessage, requestMessage.requestid(), callContext);
+ } catch (const std::exception& clientSideException) {
+     SLogger::debug(
+         "Error when calling outgoing message callback from client for sending
+ notification", clientSideException.what()); throw RpcClientError( "Error when
+ calling outgoing message callback from client for sending notification",
+         clientSideException.what());
+ }*/
+//      co_return;
+//  }
+
 // NOLINTBEGIN
 enum class StatusCode { OK, STOPPED, DEADLINE_EXCEEDED, SERVER_ERROR };
 // NOLINTEND
@@ -231,6 +250,21 @@ public:
         return task;
     }
 
+    Task<void> doNotifyTask(RpcMessage requestMessage, ProtoCallContext callContext) {
+        try {
+            mOutgoingMessageCallback(
+                requestMessage, requestMessage.requestid(), callContext);
+        } catch (const std::exception& clientSideException) {
+            SLogger::debug(
+                "Error when calling outgoing message callback from client for sending notification",
+                clientSideException.what());
+            throw RpcClientError(
+                "Error when calling outgoing message callback from client for sending notification",
+                clientSideException.what());
+        }
+        co_return;
+    }
+
     template <typename RequestType>
     Task<void> notifyRemote(
         const std::string& methodName,
@@ -249,6 +283,7 @@ public:
         auto task = folly::coro::co_invoke(
             [requestMessage, callContext, timeout, this]()
                 -> folly::coro::Task<void> {
+                /*
                 auto callMakingTask = folly::coro::co_invoke(
                     [requestMessage, callContext, timeout, this]()
                         -> folly::coro::Task<void> {
@@ -267,11 +302,11 @@ public:
                         }
                         co_return;
                     });
-
+                */
                 try {
                     co_return co_await folly::coro::timeout(
                         folly::coro::detachOnCancel(
-                            std::move(callMakingTask)
+                            std::move(doNotifyTask(requestMessage, callContext))
                                 .scheduleOn(
                                     folly::getGlobalCPUExecutor().get())),
                         std::chrono::milliseconds(timeout));
