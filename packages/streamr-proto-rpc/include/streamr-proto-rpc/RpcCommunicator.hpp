@@ -268,61 +268,34 @@ public:
 
     template <typename RequestType>
     Task<void> notifyRemote(
-        const std::string& methodName,
+        const std::string_view methodName,
         const RequestType& methodParam,
         const ProtoCallContext& callContext) {
-        SLogger::trace("notifyRemote()");
+        SLogger::trace("notifyRemote() methodName:", methodName);
 
         size_t timeout = mRpcRequestTimeout;
         if (callContext.timeout.has_value()) {
             timeout = callContext.timeout.value();
         }
 
+        SLogger::trace("notifyRemote() creating request message, methodName:", methodName);
         auto requestMessage =
             this->createRequestRpcMessage(methodName, methodParam, true);
 
-        auto task = folly::coro::co_invoke(
-            [requestMessage, callContext, timeout, this]()
-                -> folly::coro::Task<void> {
-                /*
-                auto callMakingTask = folly::coro::co_invoke(
-                    [requestMessage, callContext, timeout, this]()
-                        -> folly::coro::Task<void> {
-                        try {
-                            mOutgoingMessageCallback(
-                                requestMessage,
-                                requestMessage.requestid(),
-                                callContext);
-                        } catch (const std::exception& clientSideException) {
-                            SLogger::debug(
-                                "Error when calling outgoing message callback
-                from client for sending notification",
-                                clientSideException.what());
-                            throw RpcClientError(
-                                "Error when calling outgoing message callback
-                from client for sending notification",
-                                clientSideException.what());
-                        }
-                        co_return;
-                    });
-                */
-                try {
-                    co_return co_await folly::coro::timeout(
-                        folly::coro::detachOnCancel(
-                            std::move(doNotifyTask(requestMessage, callContext))
-                                .scheduleOn(
-                                    folly::getGlobalCPUExecutor().get())),
-                        std::chrono::milliseconds(timeout));
-                } catch (const folly::FutureTimeout& e) {
-                    SLogger::trace(
-                        "notifyRemote() caught folly::FutureTimeout", e.what());
-                    throw RpcTimeout("RPC notification timed out");
-                } catch (...) {
-                    SLogger::trace("notifyRemote() caught other exception");
-                    throw;
-                }
-            });
-        return std::move(task);
+        try {
+            co_return co_await folly::coro::timeout(
+                folly::coro::detachOnCancel(
+                    doNotifyTask(requestMessage, callContext)
+                        .scheduleOn(folly::getGlobalCPUExecutor().get())),
+                std::chrono::milliseconds(timeout));
+        } catch (const folly::FutureTimeout& e) {
+            SLogger::trace(
+                "notifyRemote() caught folly::FutureTimeout", e.what());
+            throw RpcTimeout("RPC notification timed out");
+        } catch (...) {
+            SLogger::trace("notifyRemote() caught other exception");
+            throw;
+        }
     }
 
 private:
@@ -534,13 +507,13 @@ private:
 
     template <typename RequestType>
     RpcMessage createRequestRpcMessage(
-        const std::string& methodName,
+        const std::string_view methodName,
         const RequestType& request,
         bool notification = false) {
         RpcMessage ret;
         const auto& header = ret.mutable_header();
         header->insert({"request", "request"});
-        header->insert({"method", methodName});
+        header->insert({"method", std::string(methodName)});
         SLogger::trace("createRequestRpcMessage() methodName:", methodName);
         if (notification) {
             header->insert({"notification", "notification"});
