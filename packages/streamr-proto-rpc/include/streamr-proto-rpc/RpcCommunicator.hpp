@@ -301,16 +301,33 @@ public:
             "notifyRemote() creating request message, methodName:", methodName);
         auto requestMessage =
             this->createRequestRpcMessage(methodName, methodParam, true);
-        auto&& promiseFuture = folly::coro::makePromiseContract<void>();
+        auto&& promiseContract = folly::coro::makePromiseContract<void>();
+
         try {
+            mExecutor->add(
+                [requestMessage,
+                 callContext,
+                 promise = std::move(promiseContract.first),
+                this]() mutable -> void {
+                    try {
+                        this->mOutgoingMessageCallback(
+                            requestMessage,
+                            requestMessage.requestid(),
+                            callContext);
+                        promise.setValue();
+                    } catch (const std::exception& clientSideException) {
+                        SLogger::debug(
+                            "Error when calling outgoing message callback from client for sending notification",
+                            clientSideException.what());
+                        promise.setException(RpcClientError(
+                            "Error when calling outgoing message callback from client for sending notification",
+                            clientSideException.what()));
+                    }
+                });
             co_return co_await folly::coro::timeout(
-                folly::coro::detachOnCancel(doNotifyTask(
-                                                requestMessage,
-                                                callContext,
-                                                std::move(promiseFuture.first)))
+                folly::coro::detachOnCancel(std::move(promiseContract.second))
                     .scheduleOn(co_await folly::coro::co_current_executor),
-                std::chrono::milliseconds(timeout))
-                .scheduleOn(co_await folly::coro::co_current_executor);
+                std::chrono::milliseconds(timeout));
         } catch (const folly::FutureTimeout& e) {
             SLogger::trace(
                 "notifyRemote() caught folly::FutureTimeout", e.what());
