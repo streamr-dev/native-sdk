@@ -12,6 +12,7 @@
 #include <folly/coro/Collect.h>
 #include <folly/coro/DetachOnCancel.h>
 #include <folly/coro/Timeout.h>
+#include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/DetachOnCancel.h>
 #include <folly/experimental/coro/Promise.h>
@@ -141,6 +142,7 @@ private:
         }
     };
 
+    folly::CPUThreadPoolExecutor mExecutor;
     bool mStopped = false;
     OutgoingMessageCallbackType mOutgoingMessageCallback;
     ServerRegistry mServerRegistry;
@@ -151,7 +153,8 @@ private:
 
 public:
     explicit RpcCommunicator(
-        std::optional<RpcCommunicatorConfig> config = std::nullopt) {
+        std::optional<RpcCommunicatorConfig> config = std::nullopt)
+        : mExecutor(10) { // NOLINT
         if (config.has_value()) {
             mRpcRequestTimeout = config.value().rpcRequestTimeout;
         } else {
@@ -230,8 +233,7 @@ public:
                     co_return co_await folly::coro::timeout(
                         folly::coro::detachOnCancel(
                             std::move(callMakingTask)
-                                .scheduleOn(
-                                    folly::getGlobalCPUExecutor().get())),
+                                .scheduleOn(&this->mExecutor)),
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace(
@@ -287,7 +289,7 @@ public:
             co_return co_await folly::coro::timeout(
                 folly::coro::detachOnCancel(
                     doNotifyTask(requestMessage, callContext)
-                        .scheduleOn(folly::getGlobalCPUExecutor().get())),
+                        .scheduleOn(&mExecutor)),
                 std::chrono::milliseconds(timeout));
         } catch (const folly::FutureTimeout& e) {
             SLogger::trace(
