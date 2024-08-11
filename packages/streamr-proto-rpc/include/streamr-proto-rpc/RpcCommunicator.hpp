@@ -70,7 +70,14 @@ public:
     using OutgoingMessageCallbackType = std::function<void(
         RpcMessage, std::string /*requestId*/, ProtoCallContext)>;
 
+    static int createObjectId() {
+        static int counter;
+        counter++;
+        return counter;
+    }
+
 private:
+    int objectId;
     class OngoingRequestBase {
     public:
         virtual ~OngoingRequestBase() = default;
@@ -142,7 +149,7 @@ private:
         }
     };
 
-    folly::CPUThreadPoolExecutor mExecutor;
+    folly::CPUThreadPoolExecutor* mExecutor;
     bool mStopped = false;
     OutgoingMessageCallbackType mOutgoingMessageCallback;
     ServerRegistry mServerRegistry;
@@ -153,13 +160,20 @@ private:
 
 public:
     explicit RpcCommunicator(
-        std::optional<RpcCommunicatorConfig> config = std::nullopt)
-        : mExecutor(10) { // NOLINT
+        std::optional<RpcCommunicatorConfig> config = std::nullopt) { // NOLINT
+        objectId = RpcCommunicator::createObjectId();
         if (config.has_value()) {
             mRpcRequestTimeout = config.value().rpcRequestTimeout;
         } else {
             mRpcRequestTimeout = defaultRpcRequestTimeout;
         }
+        mExecutor = new folly::CPUThreadPoolExecutor(29); // NOLINT
+    }
+    ~RpcCommunicator() {
+        SLogger::info("RpcCommunicator destructor of object:", objectId);
+        SLogger::info("deleting RpcCommunicators executor");
+        delete mExecutor;
+        SLogger::info("executor of RpcCommunicator deleted");
     }
     // Public API for both client and server
 
@@ -233,7 +247,7 @@ public:
                     co_return co_await folly::coro::timeout(
                         folly::coro::detachOnCancel(
                             std::move(callMakingTask)
-                                .scheduleOn(&this->mExecutor)),
+                                .scheduleOn(this->mExecutor)),
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace(
@@ -289,7 +303,7 @@ public:
             co_return co_await folly::coro::timeout(
                 folly::coro::detachOnCancel(
                     doNotifyTask(requestMessage, callContext)
-                        .scheduleOn(&mExecutor)),
+                        .scheduleOn(mExecutor)),
                 std::chrono::milliseconds(timeout));
         } catch (const folly::FutureTimeout& e) {
             SLogger::trace(
