@@ -308,7 +308,7 @@ public:
                 [requestMessage,
                  callContext,
                  promise = std::move(promiseContract.first),
-                this]() mutable -> void {
+                 this]() mutable -> void {
                     try {
                         this->mOutgoingMessageCallback(
                             requestMessage,
