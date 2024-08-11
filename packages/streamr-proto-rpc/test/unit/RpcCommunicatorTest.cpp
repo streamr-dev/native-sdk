@@ -29,9 +29,9 @@ public:
     } // NOLINT
 
     ~RpcCommunicatorTest() override {
-        SLogger::warn("deleting executor of RpcCommunicatorTest");
+        SLogger::warn("Deleting executor of RpcCommunicatorTest");
         delete this->executor;
-        SLogger::warn("RpcCommunicator executor deleted");
+        SLogger::warn("RpcCommunicatorTest executor deleted");
     }
 
 protected:
@@ -340,7 +340,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
-                .scheduleOn(folly::getGlobalCPUExecutor().get()));
+                .scheduleOn(executor));
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {
@@ -385,7 +385,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
-                .scheduleOn(folly::getGlobalCPUExecutor().get()));
+                .scheduleOn(executor));
         EXPECT_EQ(true, false);
     } catch (const RpcTimeout& ex) {
         SLogger::info(
@@ -414,27 +414,33 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
             const RpcMessage& /* message */,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
-            SLogger::info("setOutgoingMessageCallback() sleeping 5s");
+            std::cout << "setOutgoingMessageCallback() sleeping 5s, thread id: "
+                      << std::this_thread::get_id() << "\n";
             std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
         });
     try {
+        // auto str = std::this_thread::get_id();
+
+        std::cout << "Calling notifyRemote() from thread id: "
+                  << std::this_thread::get_id() << "\n";
         folly::coro::blockingWait(
             communicator2
                 .notifyRemote<HelloRequest>(
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
-                .scheduleOn(folly::getGlobalCPUExecutor().get()));
+                .scheduleOn(executor));
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {
-        SLogger::info(
-            "TestRpcTimeoutOnClientSideForNotification caught RpcTimeout",
-            ex.what());
+        std::cout
+            << "TestRpcTimeoutOnClientSideForNotification caught RpcTimeout in thread id: "
+            << std::this_thread::get_id() << "\n";
     } catch (const std::exception& ex) {
-        SLogger::info(
-            "TestRpcTimeoutOnClientSideForNotification caught unknown exception",
-            ex.what());
+        std::cout
+            << "TestRpcTimeoutOnClientSideForNotification caught unknown exception in thread id: "
+            << std::this_thread::get_id() << "\n";
+        EXPECT_TRUE(false);
         EXPECT_TRUE(false);
     }
 }

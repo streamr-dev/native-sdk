@@ -267,7 +267,9 @@ public:
     }
 
     Task<void> doNotifyTask(
-        RpcMessage requestMessage, ProtoCallContext callContext) {
+        RpcMessage requestMessage,
+        ProtoCallContext callContext,
+        folly::coro::Promise<void>&& promise) {
         try {
             mOutgoingMessageCallback(
                 requestMessage, requestMessage.requestid(), callContext);
@@ -279,6 +281,7 @@ public:
                 "Error when calling outgoing message callback from client for sending notification",
                 clientSideException.what());
         }
+        promise.setValue();
         co_return;
     }
 
@@ -298,13 +301,16 @@ public:
             "notifyRemote() creating request message, methodName:", methodName);
         auto requestMessage =
             this->createRequestRpcMessage(methodName, methodParam, true);
-
+        auto&& promiseFuture = folly::coro::makePromiseContract<void>();
         try {
             co_return co_await folly::coro::timeout(
-                folly::coro::detachOnCancel(
-                    doNotifyTask(requestMessage, callContext)
-                        .scheduleOn(mExecutor)),
-                std::chrono::milliseconds(timeout));
+                folly::coro::detachOnCancel(doNotifyTask(
+                                                requestMessage,
+                                                callContext,
+                                                std::move(promiseFuture.first)))
+                    .scheduleOn(co_await folly::coro::co_current_executor),
+                std::chrono::milliseconds(timeout))
+                .scheduleOn(co_await folly::coro::co_current_executor);
         } catch (const folly::FutureTimeout& e) {
             SLogger::trace(
                 "notifyRemote() caught folly::FutureTimeout", e.what());
