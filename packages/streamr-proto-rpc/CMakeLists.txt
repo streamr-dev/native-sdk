@@ -140,3 +140,11 @@ target_link_libraries(streamr-proto-rpc-example-routed-hello
 target_include_directories(streamr-proto-rpc-example-routed-hello
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/examples/routed-hello/proto>
 )
+
+add_executable(streamr-proto-rpc-example-folly
+    src/follyexample.cpp
+)
+
+target_link_libraries(streamr-proto-rpc-example-folly
+    PUBLIC Folly::folly
+)
