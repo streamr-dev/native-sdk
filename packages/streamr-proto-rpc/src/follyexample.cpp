@@ -21,7 +21,7 @@
 #include <folly/experimental/coro/Promise.h>
 #include <folly/experimental/coro/Task.h>
 #include <folly/experimental/coro/Timeout.h>
-#include <folly/experimental/coro/blockingWait.h>
+#include <folly/experimental/coro/BlockingWait.h>
 
 using namespace std::literals::chrono_literals;
 
