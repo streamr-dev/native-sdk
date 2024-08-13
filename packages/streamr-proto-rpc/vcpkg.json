@@ -2,6 +2,7 @@
     "name": "streamr-proto-rpc",
     "version": "1.0.0",
     "dependencies": [
+        "gtest",
         "protobuf",
         "folly",
         "boost-uuid",
