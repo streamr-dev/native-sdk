@@ -39,6 +39,29 @@ protected:
     RpcCommunicator communicator2; // NOLINT
     folly::CPUThreadPoolExecutor* executor; // NOLINT
     void SetUp() override {}
+
+    void setCallbacks(bool isMethod = true) {
+        communicator2.setOutgoingMessageCallback(
+            [this](
+                const RpcMessage& message,
+                const std::string& /* requestId */,
+                const ProtoCallContext& /* context */) -> void {
+                SLogger::info("onOutgoingMessageCallback()");
+                communicator1.handleIncomingMessage(
+                    message, ProtoCallContext());
+            });
+        if (isMethod) {
+            communicator1.setOutgoingMessageCallback(
+                [this](
+                    const RpcMessage& message,
+                    const std::string& /* requestId */,
+                    const ProtoCallContext& /* context */) -> void {
+                    SLogger::info("onOutgoingMessageCallback()");
+                    communicator2.handleIncomingMessage(
+                        message, ProtoCallContext());
+                });
+        }
+    }
 };
 
 void registerTestRcpMethod(RpcCommunicator& communicator) {
@@ -72,13 +95,13 @@ void registerThrowingTestRcpMethodUnknown(RpcCommunicator& communicator) {
             throw unknownThrow; // NOLINT
         });
 }
-
+/*
 void setOutgoingCallback(RpcCommunicator& sender, RpcCommunicator& receiver) {
     sender.setOutgoingMessageCallback(
         [&receiver](
             const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
+            const std::string& requestId ,
+            const ProtoCallContext&  context ) -> void {
             SLogger::info("onOutgoingMessageCallback()");
             receiver.handleIncomingMessage(message, ProtoCallContext());
         });
@@ -89,7 +112,7 @@ void setOutgoingCallbacks(
     setOutgoingCallback(communicator2, communicator1);
     setOutgoingCallback(communicator1, communicator2);
 }
-
+*/
 template <typename T>
 void setOutgoingCallbackWithException(RpcCommunicator& sender) {
     sender.setOutgoingMessageCallback(
@@ -165,7 +188,7 @@ TEST_F(RpcCommunicatorTest, TestCanRegisterRpcMethod) {
 
 TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
     registerTestRcpMethod(communicator1);
-    setOutgoingCallbacks(communicator1, communicator2);
+    setCallbacks();
     auto result = sendHelloRequest(communicator2, executor);
     EXPECT_EQ("Hello, Test", result.greeting());
 }
@@ -212,7 +235,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsUnknownError) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRuntimeError) {
     registerThrowingRcpMethod<std::runtime_error>(communicator1);
-    setOutgoingCallbacks(communicator1, communicator2);
+    setCallbacks();
     try {
         sendHelloRequest(communicator2, executor);
         EXPECT_TRUE(false);
@@ -228,7 +251,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRuntimeError) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknownRpcMethod) {
     registerThrowingRcpMethod<UnknownRpcMethod>(communicator1);
-    setOutgoingCallbacks(communicator1, communicator2);
+    setCallbacks();
     try {
         sendHelloRequest(communicator2, executor);
         EXPECT_TRUE(false);
@@ -241,7 +264,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknownRpcMethod) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRcpTimeout) {
     registerThrowingRcpMethod<RpcTimeout>(communicator1);
-    setOutgoingCallbacks(communicator1, communicator2);
+    setCallbacks();
     try {
         sendHelloRequest(communicator2, executor);
         EXPECT_TRUE(false);
@@ -254,7 +277,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRcpTimeout) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsFailedToParse) {
     registerThrowingRcpMethod<FailedToParse>(communicator1);
-    setOutgoingCallbacks(communicator1, communicator2);
+    setCallbacks();
     try {
         sendHelloRequest(communicator2, executor);
         EXPECT_TRUE(false);
@@ -270,7 +293,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsFailedToParse) {
 
 TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknown) {
     registerThrowingTestRcpMethodUnknown(communicator1);
-    setOutgoingCallbacks(communicator1, communicator2);
+    setCallbacks();
     try {
         sendHelloRequest(communicator2, executor);
         EXPECT_TRUE(false);
@@ -286,7 +309,7 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
         [&requestMsg](
             const HelloRequest& request, const ProtoCallContext& /* context */)
             -> void { requestMsg = request.DebugString(); });
-    setOutgoingCallback(communicator2, communicator1);
+    setCallbacks(false);
     sendHelloNotification(communicator2, executor);
     EXPECT_EQ(requestMsg, "myName: \"Test\"\n");
 }

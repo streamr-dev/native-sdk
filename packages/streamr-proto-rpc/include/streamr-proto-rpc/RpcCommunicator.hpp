@@ -455,6 +455,9 @@ private:
                 SLogger::trace(
                     "onIncomingMessage() calling handleNotification()");
                 this->handleNotification(rpcMessage, callContext);
+                SLogger::trace(
+                    "onIncomingMessage() handleNotification() called");
+
             } else {
                 SLogger::trace("onIncomingMessage() calling handleRequest()");
                 this->handleRequest(rpcMessage, callContext);

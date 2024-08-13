@@ -61,7 +61,6 @@ private:
                 "RPC Method " + rpcMessage.header().at("method") +
                 " is not provided");
         }
-
         return map.at(rpcMessage.header().at("method"));
     }
 
@@ -85,6 +84,9 @@ public:
 
     Empty handleNotification(
         const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
+        SLogger::trace(
+            ("Server processing RPC notification " + rpcMessage.requestid())
+                .c_str());
         auto implementation = getImplementation(rpcMessage, mNotifications);
         return implementation.fn(rpcMessage.body(), callContext);
     }
@@ -93,7 +95,7 @@ public:
     void registerRpcMethod(
         const std::string& name, const F& fn, MethodOptions options = {}) {
         RegisteredMethod method = {
-            .fn = [&fn](const Any& data, const ProtoCallContext& callContext)
+            .fn = [fn](const Any& data, const ProtoCallContext& callContext)
                 -> Any {
                 RequestType request;
                 ServerRegistry::wrappedParseAny(request, data);
@@ -110,7 +112,7 @@ public:
     void registerRpcNotification(
         const std::string& name, const F& fn, MethodOptions options = {}) {
         RegisteredNotification notification = {
-            .fn = [&fn](const Any& data, const ProtoCallContext& callContext)
+            .fn = [fn](const Any& data, const ProtoCallContext& callContext)
                 -> Empty {
                 RequestType request;
                 ServerRegistry::wrappedParseAny(request, data);

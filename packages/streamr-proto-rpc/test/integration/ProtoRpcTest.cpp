@@ -33,23 +33,6 @@ void setOutgoingCallbackWithException(RpcCommunicator& sender) {
         });
 }
 
-void setOutgoingCallback(RpcCommunicator& sender, RpcCommunicator& receiver) {
-    sender.setOutgoingMessageCallback(
-        [&receiver](
-            const RpcMessage& message,
-            const std::string& /* requestId */,
-            const ProtoCallContext& /* context */) -> void {
-            SLogger::info("onOutgoingMessageCallback()");
-            receiver.handleIncomingMessage(message, ProtoCallContext());
-        });
-}
-
-void setOutgoingCallbacks(
-    RpcCommunicator& communicator1, RpcCommunicator& communicator2) {
-    setOutgoingCallback(communicator2, communicator1);
-    setOutgoingCallback(communicator1, communicator2);
-}
-
 void verifyClientError(
     const RpcClientError& ex,
     const ErrorCode expectedErrorCode,
@@ -79,7 +62,31 @@ class ProtoRpcClientTest : public ::testing::Test {
 protected:
     RpcCommunicator communicator1; // NOLINT
     RpcCommunicator communicator2; // NOLINT
+
     void SetUp() override {}
+
+    void setCallbacks(bool isMethod = true) {
+        communicator2.setOutgoingMessageCallback(
+            [this](
+                const RpcMessage& message,
+                const std::string& /* requestId */,
+                const ProtoCallContext& /* context */) -> void {
+                SLogger::info("onOutgoingMessageCallback()");
+                communicator1.handleIncomingMessage(
+                    message, ProtoCallContext());
+            });
+        if (isMethod) {
+            communicator1.setOutgoingMessageCallback(
+                [this](
+                    const RpcMessage& message,
+                    const std::string& /* requestId */,
+                    const ProtoCallContext& /* context */) -> void {
+                    SLogger::info("onOutgoingMessageCallback()");
+                    communicator2.handleIncomingMessage(
+                        message, ProtoCallContext());
+                });
+        }
+    }
 };
 
 void registerTestRcpMethod(RpcCommunicator& communicator) {
@@ -107,7 +114,7 @@ void registerTestRcpMethodWithOptionalFields(RpcCommunicator& communicator) {
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
     registerTestRcpMethod(communicator1);
-    setOutgoingCallbacks(communicator1, communicator2);
+    setCallbacks();
     HelloRpcServiceClient client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
@@ -118,15 +125,13 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
     WakeUpRpcServiceImpl wakeUpService;
-    using namespace std::placeholders; // NOLINT
     communicator1.registerRpcNotification<WakeUpRequest>(
         "wakeUp",
-        std::bind( // NOLINT
-            &WakeUpRpcServiceImpl::wakeUp,
-            &wakeUpService,
-            _1,
-            _2));
-    setOutgoingCallback(communicator2, communicator1);
+        [&wakeUpService](
+            const WakeUpRequest& request, const ProtoCallContext& context) {
+            return wakeUpService.wakeUp(request, context);
+        });
+    setCallbacks(false);
     std::promise<std::string> promise;
     wakeUpService.on<WakeUpCalled>(
         [&promise](const std::string& reason) -> void {
@@ -142,7 +147,7 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
     registerTestRcpMethodWithOptionalFields(communicator1);
-    setOutgoingCallbacks(communicator1, communicator2);
+    setCallbacks();
     OptionalServiceClient client(communicator2);
     OptionalRequest request;
     request.set_someoptionalfield("something");
