@@ -260,9 +260,9 @@ private:
                     << "& request, const ProtoCallContext& callContext) {\n";
                 sourceSs << "        return communicator.";
                 if (methodOutputName == "void") {
-                    sourceSs << "notifyRemote<" << methodInputName << ">";
+                    sourceSs << "notify<" << methodInputName << ">";
                 } else {
-                    sourceSs << "callRemote<" << methodOutputName << ", "
+                    sourceSs << "request<" << methodOutputName << ", "
                              << methodInputName << ">";
                 }
                 sourceSs << "(\"" << methodName

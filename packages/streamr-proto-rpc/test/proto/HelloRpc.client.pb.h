@@ -17,7 +17,7 @@ RpcCommunicator& communicator;
 public:
     HelloRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<HelloResponse> sayHello(const HelloRequest& request, const ProtoCallContext& callContext) {
-        return communicator.callRemote<HelloResponse, HelloRequest>("sayHello", request, callContext);
+        return communicator.request<HelloResponse, HelloRequest>("sayHello", request, callContext);
     }
 }; // class HelloRpcServiceClient
 }; // namespace streamr::protorpc
