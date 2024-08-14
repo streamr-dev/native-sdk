@@ -1,3 +1,6 @@
+// This file is a copy of
+// https://github.com/streamr-dev/network/blob/b267dcfb1e98fa2b882fa21a41a279f3a8658f50/packages/proto-rpc/protos/ProtoRpc.proto
+
 syntax = "proto3";
 option optimize_for = CODE_SIZE;
 
