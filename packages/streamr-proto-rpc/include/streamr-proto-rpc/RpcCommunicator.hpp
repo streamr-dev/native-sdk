@@ -56,10 +56,26 @@ public:
 
     // Messaging API
 
+    /**
+     * @brief Handle a message incoming from the network
+     *
+     * @param message message received from the network
+     * @param callContext call context such as routing information
+     */
+
     void handleIncomingMessage(
         const RpcMessage& message, const ProtoCallContext& callContext) {
         this->onIncomingMessage(message, callContext);
     }
+
+    /**
+     * @brief Set a callback for sending outgoing messages to the network
+     *
+     * @param callback callback to be called when a message is ready to be sent.
+     * The callback may throw exeptions which will be forwarded through the
+     * RpcCommunicator
+     *
+     */
 
     template <typename F>
         requires std::is_assignable_v<OutgoingMessageCallbackType, F>
@@ -71,6 +87,17 @@ public:
     }
 
     // Client-side API
+
+    /**
+     * @brief [A method to be called by auto-generated clients] Call a remote
+     * method
+     *
+     * @param methodName name of the method to be called
+     * @param methodParam parameter to be passed to the method
+     * @param callContext call context such as routing information
+     * @return Task<ReturnType>
+     */
+
     template <typename ReturnType, typename RequestType>
     Task<ReturnType> callRemote(
         const std::string& methodName,
@@ -79,6 +106,16 @@ public:
         return mRpcCommunicatorClientApi.callRemote<ReturnType, RequestType>(
             methodName, methodParam, callContext);
     }
+
+    /**
+     * @brief [A method to be called by auto-generated clients] Notify a remote
+     * method
+     *
+     * @param methodName name of the method to be called
+     * @param methodParam parameter to be passed to the method
+     * @param callContext call context such as routing information
+     * @return Task<void>
+     */
 
     template <typename RequestType>
     Task<void> notifyRemote(
@@ -90,6 +127,15 @@ public:
     }
 
     // Server-side API
+
+    /**
+     * @brief Register a method to be called by remote clients
+     *
+     * @param name name of the method
+     * @param fn function to be registered
+     * @param options options for the method
+     */
+
     template <typename RequestType, typename ReturnType, typename F>
         requires std::is_assignable_v<
             std::function<ReturnType(RequestType, ProtoCallContext)>,
@@ -99,6 +145,14 @@ public:
         mRpcCommunicatorServerApi.registerRpcMethod<RequestType, ReturnType, F>(
             name, fn, options);
     }
+
+    /**
+     * @brief Register a notification to be called by remote clients
+     *
+     * @param name name of the notification
+     * @param fn function to be registered
+     * @param options options for the notification
+     */
 
     template <typename RequestType, typename F>
         requires std::is_assignable_v<
