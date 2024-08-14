@@ -67,6 +67,11 @@ if [[ -n "$GITHUB_ENV" ]]; then
     echo "VCPKG_OVERLAY_TRIPLETS=$VCPKG_OVERLAY_TRIPLETS" >> $GITHUB_ENV
 fi
 
+export VCPKG_OVERLAY_PORTS=$(pwd)/overlayports
+if [[ -n "$GITHUB_ENV" ]]; then
+    echo "VCPKG_OVERLAY_PORTS=$VCPKG_OVERLAY_PORTS" >> $GITHUB_ENV
+fi
+
 if [[ ":$PATH:" != *":$VCPKG_ROOT:"* ]]; then
     export PATH=$PATH:$VCPKG_ROOT
     if [[ -n "$GITHUB_PATH" ]]; then
@@ -82,6 +87,9 @@ TEMP_PROFILE_CONTENTS+="export PATH=\$VCPKG_ROOT:\$PATH\n"
 
 # Add VCPKG_OVERLAY_TRIPLETS environment variable
 TEMP_PROFILE_CONTENTS+="export VCPKG_OVERLAY_TRIPLETS=$(pwd)/overlaytriplets\n"
+
+# Add VCPKG_OVERLAY_PORTS environment variable
+TEMP_PROFILE_CONTENTS+="export VCPKG_OVERLAY_PORTS=$(pwd)/overlayports\n"
 
 echo $TEMP_PROFILE_CONTENTS
 
