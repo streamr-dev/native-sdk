@@ -51,17 +51,17 @@ private:
     template <typename T>
     T getImplementation(
         const RpcMessage& rpcMessage, const std::map<std::string, T>& map) {
-        if (!rpcMessage.header().contains("method")) {
+        const auto& header = rpcMessage.header();
+        if (!header.contains("method")) {
             throw UnknownRpcMethod(
                 "Header \"method\" missing from RPC message");
         }
-
-        if (map.find(rpcMessage.header().at("method")) == map.end()) {
+        const auto& method = header.at("method");
+        if (map.find(method) == map.end()) {
             throw UnknownRpcMethod(
-                "RPC Method " + rpcMessage.header().at("method") +
-                " is not provided");
+                "RPC Method " + method + " is not provided");
         }
-        return map.at(rpcMessage.header().at("method"));
+        return map.at(method);
     }
 
 public:

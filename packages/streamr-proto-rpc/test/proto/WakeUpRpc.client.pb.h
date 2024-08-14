@@ -17,7 +17,7 @@ RpcCommunicator& communicator;
 public:
     WakeUpRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<void> wakeUp(const WakeUpRequest& request, const ProtoCallContext& callContext) {
-        return communicator.notifyRemote<WakeUpRequest>("wakeUp", request, callContext);
+        return communicator.notify<WakeUpRequest>("wakeUp", request, callContext);
     }
 }; // class WakeUpRpcServiceClient
 }; // namespace streamr::protorpc

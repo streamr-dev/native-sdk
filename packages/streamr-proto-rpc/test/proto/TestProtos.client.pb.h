@@ -17,13 +17,13 @@ RpcCommunicator& communicator;
 public:
     DhtRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<ClosestPeersResponse> getClosestPeers(const ClosestPeersRequest& request, const ProtoCallContext& callContext) {
-        return communicator.callRemote<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", request, callContext);
+        return communicator.request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", request, callContext);
     }
     folly::coro::Task<PingResponse> ping(const PingRequest& request, const ProtoCallContext& callContext) {
-        return communicator.callRemote<PingResponse, PingRequest>("ping", request, callContext);
+        return communicator.request<PingResponse, PingRequest>("ping", request, callContext);
     }
     folly::coro::Task<RouteMessageAck> routeMessage(const RouteMessageWrapper& request, const ProtoCallContext& callContext) {
-        return communicator.callRemote<RouteMessageAck, RouteMessageWrapper>("routeMessage", request, callContext);
+        return communicator.request<RouteMessageAck, RouteMessageWrapper>("routeMessage", request, callContext);
     }
 }; // class DhtRpcServiceClient
 class OptionalServiceClient {
@@ -32,7 +32,7 @@ RpcCommunicator& communicator;
 public:
     OptionalServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<OptionalResponse> getOptional(const OptionalRequest& request, const ProtoCallContext& callContext) {
-        return communicator.callRemote<OptionalResponse, OptionalRequest>("getOptional", request, callContext);
+        return communicator.request<OptionalResponse, OptionalRequest>("getOptional", request, callContext);
     }
 }; // class OptionalServiceClient
 }; // namespace streamr::protorpc

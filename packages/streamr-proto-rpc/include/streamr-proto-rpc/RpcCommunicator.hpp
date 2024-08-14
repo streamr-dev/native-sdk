@@ -89,8 +89,8 @@ public:
     // Client-side API
 
     /**
-     * @brief [A method to be called by auto-generated clients] Call a remote
-     * method
+     * @brief [A method to be called by auto-generated clients] Make a RPC
+     * request to a remote method
      *
      * @param methodName name of the method to be called
      * @param methodParam parameter to be passed to the method
@@ -99,31 +99,31 @@ public:
      */
 
     template <typename ReturnType, typename RequestType>
-    Task<ReturnType> callRemote(
+    Task<ReturnType> request(
         const std::string& methodName,
         const RequestType& methodParam,
         const ProtoCallContext& callContext) {
-        return mRpcCommunicatorClientApi.callRemote<ReturnType, RequestType>(
+        return mRpcCommunicatorClientApi.request<ReturnType, RequestType>(
             methodName, methodParam, callContext);
     }
 
     /**
-     * @brief [A method to be called by auto-generated clients] Notify a remote
-     * method
+     * @brief [A method to be called by auto-generated clients] Make a 
+     * remote RPC notification
      *
-     * @param methodName name of the method to be called
-     * @param methodParam parameter to be passed to the method
+     * @param notificationName name of the notification to be called
+     * @param notificationParam parameter to be passed to the notification
      * @param callContext call context such as routing information
      * @return Task<void>
      */
 
     template <typename RequestType>
-    Task<void> notifyRemote(
-        const std::string_view methodName,
-        const RequestType& methodParam,
+    Task<void> notify(
+        const std::string_view notificationName,
+        const RequestType& notificationParam,
         const ProtoCallContext& callContext) {
-        return mRpcCommunicatorClientApi.notifyRemote<RequestType>(
-            methodName, methodParam, callContext);
+        return mRpcCommunicatorClientApi.notify<RequestType>(
+            notificationName, notificationParam, callContext);
     }
 
     // Server-side API

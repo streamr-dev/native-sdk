@@ -149,11 +149,11 @@ public:
     // To be called by auto-generated clients through RpcCommunicator
 
     template <typename ReturnType, typename RequestType>
-    Task<ReturnType> callRemote(
+    Task<ReturnType> request(
         const std::string& methodName,
         const RequestType& methodParam,
         const ProtoCallContext& callContext) {
-        SLogger::trace("callRemote(): methodName:", methodName);
+        SLogger::trace("request(): methodName:", methodName);
 
         size_t timeout = mRpcRequestTimeout;
         if (callContext.timeout.has_value()) {
@@ -170,7 +170,7 @@ public:
                     [requestMessage,
                      callContext,
                      this]() -> folly::coro::Task<ReturnType> {
-                        auto ongoingRequest = this->makeRpcCall<ReturnType>(
+                        auto ongoingRequest = this->makeRpcRequest<ReturnType>(
                             requestMessage, callContext);
                         co_return co_await std::move(
                             ongoingRequest->getFuture());
@@ -183,12 +183,12 @@ public:
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace(
-                        "callRemote() caught folly::FutureTimeout", e.what());
+                        "request() caught folly::FutureTimeout", e.what());
                     std::lock_guard lock(mOngoingRequestsMutex);
                     mOngoingRequests.erase(requestMessage.requestid());
-                    throw RpcTimeout("RPC call timed out");
+                    throw RpcTimeout("request() timed out");
                 } catch (...) {
-                    SLogger::trace("callRemote() caught other exception");
+                    SLogger::trace("request() caught other exception");
                     std::lock_guard lock(mOngoingRequestsMutex);
                     mOngoingRequests.erase(requestMessage.requestid());
                     throw;
@@ -200,11 +200,11 @@ public:
 
     // To be called by auto-generated clients through RpcCommunicator
     template <typename RequestType>
-    Task<void> notifyRemote(
-        const std::string_view methodName,
-        const RequestType& methodParam,
+    Task<void> notify(
+        const std::string_view notificationName,
+        const RequestType& notificationParam,
         const ProtoCallContext& callContext) {
-        SLogger::trace("notifyRemote() methodName:", methodName);
+        SLogger::trace("notify() notificationName:", notificationName);
 
         size_t timeout = mRpcRequestTimeout;
         if (callContext.timeout.has_value()) {
@@ -212,9 +212,10 @@ public:
         }
 
         SLogger::trace(
-            "notifyRemote() creating request message, methodName:", methodName);
+            "notify() creating request message, notificationName:",
+            notificationName);
         auto requestMessage =
-            this->createRequestRpcMessage(methodName, methodParam, true);
+            this->createRequestRpcMessage(notificationName, notificationParam, true);
         auto&& promiseContract = folly::coro::makePromiseContract<void>();
 
         try {
@@ -244,11 +245,10 @@ public:
                     .scheduleOn(&mExecutor),
                 std::chrono::milliseconds(timeout));
         } catch (const folly::FutureTimeout& e) {
-            SLogger::trace(
-                "notifyRemote() caught folly::FutureTimeout", e.what());
-            throw RpcTimeout("RPC notification timed out");
+            SLogger::trace("notify() timed out");
+            throw RpcTimeout("notify() timed out");
         } catch (...) {
-            SLogger::trace("notifyRemote() caught other exception");
+            SLogger::trace("notify() caught other exception");
             throw;
         }
     }
@@ -266,7 +266,7 @@ public:
 
 private:
     template <typename ReturnType>
-    std::shared_ptr<OngoingRequest<ReturnType>> makeRpcCall(
+    std::shared_ptr<OngoingRequest<ReturnType>> makeRpcRequest(
         const RpcMessage& requestMessage, const ProtoCallContext& callContext) {
         auto ongoingRequest = std::make_shared<OngoingRequest<ReturnType>>();
         {

@@ -140,7 +140,7 @@ auto sendHelloRequest(
     request.set_myname("Test");
     return folly::coro::blockingWait(
         sender
-            .callRemote<HelloResponse, HelloRequest>(
+            .request<HelloResponse, HelloRequest>(
                 "testFunction", request, ProtoCallContext())
             .scheduleOn(executor));
 }
@@ -151,7 +151,7 @@ auto sendHelloNotification(
     request.set_myname("Test");
     folly::coro::blockingWait(
         sender
-            .notifyRemote<HelloRequest>(
+            .notify<HelloRequest>(
                 "testFunction", request, ProtoCallContext())
             .scheduleOn(executor));
 }
@@ -192,7 +192,7 @@ TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
     EXPECT_EQ("Hello, Test", result.greeting());
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsRuntimeError) {
+TEST_F(RpcCommunicatorTest, TestrequestClientThrowsRuntimeError) {
     registerTestRcpMethod(communicator1);
     setOutgoingCallbackWithException<std::runtime_error>(communicator2);
     try {
@@ -205,7 +205,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsRuntimeError) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsFailedToParse) {
+TEST_F(RpcCommunicatorTest, TestrequestClientThrowsFailedToParse) {
     registerTestRcpMethod(communicator1);
     setOutgoingCallbackWithException<FailedToParse>(communicator2);
     try {
@@ -221,7 +221,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsFailedToParse) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsUnknownError) {
+TEST_F(RpcCommunicatorTest, TestrequestClientThrowsUnknownError) {
     registerTestRcpMethod(communicator1);
     setOutgoingCallbackWithThrownUnknown(communicator2);
     try {
@@ -232,7 +232,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsUnknownError) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRuntimeError) {
+TEST_F(RpcCommunicatorTest, TestrequestServerThrowsRuntimeError) {
     registerThrowingRcpMethod<std::runtime_error>(communicator1);
     setCallbacks();
     try {
@@ -248,7 +248,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRuntimeError) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknownRpcMethod) {
+TEST_F(RpcCommunicatorTest, TestrequestServerThrowsUnknownRpcMethod) {
     registerThrowingRcpMethod<UnknownRpcMethod>(communicator1);
     setCallbacks();
     try {
@@ -261,7 +261,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknownRpcMethod) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRcpTimeout) {
+TEST_F(RpcCommunicatorTest, TestrequestServerThrowsRcpTimeout) {
     registerThrowingRcpMethod<RpcTimeout>(communicator1);
     setCallbacks();
     try {
@@ -274,7 +274,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRcpTimeout) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsFailedToParse) {
+TEST_F(RpcCommunicatorTest, TestrequestServerThrowsFailedToParse) {
     registerThrowingRcpMethod<FailedToParse>(communicator1);
     setCallbacks();
     try {
@@ -290,7 +290,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsFailedToParse) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknown) {
+TEST_F(RpcCommunicatorTest, TestrequestServerThrowsUnknown) {
     registerThrowingTestRcpMethodUnknown(communicator1);
     setCallbacks();
     try {
@@ -301,7 +301,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknown) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
+TEST_F(RpcCommunicatorTest, TestCannotify) {
     std::string requestMsg;
     communicator1.registerRpcNotification<HelloRequest>(
         "testFunction",
@@ -313,7 +313,7 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
     EXPECT_EQ(requestMsg, "myName: \"Test\"\n");
 }
 
-TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsRuntimeError) {
+TEST_F(RpcCommunicatorTest, TestnotifyClientThrowsRuntimeError) {
     setOutgoingCallbackWithException<std::runtime_error>(communicator2);
     try {
         sendHelloNotification(communicator2, &executor);
@@ -325,7 +325,7 @@ TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsRuntimeError) {
     }
 }
 
-TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsFailedToParse) {
+TEST_F(RpcCommunicatorTest, TestnotifyClientThrowsFailedToParse) {
     setOutgoingCallbackWithException<FailedToParse>(communicator2);
     try {
         sendHelloNotification(communicator2, &executor);
@@ -358,7 +358,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
     try {
         folly::coro::blockingWait(
             communicator2
-                .callRemote<HelloResponse, HelloRequest>(
+                .request<HelloResponse, HelloRequest>(
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
@@ -403,7 +403,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
     try {
         auto result = folly::coro::blockingWait(
             communicator2
-                .callRemote<HelloResponse, HelloRequest>(
+                .request<HelloResponse, HelloRequest>(
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
@@ -443,11 +443,11 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
     try {
         // auto str = std::this_thread::get_id();
 
-        std::cout << "Calling notifyRemote() from thread id: "
+        std::cout << "Calling notify() from thread id: "
                   << std::this_thread::get_id() << "\n";
         folly::coro::blockingWait(
             communicator2
-                .notifyRemote<HelloRequest>(
+                .notify<HelloRequest>(
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
