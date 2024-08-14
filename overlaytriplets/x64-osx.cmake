@@ -19,4 +19,5 @@ set(VCPKG_CMAKE_CONFIGURE_OPTIONS -DCMAKE_C_COMPILER=${LLVM_PREFIX}/bin/clang -D
 set(VCPKG_CXX_FLAGS "-isystem /opt/homebrew/include/c++/v1")
 set(VCPKG_C_FLAGS "-isystem /opt/homebrew/include/c++/v1")
 set(VCPKG_LINKER_FLAGS "-L/opt/homebrew/lib/c++ -Wl,-rpath,/opt/homebrew/lib/c++")
-message(STATUS "OVERLAY TRIPLET: ${VCPKG_CMAKE_CONFIGURE_OPTIONS} loaded")
+
+message(STATUS "OVERLAY TRIPLET x64-osx loaded")
