@@ -19,6 +19,9 @@ using streamr::logger::SLogger;
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 using folly::coro::Task;
+
+constexpr size_t threadPoolSize = 20;
+
 class RpcCommunicatorClientApi {
 public:
     using OutgoingMessageCallbackType = std::function<void(
@@ -101,14 +104,11 @@ private:
         mOngoingRequests;
     std::recursive_mutex mOngoingRequestsMutex;
     size_t mRpcRequestTimeout;
-    folly::CPUThreadPoolExecutor* mExecutor;
+    folly::CPUThreadPoolExecutor mExecutor;
 
 public:
     explicit RpcCommunicatorClientApi(size_t rpcRequestTimeout)
-        : mRpcRequestTimeout(rpcRequestTimeout) {
-        mExecutor = new folly::CPUThreadPoolExecutor(29); // NOLINT
-    }
-    ~RpcCommunicatorClientApi() { delete mExecutor; }
+        : mRpcRequestTimeout(rpcRequestTimeout), mExecutor(threadPoolSize) {}
 
     template <typename F>
         requires std::is_assignable_v<OutgoingMessageCallbackType, F>
@@ -117,7 +117,8 @@ public:
     }
 
     void onIncomingMessage(
-        const RpcMessage& rpcMessage, const ProtoCallContext& /* callContext */) {
+        const RpcMessage& rpcMessage,
+        const ProtoCallContext& /* callContext */) {
         std::lock_guard lock(mOngoingRequestsMutex);
 
         const auto& header = rpcMessage.header();
@@ -145,7 +146,8 @@ public:
         }
     }
 
-    // This method is for making RPC calls only, not notifications
+    // To be called by auto-generated clients through RpcCommunicator
+
     template <typename ReturnType, typename RequestType>
     Task<ReturnType> callRemote(
         const std::string& methodName,
@@ -177,8 +179,7 @@ public:
                 try {
                     co_return co_await folly::coro::timeout(
                         folly::coro::detachOnCancel(
-                            std::move(callMakingTask)
-                                .scheduleOn(this->mExecutor)),
+                            std::move(callMakingTask).scheduleOn(&mExecutor)),
                         std::chrono::milliseconds(timeout));
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace(
@@ -197,25 +198,7 @@ public:
         return task;
     }
 
-    Task<void> doNotifyTask(
-        RpcMessage requestMessage,
-        ProtoCallContext callContext,
-        folly::coro::Promise<void>&& promise) {
-        try {
-            mOutgoingMessageCallback(
-                requestMessage, requestMessage.requestid(), callContext);
-        } catch (const std::exception& clientSideException) {
-            SLogger::debug(
-                "Error when calling outgoing message callback from client for sending notification",
-                clientSideException.what());
-            throw RpcClientError(
-                "Error when calling outgoing message callback from client for sending notification",
-                clientSideException.what());
-        }
-        promise.setValue();
-        co_return;
-    }
-
+    // To be called by auto-generated clients through RpcCommunicator
     template <typename RequestType>
     Task<void> notifyRemote(
         const std::string_view methodName,
@@ -235,7 +218,7 @@ public:
         auto&& promiseContract = folly::coro::makePromiseContract<void>();
 
         try {
-            mExecutor->add(
+            mExecutor.add(
                 [requestMessage,
                  callContext,
                  promise = std::move(promiseContract.first),
@@ -258,7 +241,7 @@ public:
                 });
             co_return co_await folly::coro::timeout(
                 folly::coro::detachOnCancel(std::move(promiseContract.second))
-                    .scheduleOn(co_await folly::coro::co_current_executor),
+                    .scheduleOn(&mExecutor),
                 std::chrono::milliseconds(timeout));
         } catch (const folly::FutureTimeout& e) {
             SLogger::trace(
@@ -281,6 +264,7 @@ public:
         }
     }
 
+private:
     template <typename ReturnType>
     std::shared_ptr<OngoingRequest<ReturnType>> makeRpcCall(
         const RpcMessage& requestMessage, const ProtoCallContext& callContext) {
@@ -314,7 +298,6 @@ public:
         return ongoingRequest;
     }
 
-private:
     template <typename RequestType>
     RpcMessage createRequestRpcMessage(
         const std::string_view methodName,

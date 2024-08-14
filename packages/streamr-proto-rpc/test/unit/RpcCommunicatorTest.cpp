@@ -24,20 +24,19 @@ namespace streamr::protorpc {
 
 class RpcCommunicatorTest : public ::testing::Test {
 public:
-    RpcCommunicatorTest() {
-        this->executor = new folly::CPUThreadPoolExecutor(10); // NOLINT
-    } // NOLINT
+    RpcCommunicatorTest()
+        : executor(folly::CPUThreadPoolExecutor(threadPoolSize)) {} // NOLINT
 
     ~RpcCommunicatorTest() override {
         SLogger::warn("Deleting executor of RpcCommunicatorTest");
-        delete this->executor;
         SLogger::warn("RpcCommunicatorTest executor deleted");
     }
 
 protected:
     RpcCommunicator communicator1; // NOLINT
     RpcCommunicator communicator2; // NOLINT
-    folly::CPUThreadPoolExecutor* executor; // NOLINT
+    folly::CPUThreadPoolExecutor executor; // NOLINT
+
     void SetUp() override {}
 
     void setCallbacks(bool isMethod = true) {
@@ -172,8 +171,8 @@ void registerSleepingTestRcpMethod(RpcCommunicator& communicator) {
         "testFunction",
         [](const HelloRequest& request,
            const ProtoCallContext& /* context */) -> HelloResponse {
-            SLogger::info("TestSleepingRpcMethod sleeping 5s");
-            std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
+            SLogger::info("TestSleepingRpcMethod sleeping 1s");
+            std::this_thread::sleep_for(std::chrono::seconds(1)); // NOLINT
             HelloResponse response;
             response.set_greeting("Hello, " + request.myname());
             return response;
@@ -189,7 +188,7 @@ TEST_F(RpcCommunicatorTest, TestCanRegisterRpcMethod) {
 TEST_F(RpcCommunicatorTest, TestCanMakeRpcCall) {
     registerTestRcpMethod(communicator1);
     setCallbacks();
-    auto result = sendHelloRequest(communicator2, executor);
+    auto result = sendHelloRequest(communicator2, &executor);
     EXPECT_EQ("Hello, Test", result.greeting());
 }
 
@@ -197,7 +196,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsRuntimeError) {
     registerTestRcpMethod(communicator1);
     setOutgoingCallbackWithException<std::runtime_error>(communicator2);
     try {
-        sendHelloRequest(communicator2, executor);
+        sendHelloRequest(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (const RpcClientError& ex) {
         verifyClientError(ex, ErrorCode::RPC_CLIENT_ERROR, "TestException");
@@ -210,7 +209,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsFailedToParse) {
     registerTestRcpMethod(communicator1);
     setOutgoingCallbackWithException<FailedToParse>(communicator2);
     try {
-        sendHelloRequest(communicator2, executor);
+        sendHelloRequest(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (const RpcClientError& ex) {
         verifyClientError(
@@ -226,7 +225,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteClientThrowsUnknownError) {
     registerTestRcpMethod(communicator1);
     setOutgoingCallbackWithThrownUnknown(communicator2);
     try {
-        sendHelloRequest(communicator2, executor);
+        sendHelloRequest(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (...) {
         EXPECT_TRUE(true);
@@ -237,7 +236,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRuntimeError) {
     registerThrowingRcpMethod<std::runtime_error>(communicator1);
     setCallbacks();
     try {
-        sendHelloRequest(communicator2, executor);
+        sendHelloRequest(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (const RpcServerError& ex) {
         EXPECT_EQ(ex.code, ErrorCode::RPC_SERVER_ERROR);
@@ -253,7 +252,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknownRpcMethod) {
     registerThrowingRcpMethod<UnknownRpcMethod>(communicator1);
     setCallbacks();
     try {
-        sendHelloRequest(communicator2, executor);
+        sendHelloRequest(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (const UnknownRpcMethod& ex) {
         EXPECT_EQ(ex.code, ErrorCode::UNKNOWN_RPC_METHOD);
@@ -266,7 +265,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsRcpTimeout) {
     registerThrowingRcpMethod<RpcTimeout>(communicator1);
     setCallbacks();
     try {
-        sendHelloRequest(communicator2, executor);
+        sendHelloRequest(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {
         EXPECT_EQ(ex.code, ErrorCode::RPC_TIMEOUT);
@@ -279,7 +278,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsFailedToParse) {
     registerThrowingRcpMethod<FailedToParse>(communicator1);
     setCallbacks();
     try {
-        sendHelloRequest(communicator2, executor);
+        sendHelloRequest(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (const RpcServerError& ex) {
         EXPECT_EQ(ex.code, ErrorCode::RPC_SERVER_ERROR);
@@ -295,7 +294,7 @@ TEST_F(RpcCommunicatorTest, TestCallRemoteServerThrowsUnknown) {
     registerThrowingTestRcpMethodUnknown(communicator1);
     setCallbacks();
     try {
-        sendHelloRequest(communicator2, executor);
+        sendHelloRequest(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (...) {
         EXPECT_TRUE(true);
@@ -310,14 +309,14 @@ TEST_F(RpcCommunicatorTest, TestCanNotifyRemote) {
             const HelloRequest& request, const ProtoCallContext& /* context */)
             -> void { requestMsg = request.DebugString(); });
     setCallbacks(false);
-    sendHelloNotification(communicator2, executor);
+    sendHelloNotification(communicator2, &executor);
     EXPECT_EQ(requestMsg, "myName: \"Test\"\n");
 }
 
 TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsRuntimeError) {
     setOutgoingCallbackWithException<std::runtime_error>(communicator2);
     try {
-        sendHelloNotification(communicator2, executor);
+        sendHelloNotification(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (const RpcClientError& ex) {
         verifyClientError(ex, ErrorCode::RPC_CLIENT_ERROR, "TestException");
@@ -329,7 +328,7 @@ TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsRuntimeError) {
 TEST_F(RpcCommunicatorTest, TestNotifyRemoteClientThrowsFailedToParse) {
     setOutgoingCallbackWithException<FailedToParse>(communicator2);
     try {
-        sendHelloNotification(communicator2, executor);
+        sendHelloNotification(communicator2, &executor);
         EXPECT_TRUE(false);
     } catch (const RpcClientError& ex) {
         verifyClientError(
@@ -349,8 +348,8 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
             const RpcMessage& /* message */,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
-            SLogger::info("setOutgoingMessageCallback() sleeping 5s");
-            std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
+            SLogger::info("setOutgoingMessageCallback() sleeping 1s");
+            std::this_thread::sleep_for(std::chrono::seconds(1)); // NOLINT
         });
 
     HelloRequest request;
@@ -363,7 +362,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
-                .scheduleOn(executor));
+                .scheduleOn(&executor));
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {
@@ -408,7 +407,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
-                .scheduleOn(executor));
+                .scheduleOn(&executor));
         EXPECT_EQ(true, false);
     } catch (const RpcTimeout& ex) {
         SLogger::info(
@@ -437,9 +436,9 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
             const RpcMessage& /* message */,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
-            std::cout << "setOutgoingMessageCallback() sleeping 5s, thread id: "
+            std::cout << "setOutgoingMessageCallback() sleeping 1s, thread id: "
                       << std::this_thread::get_id() << "\n";
-            std::this_thread::sleep_for(std::chrono::seconds(5)); // NOLINT
+            std::this_thread::sleep_for(std::chrono::seconds(1)); // NOLINT
         });
     try {
         // auto str = std::this_thread::get_id();
@@ -452,7 +451,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
                     "testFunction",
                     request,
                     ProtoCallContext{.timeout = 50}) // NOLINT
-                .scheduleOn(executor));
+                .scheduleOn(&executor));
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {
