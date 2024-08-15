@@ -58,8 +58,7 @@ private:
         }
         const auto& method = header.at("method");
         if (map.find(method) == map.end()) {
-            throw UnknownRpcMethod(
-                "RPC Method " + method + " is not provided");
+            throw UnknownRpcMethod("RPC Method " + method + " is not provided");
         }
         return map.at(method);
     }

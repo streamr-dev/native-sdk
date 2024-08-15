@@ -108,7 +108,7 @@ public:
     }
 
     /**
-     * @brief [A method to be called by auto-generated clients] Make a 
+     * @brief [A method to be called by auto-generated clients] Make a
      * remote RPC notification
      *
      * @param notificationName name of the notification to be called

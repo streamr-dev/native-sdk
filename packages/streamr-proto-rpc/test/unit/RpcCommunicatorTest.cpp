@@ -150,9 +150,7 @@ auto sendHelloNotification(
     HelloRequest request;
     request.set_myname("Test");
     folly::coro::blockingWait(
-        sender
-            .notify<HelloRequest>(
-                "testFunction", request, ProtoCallContext())
+        sender.notify<HelloRequest>("testFunction", request, ProtoCallContext())
             .scheduleOn(executor));
 }
 
