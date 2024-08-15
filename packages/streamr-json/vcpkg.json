@@ -1,0 +1,6 @@
+{
+  "name": "streamr-json",
+  "version": "1.0.0",
+  "dependencies": ["gtest", "boost-pfr", "nlohmann-json"]
+}
+

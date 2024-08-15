@@ -1,0 +1,6 @@
+{
+    "C_Cpp.codeAnalysis.clangTidy.useBuildPath": true,
+    "C_Cpp.default.intelliSenseMode": "macos-clang-arm64",
+    "C_Cpp.codeAnalysis.clangTidy.config": "",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+}
