@@ -214,8 +214,8 @@ public:
         SLogger::trace(
             "notify() creating request message, notificationName:",
             notificationName);
-        auto requestMessage =
-            this->createRequestRpcMessage(notificationName, notificationParam, true);
+        auto requestMessage = this->createRequestRpcMessage(
+            notificationName, notificationParam, true);
         auto&& promiseContract = folly::coro::makePromiseContract<void>();
 
         try {
