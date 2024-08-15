@@ -17,35 +17,7 @@ runs:
       with:
         key: cache-vcpkg-installed-${{ hashFiles('./vcpkg.json') }}
         path: |
-          **/vcpkg_installed
-    - name: cache vcpkg installed streamr-eventemitter
-      id: cache-vcpkg-installed-streamr-eventemitter
-      uses: actions/cache/restore@v4
-      with:
-        key: cache-vcpkg-installed-streamr-eventemitter-${{ hashFiles('./packages/streamr-eventemitter/vcpkg.json') }}
-        path: |
-          ./packages/streamr-eventemitter/vcpkg_installed
-    - name: cache vcpkg installed streamr-json
-      id: cache-vcpkg-installed-streamr-json
-      uses: actions/cache/restore@v4
-      with:
-        key: cache-vcpkg-installed-streamr-json-${{ hashFiles('./packages/streamr-json/vcpkg.json') }}
-        path: |
-          ./packages/streamr-json/vcpkg_installed
-    - name: cache vcpkg installed streamr-logger
-      id: cache-vcpkg-installed-streamr-logger
-      uses: actions/cache/restore@v4
-      with:
-        key: cache-vcpkg-installed-streamr-logger-${{ hashFiles('./packages/streamr-logger/vcpkg.json') }}
-        path: |
-          ./packages/streamr-logger/vcpkg_installed
-    - name: cache vcpkg installed streamr-proto-rpc
-      id: cache-vcpkg-installed-streamr-proto-rpc
-      uses: actions/cache/restore@v4
-      with:
-        key: cache-vcpkg-installed-streamr-proto-rpc-${{ hashFiles('./packages/streamr-proto-rpc/vcpkg.json') }}
-        path: |
-          ./packages/streamr-proto-rpc/vcpkg_installed
+          ./build/vcpkg_installed
     - name: install-prerequisities
       run:
         source install-prerequisities.sh
@@ -69,36 +41,5 @@ runs:
       with:
         key: cache-vcpkg-installed-${{ hashFiles('./vcpkg.json') }}
         path: |
-          **/vcpkg_installed
-    - name: cache vcpkg installed streamr-eventemitter save
-      id: cache-vcpkg-installed-streamr-eventemitter-save
-      if: always()
-      uses: actions/cache/save@v4
-      with:
-        key: cache-vcpkg-installed-streamr-eventemitter-${{ hashFiles('./packages/streamr-eventemitter/vcpkg.json') }}
-        path: |
-          ./packages/streamr-eventemitter/vcpkg_installed
-    - name: cache vcpkg installed streamr-json save
-      id: cache-vcpkg-installed-streamr-json-save
-      if: always()
-      uses: actions/cache/save@v4
-      with:
-        key: cache-vcpkg-installed-streamr-json-${{ hashFiles('./packages/streamr-json/vcpkg.json') }}
-        path: |
-          ./packages/streamr-json/vcpkg_installed
-    - name: cache vcpkg installed streamr-logger save
-      id: cache-vcpkg-installed-streamr-logger-save
-      if: always()
-      uses: actions/cache/save@v4
-      with:
-        key: cache-vcpkg-installed-streamr-logger-${{ hashFiles('./packages/streamr-logger/vcpkg.json') }}
-        path: |
-          ./packages/streamr-logger/vcpkg_installed
-    - name: cache vcpkg installed streamr-proto-rpc
-      id: cache-vcpkg-installed-streamr-proto-rpc-save
-      if: always()
-      uses: actions/cache/save@v4
-      with:
-        key: cache-vcpkg-installed-streamr-proto-rpc-${{ hashFiles('./packages/streamr-proto-rpc/vcpkg.json') }}
-        path: |
-          ./packages/streamr-proto-rpc/vcpkg_installed
+          ./build/vcpkg_installed
+
