@@ -1,7 +1,14 @@
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../MonorepoPackages.cmake)
     message(STATUS "In monorepo sub-package ${CMAKE_CURRENT_SOURCE_DIR}")
-    
+
+    # if in monorepo, do not install vcpkg dependencies
+    set(VCPKG_MANIFEST_INSTALL OFF)
+   
+    # if in monorepo, use the vcpkg dependencies from the monorepo root
+    set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../build/vcpkg_installed)
+
     # if in monorepo, use the monorepo deps from filesystem
     if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.json)
       file(READ ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.json VCPKG_JSON)
