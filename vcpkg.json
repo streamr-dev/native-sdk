@@ -1,0 +1,11 @@
+{
+  "name": "streamr-native-sdk",
+  "version": "1.0.0",
+  "dependencies": [
+    "boost-config",
+    "boost-pfr",
+    "folly",
+    "gtest",
+    "nlohmann-json"
+  ]
+}
