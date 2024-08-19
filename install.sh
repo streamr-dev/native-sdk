@@ -1,5 +1,19 @@
 #!/bin/bash
 
+set -e
+
+# Check if VCPKG_ROOT is set and points to the correct directory
+if [ -z "$VCPKG_ROOT" ]; then
+    echo "Error: VCPKG_ROOT is not set. Please run 'source install-prerequisities.sh' or 'source setenvs.sh' before running this script."
+    exit 1
+fi
+
+EXPECTED_VCPKG_ROOT="$(pwd)/vcpkg"
+if [ "$VCPKG_ROOT" != "$EXPECTED_VCPKG_ROOT" ]; then
+    echo "Error: VCPKG_ROOT points to the vcpkg of another project '$VCPKG_ROOT'. Please run 'source install-prerequisities.sh' or 'source setenvs.sh' before running this script."
+    exit 1
+fi
+
 # Parse command-line options
 PROD_BUILD=false
 
