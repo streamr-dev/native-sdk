@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.22)
+include(homebrewClang.cmake)
+set(CMAKE_CXX_STANDARD 26)
+
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+
+# make the current package a monorepo package
+include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
+
+set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+
+project(streamr-libstreamrproxyclient CXX)
+add_library(libstreamrproxyclient SHARED
+            src/libstreamrproxyclient.cpp
+            include/libstreamrproxyclient.hpp
+)
+
+target_include_directories(libstreamrproxyclient PUBLIC include)
+
+if (APPLE)
+    set_target_properties(libstreamrproxyclient PROPERTIES
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION C
+    MACOSX_FRAMEWORK_IDENTIFIER com.streamr.libstreamrproxyclient
+    MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+    VERSION 1.0.0
+    SOVERSION 1.0.0
+    PUBLIC_HEADER include/libstreamrproxyclient.hpp
+    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Petri Savolainen")
+endif()

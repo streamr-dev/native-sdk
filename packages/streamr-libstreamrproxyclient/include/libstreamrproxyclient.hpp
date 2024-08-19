@@ -1,0 +1,10 @@
+#ifndef LIBSTREAMRPROXYCLIENT_HPP
+#define LIBSTREAMRPROXYCLIENT_HPP
+
+extern "C" {
+
+void testRpc();
+
+}
+
+#endif // LIBSTREAMRPROXYCLIENT_HPP
