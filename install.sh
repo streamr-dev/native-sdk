@@ -25,6 +25,7 @@ fi
 
 # Print the target platform if specified
 if [ -n "$TARGET_TRIPLET" ]; then
+    export PLATFORM=$PLATFORM
     echo "Target platform: $TARGET_TRIPLET"
 fi
 

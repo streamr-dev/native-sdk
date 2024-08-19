@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
 include(homebrewClang.cmake)
 set(CMAKE_CXX_STANDARD 26)
 
