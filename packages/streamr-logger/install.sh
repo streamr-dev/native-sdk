@@ -7,9 +7,9 @@ TARGET_TRIPLET=""
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --prod) PROD_BUILD=true ;;
-        --iphone) TARGET_TRIPLET="arm64-ios" ;;
+        --ios) TARGET_TRIPLET="arm64-ios" ;;
         --android) TARGET_TRIPLET="arm64-android" ;;
-        *) echo "Unknown parameter passed: $1. Usage: ./install.sh [--prod] [--iphone] [--android]"; exit 1 ;;
+        *) echo "Unknown parameter passed: $1. Usage: ./install.sh [--prod] [--ios] [--android]"; exit 1 ;;
     esac
     shift
 done
