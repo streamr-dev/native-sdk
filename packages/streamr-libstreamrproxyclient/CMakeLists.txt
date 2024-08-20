@@ -22,14 +22,14 @@ add_library(libstreamrproxyclient SHARED
 
 target_include_directories(libstreamrproxyclient PUBLIC include)
 
-if (APPLE)
+if (IOS)
+    message(STATUS "Building for iOS")
     set_target_properties(libstreamrproxyclient PROPERTIES
     FRAMEWORK TRUE
-    FRAMEWORK_VERSION C
     MACOSX_FRAMEWORK_IDENTIFIER com.streamr.libstreamrproxyclient
-    MACOSX_FRAMEWORK_INFO_PLIST Info.plist
     VERSION 1.0.0
     SOVERSION 1.0.0
     PUBLIC_HEADER include/libstreamrproxyclient.hpp
     XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Petri Savolainen")
 endif()
+
