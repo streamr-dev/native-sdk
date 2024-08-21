@@ -57,19 +57,22 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-json-config.cmake"
   "endif()\n"
   "include(${CMAKE_BINARY_DIR}/streamr-json-config-in.cmake)\n")
 
-enable_testing()
-find_package(GTest CONFIG REQUIRED)
+if(NOT IOS)
+  enable_testing()
+  find_package(GTest CONFIG REQUIRED)
 
-add_executable(streamr-json-test-unit test/unit/toStringTest.cpp test/unit/toJsonTest.cpp)
-target_link_libraries(streamr-json-test-unit 
-  PRIVATE streamr-json
-  PRIVATE GTest::gtest 
-  PRIVATE GTest::gtest_main 
-  PRIVATE GTest::gmock 
-  PRIVATE GTest::gmock_main)
+  add_executable(streamr-json-test-unit test/unit/toStringTest.cpp test/unit/toJsonTest.cpp)
+  target_link_libraries(streamr-json-test-unit 
+    PRIVATE streamr-json
+    PRIVATE GTest::gtest 
+    PRIVATE GTest::gtest_main 
+    PRIVATE GTest::gmock 
+    PRIVATE GTest::gmock_main)
 
-include(GoogleTest)
-gtest_discover_tests(streamr-json-test-unit)
+  include(GoogleTest)
+  gtest_discover_tests(streamr-json-test-unit)
 
-add_executable(streamr-json-example src/examples/JsonExample.cpp)
-target_link_libraries(streamr-json-example PRIVATE streamr-json)
+  add_executable(streamr-json-example src/examples/JsonExample.cpp)
+  target_link_libraries(streamr-json-example PRIVATE streamr-json)
+
+endif()

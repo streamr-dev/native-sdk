@@ -21,31 +21,33 @@ set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 26)
 
 add_library(streamr::streamr-logger ALIAS streamr-logger)
 
-add_executable(env_category_tests test/unit/LoggerEnvTest.cpp)
-target_link_libraries(env_category_tests PRIVATE streamr-logger)
-enable_testing()
-add_test(
-  NAME env_category_fatal_and_info_log_test
-  COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 1
+if(NOT IOS)
+  add_executable(env_category_tests test/unit/LoggerEnvTest.cpp)
+  target_link_libraries(env_category_tests PRIVATE streamr-logger)
+  enable_testing()
+  add_test(
+    NAME env_category_fatal_and_info_log_test
+    COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 1
   )
-set_property(TEST env_category_fatal_and_info_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
+  set_property(TEST env_category_fatal_and_info_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
 
-add_test(
-  NAME env_category_fatal_and_fatal_log_test
-  COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 2
+  add_test(
+    NAME env_category_fatal_and_fatal_log_test
+    COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 2
   )
-set_property(TEST env_category_fatal_and_fatal_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
+  set_property(TEST env_category_fatal_and_fatal_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
 
-add_test(
-  NAME env_category_fatal_and_error_log_test
-  COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 3
+  add_test(
+    NAME env_category_fatal_and_error_log_test
+    COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 3
   )
-set_property(TEST env_category_fatal_and_error_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
+  set_property(TEST env_category_fatal_and_error_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
 
-add_test(
-  NAME env_category_wrongly_written_as_fatal_and_info_log_test
-  COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 4
+  add_test(
+    NAME env_category_wrongly_written_as_fatal_and_info_log_test
+    COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 4
   )
+endif()
 
 target_include_directories(
   streamr-logger INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -67,20 +69,22 @@ export(TARGETS streamr-logger
   "find_package(streamr-json CONFIG REQUIRED)\n"
   "include(${CMAKE_BINARY_DIR}/streamr-logger-config-in.cmake)\n")
 
-enable_testing()
-find_package(GTest CONFIG REQUIRED)
+if(NOT IOS)
+  enable_testing()
+  find_package(GTest CONFIG REQUIRED)
 
-add_executable(streamr-logger-test-unit test/unit/LoggerTest.cpp test/unit/StreamrLogFormatterTest.cpp)
+  add_executable(streamr-logger-test-unit test/unit/LoggerTest.cpp test/unit/StreamrLogFormatterTest.cpp)
 
-target_link_libraries(streamr-logger-test-unit 
-  PRIVATE streamr-logger
-  PRIVATE GTest::gtest 
-  PRIVATE GTest::gtest_main 
-  PRIVATE GTest::gmock 
-  PRIVATE GTest::gmock_main)
+  target_link_libraries(streamr-logger-test-unit 
+    PRIVATE streamr-logger
+    PRIVATE GTest::gtest 
+    PRIVATE GTest::gtest_main 
+    PRIVATE GTest::gmock 
+    PRIVATE GTest::gmock_main)
 
-include(GoogleTest)
-gtest_discover_tests(streamr-logger-test-unit)
+  include(GoogleTest)
+  gtest_discover_tests(streamr-logger-test-unit)
 
-add_executable(streamr-logger-example src/examples/LoggerExample.cpp)
-target_link_libraries(streamr-logger-example PRIVATE streamr-logger)
+  add_executable(streamr-logger-example src/examples/LoggerExample.cpp)
+  target_link_libraries(streamr-logger-example PRIVATE streamr-logger)
+endif()

@@ -3,7 +3,7 @@
 
 extern "C" {
 
-void testRpc();
+const char* testRpc();
 
 }
 
