@@ -37,17 +37,18 @@ export(TARGETS streamr-eventemitter
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-eventemitter-config.cmake" 
   "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
   "include(${CMAKE_BINARY_DIR}/streamr-eventemitter-config-in.cmake)\n")
+if(NOT IOS)
+  enable_testing()
+  find_package(GTest CONFIG REQUIRED)
 
-enable_testing()
-find_package(GTest CONFIG REQUIRED)
+  add_executable(streamr-eventemitter-test-unit test/unit/EventEmitterTest.cpp)
+  target_link_libraries(streamr-eventemitter-test-unit 
+    PUBLIC streamr-eventemitter
+    PUBLIC GTest::gtest 
+    PUBLIC GTest::gtest_main 
+    PUBLIC GTest::gmock 
+    PUBLIC GTest::gmock_main)
 
-add_executable(streamr-eventemitter-test-unit test/unit/EventEmitterTest.cpp)
-target_link_libraries(streamr-eventemitter-test-unit 
-  PUBLIC streamr-eventemitter
-  PUBLIC GTest::gtest 
-  PUBLIC GTest::gtest_main 
-  PUBLIC GTest::gmock 
-  PUBLIC GTest::gmock_main)
-
-include(GoogleTest)
-gtest_discover_tests(streamr-eventemitter-test-unit)
+  include(GoogleTest)
+  gtest_discover_tests(streamr-eventemitter-test-unit)
+endif()

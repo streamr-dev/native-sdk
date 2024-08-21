@@ -26,6 +26,7 @@ if (IOS)
     message(STATUS "Building for iOS")
     set_target_properties(libstreamrproxyclient PROPERTIES
     FRAMEWORK TRUE
+    FRAMEWORK_VERSION A
     MACOSX_FRAMEWORK_IDENTIFIER com.streamr.libstreamrproxyclient
     VERSION 1.0.0
     SOVERSION 1.0.0
