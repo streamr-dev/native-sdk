@@ -1,0 +1,413 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		417762BC2C7609FD000CA1B3 /* StreamrProtoRpcExampleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417762BB2C7609FD000CA1B3 /* StreamrProtoRpcExampleAppApp.swift */; };
+		417762BE2C7609FD000CA1B3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417762BD2C7609FD000CA1B3 /* ContentView.swift */; };
+		417762C02C7609FF000CA1B3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 417762BF2C7609FF000CA1B3 /* Assets.xcassets */; };
+		417762C32C7609FF000CA1B3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 417762C22C7609FF000CA1B3 /* Preview Assets.xcassets */; };
+		417762CD2C7610EC000CA1B3 /* Wrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 417762CC2C7610EC000CA1B3 /* Wrapper.mm */; };
+		417762D92C76182A000CA1B3 /* Hello.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 417762D72C76182A000CA1B3 /* Hello.cpp */; };
+		417762F32C764712000CA1B3 /* HelloRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 417762F22C764711000CA1B3 /* HelloRpc.pb.cc */; };
+		417762F52C7648D7000CA1B3 /* ProtoRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 417762F42C7648D7000CA1B3 /* ProtoRpc.pb.cc */; };
+		417762F72C765648000CA1B3 /* streamr.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 417762F62C765648000CA1B3 /* streamr.xcframework */; };
+		417762FA2C767117000CA1B3 /* libc++abi.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 417762F92C767117000CA1B3 /* libc++abi.tbd */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		417762B82C7609FD000CA1B3 /* StreamrProtoRpcExampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StreamrProtoRpcExampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		417762BB2C7609FD000CA1B3 /* StreamrProtoRpcExampleAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamrProtoRpcExampleAppApp.swift; sourceTree = "<group>"; };
+		417762BD2C7609FD000CA1B3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		417762BF2C7609FF000CA1B3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		417762C22C7609FF000CA1B3 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		417762CB2C7610EB000CA1B3 /* StreamrProtoRpcExampleApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StreamrProtoRpcExampleApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		417762CC2C7610EC000CA1B3 /* Wrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Wrapper.mm; sourceTree = "<group>"; };
+		417762CE2C761123000CA1B3 /* Wrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Wrapper.h; sourceTree = "<group>"; };
+		417762D72C76182A000CA1B3 /* Hello.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Hello.cpp; sourceTree = "<group>"; };
+		417762D82C76182A000CA1B3 /* Hello.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Hello.hpp; sourceTree = "<group>"; };
+		417762EC2C763CC9000CA1B3 /* HelloRpc.client.pb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelloRpc.client.pb.h; sourceTree = "<group>"; };
+		417762ED2C763D7B000CA1B3 /* HelloRpc.pb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelloRpc.pb.h; sourceTree = "<group>"; };
+		417762F02C764569000CA1B3 /* ProtoRpc.pb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProtoRpc.pb.h; sourceTree = "<group>"; };
+		417762F12C7645A0000CA1B3 /* HelloRpc.server.pb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelloRpc.server.pb.h; sourceTree = "<group>"; };
+		417762F22C764711000CA1B3 /* HelloRpc.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HelloRpc.pb.cc; sourceTree = "<group>"; };
+		417762F42C7648D7000CA1B3 /* ProtoRpc.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProtoRpc.pb.cc; sourceTree = "<group>"; };
+		417762F62C765648000CA1B3 /* streamr.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = streamr.xcframework; path = "../../../../../../dist/ios/streamr.xcframework"; sourceTree = "<group>"; };
+		417762F92C767117000CA1B3 /* libc++abi.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++abi.tbd"; path = "usr/lib/libc++abi.tbd"; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		417762B52C7609FD000CA1B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				417762FA2C767117000CA1B3 /* libc++abi.tbd in Frameworks */,
+				417762F72C765648000CA1B3 /* streamr.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		417762AF2C7609FD000CA1B3 = {
+			isa = PBXGroup;
+			children = (
+				417762BA2C7609FD000CA1B3 /* StreamrProtoRpcExampleApp */,
+				417762B92C7609FD000CA1B3 /* Products */,
+				417762F82C767117000CA1B3 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		417762B92C7609FD000CA1B3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				417762B82C7609FD000CA1B3 /* StreamrProtoRpcExampleApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		417762BA2C7609FD000CA1B3 /* StreamrProtoRpcExampleApp */ = {
+			isa = PBXGroup;
+			children = (
+				417762F62C765648000CA1B3 /* streamr.xcframework */,
+				417762F22C764711000CA1B3 /* HelloRpc.pb.cc */,
+				417762F42C7648D7000CA1B3 /* ProtoRpc.pb.cc */,
+				417762F02C764569000CA1B3 /* ProtoRpc.pb.h */,
+				417762EC2C763CC9000CA1B3 /* HelloRpc.client.pb.h */,
+				417762F12C7645A0000CA1B3 /* HelloRpc.server.pb.h */,
+				417762ED2C763D7B000CA1B3 /* HelloRpc.pb.h */,
+				417762BB2C7609FD000CA1B3 /* StreamrProtoRpcExampleAppApp.swift */,
+				417762BD2C7609FD000CA1B3 /* ContentView.swift */,
+				417762BF2C7609FF000CA1B3 /* Assets.xcassets */,
+				417762C12C7609FF000CA1B3 /* Preview Content */,
+				417762CC2C7610EC000CA1B3 /* Wrapper.mm */,
+				417762CB2C7610EB000CA1B3 /* StreamrProtoRpcExampleApp-Bridging-Header.h */,
+				417762CE2C761123000CA1B3 /* Wrapper.h */,
+				417762D72C76182A000CA1B3 /* Hello.cpp */,
+				417762D82C76182A000CA1B3 /* Hello.hpp */,
+			);
+			path = StreamrProtoRpcExampleApp;
+			sourceTree = "<group>";
+		};
+		417762C12C7609FF000CA1B3 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				417762C22C7609FF000CA1B3 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		417762F82C767117000CA1B3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				417762F92C767117000CA1B3 /* libc++abi.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		417762B72C7609FD000CA1B3 /* StreamrProtoRpcExampleApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 417762C62C7609FF000CA1B3 /* Build configuration list for PBXNativeTarget "StreamrProtoRpcExampleApp" */;
+			buildPhases = (
+				417762B42C7609FD000CA1B3 /* Sources */,
+				417762B52C7609FD000CA1B3 /* Frameworks */,
+				417762B62C7609FD000CA1B3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StreamrProtoRpcExampleApp;
+			productName = StreamrProtoRpcExampleApp;
+			productReference = 417762B82C7609FD000CA1B3 /* StreamrProtoRpcExampleApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		417762B02C7609FD000CA1B3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					417762B72C7609FD000CA1B3 = {
+						CreatedOnToolsVersion = 15.4;
+						LastSwiftMigration = 1540;
+					};
+				};
+			};
+			buildConfigurationList = 417762B32C7609FD000CA1B3 /* Build configuration list for PBXProject "StreamrProtoRpcExampleApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 417762AF2C7609FD000CA1B3;
+			productRefGroup = 417762B92C7609FD000CA1B3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				417762B72C7609FD000CA1B3 /* StreamrProtoRpcExampleApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		417762B62C7609FD000CA1B3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				417762C32C7609FF000CA1B3 /* Preview Assets.xcassets in Resources */,
+				417762C02C7609FF000CA1B3 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		417762B42C7609FD000CA1B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				417762BE2C7609FD000CA1B3 /* ContentView.swift in Sources */,
+				417762BC2C7609FD000CA1B3 /* StreamrProtoRpcExampleAppApp.swift in Sources */,
+				417762F32C764712000CA1B3 /* HelloRpc.pb.cc in Sources */,
+				417762F52C7648D7000CA1B3 /* ProtoRpc.pb.cc in Sources */,
+				417762D92C76182A000CA1B3 /* Hello.cpp in Sources */,
+				417762CD2C7610EC000CA1B3 /* Wrapper.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		417762C42C7609FF000CA1B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "\"-L c++abi\"";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		417762C52C7609FF000CA1B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = "\"-L c++abi\"";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		417762C72C7609FF000CA1B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"StreamrProtoRpcExampleApp/Preview Content\"";
+				DEVELOPMENT_TEAM = S933S46DZS;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = testing.StreamrProtoRpcExampleApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "StreamrProtoRpcExampleApp/StreamrProtoRpcExampleApp-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		417762C82C7609FF000CA1B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"StreamrProtoRpcExampleApp/Preview Content\"";
+				DEVELOPMENT_TEAM = S933S46DZS;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = testing.StreamrProtoRpcExampleApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "StreamrProtoRpcExampleApp/StreamrProtoRpcExampleApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		417762B32C7609FD000CA1B3 /* Build configuration list for PBXProject "StreamrProtoRpcExampleApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				417762C42C7609FF000CA1B3 /* Debug */,
+				417762C52C7609FF000CA1B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		417762C62C7609FF000CA1B3 /* Build configuration list for PBXNativeTarget "StreamrProtoRpcExampleApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				417762C72C7609FF000CA1B3 /* Debug */,
+				417762C82C7609FF000CA1B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 417762B02C7609FD000CA1B3 /* Project object */;
+}
