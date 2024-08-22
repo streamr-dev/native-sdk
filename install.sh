@@ -25,6 +25,7 @@ while [[ "$#" -gt 0 ]]; do
         --prod) PROD_BUILD=true ;;
         --ios) TARGET_TRIPLET="arm64-ios"; CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/overlaytriplets/arm64-ios.cmake"; PLATFORM="OS64" ;;
         --android) TARGET_TRIPLET="arm64-android"; CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/overlaytriplets/arm64-android.cmake"; PLATFORM="android" ;;
+        --xcframework) CREATE_XCFRAMEWORK=true ;;
         *) echo "Unknown parameter passed: $1. Usage: ./install.sh [--prod] [--ios] [--android]"; exit 1 ;;
     esac
     shift
@@ -72,3 +73,6 @@ else
     cd build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && cmake --build . && cd ..
 fi
 
+if [ "$CREATE_XCFRAMEWORK" = true ]; then
+    create-streamr-xcframework.pl    
+fi
