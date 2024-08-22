@@ -74,5 +74,5 @@ else
 fi
 
 if [ "$CREATE_XCFRAMEWORK" = true ]; then
-    create-streamr-xcframework.pl    
+    ./create-streamr-xcframework.pl    
 fi
