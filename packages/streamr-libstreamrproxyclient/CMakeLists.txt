@@ -23,14 +23,18 @@ add_library(libstreamrproxyclient SHARED
 target_include_directories(libstreamrproxyclient PUBLIC include)
 
 if (IOS)
-    message(STATUS "Building for iOS")
+    message(STATUS "Building dylib for iOS")
+    target_link_libraries(libstreamrproxyclient ${FOUNDATION_LIBRARY})
+    target_compile_definitions(libstreamrproxyclient PUBLIC IS_BUILDING_SHARED)
     set_target_properties(libstreamrproxyclient PROPERTIES
-    FRAMEWORK TRUE
-    FRAMEWORK_VERSION A
-    MACOSX_FRAMEWORK_IDENTIFIER com.streamr.libstreamrproxyclient
-    VERSION 1.0.0
-    SOVERSION 1.0.0
-    PUBLIC_HEADER include/libstreamrproxyclient.hpp
-    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Petri Savolainen")
+        FRAMEWORK TRUE
+        FRAMEWORK_VERSION A
+        MACOSX_FRAMEWORK_IDENTIFIER network.streamr.streamrproxyclient
+        VERSION 1.0.0
+        SOVERSION 1.0.0
+        PUBLIC_HEADER include/libstreamrproxyclient.hpp
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Petri Savolainen"
+    )
+    install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/createiosframework.sh)")
 endif()
 
