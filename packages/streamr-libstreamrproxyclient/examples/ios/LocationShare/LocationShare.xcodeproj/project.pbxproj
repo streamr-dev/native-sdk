@@ -1,0 +1,635 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		413E46C32C7867670030132D /* LocationShareApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46C22C7867670030132D /* LocationShareApp.swift */; };
+		413E46C52C7867670030132D /* LocationShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46C42C7867670030132D /* LocationShareView.swift */; };
+		413E46C72C78676A0030132D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 413E46C62C78676A0030132D /* Assets.xcassets */; };
+		413E46CA2C78676A0030132D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 413E46C92C78676A0030132D /* Preview Assets.xcassets */; };
+		413E46D42C78676A0030132D /* LocationShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46D32C78676A0030132D /* LocationShareTests.swift */; };
+		413E46DE2C78676A0030132D /* LocationShareUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46DD2C78676A0030132D /* LocationShareUITests.swift */; };
+		413E46E02C78676A0030132D /* LocationShareUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46DF2C78676A0030132D /* LocationShareUITestsLaunchTests.swift */; };
+		413E46ED2C7875CE0030132D /* LocationShareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46EC2C7875CD0030132D /* LocationShareViewModel.swift */; };
+		413E46EF2C78773C0030132D /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46EE2C78773C0030132D /* LocationManager.swift */; };
+		413E46F22C7895900030132D /* StreamrProxyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F12C7895900030132D /* StreamrProxyClient.swift */; };
+		413E46F62C7898D40030132D /* PeerDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F52C7898D40030132D /* PeerDescriptor.swift */; };
+		4176FEC02C7B9078004F8A48 /* ProxyClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4176FEBE2C7B9078004F8A48 /* ProxyClient.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		413E46D02C78676A0030132D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 413E46B72C7867670030132D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 413E46BE2C7867670030132D;
+			remoteInfo = LocationShare;
+		};
+		413E46DA2C78676A0030132D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 413E46B72C7867670030132D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 413E46BE2C7867670030132D;
+			remoteInfo = LocationShare;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		413E46BF2C7867670030132D /* LocationShare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LocationShare.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		413E46C22C7867670030132D /* LocationShareApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareApp.swift; sourceTree = "<group>"; };
+		413E46C42C7867670030132D /* LocationShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareView.swift; sourceTree = "<group>"; };
+		413E46C62C78676A0030132D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		413E46C92C78676A0030132D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		413E46CF2C78676A0030132D /* LocationShareTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocationShareTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		413E46D32C78676A0030132D /* LocationShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareTests.swift; sourceTree = "<group>"; };
+		413E46D92C78676A0030132D /* LocationShareUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocationShareUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		413E46DD2C78676A0030132D /* LocationShareUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareUITests.swift; sourceTree = "<group>"; };
+		413E46DF2C78676A0030132D /* LocationShareUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		413E46EC2C7875CD0030132D /* LocationShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareViewModel.swift; sourceTree = "<group>"; };
+		413E46EE2C78773C0030132D /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		413E46F02C787E820030132D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		413E46F12C7895900030132D /* StreamrProxyClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamrProxyClient.swift; sourceTree = "<group>"; };
+		413E46F52C7898D40030132D /* PeerDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDescriptor.swift; sourceTree = "<group>"; };
+		4176FEBD2C7B9077004F8A48 /* LocationShare-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LocationShare-Bridging-Header.h"; sourceTree = "<group>"; };
+		4176FEBE2C7B9078004F8A48 /* ProxyClient.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ProxyClient.cpp; sourceTree = "<group>"; };
+		4176FEBF2C7B9078004F8A48 /* ProxyClient.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ProxyClient.hpp; sourceTree = "<group>"; };
+		4176FEC12C7B9204004F8A48 /* Result.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Result.hpp; sourceTree = "<group>"; };
+		4176FEC22C7B92DA004F8A48 /* PeerDescriptor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PeerDescriptor.hpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		413E46BC2C7867670030132D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		413E46CC2C78676A0030132D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		413E46D62C78676A0030132D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		413E46B62C7867670030132D = {
+			isa = PBXGroup;
+			children = (
+				413E46C12C7867670030132D /* LocationShare */,
+				413E46D22C78676A0030132D /* LocationShareTests */,
+				413E46DC2C78676A0030132D /* LocationShareUITests */,
+				413E46C02C7867670030132D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		413E46C02C7867670030132D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				413E46BF2C7867670030132D /* LocationShare.app */,
+				413E46CF2C78676A0030132D /* LocationShareTests.xctest */,
+				413E46D92C78676A0030132D /* LocationShareUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		413E46C12C7867670030132D /* LocationShare */ = {
+			isa = PBXGroup;
+			children = (
+				413E46F02C787E820030132D /* Info.plist */,
+				413E46C22C7867670030132D /* LocationShareApp.swift */,
+				413E46C42C7867670030132D /* LocationShareView.swift */,
+				413E46C62C78676A0030132D /* Assets.xcassets */,
+				413E46C82C78676A0030132D /* Preview Content */,
+				413E46EC2C7875CD0030132D /* LocationShareViewModel.swift */,
+				413E46EE2C78773C0030132D /* LocationManager.swift */,
+				413E46F12C7895900030132D /* StreamrProxyClient.swift */,
+				413E46F52C7898D40030132D /* PeerDescriptor.swift */,
+				4176FEBE2C7B9078004F8A48 /* ProxyClient.cpp */,
+				4176FEBF2C7B9078004F8A48 /* ProxyClient.hpp */,
+				4176FEBD2C7B9077004F8A48 /* LocationShare-Bridging-Header.h */,
+				4176FEC12C7B9204004F8A48 /* Result.hpp */,
+				4176FEC22C7B92DA004F8A48 /* PeerDescriptor.hpp */,
+			);
+			path = LocationShare;
+			sourceTree = "<group>";
+		};
+		413E46C82C78676A0030132D /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				413E46C92C78676A0030132D /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		413E46D22C78676A0030132D /* LocationShareTests */ = {
+			isa = PBXGroup;
+			children = (
+				413E46D32C78676A0030132D /* LocationShareTests.swift */,
+			);
+			path = LocationShareTests;
+			sourceTree = "<group>";
+		};
+		413E46DC2C78676A0030132D /* LocationShareUITests */ = {
+			isa = PBXGroup;
+			children = (
+				413E46DD2C78676A0030132D /* LocationShareUITests.swift */,
+				413E46DF2C78676A0030132D /* LocationShareUITestsLaunchTests.swift */,
+			);
+			path = LocationShareUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		413E46BE2C7867670030132D /* LocationShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 413E46E32C78676A0030132D /* Build configuration list for PBXNativeTarget "LocationShare" */;
+			buildPhases = (
+				413E46BB2C7867670030132D /* Sources */,
+				413E46BC2C7867670030132D /* Frameworks */,
+				413E46BD2C7867670030132D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LocationShare;
+			productName = LocationShare;
+			productReference = 413E46BF2C7867670030132D /* LocationShare.app */;
+			productType = "com.apple.product-type.application";
+		};
+		413E46CE2C78676A0030132D /* LocationShareTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 413E46E62C78676A0030132D /* Build configuration list for PBXNativeTarget "LocationShareTests" */;
+			buildPhases = (
+				413E46CB2C78676A0030132D /* Sources */,
+				413E46CC2C78676A0030132D /* Frameworks */,
+				413E46CD2C78676A0030132D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				413E46D12C78676A0030132D /* PBXTargetDependency */,
+			);
+			name = LocationShareTests;
+			productName = LocationShareTests;
+			productReference = 413E46CF2C78676A0030132D /* LocationShareTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		413E46D82C78676A0030132D /* LocationShareUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 413E46E92C78676A0030132D /* Build configuration list for PBXNativeTarget "LocationShareUITests" */;
+			buildPhases = (
+				413E46D52C78676A0030132D /* Sources */,
+				413E46D62C78676A0030132D /* Frameworks */,
+				413E46D72C78676A0030132D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				413E46DB2C78676A0030132D /* PBXTargetDependency */,
+			);
+			name = LocationShareUITests;
+			productName = LocationShareUITests;
+			productReference = 413E46D92C78676A0030132D /* LocationShareUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		413E46B72C7867670030132D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					413E46BE2C7867670030132D = {
+						CreatedOnToolsVersion = 15.4;
+						LastSwiftMigration = 1540;
+					};
+					413E46CE2C78676A0030132D = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 413E46BE2C7867670030132D;
+					};
+					413E46D82C78676A0030132D = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 413E46BE2C7867670030132D;
+					};
+				};
+			};
+			buildConfigurationList = 413E46BA2C7867670030132D /* Build configuration list for PBXProject "LocationShare" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 413E46B62C7867670030132D;
+			productRefGroup = 413E46C02C7867670030132D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				413E46BE2C7867670030132D /* LocationShare */,
+				413E46CE2C78676A0030132D /* LocationShareTests */,
+				413E46D82C78676A0030132D /* LocationShareUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		413E46BD2C7867670030132D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				413E46CA2C78676A0030132D /* Preview Assets.xcassets in Resources */,
+				413E46C72C78676A0030132D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		413E46CD2C78676A0030132D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		413E46D72C78676A0030132D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		413E46BB2C7867670030132D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				413E46F62C7898D40030132D /* PeerDescriptor.swift in Sources */,
+				413E46EF2C78773C0030132D /* LocationManager.swift in Sources */,
+				413E46C52C7867670030132D /* LocationShareView.swift in Sources */,
+				413E46F22C7895900030132D /* StreamrProxyClient.swift in Sources */,
+				413E46ED2C7875CE0030132D /* LocationShareViewModel.swift in Sources */,
+				4176FEC02C7B9078004F8A48 /* ProxyClient.cpp in Sources */,
+				413E46C32C7867670030132D /* LocationShareApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		413E46CB2C78676A0030132D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				413E46D42C78676A0030132D /* LocationShareTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		413E46D52C78676A0030132D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				413E46DE2C78676A0030132D /* LocationShareUITests.swift in Sources */,
+				413E46E02C78676A0030132D /* LocationShareUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		413E46D12C78676A0030132D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 413E46BE2C7867670030132D /* LocationShare */;
+			targetProxy = 413E46D02C78676A0030132D /* PBXContainerItemProxy */;
+		};
+		413E46DB2C78676A0030132D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 413E46BE2C7867670030132D /* LocationShare */;
+			targetProxy = 413E46DA2C78676A0030132D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		413E46E12C78676A0030132D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		413E46E22C78676A0030132D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		413E46E42C78676A0030132D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"LocationShare/Preview Content\"";
+				DEVELOPMENT_TEAM = S933S46DZS;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LocationShare/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "The app needs access to your location to provide location-based services.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "LocationShare/LocationShare-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		413E46E52C78676A0030132D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"LocationShare/Preview Content\"";
+				DEVELOPMENT_TEAM = S933S46DZS;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LocationShare/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "The app needs access to your location to provide location-based services.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "LocationShare/LocationShare-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		413E46E72C78676A0030132D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S933S46DZS;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShareTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LocationShare.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LocationShare";
+			};
+			name = Debug;
+		};
+		413E46E82C78676A0030132D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S933S46DZS;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShareTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LocationShare.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LocationShare";
+			};
+			name = Release;
+		};
+		413E46EA2C78676A0030132D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S933S46DZS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShareUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LocationShare;
+			};
+			name = Debug;
+		};
+		413E46EB2C78676A0030132D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = S933S46DZS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShareUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LocationShare;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		413E46BA2C7867670030132D /* Build configuration list for PBXProject "LocationShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				413E46E12C78676A0030132D /* Debug */,
+				413E46E22C78676A0030132D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		413E46E32C78676A0030132D /* Build configuration list for PBXNativeTarget "LocationShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				413E46E42C78676A0030132D /* Debug */,
+				413E46E52C78676A0030132D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		413E46E62C78676A0030132D /* Build configuration list for PBXNativeTarget "LocationShareTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				413E46E72C78676A0030132D /* Debug */,
+				413E46E82C78676A0030132D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		413E46E92C78676A0030132D /* Build configuration list for PBXNativeTarget "LocationShareUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				413E46EA2C78676A0030132D /* Debug */,
+				413E46EB2C78676A0030132D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 413E46B72C7867670030132D /* Project object */;
+}
