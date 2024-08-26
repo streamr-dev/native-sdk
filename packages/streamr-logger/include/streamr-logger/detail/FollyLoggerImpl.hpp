@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <memory>
 #include <source_location>
+#include <string_view>
 #include <folly/logging/LogCategoryConfig.h>
 #include <folly/logging/LogConfig.h>
 #include <folly/logging/LogLevel.h>
@@ -47,8 +48,8 @@ public:
 
     void sendLogMessage(
         const streamr::logger::StreamrLogLevel logLevel,
-        const std::string& msg,
-        const std::string& metadata,
+        std::string_view msg,
+        std::string_view metadata,
         const std::source_location& location) override {
         const auto messageFollyLogLevel =
             LogLevelMap::instance().streamrLevelToFollyLevel(logLevel);
