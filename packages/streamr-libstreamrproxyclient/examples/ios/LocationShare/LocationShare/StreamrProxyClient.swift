@@ -13,12 +13,16 @@ class StreamrProxyClient {
     @MainActor var proxyInfo: PeerDesc = PeerDesc(peerId: "", peerAddress: "")
     @MainActor var publishingIntervalInSeconds: TimeInterval = defaultPublishingIntervalInSeconds
     @MainActor private(set) var status: Status = .stopped
-    private var cancellable: AnyCancellable?
-    private var locationManager: LocationManager
-    private var proxyClient = ProxyClient()
-    static var defaultPublishingIntervalInSeconds: TimeInterval = 5
-    private var proxyClientHandle: Int32 = 0
-    
+    private let locationManager: LocationManager
+    private let proxyClient = ProxyClient()
+    static let defaultPublishingIntervalInSeconds: TimeInterval = 5
+    @ObservationIgnored private var proxyClientHandle: ProxyClientHandle = 0
+    @ObservationIgnored private var task: Task<Void, Never>?
+    @ObservationIgnored private var timerSequence = Timer
+        .publish(every: 1, on: .main, in: .default)
+        .autoconnect()
+        .values
+
     enum Status {
         case stopped
         case proxySet
@@ -33,7 +37,7 @@ class StreamrProxyClient {
     @MainActor
     private func setProxy() async -> Result {
         print("Set Proxy start")
-        let peerDescriptor = PeerDescriptor(peerId: "9f8wunfaiwuhfwe9a8", peerAddress: "ws://127.0.0.1:8080")
+        let peerDescriptor = PeerDescriptor(peerId: std.string(proxyInfo.peerId), peerAddress: std.string(proxyInfo.peerAddress))
         let result = await Task.detached {
             self.proxyClient.setProxy(self.proxyClientHandle, peerDescriptor)
         }.value
@@ -41,42 +45,49 @@ class StreamrProxyClient {
         return result
     }
  
-    private func publish() {
-        print("Set Proxy start")
-        Task { @MainActor in
-            print("Thread: publish: \(Thread.current)")
-            let latitude = locationManager.location?.latitude ?? 0
-            let longitude = locationManager.location?.longitude ?? 0
-            print("Publish: \(latitude), \(longitude)")
-            self.status = .publishing
-        }
+    @MainActor
+    private func publish() async -> Result {
+        print("Publish start")
+        let latitude = locationManager.location?.latitude ?? 0
+        let longitude = locationManager.location?.longitude ?? 0
+        self.status = .publishing
+        let result = await Task.detached {
+            self.proxyClient.publish(self.proxyClientHandle, std.string("\(latitude) \(longitude)"))
+        }.value
+        print("Publish end with result: \(result)")
+        return result
     }
     
     func startPublishing() {
+        print("startPublishing start")
         Task { @MainActor in
-            print("Thread: startPublishing: \(Thread.current)")
-            print("startPublishing with interval: \(publishingIntervalInSeconds)")
+            status = .proxySet
             let result = await setProxy()
             if result.code == 1 {
+                status = .stopped
                 return
             }
-            status = .proxySet
-            let task = Timer.publish(every: publishingIntervalInSeconds, on: .main, in: .default).values
-            cancellable = Timer.publish(every: publishingIntervalInSeconds, on: .main, in: .default)
-                .autoconnect()
-                .sink { [self] _ in
-                    publish()
+            timerSequence = Timer
+                  .publish(every: publishingIntervalInSeconds, on: .main, in: .default)
+                  .autoconnect()
+                  .values
+            task = Task {
+                for await _ in timerSequence {
+                    await publish()
                 }
+            }
         }
+        print("startPublishing end")
     }
     
     func stopPublishing() {
-        print("stopPublishing")
-        cancellable?.cancel()
-        cancellable = nil
+        print("stopPublishing start")
+        task?.cancel()
+        task = nil
         Task { @MainActor in
             status = .stopped
         }
+        print("stopPublishing stop")
     }
     
 

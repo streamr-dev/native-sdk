@@ -12,12 +12,14 @@
 #include "Result.hpp"
 #include "PeerDescriptor.hpp"
 
+using ProxyClientHandle = int;
+
 class ProxyClient {
 public:
     ProxyClient() { }
-    int newClient() const;
-    Result deleteClient(int proxyClientHandle) const;
-    Result publish(int proxyClientHandle, std::string data) const;
-    Result setProxy(int proxyClientHandle, PeerDescriptor proxy) const;
+    ProxyClientHandle newClient() const;
+    Result deleteClient(ProxyClientHandle proxyClientHandle) const;
+    Result publish(ProxyClientHandle proxyClientHandle, std::string data) const;
+    Result setProxy(ProxyClientHandle proxyClientHandle, PeerDescriptor proxy) const;
 };
 #endif /* ProxyClient_hpp */

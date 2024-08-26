@@ -13,20 +13,20 @@
 
 using namespace std::chrono_literals;
 
-int ProxyClient::newClient() const {
+ProxyClientHandle ProxyClient::newClient() const {
     return 1;
 }
 
-Result ProxyClient::deleteClient(int proxyClientHandle) const {
+Result ProxyClient::deleteClient(ProxyClientHandle proxyClientHandle) const {
     return Result{0, ""};
 }
 
-Result ProxyClient::publish(int proxyClientHandle, std::string data) const {
+Result ProxyClient::publish(ProxyClientHandle proxyClientHandle, std::string data) const {
     std::this_thread::sleep_for(1s);
     return Result{0, ""};
 }
 
-Result ProxyClient::setProxy(int proxyClientHandle, PeerDescriptor proxy) const {
+Result ProxyClient::setProxy(ProxyClientHandle proxyClientHandle, PeerDescriptor proxy) const {
     std::this_thread::sleep_for(10s);
     return Result{0, ""};
 }
