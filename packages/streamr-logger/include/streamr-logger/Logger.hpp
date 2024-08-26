@@ -86,7 +86,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void trace(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -102,7 +102,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void debug(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -118,7 +118,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void info(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -134,7 +134,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void warn(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -150,7 +150,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void error(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -166,7 +166,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void fatal(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -195,7 +195,7 @@ private:
     template <typename MetadataType>
     void log(
         const StreamrLogLevel messageLogLevel,
-        const std::string& msg,
+        std::string_view msg,
         MetadataType metadata,
         const std::source_location& location) {
         // Merge the possible metadata with the context bindings
