@@ -11,7 +11,8 @@
 #include <string>
 
 struct Result {
-    int code;
+    enum class ResultCode{ Ok, Error };
+    ResultCode code;
     std::string message;
 };
 

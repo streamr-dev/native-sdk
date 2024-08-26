@@ -12,7 +12,7 @@ import Combine
 class StreamrProxyClient {
     @MainActor var proxyInfo: PeerDesc = PeerDesc(peerId: "", peerAddress: "")
     @MainActor var publishingIntervalInSeconds: TimeInterval = defaultPublishingIntervalInSeconds
-    @MainActor private(set) var status: Status = .stopped
+    var status: Status = .stopped
     private let locationManager: LocationManager
     private let proxyClient = ProxyClient()
     static let defaultPublishingIntervalInSeconds: TimeInterval = 5
@@ -39,7 +39,7 @@ class StreamrProxyClient {
         print("Set Proxy start")
         let peerDescriptor = PeerDescriptor(peerId: std.string(proxyInfo.peerId), peerAddress: std.string(proxyInfo.peerAddress))
         let result = await Task.detached {
-            self.proxyClient.setProxy(self.proxyClientHandle, peerDescriptor)
+            self.proxyClient.setProxies(self.proxyClientHandle, [peerDescriptor])
         }.value
         print("Set Proxy end")
         return result
@@ -54,7 +54,7 @@ class StreamrProxyClient {
         let result = await Task.detached {
             self.proxyClient.publish(self.proxyClientHandle, std.string("\(latitude) \(longitude)"))
         }.value
-        print("Publish end with result: \(result)")
+        print("Publish end")
         return result
     }
     
@@ -63,7 +63,7 @@ class StreamrProxyClient {
         Task { @MainActor in
             status = .proxySet
             let result = await setProxy()
-            if result.code == 1 {
+            if result.code == Result.ResultCode.Error {
                 status = .stopped
                 return
             }
@@ -74,6 +74,7 @@ class StreamrProxyClient {
             task = Task {
                 for await _ in timerSequence {
                     await publish()
+                    if Task.isCancelled { return }
                 }
             }
         }

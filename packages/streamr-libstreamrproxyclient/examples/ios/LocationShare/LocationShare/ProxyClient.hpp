@@ -20,6 +20,6 @@ public:
     ProxyClientHandle newClient() const;
     Result deleteClient(ProxyClientHandle proxyClientHandle) const;
     Result publish(ProxyClientHandle proxyClientHandle, std::string data) const;
-    Result setProxy(ProxyClientHandle proxyClientHandle, PeerDescriptor proxy) const;
+    Result setProxies(ProxyClientHandle proxyClientHandle, std::vector<PeerDescriptor> proxy) const;
 };
 #endif /* ProxyClient_hpp */

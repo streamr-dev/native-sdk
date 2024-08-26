@@ -22,6 +22,7 @@ struct LocationShareView: View {
                         "Enter proxy ID",
                         text: $viewModel.proxyId
                     )
+                    Text(viewModel.status)
                 }
                 Section(header: Text("Publishing Interval")) {
                     TextField(

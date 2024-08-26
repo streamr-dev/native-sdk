@@ -9,11 +9,16 @@ import Foundation
 
 struct LocationShareViewModel {
     private var locationManager: LocationManager
-    private var streamrProxyClient: StreamrProxyClient
+    var streamrProxyClient: StreamrProxyClient
    
     init() {
         self.locationManager = LocationManager()
         self.streamrProxyClient = StreamrProxyClient(locationManager: locationManager)
+    }
+       
+    @MainActor
+    var status: String {
+        "Status: \(streamrProxyClient.status)"
     }
     
     @MainActor

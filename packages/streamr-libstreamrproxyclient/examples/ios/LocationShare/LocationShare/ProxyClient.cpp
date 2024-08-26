@@ -18,16 +18,16 @@ ProxyClientHandle ProxyClient::newClient() const {
 }
 
 Result ProxyClient::deleteClient(ProxyClientHandle proxyClientHandle) const {
-    return Result{0, ""};
+    return Result{Result::ResultCode::Ok, ""};
 }
 
 Result ProxyClient::publish(ProxyClientHandle proxyClientHandle, std::string data) const {
     std::this_thread::sleep_for(1s);
-    return Result{0, ""};
+    return Result{Result::ResultCode::Ok, ""};
 }
 
-Result ProxyClient::setProxy(ProxyClientHandle proxyClientHandle, PeerDescriptor proxy) const {
-    std::this_thread::sleep_for(10s);
-    return Result{0, ""};
+Result ProxyClient::setProxies(ProxyClientHandle proxyClientHandle, std::vector<PeerDescriptor> proxy) const {
+    std::this_thread::sleep_for(1s);
+    return Result{Result::ResultCode::Ok, ""};
 }
 
