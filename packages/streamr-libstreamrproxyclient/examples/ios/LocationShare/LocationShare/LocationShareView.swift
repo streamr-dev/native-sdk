@@ -22,11 +22,12 @@ struct LocationShareView: View {
                         "Enter proxy ID",
                         text: $viewModel.proxyId
                     )
+                }
+                Section(header: Text("Publishing Interval")) {
                     TextField(
-                        "Enter sending interval in seconds",
+                        "Enter interval in seconds",
                         text: $viewModel.publishingIntervalInSeconds
                     )
-                
                 }
                 Section(header: Text("GPS Location")) {
                     Text("\(viewModel.latitude), \(viewModel.longitude)")
