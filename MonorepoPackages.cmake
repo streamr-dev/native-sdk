@@ -4,4 +4,5 @@ set(MonorepoPackages
     streamr-eventemitter
     streamr-utils
     streamr-proto-rpc
+    streamr-dht
 )

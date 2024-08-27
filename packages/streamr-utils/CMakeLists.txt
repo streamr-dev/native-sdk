@@ -19,7 +19,13 @@ target_include_directories(
   streamr-utils INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
-export(TARGETS streamr-utils FILE streamr-utils-config.cmake)
+export(TARGETS streamr-utils
+    NAMESPACE streamr::
+    FILE streamr-utils-config-in.cmake)
+  
+file(WRITE "${CMAKE_BINARY_DIR}/streamr-utils-config.cmake" 
+    "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
+    "include(${CMAKE_BINARY_DIR}/streamr-utils-config-in.cmake)\n")
 
 if(NOT IOS)
   enable_testing()
