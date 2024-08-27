@@ -48,6 +48,24 @@ target_link_libraries(streamr-proto-rpc
     PUBLIC Folly::folly
     )
 
+export(TARGETS streamr-proto-rpc 
+    NAMESPACE streamr::
+    FILE streamr-proto-rpc-config-in.cmake)
+  
+file(WRITE "${CMAKE_BINARY_DIR}/streamr-proto-rpc-config.cmake" 
+    "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
+    "find_package(streamr-logger CONFIG REQUIRED)\n"
+    "find_package(streamr-eventemitter CONFIG REQUIRED)\n"
+    "find_package(Protobuf REQUIRED)\n"
+    "find_package(Boost CONFIG REQUIRED)\n"
+    "find_package(magic_enum CONFIG REQUIRED)\n"
+    "find_package(folly REQUIRED)\n"
+    "if(NOT TARGET Boost::uuid)\n"
+    "  add_library(Boost::uuid INTERFACE IMPORTED)\n"
+    "  set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
+    "endif()\n"
+    "include(${CMAKE_BINARY_DIR}/streamr-proto-rpc-config-in.cmake)\n")
+
 if(NOT IOS)
     add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp include/streamr-proto-rpc/PluginCodeGenerator.hpp)
 

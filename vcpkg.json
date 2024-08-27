@@ -7,8 +7,10 @@
     "boost-uuid",
     "folly",
     "gtest",
+    "libdatachannel",
     "magic-enum",
     "nlohmann-json",
+    "openssl",
     "protobuf"
   ]
 }
