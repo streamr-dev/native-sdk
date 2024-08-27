@@ -19,6 +19,7 @@ vcpkg_from_github(
         fix-unistd-include.patch
         fix-fmt11-cmake.patch
         disable-groupvarint.patch
+        disable-cxa-init-primary-exception.patch
 )
 
 file(REMOVE "${SOURCE_PATH}/CMake/FindFmt.cmake")
