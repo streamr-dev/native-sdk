@@ -14,7 +14,11 @@ set(CMAKE_CXX_COMPILER "${LLVM_PREFIX}/bin/clang++")
 set(ENV{CC} "${CMAKE_C_COMPILER}")
 set(ENV{CXX} "${CMAKE_CXX_COMPILER}")
 
-set(VCPKG_CMAKE_CONFIGURE_OPTIONS -DCMAKE_C_COMPILER=${LLVM_PREFIX}/bin/clang -DCMAKE_CXX_COMPILER=${LLVM_PREFIX}/bin/clang++ -DCMAKE_CXX_STANDARD=26)
+set(VCPKG_CMAKE_CONFIGURE_OPTIONS
+    -DCMAKE_C_COMPILER=${LLVM_PREFIX}/bin/clang
+    -DCMAKE_CXX_COMPILER=${LLVM_PREFIX}/bin/clang++
+    -DCMAKE_CXX_STANDARD=26
+    )
 
 set(VCPKG_CXX_FLAGS "-isystem /opt/homebrew/include/c++/v1")
 set(VCPKG_C_FLAGS "-isystem /opt/homebrew/include/c++/v1")

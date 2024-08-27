@@ -13,12 +13,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     
     xcode-select --install
     brew install jq
-    brew uninstall llvm
-    brew install llvm@17
+    brew uninstall llvm@17
+    brew install llvm
     brew install cmake
     brew install pkg-config
    
-    brew link --overwrite --force llvm@17
+    brew link --overwrite --force llvm
     #rm -f $HOMEBREW_PREFIX/bin/clang-format
     #rm -f $HOMEBREW_PREFIX/bin/clangd
     #rm -f $HOMEBREW_PREFIX/bin/lldb
