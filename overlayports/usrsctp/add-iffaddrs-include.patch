@@ -1,0 +1,13 @@
+diff --git a/usrsctplib/netinet/sctp_bsd_addr.c b/usrsctplib/netinet/sctp_bsd_addr.c
+index fa7b877..c691b57 100755
+--- a/usrsctplib/netinet/sctp_bsd_addr.c
++++ b/usrsctplib/netinet/sctp_bsd_addr.c
+@@ -36,7 +36,7 @@
+ #include <sys/cdefs.h>
+ __FBSDID("$FreeBSD: head/sys/netinet/sctp_bsd_addr.c 366426 2020-10-04 15:37:34Z tuexen $");
+ #endif
+-
++#include <ifaddrs.h>
+ #include <netinet/sctp_os.h>
+ #include <netinet/sctp_var.h>
+ #include <netinet/sctp_pcb.h>

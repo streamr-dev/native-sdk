@@ -20,6 +20,7 @@ vcpkg_from_github(
         fix-fmt11-cmake.patch
         disable-groupvarint.patch
         disable-cxa-init-primary-exception.patch
+        fix-android-remainder.patch
 )
 
 file(REMOVE "${SOURCE_PATH}/CMake/FindFmt.cmake")

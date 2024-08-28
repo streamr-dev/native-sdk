@@ -49,6 +49,9 @@ if(NOT IOS)
     PUBLIC GTest::gmock 
     PUBLIC GTest::gmock_main)
 
-  include(GoogleTest)
-  gtest_discover_tests(streamr-eventemitter-test-unit)
+  if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
+    include(GoogleTest)
+    gtest_discover_tests(streamr-eventemitter-test-unit)
+  endif()
+
 endif()
