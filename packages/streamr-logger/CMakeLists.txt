@@ -2,17 +2,20 @@ cmake_minimum_required(VERSION 3.22)
 include(homebrewClang.cmake)
 
 set(CMAKE_CXX_STANDARD 26)
-#set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)
 
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 # make the current package a monorepo package
 include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
+set(VCPKG_TRACE_FIND_PACKAGE TRUE)
+set(CMAKE_FIND_USE_CMAKE_PATH ON CACHE BOOL "Force CMake to use CMAKE_PATH" FORCE)
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
-
+set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH ON)
 project(logger CXX)
 
-find_package(folly REQUIRED)
+set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH ON)
+find_package(folly CONFIG REQUIRED)
 find_package(streamr-json CONFIG REQUIRED)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -64,7 +67,7 @@ export(TARGETS streamr-logger
   FILE streamr-logger-config-in.cmake)
 
   file(WRITE "${CMAKE_BINARY_DIR}/streamr-logger-config.cmake" 
-  "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
+  "list(APPEND CMAKE_FIND_ROOT_PATH \"${CMAKE_FIND_ROOT_PATH}\")\n"
   "find_package(folly REQUIRED)\n"
   "find_package(streamr-json CONFIG REQUIRED)\n"
   "include(${CMAKE_BINARY_DIR}/streamr-logger-config-in.cmake)\n")
@@ -82,8 +85,10 @@ if(NOT IOS)
     PRIVATE GTest::gmock 
     PRIVATE GTest::gmock_main)
 
-  include(GoogleTest)
-  gtest_discover_tests(streamr-logger-test-unit)
+  if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
+    include(GoogleTest)
+    gtest_discover_tests(streamr-logger-test-unit)
+  endif()
 
   add_executable(streamr-logger-example src/examples/LoggerExample.cpp)
   target_link_libraries(streamr-logger-example PRIVATE streamr-logger)

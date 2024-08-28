@@ -10,6 +10,8 @@ vcpkg_from_github(
         fix_export.patch
         mingw.diff
         fix-missing-route-header-ios.patch
+        fix-cmake-version.patch
+        add-iffaddrs-include.patch
 )
 
 vcpkg_cmake_configure(

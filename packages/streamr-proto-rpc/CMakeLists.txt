@@ -108,9 +108,10 @@ if(NOT IOS)
         PUBLIC GTest::gmock 
         PUBLIC Folly::folly
     )
-    
-    include(GoogleTest)
-    gtest_discover_tests(streamr-proto-rpc-test-unit)
+    if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
+      include(GoogleTest)
+      gtest_discover_tests(streamr-proto-rpc-test-unit)
+    endif()
 
     add_executable(streamr-proto-rpc-test-integration
         test/proto/HelloRpc.pb.cc
@@ -131,10 +132,11 @@ if(NOT IOS)
         PUBLIC GTest::gmock 
         PUBLIC Folly::folly
     )
+    if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
+      include(GoogleTest)
+      gtest_discover_tests(streamr-proto-rpc-test-integration)
+    endif()
     
-    include(GoogleTest)
-    gtest_discover_tests(streamr-proto-rpc-test-integration)
-
     add_executable(streamr-proto-rpc-example-hello
         examples/hello/hello.cpp
         examples/hello/proto/HelloRpc.pb.cc
