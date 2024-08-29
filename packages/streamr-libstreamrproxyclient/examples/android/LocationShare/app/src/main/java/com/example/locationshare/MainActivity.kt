@@ -20,13 +20,19 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import android.Manifest;
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.locationshare.ui.LocationShareViewModel
 
 class MainActivity : ComponentActivity() {
 
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
     private lateinit var locationClient: FusedLocationProviderClient
-
+    private val locationViewModel: LocationViewModel by viewModels()
+    private val locationShareViewModel: LocationShareViewModel by viewModels {
+        LocationShareViewModelFactory(StreamrProxyClient(locationViewModel.state))
+    }
     private fun checkPermissions() {
 
         if (!hasLocationPermissions()) {
@@ -74,8 +80,6 @@ class MainActivity : ComponentActivity() {
         println("Start LocationShare")
         super.onCreate(savedInstanceState)
         checkPermissions()
-        val locationViewModel = LocationViewModel()
-        var locationShareViewModel = LocationShareViewModel(StreamrProxyClient(locationViewModel.state))
         initUpdates(locationViewModel)
         enableEdgeToEdge()
         setContent {
@@ -84,11 +88,22 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    LocationShareScreen(locationViewModel = locationViewModel, locationShareViewModel = locationShareViewModel)
+                    LocationShareScreen(
+                        locationViewModel = locationViewModel,
+                        locationShareViewModel = locationShareViewModel
+                    )
                 }
             }
         }
     }
 }
 
-
+class LocationShareViewModelFactory(private val streamrProxyClient: StreamrProxyClient) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(LocationShareViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return LocationShareViewModel(streamrProxyClient) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
