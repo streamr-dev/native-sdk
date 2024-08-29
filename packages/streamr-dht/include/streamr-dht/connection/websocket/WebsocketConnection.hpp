@@ -25,9 +25,11 @@ protected:
     explicit WebsocketConnection(ConnectionType type) : Connection(type) {}
 
     void setSocket(std::shared_ptr<rtc::WebSocket>&& socket) {
+        SLogger::trace("setSocket()");
         std::lock_guard<std::recursive_mutex> lock(mMutex);
         mSocket = std::move(socket);
-
+    
+        SLogger::trace("setSocket() after move");
         // Set socket callbacks
 
         mSocket->onError([this](const std::string& error) {
@@ -39,7 +41,6 @@ protected:
                 emit<Error>(error);
             }
         });
-
         mSocket->onOpen([this]() {
             SLogger::trace(
                 "onOpen()",
@@ -71,6 +72,7 @@ protected:
                 emit<Disconnected>(gracefulLeave, 0, "");
                 this->removeAllListeners();
             }
+          
         });
 
         mSocket->onMessage([this](const std::variant<rtc::binary, std::string>&
@@ -91,6 +93,7 @@ protected:
                 }
             }
         });
+        SLogger::trace("setSocket() end");
     }
 
 public:
