@@ -110,7 +110,7 @@ private:
     // are fully ready, otherwise they would get destroyed when the smart
     // pointer falls out of scope.
 
-    void handleHalfReadySocket(const std::shared_ptr<rtc::WebSocket>& ws) {
+    void handleHalfReadySocket(const std::shared_ptr<rtc::WebSocket> ws) {
         auto id = boost::uuids::to_string(boost::uuids::random_generator()());
         mHalfReadySockets.insert({id, ws});
 
@@ -123,21 +123,24 @@ private:
             auto parsedUrl = Url{ws->path().value()};
             auto parsedRemoteAddress = ws->remoteAddress().value().substr(
                 0, ws->remoteAddress().value().find(':'));
-
             emit<events::Connected>(std::make_shared<WebsocketServerConnection>(
                 std::move(mHalfReadySockets[id]),
                 std::move(parsedUrl),
                 parsedRemoteAddress));
-
+            SLogger::info(
+                "handleHalfReadySocket. Before erase");
             mHalfReadySockets.erase(id);
         });
 
         ws->onClosed([id, this]() {
             SLogger::info(
                 "WebSocket client disconnected, calling forceClose()");
-            const auto& ws = mHalfReadySockets[id];
-            ws->forceClose();
-            mHalfReadySockets.erase(id);
+            const auto& it = mHalfReadySockets.find(id);  
+            if (it == mHalfReadySockets.end()) { 
+                // Already erased
+                return;
+            } 
+            mHalfReadySockets.erase(it);
         });
 
         ws->onError([id, this](const std::string& error) {
