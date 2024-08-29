@@ -24,6 +24,7 @@ public:
         : WebsocketConnection(ConnectionType::WEBSOCKET_SERVER),
           mResourceURL(std::move(resourceURL)),
           mRemoteAddress(remoteAddress) {
+        SLogger::trace("WebsocketServerConnection() setSocket");
         setSocket(std::move(socket));
     }
 
