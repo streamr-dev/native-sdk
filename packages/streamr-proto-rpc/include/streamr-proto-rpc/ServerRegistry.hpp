@@ -76,7 +76,7 @@ public:
     Any handleRequest(
         const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
         SLogger::trace(
-            ("Server processing RPC call " + rpcMessage.requestid()).c_str());
+            ("Server processing RPC call " + rpcMessage.requestid()));
         auto implementation = getImplementation(rpcMessage, mMethods);
         return implementation.fn(rpcMessage.body(), callContext);
     }
@@ -84,8 +84,7 @@ public:
     Empty handleNotification(
         const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
         SLogger::trace(
-            ("Server processing RPC notification " + rpcMessage.requestid())
-                .c_str());
+            ("Server processing RPC notification " + rpcMessage.requestid()));
         auto implementation = getImplementation(rpcMessage, mNotifications);
         return implementation.fn(rpcMessage.body(), callContext);
     }
@@ -116,7 +115,7 @@ public:
                 RequestType request;
                 ServerRegistry::wrappedParseAny(request, data);
                 fn(request, callContext);
-                return Empty();
+                return {};
             },
             .options = options};
         mNotifications[name] = notification;

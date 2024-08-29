@@ -13,18 +13,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     
     xcode-select --install
     brew install jq
-    brew uninstall llvm@17
-    brew install llvm
+    brew uninstall llvm
+    brew install llvm@17
     brew install cmake
     brew install pkg-config
    
-    brew link --overwrite --force llvm
-    #rm -f $HOMEBREW_PREFIX/bin/clang-format
-    #rm -f $HOMEBREW_PREFIX/bin/clangd
-    #rm -f $HOMEBREW_PREFIX/bin/lldb
-    #ln -s $HOMEBREW_PREFIX/bin/clang-format $HOMEBREW_PREFIX/bin/clang-format
-    #ln -s $HOMEBREW_PREFIX/bin/clangd $HOMEBREW_PREFIX/bin/clangd
-    #ln -s $HOMEBREW_PREFIX/bin/lldb $HOMEBREW_PREFIX/bin/lldb
+    brew link --overwrite --force llvm@17
     
     rm -f $HOMEBREW_PREFIX/bin/clang-tidy
 
@@ -95,8 +89,8 @@ echo $TEMP_PROFILE_CONTENTS
 
 touch $PROFILE_FILE
 # Remove old version of the block
-sed -i '/# streamr-native-sdk added start/,/# streamr-native-sdk added end/d' $PROFILE_FILE
+# sed -i '/# streamr-native-sdk added start/,/# streamr-native-sdk added end/d' $PROFILE_FILE
 # Add new block to profile file
-echo -e "# streamr-native-sdk added start\n$TEMP_PROFILE_CONTENTS# streamr-native-sdk added end" >> $PROFILE_FILE
+echo -e "# streamr-native-sdk added start\n$TEMP_PROFILE_CONTENTS# streamr-native-sdk added end" > $PROFILE_FILE
 
 git config core.hooksPath .githooks
