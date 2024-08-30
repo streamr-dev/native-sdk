@@ -1,5 +1,6 @@
 PROTOC=../../build/vcpkg_installed/arm64-osx/tools/protobuf/protoc
-PLUGIN=../../build/packages/streamr-proto-rpc/protobuf-streamr-plugin
+#PLUGIN=../../build/packages/streamr-proto-rpc/protobuf-streamr-plugin
+PLUGIN=../streamr-proto-rpc/build/protobuf-streamr-plugin
 mkdir -p ./src/proto
 mkdir -p ./src/proto/packages/dht/protos
 

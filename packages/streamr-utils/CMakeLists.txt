@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 26)
 
 project(streamr-utils CXX)
 
-#find_package(folly CONFIG REQUIRED)
+find_package(folly CONFIG REQUIRED)
 
 add_library(streamr-utils INTERFACE)
 add_library(streamr::streamr-utils ALIAS streamr-utils)
@@ -18,6 +18,10 @@ add_library(streamr::streamr-utils ALIAS streamr-utils)
 target_include_directories(
   streamr-utils INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
+
+target_link_libraries(streamr-utils
+    INTERFACE Folly::folly
+)
 
 export(TARGETS streamr-utils
     NAMESPACE streamr::

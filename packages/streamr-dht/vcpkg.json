@@ -8,7 +8,8 @@
         "boost-uuid",
         "magic-enum",
         "libdatachannel",
-        "openssl"
+        "openssl",
+        "boost-algorithm"
     ],
     "features": {
         "monorepo": {
