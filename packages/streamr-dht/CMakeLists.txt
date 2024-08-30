@@ -45,13 +45,15 @@ target_sources(streamr-dht
 target_link_libraries(streamr-dht 
     INTERFACE streamr::streamr-logger
     INTERFACE streamr::streamr-eventemitter
+    PUBLIC streamr::streamr-proto-rpc
+    INTERFACE streamr::streamr-utils
     PRIVATE protobuf::libprotobuf
     PRIVATE protobuf::libprotoc
     INTERFACE Boost::uuid
+    INTERFACE Boost::algorithm
     PRIVATE magic_enum::magic_enum
     PRIVATE Folly::folly
     PRIVATE OpenSSL::Crypto
-    INTERFACE streamr::streamr-utils
     PRIVATE LibDataChannel::LibDataChannelStatic
     )
 
@@ -61,6 +63,7 @@ if(NOT IOS)
 
     add_executable(streamr-dht-test-unit
         test/unit/WebsocketClientConnectionTest.cpp
+        test/unit/WebsocketClientConnectorRpcLocalTest.cpp
         test/unit/WebsocketServerConnectionTest.cpp
         test/unit/WebsocketServerTest.cpp
         test/unit/CertificateHelperTest.cpp

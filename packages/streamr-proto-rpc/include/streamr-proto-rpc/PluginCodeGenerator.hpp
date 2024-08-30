@@ -78,8 +78,9 @@ private:
         headerSs << "\n";
         headerSs << "#ifndef " << headerGuard << "\n";
         headerSs << "#define " << headerGuard << "\n\n";
-        headerSs << "#include \"" << typesFilename << "\" // NOLINT \n";
+        headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
         headerSs << "#include <folly/experimental/coro/Task.h>\n";
+        headerSs << "#include \"streamr-proto-rpc/ProtoCallContext.hpp\" // NOLINT\n";
 
         std::stringstream sourceSs;
 
@@ -88,7 +89,7 @@ private:
         } else {
             sourceSs << "namespace " << file->package() << " {\n";
         }
-
+        headerSs << "using streamr::protorpc::ProtoCallContext;\n\n";
         // for each services
         int numServices = file->service_count();
         for (int i = 0; i < numServices; i++) {

@@ -4,8 +4,11 @@
 #ifndef STREAMR_PROTORPC_DHTRPC_SERVER_PB_H
 #define STREAMR_PROTORPC_DHTRPC_SERVER_PB_H
 
-#include "DhtRpc.pb.h" // NOLINT 
+#include "DhtRpc.pb.h" // NOLINT
 #include <folly/experimental/coro/Task.h>
+#include "streamr-proto-rpc/ProtoCallContext.hpp" // NOLINT
+using streamr::protorpc::ProtoCallContext;
+
 
 namespace dht {
 class DhtNodeRpc {
