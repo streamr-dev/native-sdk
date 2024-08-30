@@ -1,3 +1,5 @@
+#define GLOG_USE_GLOG_EXPORT
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <streamr-logger/detail/StreamrLogFormatter.hpp>

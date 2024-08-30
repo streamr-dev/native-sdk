@@ -1,3 +1,5 @@
+#define GLOG_USE_GLOG_EXPORT
+
 #include <exception>
 #include <thread>
 #include <gtest/gtest.h>
