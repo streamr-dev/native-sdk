@@ -15,10 +15,10 @@
 
 namespace streamr::dht::connection::websocket {
 
+using streamr::dht::connection::Url;
 using streamr::dht::connection::events::Data;
 using streamr::dht::connection::events::Disconnected;
 using streamr::dht::connection::events::Error;
-using streamr::dht::connection::Url;
 using streamr::dht::utils::CertificateHelper;
 using streamr::dht::utils::TlsCertificate;
 using streamr::dht::utils::WebsocketServerStartError;
@@ -57,8 +57,8 @@ private:
     WebsocketServerConfig mConfig;
     uint16_t mPort;
     bool mTls;
-    std::unordered_map<std::string, std::shared_ptr<rtc::WebSocket>>
-        mHalfReadySockets;
+    std::unordered_map<std::string, std::shared_ptr<WebsocketServerConnection>>
+        mHalfReadyConnections;
 
 public:
     explicit WebsocketServer(WebsocketServerConfig&& config)
@@ -110,43 +110,57 @@ private:
     // are fully ready, otherwise they would get destroyed when the smart
     // pointer falls out of scope.
 
-    void handleHalfReadySocket(const std::shared_ptr<rtc::WebSocket> ws) {
+    void handleIncomingClient(std::shared_ptr<rtc::WebSocket>&& ws) {
+        auto websocketServerConnection =
+            std::make_shared<WebsocketServerConnection>();
         auto id = boost::uuids::to_string(boost::uuids::random_generator()());
-        mHalfReadySockets.insert({id, ws});
+        mHalfReadyConnections.insert({id, websocketServerConnection});
 
-        ws->onOpen([id, this]() {
-            SLogger::info("Hafl-Ready WebSocket client connected");
-            const auto& ws = mHalfReadySockets[id];
-            if (!ws->path().has_value() || !ws->remoteAddress().has_value()) {
-                return;
-            }
-            auto parsedUrl = Url{ws->path().value()};
-            auto parsedRemoteAddress = ws->remoteAddress().value().substr(
-                0, ws->remoteAddress().value().find(':'));
-            emit<events::Connected>(std::make_shared<WebsocketServerConnection>(
-                std::move(mHalfReadySockets[id]),
-                std::move(parsedUrl),
-                parsedRemoteAddress));
+        websocketServerConnection->on<Connected>([this, id]() {
             SLogger::info(
-                "handleHalfReadySocket. Before erase");
-            mHalfReadySockets.erase(id);
+                "Half-ready WebSocketServerConnection emitted Connected, emitting it as Connected");
+
+            auto readyConnection = this->mHalfReadyConnections.at(id);
+
+            readyConnection->removeAllListeners();
+
+            emit<events::Connected>(readyConnection);
+            SLogger::info("handleHalfReadySocket. Before erase");
+            mHalfReadyConnections.erase(id);
         });
 
-        ws->onClosed([id, this]() {
+        websocketServerConnection->on<
+            Disconnected>([id, this](
+                              bool /* gracefulLeave */,
+                              uint64_t /* code */,
+                              const std::string& /* reason */) {
             SLogger::info(
-                "WebSocket client disconnected, calling forceClose()");
-            const auto& it = mHalfReadySockets.find(id);  
-            if (it == mHalfReadySockets.end()) { 
+                "Half-ready WebSocketServerConnection emitted Disconnected event, erasing it");
+            const auto& it = mHalfReadyConnections.find(id);
+            if (it == mHalfReadyConnections.end()) {
                 // Already erased
                 return;
-            } 
-            mHalfReadySockets.erase(it);
+            }
+            it->second->removeAllListeners();
+            mHalfReadyConnections.erase(it);
         });
 
-        ws->onError([id, this](const std::string& error) {
-            SLogger::trace("WebSocket Client error: " + error);
-            mHalfReadySockets.erase(id);
+        websocketServerConnection->on<Error>([id,
+                                              this](const std::string& error) {
+            SLogger::trace(
+                "Half-ready WebSocketServerConnection emitted Error event, erasing it, error: " +
+                error);
+
+            const auto& it = mHalfReadyConnections.find(id);
+            if (it == mHalfReadyConnections.end()) {
+                // Already erased
+                return;
+            }
+            it->second->removeAllListeners();
+            mHalfReadyConnections.erase(it);
         });
+
+        websocketServerConnection->setDataChannelWebSocket(std::move(ws));
     }
 
     void startServer(
@@ -202,31 +216,7 @@ private:
         mServer->onClient([&](std::shared_ptr<rtc::WebSocket>&& ws) {
             SLogger::trace("onClient()");
 
-            if (!ws->path().has_value() || !ws->remoteAddress().has_value()) {
-                SLogger::trace(
-                    "onClient() !(ws->path().has_value() || !ws->remoteAddress().has_value())");
-                handleHalfReadySocket(ws);
-            } else {
-                SLogger::trace(
-                    "onClient() ws->path().has_value() && ws->remoteAddress().has_value()");
-                SLogger::trace(
-                    "onClient() trying to parse url of length: " +
-                    std::to_string(ws->path().value().length()));
-
-                auto parsedUrl = Url{ws->path().value()};
-
-                SLogger::trace("onClient() parsedUrl: " + parsedUrl);
-
-                auto parsedRemoteAddress = ws->remoteAddress().value().substr(
-                    0, ws->remoteAddress().value().find(':'));
-
-                SLogger::trace(
-                    "onClient() parsedRemoteAddress: " + parsedRemoteAddress);
-                SLogger::trace("onClient() trying to emit<Connected>()");
-
-                emit<events::Connected>(std::make_shared<WebsocketServerConnection>(
-                    std::move(ws), std::move(parsedUrl), parsedRemoteAddress));
-            }
+            handleIncomingClient(std::move(ws));
         });
     }
 };

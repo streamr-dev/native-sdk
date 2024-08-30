@@ -8,8 +8,5 @@ using streamr::dht::connection::websocket::WebsocketServerConnection;
 
 
 TEST(WebsocketServerConnection, TestCanBeCreated) {
-    auto mockSocket = std::make_shared<rtc::WebSocket>();
-    streamr::dht::connection::Url resourceURL("ws://example.com/resource");
-    std::string remoteAddress = "192.168.0.1";
-    WebsocketServerConnection connection(std::move(mockSocket), std::move(resourceURL), remoteAddress);
+    WebsocketServerConnection connection;
 }
