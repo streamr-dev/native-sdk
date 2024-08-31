@@ -2,6 +2,8 @@
 
 rm -rf build/ios
 
+brew install chargepoint/xcparse/xcparse
+
 # Run tests
 xcodebuild test -project test/ios/iOSUnitTesting/iOSUnitTesting.xcodeproj  -scheme iOSUnitTesting -destination 'platform=macOS' -resultBundlePath build/ios/TestResults.xcresult
 
