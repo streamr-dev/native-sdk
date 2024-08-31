@@ -4,16 +4,8 @@ rm -rf build/ios
 
 brew install chargepoint/xcparse/xcparse
 
-xcodebuild test -project test/ios/iOSUnitTesting/iOSUnitTesting.xcodeproj \
-                -scheme iOSUnitTesting \
-                -destination 'platform=iOS Simulator,name=iPhone 12' \
-                CODE_SIGN_IDENTITY="" \
-                CODE_SIGNING_REQUIRED=NO \
-                CODE_SIGNING_ALLOWED=NO
-
-
 # Run tests
-xcodebuild test -project test/ios/iOSUnitTesting/iOSUnitTesting.xcodeproj  -scheme iOSUnitTesting -destination 'platform=macOS' CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -resultBundlePath build/ios/TestResults.xcresult
+xcodebuild test -project test/ios/iOSUnitTesting/iOSUnitTesting.xcodeproj  -scheme iOSUnitTesting -destination 'platform=macOS' CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -resultBundlePath build/ios/TestResults.xcresult
 
 # Check if xcodebuild was successful
 if [ $? -ne 0 ]; then
