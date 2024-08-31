@@ -25,14 +25,14 @@ make_path($build_lib);
 # Copy streamr headers
 dircopy("$abs_path/packages/streamr-proto-rpc/include", $build_include);
 dircopy("$abs_path/packages/streamr-logger/include", $build_include);
-dircopy("$abs_path/packages/streamr-logger/include", $build_include);
-dircopy("$abs_path/packages/streamr-logger/include", $build_include);
+dircopy("$abs_path/packages/streamr-json/include", $build_include);
+dircopy("$abs_path/packages/streamr-eventemitter/include", $build_include);
 
 # Find all include and lib directories and process them 
 find(\&process_dir, "./vcpkg/packages");
 
-`libtool -static -o $build_lib/streamr.a $build_lib/*.a`;
-`xcodebuild -create-xcframework -library $build_lib/streamr.a -headers $build_include -output $dist_path/streamr.xcframework`; 
+`libtool -static -o $build_lib/libstreamr.a $build_lib/*.a`;
+`xcodebuild -create-xcframework -library $build_lib/libstreamr.a -headers $build_include -output $dist_path/streamr.xcframework`; 
 print "\nstreamr.xcframework was created in the directory: dist/ios.\n";
 
 # Subroutine to process each directory
