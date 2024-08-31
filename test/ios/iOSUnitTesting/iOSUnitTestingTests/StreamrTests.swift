@@ -7,7 +7,7 @@
 
 import XCTest
 
-class YourProjectTests: XCTestCase {
+class StreamrTests: XCTestCase {
 
     func testGoogleTests() {
         let runner = GoogleTestRunner()
