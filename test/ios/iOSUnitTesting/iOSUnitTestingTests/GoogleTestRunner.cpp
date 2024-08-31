@@ -10,7 +10,6 @@
 
 #include "GoogleTestRunner.hpp"
 #include "gtest/gtest.h"
-#include <folly/coro/blockingWait.h>
 
 GoogleTestResult GoogleTestRunner::runAllTests(int argc, char** argv) const {
     testing::internal::CaptureStdout();
