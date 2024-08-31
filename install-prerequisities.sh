@@ -11,9 +11,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     #PROFILE_FILE=~/.zprofile
     PROFILE_FILE=./setenvs.sh
     
-#    xcode-select --install
+    xcode-select --install || true
     brew install jq
-    brew uninstall llvm
+    brew uninstall llvm || true
     brew install llvm@17
     brew install cmake
     brew install pkg-config
