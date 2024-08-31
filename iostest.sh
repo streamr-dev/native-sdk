@@ -35,6 +35,7 @@ else
 fi
 
 xcparse logs build/ios/TestResults.xcresult build/ios/TestResults
+
 find build/ios -name StandardOutputAndStandardError.txt -exec cat {} +
 
 exit $EXIT_CODE
