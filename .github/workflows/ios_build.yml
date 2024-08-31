@@ -1,0 +1,31 @@
+name: iOS Build and Test
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-and-test:
+    if: contains(github.event.head_commit.message, 'iosbuild')
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install prerequisites
+      run: source ./install-prerequisities.sh
+
+    - name: Install iOS and XCFramework
+      run: ./install.sh --ios --xcframework
+
+    - name: Run linter
+      run: ./lint.sh
+
+    - name: Run iOS tests
+      run: ./iostest.sh
+      
