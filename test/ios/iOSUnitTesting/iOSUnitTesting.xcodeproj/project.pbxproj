@@ -11,8 +11,7 @@
 		410E67B62C819BC900347AF3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410E67B52C819BC900347AF3 /* ContentView.swift */; };
 		410E67B82C819BCC00347AF3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 410E67B72C819BCC00347AF3 /* Assets.xcassets */; };
 		410E67BB2C819BCC00347AF3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 410E67BA2C819BCC00347AF3 /* Preview Assets.xcassets */; };
-		410E67C52C819BCC00347AF3 /* iOSUnitTestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410E67C42C819BCC00347AF3 /* iOSUnitTestingTests.swift */; };
-		410E69C22C81A0F700347AF3 /* GTestWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 410E69C12C81A0F700347AF3 /* GTestWrapper.mm */; };
+		410E67C52C819BCC00347AF3 /* StreamrTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410E67C42C819BCC00347AF3 /* StreamrTests.swift */; };
 		410E69C82C81A4A100347AF3 /* gtest_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E69C62C81A4A100347AF3 /* gtest_main.cc */; };
 		410E69C92C81A4A100347AF3 /* gtest-all.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E69C72C81A4A100347AF3 /* gtest-all.cc */; };
 		410E69CC2C81B9E900347AF3 /* GoogleTestRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 410E69CA2C81B9E900347AF3 /* GoogleTestRunner.cpp */; };
@@ -49,9 +48,8 @@
 		410E67B72C819BCC00347AF3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		410E67BA2C819BCC00347AF3 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		410E67C02C819BCC00347AF3 /* iOSUnitTestingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSUnitTestingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		410E67C42C819BCC00347AF3 /* iOSUnitTestingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSUnitTestingTests.swift; sourceTree = "<group>"; };
+		410E67C42C819BCC00347AF3 /* StreamrTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamrTests.swift; sourceTree = "<group>"; };
 		410E69B92C819CF100347AF3 /* iOSUnitTestingTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "iOSUnitTestingTests-Bridging-Header.h"; sourceTree = "<group>"; };
-		410E69C12C81A0F700347AF3 /* GTestWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GTestWrapper.mm; sourceTree = "<group>"; };
 		410E69C62C81A4A100347AF3 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = extern/googletest/googletest/src/gtest_main.cc; sourceTree = SOURCE_ROOT; };
 		410E69C72C81A4A100347AF3 /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-all.cc"; path = "extern/googletest/googletest/src/gtest-all.cc"; sourceTree = SOURCE_ROOT; };
 		410E69CA2C81B9E900347AF3 /* GoogleTestRunner.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GoogleTestRunner.cpp; sourceTree = "<group>"; };
@@ -172,9 +170,8 @@
 				410E6A582C81F0C500347AF3 /* streamr.xcframework */,
 				410E69C62C81A4A100347AF3 /* gtest_main.cc */,
 				410E69C72C81A4A100347AF3 /* gtest-all.cc */,
-				410E67C42C819BCC00347AF3 /* iOSUnitTestingTests.swift */,
+				410E67C42C819BCC00347AF3 /* StreamrTests.swift */,
 				410E69B92C819CF100347AF3 /* iOSUnitTestingTests-Bridging-Header.h */,
-				410E69C12C81A0F700347AF3 /* GTestWrapper.mm */,
 				410E69CA2C81B9E900347AF3 /* GoogleTestRunner.cpp */,
 				410E69CB2C81B9E900347AF3 /* GoogleTestRunner.hpp */,
 			);
@@ -301,13 +298,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				410E69C22C81A0F700347AF3 /* GTestWrapper.mm in Sources */,
 				410E6ACD2C8224F500347AF3 /* RpcCommunicatorTest.cpp in Sources */,
 				410E6AC92C8224D300347AF3 /* StreamrLogFormatterTest.cpp in Sources */,
 				410E6ADC2C82255D00347AF3 /* WakeUpRpc.pb.cc in Sources */,
 				410E69C82C81A4A100347AF3 /* gtest_main.cc in Sources */,
 				410E6AC52C8224B200347AF3 /* toStringTest.cpp in Sources */,
-				410E67C52C819BCC00347AF3 /* iOSUnitTestingTests.swift in Sources */,
+				410E67C52C819BCC00347AF3 /* StreamrTests.swift in Sources */,
 				410E6AC62C8224B200347AF3 /* toJsonTest.cpp in Sources */,
 				410E6ADD2C82255D00347AF3 /* TestProtos.pb.cc in Sources */,
 				410E6ADB2C82255D00347AF3 /* HelloRpc.pb.cc in Sources */,
