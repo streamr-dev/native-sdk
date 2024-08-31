@@ -29,8 +29,8 @@ dircopy("$abs_path/packages/streamr-json/include", $build_include);
 dircopy("$abs_path/packages/streamr-eventemitter/include", $build_include);
 
 # Find all include and lib directories and process them 
-find(\&process_dir, "./vcpkg/packages");
-
+find(\&process_dir, "./build/vcpkg_installed/arm64-ios");
+dircopy("$abs_path/build/vcpkg_installed/arm64-ios/lib", $build_lib);
 `libtool -static -o $build_lib/libstreamr.a $build_lib/*.a`;
 `xcodebuild -create-xcframework -library $build_lib/libstreamr.a -headers $build_include -output $dist_path/streamr.xcframework`; 
 print "\nstreamr.xcframework was created in the directory: dist/ios.\n";
@@ -39,14 +39,10 @@ print "\nstreamr.xcframework was created in the directory: dist/ios.\n";
 sub process_dir {
     my $dir = $File::Find::name;
     print "Current dir: $dir\n";
-    if ($dir =~ m|^\./vcpkg/packages/[^/]+/include$|) {
+    if ($dir =~ m|^\./build/vcpkg_installed/arm64-ios/include$|) {
        # Copy includes from vcpkg-packages (vcpkg/packages/<Package>/include)
        dircopy("$abs_path/$dir", $build_include);
        print "cp $abs_path/$dir $build_include\n";
-    } elsif ($dir =~ m|^\./vcpkg/packages/[^/]+/lib$|) {
-       # Copy libs from vcpkg-packages (vcpkg/packages/<Package>/lib) 
-       dircopy("$abs_path/$dir", $build_lib);
-       print "cp $abs_path/$dir $build_lib\n"; 
-    }
+    } 
 }
 
