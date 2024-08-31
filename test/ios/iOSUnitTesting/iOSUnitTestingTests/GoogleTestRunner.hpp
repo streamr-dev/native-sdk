@@ -18,7 +18,7 @@ struct GoogleTestResult {
 class GoogleTestRunner {
 public:
     GoogleTestRunner() { }
-    GoogleTestResult runAllTests(int argc, char** argv);
+    GoogleTestResult runAllTests(int argc, char** argv) const;
 };
 
 #endif /* GoogleTestRunner_hpp */
