@@ -38,12 +38,15 @@ print "\nstreamr.xcframework was created in the directory: dist/ios.\n";
 # Subroutine to process each directory
 sub process_dir {
     my $dir = $File::Find::name;
+    print "Current dir: $dir\n";
     if ($dir =~ m|^\./vcpkg/packages/[^/]+/include$|) {
        # Copy includes from vcpkg-packages (vcpkg/packages/<Package>/include)
        dircopy("$abs_path/$dir", $build_include);
+       print "cp $abs_path/$dir $build_include\n";
     } elsif ($dir =~ m|^\./vcpkg/packages/[^/]+/lib$|) {
        # Copy libs from vcpkg-packages (vcpkg/packages/<Package>/lib) 
        dircopy("$abs_path/$dir", $build_lib);
+       print "cp $abs_path/$dir $build_lib\n"; 
     }
 }
 
