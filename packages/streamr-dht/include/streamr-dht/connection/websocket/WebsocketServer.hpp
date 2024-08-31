@@ -94,7 +94,10 @@ public:
     void stop() {
         SLogger::trace("stop()");
         removeAllListeners();
-        mServer->stop();
+        if (mServer) {
+            mServer->stop();
+            mServer = nullptr;
+        }
     }
 
     void updateCertificate(const std::string& cert, const std::string& key) {
