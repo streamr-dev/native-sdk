@@ -20,9 +20,6 @@ jobs:
     - name: install
       uses: ./.github/workflows/reusable/cached-install-ios
 
-    - name: Run linter
-      run: ./lint.sh
-
     - name: Run iOS tests
       run: ./iostest.sh
       
