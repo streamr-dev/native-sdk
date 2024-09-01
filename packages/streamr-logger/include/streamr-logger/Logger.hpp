@@ -1,7 +1,6 @@
 #ifndef STREAMER_LOGGER_LOGGER_HPP
 #define STREAMER_LOGGER_LOGGER_HPP
 
-#include <initializer_list>
 #include <source_location>
 #include <string_view>
 #include <nlohmann/json.hpp>
@@ -185,7 +184,7 @@ private:
             return element;
         }
         if (element.is_null() ||
-            (element.is_string() && element.get<std::string>() == "")) {
+            (element.is_string() && element.get<std::string>().empty())) {
             return nlohmann::json::object({});
         }
         return nlohmann::json::object({{key, element}});

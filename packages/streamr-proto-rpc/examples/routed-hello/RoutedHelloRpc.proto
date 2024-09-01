@@ -1,0 +1,17 @@
+// This file is a copy of
+// https://github.com/streamr-dev/network/blob/b267dcfb1e98fa2b882fa21a41a279f3a8658f50/packages/proto-rpc/examples/routed-hello/RoutedHelloRpc.proto
+
+syntax = "proto3";
+option optimize_for = CODE_SIZE;
+
+service RoutedHelloRpcService {
+  rpc sayHello (RoutedHelloRequest) returns (RoutedHelloResponse);
+}
+
+message RoutedHelloRequest {
+    string myName = 1;
+  }
+  
+message RoutedHelloResponse {
+    string greeting = 1;
+  }

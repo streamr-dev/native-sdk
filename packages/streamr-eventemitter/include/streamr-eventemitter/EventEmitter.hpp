@@ -51,12 +51,11 @@ struct Event {
 };
 
 template <typename T, typename EmitterEventType>
-concept MatchingEventType = std::is_same<T, EmitterEventType>::value;
+concept MatchingEventType = std::is_same_v<T, EmitterEventType>;
 
 template <typename T, typename EmitterEventType>
-concept MatchingCallbackType =
-    std::is_assignable<typename EmitterEventType::Handler::HandlerFunction, T>::
-        value;
+concept MatchingCallbackType = std::
+    is_assignable_v<typename EmitterEventType::Handler::HandlerFunction, T>;
 
 // Immutable reference to a Handler.
 // This is needed because there is no way of checking the validity

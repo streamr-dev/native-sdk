@@ -4,8 +4,11 @@
   "dependencies": [
     "boost-config",
     "boost-pfr",
+    "boost-uuid",
     "folly",
     "gtest",
-    "nlohmann-json"
+    "magic-enum",
+    "nlohmann-json",
+    "protobuf"
   ]
 }
