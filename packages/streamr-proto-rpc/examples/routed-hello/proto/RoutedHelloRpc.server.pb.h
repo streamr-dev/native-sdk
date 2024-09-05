@@ -4,8 +4,11 @@
 #ifndef STREAMR_PROTORPC_ROUTEDHELLORPC_SERVER_PB_H
 #define STREAMR_PROTORPC_ROUTEDHELLORPC_SERVER_PB_H
 
-#include "RoutedHelloRpc.pb.h" // NOLINT 
+#include "RoutedHelloRpc.pb.h" // NOLINT
 #include <folly/experimental/coro/Task.h>
+#include "streamr-proto-rpc/ProtoCallContext.hpp" // NOLINT
+using streamr::protorpc::ProtoCallContext;
+
 
 namespace streamr::protorpc {
 class RoutedHelloRpcService {

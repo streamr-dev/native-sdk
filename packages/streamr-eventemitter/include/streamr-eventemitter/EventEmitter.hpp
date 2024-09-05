@@ -18,6 +18,7 @@ namespace streamr::eventemitter {
 
 template <typename... HandlerArgumentTypes>
 struct Event {
+    using ArgumentTypes = std::tuple<HandlerArgumentTypes...>;
     class Handler {
     public:
         using HandlerFunction = std::function<void(HandlerArgumentTypes...)>;
@@ -156,7 +157,7 @@ public:
             callback;
         // silently ignore null callbacks
         if (!handlerFunction) {
-            return HandlerToken(); // return a non-existent token
+            return HandlerToken{}; // return a non-existent token
         }
         auto handlerReference = HandlerToken::create();
         typename EmitterEventType::Handler handler(
@@ -275,6 +276,7 @@ class EventEmitter<std::tuple<EventTypes...>>
 public:
     // Make the inherited methods visible to the templating system
     using EventEmitterImpl<EventTypes>::on...;
+    using EventEmitterImpl<EventTypes>::once...;
     using EventEmitterImpl<EventTypes>::off...;
     using EventEmitterImpl<EventTypes>::listenerCount...;
     using EventEmitterImpl<EventTypes>::removeAllListeners...;

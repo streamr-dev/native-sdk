@@ -11,11 +11,13 @@
 
 
 namespace streamr::protorpc {
+using streamr::protorpc::RpcCommunicator;
+using streamr::protorpc::ProtoCallContext;
 class HelloRpcServiceClient {
 private:
 RpcCommunicator& communicator;
 public:
-    HelloRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit HelloRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<HelloResponse> sayHello(const HelloRequest& request, const ProtoCallContext& callContext) {
         return communicator.request<HelloResponse, HelloRequest>("sayHello", request, callContext);
     }

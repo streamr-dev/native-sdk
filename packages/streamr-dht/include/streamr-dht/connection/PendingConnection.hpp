@@ -1,81 +1,13 @@
-/*
-import EventEmitter from 'eventemitter3'
-import { PeerDescriptor } from '../proto/packages/dht/protos/DhtRpc'
-import { Logger, setAbortableTimeout } from '@streamr/utils'
-import { getNodeIdOrUnknownFromPeerDescriptor } from './ConnectionManager'
-import { IConnection } from './IConnection'
 
-export interface PendingConnectionEvents {
-    connected: (peerDescriptor: PeerDescriptor, connection: IConnection) => void
-    disconnected: (gracefulLeave: boolean) => void
-}
-
-const logger = new Logger(module)
-
-// PendingConnection is used as a reference to a connection that should be
-opened and handshaked to a given PeerDescriptor
-// It does not hold a connection internally. The public method
-onHandshakedCompleted should be called once a connection for the
-// remotePeerDescriptor is opened and handshaked successfully.
-// PendingConnections are created by the Connectors.
-export class PendingConnection extends EventEmitter<PendingConnectionEvents> {
-
-    private readonly connectingAbortController: AbortController = new
-AbortController() private remotePeerDescriptor: PeerDescriptor private
-replacedAsDuplicate: boolean = false private stopped: boolean = false
-
-    constructor(remotePeerDescriptor: PeerDescriptor, timeout = 15 * 1000) {
-        super()
-        this.remotePeerDescriptor = remotePeerDescriptor
-        setAbortableTimeout(() => {
-            this.close(false)
-        }, timeout, this.connectingAbortController.signal)
-    }
-
-    replaceAsDuplicate(): void {
-        logger.trace(getNodeIdOrUnknownFromPeerDescriptor(this.remotePeerDescriptor)
-+ ' replaceAsDuplicate') this.replacedAsDuplicate = true
-    }
-
-    onHandshakeCompleted(connection: IConnection): void {
-        if (!this.replacedAsDuplicate) {
-            this.emit('connected', this.remotePeerDescriptor, connection)
-        }
-    }
-
-    close(graceful: boolean): void {
-        if (this.stopped) {
-            return
-        }
-        this.stopped = true
-        this.connectingAbortController.abort()
-        if (!this.replacedAsDuplicate) {
-            this.emit('disconnected', graceful)
-        }
-    }
-
-    destroy(): void {
-        if (this.stopped) {
-            return
-        }
-        this.stopped = true
-        this.connectingAbortController.abort()
-        this.removeAllListeners()
-    }
-
-    getPeerDescriptor(): PeerDescriptor {
-        return this.remotePeerDescriptor
-    }
-
-}
-
-*/
 #ifndef STREAMR_DHT_CONNECTION_PENDINGCONNECTION_HPP
 #define STREAMR_DHT_CONNECTION_PENDINGCONNECTION_HPP
 
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/connection/Connection.hpp"
+#include "streamr-dht/Identifiers.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
+#include "streamr-utils/AbortController.hpp"
+#include "streamr-utils/abortableTimers.hpp"
 
 namespace streamr::dht::connection {
 
@@ -83,26 +15,71 @@ using ::dht::PeerDescriptor;
 using streamr::dht::connection::Connection;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
+using streamr::utils::AbortController;
+using streamr::utils::AbortableTimers;
+using streamr::dht::Identifiers;
 
-struct Connected : Event<PeerDescriptor, Connection> {};
+namespace pendingconnectionevents {
+
+struct Connected : Event<const PeerDescriptor&, const std::shared_ptr<Connection>&> {};
 struct Disconnected : Event<bool /*gracefulLeave*/> {};
 
-using PendingConnectionEvents = std::tuple<Connected, Disconnected>;
+} // namespace pendingconnectionevents
+
+using PendingConnectionEvents = std::tuple<pendingconnectionevents::Connected, pendingconnectionevents::Disconnected>;
 
 class PendingConnection : public EventEmitter<PendingConnectionEvents> {
 private:
-    PeerDescriptor remotePeerDescriptor;
+    AbortController connectingAbortController;
+    const PeerDescriptor& remotePeerDescriptor;
     bool replacedAsDuplicate = false;
     bool stopped = false;
 
+public:
     explicit PendingConnection(
-        PeerDescriptor&& remotePeerDescriptor, int timeout = 15 * 1000)
-        : remotePeerDescriptor(std::move(remotePeerDescriptor)) {
-        
-        setAbortableTimeout(
-            () = > {this.close(false)},
+        const PeerDescriptor& remotePeerDescriptor,
+        std::chrono::milliseconds timeout =
+            std::chrono::milliseconds(15 * 1000)) // NOLINT
+        : remotePeerDescriptor(remotePeerDescriptor) {
+        AbortableTimers::setAbortableTimeout(
+            [this]() { this->close(false); },
             timeout,
-            this.connectingAbortController.signal)
+            this->connectingAbortController.signal);
+    }
+
+    void replaceAsDuplicate() {
+        SLogger::trace(Identifiers::getNodeIdFromPeerDescriptor(this->remotePeerDescriptor) + " replaceAsDuplicate");
+        this->replacedAsDuplicate = true;
+    }
+
+    void onHandshakeCompleted(const std::shared_ptr<Connection>& connection) {
+        if (!this->replacedAsDuplicate) {
+            this->emit<pendingconnectionevents::Connected>(this->remotePeerDescriptor, connection);
+        }
+    }
+
+    void close(bool graceful) {
+        if (this->stopped) {
+            return;
+        }
+        this->stopped = true;
+        this->connectingAbortController.abort();
+        if (!this->replacedAsDuplicate) {
+            this->emit<pendingconnectionevents::Disconnected>(graceful);
+        }
+    }
+
+    void destroy() {
+        if (this->stopped) {
+            return;
+        }
+        this->stopped = true;
+        this->connectingAbortController.abort();
+        this->removeAllListeners();
+    }
+
+    [[nodiscard]] const PeerDescriptor& getPeerDescriptor() const {
+        return this->remotePeerDescriptor;
     }
 };
 

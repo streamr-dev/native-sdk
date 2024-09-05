@@ -33,10 +33,11 @@ target_include_directories(streamr-proto-rpc
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
+    PUBLIC $<INSTALL_INTERFACE:include>
     )
 
 target_sources(streamr-proto-rpc 
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/ProtoRpc.pb.cc)
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc)
 
 target_link_libraries(streamr-proto-rpc 
     INTERFACE streamr::streamr-logger
@@ -91,8 +92,8 @@ if(NOT IOS)
 
     add_executable(streamr-proto-rpc-test-unit
         test/proto/HelloRpc.pb.cc
-    test/proto/TestProtos.pb.cc 
-    test/proto/WakeUpRpc.pb.cc
+        test/proto/TestProtos.pb.cc 
+        test/proto/WakeUpRpc.pb.cc
         test/unit/ServerRegistryTest.cpp
         test/unit/RpcCommunicatorTest.cpp
     )

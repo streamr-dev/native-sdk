@@ -10,7 +10,7 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include "Errors.hpp"
 #include "ProtoCallContext.hpp"
-#include "ProtoRpc.pb.h"
+#include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-logger/SLogger.hpp"
 namespace streamr::protorpc {
 
@@ -103,11 +103,11 @@ private:
     std::unordered_map<std::string, std::shared_ptr<OngoingRequestBase>>
         mOngoingRequests;
     std::recursive_mutex mOngoingRequestsMutex;
-    size_t mRpcRequestTimeout;
+    std::chrono::milliseconds mRpcRequestTimeout;
     folly::CPUThreadPoolExecutor mExecutor;
 
 public:
-    explicit RpcCommunicatorClientApi(size_t rpcRequestTimeout)
+    explicit RpcCommunicatorClientApi(std::chrono::milliseconds rpcRequestTimeout)
         : mRpcRequestTimeout(rpcRequestTimeout), mExecutor(threadPoolSize) {}
 
     template <typename F>
@@ -155,7 +155,7 @@ public:
         const ProtoCallContext& callContext) {
         SLogger::trace("request(): methodName:", methodName);
 
-        size_t timeout = mRpcRequestTimeout;
+        std::chrono::milliseconds timeout = mRpcRequestTimeout;
         if (callContext.timeout.has_value()) {
             timeout = callContext.timeout.value();
         }
@@ -206,7 +206,7 @@ public:
         const ProtoCallContext& callContext) {
         SLogger::trace("notify() notificationName:", notificationName);
 
-        size_t timeout = mRpcRequestTimeout;
+        std::chrono::milliseconds timeout = mRpcRequestTimeout;
         if (callContext.timeout.has_value()) {
             timeout = callContext.timeout.value();
         }

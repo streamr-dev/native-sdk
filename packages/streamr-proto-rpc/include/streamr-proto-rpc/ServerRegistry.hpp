@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <google/protobuf/any.pb.h>
 #include <google/protobuf/empty.pb.h>
-#include "ProtoRpc.pb.h"
+#include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-proto-rpc/Errors.hpp"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"

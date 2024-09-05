@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "streamr-dht/utils/CertificateHelper.hpp"
+#include "streamr-dht/helpers/CertificateHelper.hpp"
 #include "streamr-logger/SLogger.hpp"
 
 using streamr::logger::SLogger;
-using streamr::dht::utils::CertificateHelper;
+using streamr::dht::helpers::CertificateHelper;
 
 TEST(CertificateHelperTest, createSelfSignedCertificate) {
     auto certificate = CertificateHelper::createSelfSignedCertificate(1000); // NOLINT

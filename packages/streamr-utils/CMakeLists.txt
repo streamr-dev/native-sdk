@@ -11,6 +11,13 @@ set(CMAKE_CXX_STANDARD 26)
 project(streamr-utils CXX)
 
 find_package(folly CONFIG REQUIRED)
+find_package(Boost CONFIG REQUIRED)
+find_package(streamr-eventemitter CONFIG REQUIRED)
+
+if(NOT TARGET Boost::uuid)
+  add_library(Boost::uuid INTERFACE IMPORTED)
+  set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+endif()
 
 add_library(streamr-utils INTERFACE)
 add_library(streamr::streamr-utils ALIAS streamr-utils)
@@ -21,6 +28,7 @@ target_include_directories(
 
 target_link_libraries(streamr-utils
     INTERFACE Folly::folly
+    INTERFACE streamr::streamr-eventemitter
 )
 
 export(TARGETS streamr-utils
@@ -28,14 +36,24 @@ export(TARGETS streamr-utils
     FILE streamr-utils-config-in.cmake)
   
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-utils-config.cmake" 
-    "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
+    "list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH})\n"
+    "find_package(Boost CONFIG REQUIRED)\n"
+    "find_package(folly CONFIG REQUIRED)\n"
+    "if(NOT TARGET Boost::uuid)\n"
+    "    add_library(Boost::uuid INTERFACE IMPORTED)\n"
+    "    set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
+    "endif()\n"
     "include(${CMAKE_BINARY_DIR}/streamr-utils-config-in.cmake)\n")
 
 if(NOT IOS)
   enable_testing()
   find_package(GTest CONFIG REQUIRED)
 
-  add_executable(streamr-utils-test-unit test/unit/BrandedTest.cpp)
+  add_executable(streamr-utils-test-unit 
+    test/unit/BrandedTest.cpp
+    test/unit/abortableTimersTest.cpp
+    test/unit/waitForEventTest.cpp
+  )
   target_link_libraries(streamr-utils-test-unit 
     PUBLIC streamr-utils
     PUBLIC GTest::gtest 

@@ -23,12 +23,12 @@ public:
         : WebsocketConnection(ConnectionType::WEBSOCKET_SERVER),
           mResourceURL(Url{""}) {
         this->mHalfReadyConnectedHandlerToken = this->on<
-            events::Connected>([this]() {
+            connectionevents::Connected>([this]() {
             SLogger::trace(
                 "WebsocketServerConnection() The half-ready socket is fully connected");
             mResourceURL = Url{mSocket->path().value()};
             mRemoteAddress = mSocket->remoteAddress().value();
-            this->off<events::Connected>(this->mHalfReadyConnectedHandlerToken);
+            this->off<connectionevents::Connected>(this->mHalfReadyConnectedHandlerToken);
         });
     }
 

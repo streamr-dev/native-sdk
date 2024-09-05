@@ -11,11 +11,13 @@
 
 
 namespace streamr::protorpc {
+using streamr::protorpc::RpcCommunicator;
+using streamr::protorpc::ProtoCallContext;
 class DhtRpcServiceClient {
 private:
 RpcCommunicator& communicator;
 public:
-    DhtRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit DhtRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<ClosestPeersResponse> getClosestPeers(const ClosestPeersRequest& request, const ProtoCallContext& callContext) {
         return communicator.request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", request, callContext);
     }
@@ -30,7 +32,7 @@ class OptionalServiceClient {
 private:
 RpcCommunicator& communicator;
 public:
-    OptionalServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit OptionalServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<OptionalResponse> getOptional(const OptionalRequest& request, const ProtoCallContext& callContext) {
         return communicator.request<OptionalResponse, OptionalRequest>("getOptional", request, callContext);
     }

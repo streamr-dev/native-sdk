@@ -205,7 +205,8 @@ private:
         } else {
             sourceSs << "namespace " << file->package() << " {\n";
         }
-
+        sourceSs << "using streamr::protorpc::RpcCommunicator;\n";
+        sourceSs << "using streamr::protorpc::ProtoCallContext;\n";
         // for each services
         int numServices = file->service_count();
         for (int i = 0; i < numServices; i++) {
@@ -219,7 +220,7 @@ private:
             sourceSs << "RpcCommunicator& communicator;\n";
             sourceSs << "public:\n";
             sourceSs
-                << "    " << serviceName
+                << "    explicit " << serviceName
                 << "Client(RpcCommunicator& communicator) : communicator(communicator) {}\n";
             // sourceSs << "    \n";
             // for each methods

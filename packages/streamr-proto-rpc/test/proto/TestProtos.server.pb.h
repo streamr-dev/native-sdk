@@ -4,8 +4,11 @@
 #ifndef STREAMR_PROTORPC_TESTPROTOS_SERVER_PB_H
 #define STREAMR_PROTORPC_TESTPROTOS_SERVER_PB_H
 
-#include "TestProtos.pb.h" // NOLINT 
+#include "TestProtos.pb.h" // NOLINT
 #include <folly/experimental/coro/Task.h>
+#include "streamr-proto-rpc/ProtoCallContext.hpp" // NOLINT
+using streamr::protorpc::ProtoCallContext;
+
 
 namespace streamr::protorpc {
 class DhtRpcService {

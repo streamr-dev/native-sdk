@@ -16,6 +16,8 @@ using DhtAddress = streamr::utils::Branded<std::string, struct DhtAddressBrand>;
 using DhtAddressRaw =
     streamr::utils::Branded<std::string, struct DhtAddressRawBrand>;
 
+using ServiceID = streamr::utils::Branded<std::string, struct ServiceIDBrand>;
+
 constexpr size_t kademliaIdLengthInBytes = 20;
 
 struct Identifiers {
