@@ -15,7 +15,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
-namespace streamr::dht::utils {
+namespace streamr::dht::helpers {
 
 struct TlsCertificate {
     std::string privateKey;
@@ -135,6 +135,6 @@ public:
 #endif
 };
 
-} // namespace streamr::dht::utils
+} // namespace streamr::dht::helpers
 
 #endif

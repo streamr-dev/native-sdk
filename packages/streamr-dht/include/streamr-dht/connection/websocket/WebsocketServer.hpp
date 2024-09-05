@@ -9,31 +9,24 @@
 #include <unordered_map>
 #include <rtc/rtc.hpp>
 #include "streamr-dht/connection/websocket/WebsocketServerConnection.hpp"
-#include "streamr-dht/utils/CertificateHelper.hpp"
-#include "streamr-dht/utils/Errors.hpp"
+#include "streamr-dht/helpers/CertificateHelper.hpp"
+#include "streamr-dht/helpers/Errors.hpp"
+#include "streamr-dht/types/PortRange.hpp"
+#include "streamr-dht/types/TlsCertificateFiles.hpp"
 #include "streamr-logger/SLogger.hpp"
 
 namespace streamr::dht::connection::websocket {
 
 using streamr::dht::connection::Url;
-using streamr::dht::connection::events::Data;
-using streamr::dht::connection::events::Disconnected;
-using streamr::dht::connection::events::Error;
-using streamr::dht::utils::CertificateHelper;
-using streamr::dht::utils::TlsCertificate;
-using streamr::dht::utils::WebsocketServerStartError;
+using streamr::dht::connection::connectionevents::Data;
+using streamr::dht::connection::connectionevents::Disconnected;
+using streamr::dht::connection::connectionevents::Error;
+using streamr::dht::helpers::CertificateHelper;
+using streamr::dht::helpers::TlsCertificate;
+using streamr::dht::helpers::WebsocketServerStartError;
+using streamr::dht::types::PortRange;
+using streamr::dht::types::TlsCertificateFiles;
 using streamr::logger::SLogger;
-
-struct PortRange {
-    uint16_t min;
-    uint16_t max;
-};
-
-struct TlsCertificateFiles {
-    std::string privateKeyFileName;
-    std::string certFileName;
-};
-
 struct WebsocketServerConfig {
     PortRange portRange;
     bool enableTls;
@@ -41,13 +34,13 @@ struct WebsocketServerConfig {
     std::optional<size_t> maxMessageSize;
 };
 
-namespace events {
+namespace websocketserverevents {
 
 struct Connected : Event<std::shared_ptr<WebsocketServerConnection>> {};
 
-} // namespace events
+} // namespace websocketserverevents
 
-using WebsocketServerEvents = std::tuple<events::Connected>;
+using WebsocketServerEvents = std::tuple<websocketserverevents::Connected>;
 
 constexpr size_t defaultMaxMessageSize = 1048576;
 
@@ -124,7 +117,7 @@ private:
 
             readyConnection->removeAllListeners();
 
-            emit<events::Connected>(readyConnection);
+            emit<websocketserverevents::Connected>(readyConnection);
             SLogger::info("handleHalfReadySocket. Before erase");
             mHalfReadyConnections.erase(id);
         });

@@ -3,7 +3,6 @@
 #include <streamr-dht/connection/websocket/WebsocketClientConnection.hpp>
 #include <streamr-dht/connection/websocket/WebsocketServerConnection.hpp>
 #include <streamr-dht/connection/websocket/WebsocketServer.hpp>
-#include <streamr-dht/utils/Errors.hpp>
 #include <streamr-logger/SLogger.hpp>
 #include <gtest/gtest.h>
 
@@ -11,9 +10,11 @@ using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketClientConnection;
 using streamr::dht::connection::websocket::WebsocketServerConnection;
 using streamr::dht::connection::websocket::WebsocketServerConfig;
-using streamr::dht::connection::websocket::events::Connected;
-using streamr::dht::connection::events::Data;
+using streamr::dht::connection::connectionevents::Connected;
+using streamr::dht::connection::connectionevents::Data;
 using streamr::logger::SLogger;
+
+namespace websocketserverevents = streamr::dht::connection::websocket::websocketserverevents;
 
 TEST(WebsocketClientServerTest, TestServerCanAcceptConnection) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
@@ -27,7 +28,7 @@ TEST(WebsocketClientServerTest, TestServerCanAcceptConnection) {
     WebsocketServer server(std::move(config));
    
     std::promise<std::string_view> connectionEstablishedPromise;
-    server.on<Connected>([&](const std::shared_ptr<WebsocketServerConnection>& /*connection*/) {
+    server.on<websocketserverevents::Connected>([&](const std::shared_ptr<WebsocketServerConnection>& /*connection*/) {
         SLogger::trace("in onConnected() event handler");
         connectionEstablishedPromise.set_value("Hello, world!");
     });
@@ -60,7 +61,7 @@ TEST(WebsocketClientServerTest, TestServerCanTrasmitMessageToServer) {
     
     std::shared_ptr<WebsocketServerConnection> serverConnection;
     
-    server.on<Connected>([&](const std::shared_ptr<WebsocketServerConnection>& connection) {
+    server.on<websocketserverevents::Connected>([&](const std::shared_ptr<WebsocketServerConnection>& connection) {
         SLogger::trace("in onConnected() event handler");
         serverConnection = connection;  // make sure the connection does not get destroyed
         serverConnection->on<Data>([&](const std::vector<std::byte>& message) {
@@ -78,7 +79,7 @@ TEST(WebsocketClientServerTest, TestServerCanTrasmitMessageToServer) {
 
     WebsocketClientConnection client;
     
-    client.on<streamr::dht::connection::events::Connected>([&]() {
+    client.on<streamr::dht::connection::connectionevents::Connected>([&]() {
         client.send(message);
     });
 

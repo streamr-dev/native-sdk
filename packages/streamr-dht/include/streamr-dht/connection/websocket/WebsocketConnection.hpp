@@ -8,10 +8,10 @@
 namespace streamr::dht::connection::websocket {
 
 using streamr::logger::SLogger;
-using streamr::dht::connection::events::Connected;
-using streamr::dht::connection::events::Data;
-using streamr::dht::connection::events::Disconnected;
-using streamr::dht::connection::events::Error;
+using streamr::dht::connection::connectionevents::Connected;
+using streamr::dht::connection::connectionevents::Data;
+using streamr::dht::connection::connectionevents::Disconnected;
+using streamr::dht::connection::connectionevents::Error;
 
 constexpr size_t maxMessageSize = 1048576;
 

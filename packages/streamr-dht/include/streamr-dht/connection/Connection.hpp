@@ -34,7 +34,7 @@ enum class ConnectionType {
 
 // Events
 
-namespace events {
+namespace connectionevents {
 struct Data : Event<std::vector<std::byte> /*data*/> {};
 struct Connected : Event<> {};
 struct Disconnected
@@ -46,7 +46,7 @@ struct Error : Event<std::string /*name*/> {};
 } // namespace events
 
 using ConnectionEvents = std::
-    tuple<events::Data, events::Connected, events::Disconnected, events::Error>;
+    tuple<connectionevents::Data, connectionevents::Connected, connectionevents::Disconnected, connectionevents::Error>;
 
 class Connection : public EventEmitter<ConnectionEvents> {
 private:

@@ -1,5 +1,6 @@
 #include <exception>
 #include <thread>
+#include <chrono>
 #include <gtest/gtest.h>
 #include <streamr-proto-rpc/RpcCommunicator.hpp>
 #include <folly/Portability.h>
@@ -21,6 +22,8 @@
 #include "streamr-proto-rpc/ServerRegistry.hpp"
 
 namespace streamr::protorpc {
+
+using namespace std::chrono_literals;
 
 class RpcCommunicatorTest : public ::testing::Test {
 public:
@@ -359,7 +362,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
                 .request<HelloResponse, HelloRequest>(
                     "testFunction",
                     request,
-                    ProtoCallContext{.timeout = 50}) // NOLINT
+                    ProtoCallContext{.timeout = 50ms}) // NOLINT
                 .scheduleOn(&executor));
         // Test fails here
         EXPECT_TRUE(false);
@@ -404,7 +407,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
                 .request<HelloResponse, HelloRequest>(
                     "testFunction",
                     request,
-                    ProtoCallContext{.timeout = 50}) // NOLINT
+                    ProtoCallContext{.timeout = 50ms}) // NOLINT
                 .scheduleOn(&executor));
         EXPECT_EQ(true, false);
     } catch (const RpcTimeout& ex) {
@@ -448,7 +451,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
                 .notify<HelloRequest>(
                     "testFunction",
                     request,
-                    ProtoCallContext{.timeout = 50}) // NOLINT
+                    ProtoCallContext{.timeout = 50ms}) // NOLINT
                 .scheduleOn(&executor));
         // Test fails here
         EXPECT_TRUE(false);

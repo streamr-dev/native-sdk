@@ -24,6 +24,7 @@ find_package(magic_enum CONFIG REQUIRED)
 find_package(folly REQUIRED)
 find_package(libdatachannel CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(ipaddress CONFIG REQUIRED)
 
 if(NOT TARGET Boost::uuid)
   add_library(Boost::uuid INTERFACE IMPORTED)
@@ -40,7 +41,9 @@ target_include_directories(streamr-dht
     )
 
 target_sources(streamr-dht 
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/dht/protos/DhtRpc.pb.cc)
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/dht/protos/DhtRpc.pb.cc
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc
+    )
 
 target_link_libraries(streamr-dht 
     INTERFACE streamr::streamr-logger
@@ -55,6 +58,7 @@ target_link_libraries(streamr-dht
     PRIVATE Folly::folly
     PRIVATE OpenSSL::Crypto
     PRIVATE LibDataChannel::LibDataChannelStatic
+    INTERFACE ipaddress::ipaddress
     )
 
 if(NOT IOS)
@@ -64,9 +68,12 @@ if(NOT IOS)
     add_executable(streamr-dht-test-unit
         test/unit/WebsocketClientConnectionTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
+        test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
         test/unit/WebsocketServerConnectionTest.cpp
-        test/unit/WebsocketServerTest.cpp
+        test/unit/WebsocketServerConnectorTest.cpp
         test/unit/CertificateHelperTest.cpp
+        test/unit/RoutingRpcCommunicatorTest.cpp
+        test/unit/ConnectionManagerTest.cpp
     )
 
     #target_include_directories(streamr-dht-test-unit 

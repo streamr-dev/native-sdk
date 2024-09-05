@@ -9,7 +9,8 @@
         "magic-enum",
         "libdatachannel",
         "openssl",
-        "boost-algorithm"
+        "boost-algorithm",
+        "vladimirshaleev-ipaddress"
     ],
     "features": {
         "monorepo": {

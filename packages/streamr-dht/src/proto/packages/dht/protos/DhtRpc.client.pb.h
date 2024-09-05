@@ -11,11 +11,13 @@
 
 
 namespace dht {
+using streamr::protorpc::RpcCommunicator;
+using streamr::protorpc::ProtoCallContext;
 class DhtNodeRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    DhtNodeRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit DhtNodeRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<ClosestPeersResponse> getClosestPeers(const ClosestPeersRequest& request, const ProtoCallContext& callContext) {
         return communicator.request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", request, callContext);
     }
@@ -33,7 +35,7 @@ class RouterRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    RouterRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit RouterRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<RouteMessageAck> routeMessage(const RouteMessageWrapper& request, const ProtoCallContext& callContext) {
         return communicator.request<RouteMessageAck, RouteMessageWrapper>("routeMessage", request, callContext);
     }
@@ -45,7 +47,7 @@ class RecursiveOperationRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    RecursiveOperationRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit RecursiveOperationRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<RouteMessageAck> routeRequest(const RouteMessageWrapper& request, const ProtoCallContext& callContext) {
         return communicator.request<RouteMessageAck, RouteMessageWrapper>("routeRequest", request, callContext);
     }
@@ -54,7 +56,7 @@ class StoreRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    StoreRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit StoreRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<StoreDataResponse> storeData(const StoreDataRequest& request, const ProtoCallContext& callContext) {
         return communicator.request<StoreDataResponse, StoreDataRequest>("storeData", request, callContext);
     }
@@ -66,7 +68,7 @@ class RecursiveOperationSessionRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    RecursiveOperationSessionRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit RecursiveOperationSessionRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<void> sendResponse(const RecursiveOperationResponse& request, const ProtoCallContext& callContext) {
         return communicator.notify<RecursiveOperationResponse>("sendResponse", request, callContext);
     }
@@ -75,7 +77,7 @@ class WebsocketClientConnectorRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    WebsocketClientConnectorRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit WebsocketClientConnectorRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<void> requestConnection(const WebsocketConnectionRequest& request, const ProtoCallContext& callContext) {
         return communicator.notify<WebsocketConnectionRequest>("requestConnection", request, callContext);
     }
@@ -84,7 +86,7 @@ class WebrtcConnectorRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    WebrtcConnectorRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit WebrtcConnectorRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<void> requestConnection(const WebrtcConnectionRequest& request, const ProtoCallContext& callContext) {
         return communicator.notify<WebrtcConnectionRequest>("requestConnection", request, callContext);
     }
@@ -102,7 +104,7 @@ class ConnectionLockRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    ConnectionLockRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit ConnectionLockRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<LockResponse> lockRequest(const LockRequest& request, const ProtoCallContext& callContext) {
         return communicator.request<LockResponse, LockRequest>("lockRequest", request, callContext);
     }
@@ -117,7 +119,7 @@ class ExternalApiRpcClient {
 private:
 RpcCommunicator& communicator;
 public:
-    ExternalApiRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
+    explicit ExternalApiRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
     folly::coro::Task<ExternalFetchDataResponse> externalFetchData(const ExternalFetchDataRequest& request, const ProtoCallContext& callContext) {
         return communicator.request<ExternalFetchDataResponse, ExternalFetchDataRequest>("externalFetchData", request, callContext);
     }

@@ -4,11 +4,12 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <chrono>
 
 namespace streamr::protorpc {
 
 struct ProtoCallContext : public std::map<std::string, std::string> {
-    std::optional<std::size_t> timeout;
+    std::optional<std::chrono::milliseconds> timeout;
     bool notification = false;
 };
 

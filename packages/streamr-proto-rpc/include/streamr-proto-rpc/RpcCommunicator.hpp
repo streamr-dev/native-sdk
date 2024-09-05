@@ -1,6 +1,7 @@
 #ifndef STREAMR_PROTO_RPC_RPC_COMMUNICATOR_HPP
 #define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_HPP
 
+#include <chrono>
 #include <optional>
 #include <google/protobuf/any.pb.h>
 #include <folly/coro/Collect.h>
@@ -16,7 +17,7 @@
 #include <magic_enum.hpp>
 
 #include "ProtoCallContext.hpp"
-#include "ProtoRpc.pb.h"
+#include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "RpcCommunicatorClientApi.hpp"
 #include "RpcCommunicatorServerApi.hpp"
 #include "ServerRegistry.hpp"
@@ -25,6 +26,7 @@
 
 namespace streamr::protorpc {
 
+using namespace std::chrono_literals;
 using google::protobuf::Any;
 using streamr::logger::SLogger;
 using RpcMessage = ::protorpc::RpcMessage;
@@ -33,14 +35,14 @@ using folly::coro::Task;
 using OutgoingMessageCallbackType =
     RpcCommunicatorClientApi::OutgoingMessageCallbackType;
 
-constexpr size_t defaultRpcRequestTimeout = 5000;
+constexpr std::chrono::milliseconds defaultRpcRequestTimeout = 5000ms;
 
 // NOLINTBEGIN
 enum class StatusCode { OK, STOPPED, DEADLINE_EXCEEDED, SERVER_ERROR };
 // NOLINTEND
 
-struct RpcCommunicatorConfig {
-    size_t rpcRequestTimeout;
+struct RpcCommunicatorOptions{
+    std::chrono::milliseconds rpcRequestTimeout;
 };
 class RpcCommunicator {
 private:
@@ -49,9 +51,9 @@ private:
 
 public:
     explicit RpcCommunicator(
-        std::optional<RpcCommunicatorConfig> config = std::nullopt)
+        std::optional<RpcCommunicatorOptions> options = std::nullopt)
         : mRpcCommunicatorClientApi(
-              config.has_value() ? config.value().rpcRequestTimeout
+              options.has_value() ? options.value().rpcRequestTimeout
                                  : defaultRpcRequestTimeout) {}
 
     // Messaging API

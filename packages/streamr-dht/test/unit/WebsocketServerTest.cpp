@@ -1,10 +1,10 @@
 #include <streamr-dht/connection/websocket/WebsocketServer.hpp>
-#include <streamr-dht/utils/Errors.hpp>
+#include <streamr-dht/helpers/Errors.hpp>
 #include <gtest/gtest.h>
 
 using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketServerConfig;
-using streamr::dht::utils::WebsocketServerStartError;
+using streamr::dht::helpers::WebsocketServerStartError;
 using streamr::dht::connection::websocket::TlsCertificateFiles;
 
 TEST(WebsocketServerTest, TestStartAndStopServer) {
@@ -64,7 +64,7 @@ TEST(WebsocketServerTest, TestStartAndStopServerWithSpecifiedCertificate) {
 
 TEST(WebsocketServerTest, UpdateCertificate) {
     WebsocketServerConfig config {
-        .portRange = {10004, 10005},
+        .portRange = {10004, 10005}, // NOLINT
         .enableTls = true,
         .tlsCertificateFiles = std::optional<TlsCertificateFiles>{TlsCertificateFiles{"../test/unit/example.key", "../test/unit/example.crt"}},  
         .maxMessageSize = std::nullopt
@@ -126,7 +126,7 @@ noOPvyLe52Hc2twPb9+w8g==
 
 TEST(WebsocketServerTest, UpdateCertificateWithInvalidCertificate) {
     WebsocketServerConfig config {
-        .portRange = {10004, 10005},
+        .portRange = {10004, 10005}, // NOLINT
         .enableTls = true,
         .tlsCertificateFiles = std::optional<TlsCertificateFiles>{TlsCertificateFiles{"../test/unit/example.key", "../test/unit/example.crt"}},  
         .maxMessageSize = std::nullopt
