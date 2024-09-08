@@ -22,10 +22,11 @@ using folly::coro::Task;
 
 constexpr size_t threadPoolSize = 20;
 
+template <typename CallContextType>
 class RpcCommunicatorClientApi {
 public:
     using OutgoingMessageCallbackType = std::function<void(
-        RpcMessage, std::string /*requestId*/, ProtoCallContext)>;
+        RpcMessage, std::string /*requestId*/, CallContextType)>;
 
 private:
     class OngoingRequestBase {
@@ -110,10 +111,15 @@ public:
     explicit RpcCommunicatorClientApi(std::chrono::milliseconds rpcRequestTimeout)
         : mRpcRequestTimeout(rpcRequestTimeout), mExecutor(threadPoolSize) {}
 
+    /*
     template <typename F>
         requires std::is_assignable_v<OutgoingMessageCallbackType, F>
     void setOutgoingMessageCallback(F&& callback) {
         mOutgoingMessageCallback = std::forward<F>(callback);
+    }*/
+    
+    void setOutgoingMessageCallback(OutgoingMessageCallbackType callback) {
+        mOutgoingMessageCallback = std::move(callback);
     }
 
     void onIncomingMessage(
@@ -152,7 +158,7 @@ public:
     Task<ReturnType> request(
         const std::string& methodName,
         const RequestType& methodParam,
-        const ProtoCallContext& callContext) {
+        const CallContextType& callContext) {
         SLogger::trace("request(): methodName:", methodName);
 
         std::chrono::milliseconds timeout = mRpcRequestTimeout;
@@ -203,7 +209,7 @@ public:
     Task<void> notify(
         const std::string_view notificationName,
         const RequestType& notificationParam,
-        const ProtoCallContext& callContext) {
+        const CallContextType& callContext) {
         SLogger::trace("notify() notificationName:", notificationName);
 
         std::chrono::milliseconds timeout = mRpcRequestTimeout;
@@ -224,7 +230,7 @@ public:
                  callContext,
                  promise = std::move(promiseContract.first),
                  outgoingMessageCallback =
-                     std::move(mOutgoingMessageCallback)]() mutable -> void {
+                     mOutgoingMessageCallback]() mutable -> void {
                     try {
                         outgoingMessageCallback(
                             requestMessage,

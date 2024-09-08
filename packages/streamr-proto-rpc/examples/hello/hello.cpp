@@ -11,6 +11,7 @@ using streamr::protorpc::HelloRpcServiceClient;
 using streamr::protorpc::ProtoCallContext;
 using streamr::protorpc::RpcCommunicator;
 using streamr::protorpc::RpcMessage;
+using RpcCommunicatorType = streamr::protorpc::RpcCommunicator<ProtoCallContext>;
 
 class HelloService : public HelloRpcService {
 public:
@@ -25,7 +26,7 @@ public:
 
 int main() {
     // Setup server
-    RpcCommunicator communicator1;
+    RpcCommunicatorType communicator1;
     HelloService helloService;
 
     communicator1.registerRpcMethod<HelloRequest, HelloResponse>(
@@ -37,7 +38,7 @@ int main() {
             std::placeholders::_2));
 
     // Setup client
-    RpcCommunicator communicator2;
+    RpcCommunicatorType communicator2;
     HelloRpcServiceClient helloClient(communicator2);
 
     // Simulate a network connection between the client and server
@@ -62,7 +63,7 @@ int main() {
     HelloRequest request;
     request.set_myname("Alice");
     auto response = folly::coro::blockingWait(
-        helloClient.sayHello(request, ProtoCallContext()));
+        helloClient.sayHello(std::move(request), ProtoCallContext()));
     std::cout << response.greeting() << "\n";
 
     return 0;

@@ -24,7 +24,7 @@
 namespace streamr::protorpc {
 
 using namespace std::chrono_literals;
-
+using RpcCommunicatorType = RpcCommunicator<ProtoCallContext>;
 class RpcCommunicatorTest : public ::testing::Test {
 public:
     RpcCommunicatorTest()
@@ -32,12 +32,12 @@ public:
 
     ~RpcCommunicatorTest() override {
         SLogger::warn("Deleting executor of RpcCommunicatorTest");
-        SLogger::warn("RpcCommunicatorTest executor deleted");
+        SLogger::warn("RpcCommunicatorTypeTest executor deleted");
     }
 
 protected:
-    RpcCommunicator communicator1; // NOLINT
-    RpcCommunicator communicator2; // NOLINT
+    RpcCommunicatorType communicator1; // NOLINT
+    RpcCommunicatorType communicator2; // NOLINT
     folly::CPUThreadPoolExecutor executor; // NOLINT
 
     void SetUp() override {}
@@ -66,7 +66,7 @@ protected:
     }
 };
 
-void registerTestRcpMethod(RpcCommunicator& communicator) {
+void registerTestRcpMethod(RpcCommunicatorType& communicator) {
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
         "testFunction",
         [](const HelloRequest& request,
@@ -79,7 +79,7 @@ void registerTestRcpMethod(RpcCommunicator& communicator) {
 }
 
 template <typename T>
-void registerThrowingRcpMethod(RpcCommunicator& communicator) {
+void registerThrowingRcpMethod(RpcCommunicatorType& communicator) {
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
         "testFunction",
         [](const HelloRequest& /* request */,
@@ -88,7 +88,7 @@ void registerThrowingRcpMethod(RpcCommunicator& communicator) {
         });
 }
 
-void registerThrowingTestRcpMethodUnknown(RpcCommunicator& communicator) {
+void registerThrowingTestRcpMethodUnknown(RpcCommunicatorType& communicator) {
     const int unknownThrow = 42;
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
         "testFunction",
@@ -98,7 +98,7 @@ void registerThrowingTestRcpMethodUnknown(RpcCommunicator& communicator) {
         });
 }
 /*
-void setOutgoingCallback(RpcCommunicator& sender, RpcCommunicator& receiver) {
+void setOutgoingCallback(RpcCommunicatorType& sender, RpcCommunicatorType& receiver) {
     sender.setOutgoingMessageCallback(
         [&receiver](
             const RpcMessage& message,
@@ -110,13 +110,13 @@ void setOutgoingCallback(RpcCommunicator& sender, RpcCommunicator& receiver) {
 }
 
 void setOutgoingCallbacks(
-    RpcCommunicator& communicator1, RpcCommunicator& communicator2) {
+    RpcCommunicatorType& communicator1, RpcCommunicatorType& communicator2) {
     setOutgoingCallback(communicator2, communicator1);
     setOutgoingCallback(communicator1, communicator2);
 }
 */
 template <typename T>
-void setOutgoingCallbackWithException(RpcCommunicator& sender) {
+void setOutgoingCallbackWithException(RpcCommunicatorType& sender) {
     sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
@@ -126,7 +126,7 @@ void setOutgoingCallbackWithException(RpcCommunicator& sender) {
         });
 }
 
-void setOutgoingCallbackWithThrownUnknown(RpcCommunicator& sender) {
+void setOutgoingCallbackWithThrownUnknown(RpcCommunicatorType& sender) {
     const int unknownThrow = 42;
     sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
@@ -138,7 +138,7 @@ void setOutgoingCallbackWithThrownUnknown(RpcCommunicator& sender) {
 }
 
 auto sendHelloRequest(
-    RpcCommunicator& sender, folly::CPUThreadPoolExecutor* executor) {
+    RpcCommunicatorType& sender, folly::CPUThreadPoolExecutor* executor) {
     HelloRequest request;
     request.set_myname("Test");
     return folly::coro::blockingWait(
@@ -149,7 +149,7 @@ auto sendHelloRequest(
 }
 
 auto sendHelloNotification(
-    RpcCommunicator& sender, folly::CPUThreadPoolExecutor* executor) {
+    RpcCommunicatorType& sender, folly::CPUThreadPoolExecutor* executor) {
     HelloRequest request;
     request.set_myname("Test");
     folly::coro::blockingWait(
@@ -167,7 +167,7 @@ void verifyClientError(
     EXPECT_EQ(ex.originalErrorInfo.value(), expectedOriginalErrorInfo);
 }
 
-void registerSleepingTestRcpMethod(RpcCommunicator& communicator) {
+void registerSleepingTestRcpMethod(RpcCommunicatorType& communicator) {
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
         "testFunction",
         [](const HelloRequest& request,
@@ -181,7 +181,7 @@ void registerSleepingTestRcpMethod(RpcCommunicator& communicator) {
 }
 
 TEST_F(RpcCommunicatorTest, TestCanRegisterRpcMethod) {
-    RpcCommunicator communicator;
+    RpcCommunicatorType communicator;
     registerTestRcpMethod(communicator);
     EXPECT_EQ(true, true);
 }

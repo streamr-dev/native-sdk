@@ -13,28 +13,30 @@
 namespace streamr::protorpc {
 using streamr::protorpc::RpcCommunicator;
 using streamr::protorpc::ProtoCallContext;
+template <typename CallContextType>
 class DhtRpcServiceClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit DhtRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<ClosestPeersResponse> getClosestPeers(const ClosestPeersRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", request, callContext);
+    explicit DhtRpcServiceClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<ClosestPeersResponse> getClosestPeers(ClosestPeersRequest&& request, CallContextType&& callContext) {
+        return communicator.template request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", std::move(request), std::move(callContext));
     }
-    folly::coro::Task<PingResponse> ping(const PingRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<PingResponse, PingRequest>("ping", request, callContext);
+    folly::coro::Task<PingResponse> ping(PingRequest&& request, CallContextType&& callContext) {
+        return communicator.template request<PingResponse, PingRequest>("ping", std::move(request), std::move(callContext));
     }
-    folly::coro::Task<RouteMessageAck> routeMessage(const RouteMessageWrapper& request, const ProtoCallContext& callContext) {
-        return communicator.request<RouteMessageAck, RouteMessageWrapper>("routeMessage", request, callContext);
+    folly::coro::Task<RouteMessageAck> routeMessage(RouteMessageWrapper&& request, CallContextType&& callContext) {
+        return communicator.template request<RouteMessageAck, RouteMessageWrapper>("routeMessage", std::move(request), std::move(callContext));
     }
 }; // class DhtRpcServiceClient
+template <typename CallContextType>
 class OptionalServiceClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit OptionalServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<OptionalResponse> getOptional(const OptionalRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<OptionalResponse, OptionalRequest>("getOptional", request, callContext);
+    explicit OptionalServiceClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<OptionalResponse> getOptional(OptionalRequest&& request, CallContextType&& callContext) {
+        return communicator.template request<OptionalResponse, OptionalRequest>("getOptional", std::move(request), std::move(callContext));
     }
 }; // class OptionalServiceClient
 }; // namespace streamr::protorpc

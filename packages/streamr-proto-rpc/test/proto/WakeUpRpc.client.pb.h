@@ -13,13 +13,14 @@
 namespace streamr::protorpc {
 using streamr::protorpc::RpcCommunicator;
 using streamr::protorpc::ProtoCallContext;
+template <typename CallContextType>
 class WakeUpRpcServiceClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit WakeUpRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<void> wakeUp(const WakeUpRequest& request, const ProtoCallContext& callContext) {
-        return communicator.notify<WakeUpRequest>("wakeUp", request, callContext);
+    explicit WakeUpRpcServiceClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<void> wakeUp(WakeUpRequest&& request, CallContextType&& callContext) {
+        return communicator.template notify<WakeUpRequest>("wakeUp", std::move(request), std::move(callContext));
     }
 }; // class WakeUpRpcServiceClient
 }; // namespace streamr::protorpc
