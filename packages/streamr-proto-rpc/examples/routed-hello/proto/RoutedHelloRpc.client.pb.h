@@ -13,13 +13,14 @@
 namespace streamr::protorpc {
 using streamr::protorpc::RpcCommunicator;
 using streamr::protorpc::ProtoCallContext;
+template <typename CallContextType>
 class RoutedHelloRpcServiceClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit RoutedHelloRpcServiceClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<RoutedHelloResponse> sayHello(const RoutedHelloRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<RoutedHelloResponse, RoutedHelloRequest>("sayHello", request, callContext);
+    explicit RoutedHelloRpcServiceClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<RoutedHelloResponse> sayHello(RoutedHelloRequest&& request, CallContextType&& callContext) {
+        return communicator.template request<RoutedHelloResponse, RoutedHelloRequest>("sayHello", std::move(request), std::move(callContext));
     }
 }; // class RoutedHelloRpcServiceClient
 }; // namespace streamr::protorpc

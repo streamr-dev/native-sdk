@@ -214,14 +214,15 @@ private:
                 file->service(i);
             const std::string serviceFullname = service->full_name();
             const std::string& serviceName = service->name();
+            sourceSs << "template <typename CallContextType>\n";
             sourceSs << "class " << serviceName << "Client"
                      << " {\n";
             sourceSs << "private:\n";
-            sourceSs << "RpcCommunicator& communicator;\n";
+            sourceSs << "RpcCommunicator<CallContextType>& communicator;\n";
             sourceSs << "public:\n";
             sourceSs
                 << "    explicit " << serviceName
-                << "Client(RpcCommunicator& communicator) : communicator(communicator) {}\n";
+                << "Client(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}\n";
             // sourceSs << "    \n";
             // for each methods
             int numMethods = service->method_count();
@@ -258,17 +259,17 @@ private:
 
                 sourceSs
                     << "    folly::coro::Task<" + methodOutputName + "> "
-                    << methodName << "(const " << methodInputName
-                    << "& request, const ProtoCallContext& callContext) {\n";
+                    << methodName << "(" << methodInputName
+                    << "&& request, CallContextType&& callContext) {\n";
                 sourceSs << "        return communicator.";
                 if (methodOutputName == "void") {
-                    sourceSs << "notify<" << methodInputName << ">";
+                    sourceSs << "template notify<" << methodInputName << ">";
                 } else {
-                    sourceSs << "request<" << methodOutputName << ", "
+                    sourceSs << "template request<" << methodOutputName << ", "
                              << methodInputName << ">";
                 }
                 sourceSs << "(\"" << methodName
-                         << "\", request, callContext);\n";
+                         << "\", std::move(request), std::move(callContext));\n";
                 sourceSs << "    }\n";
             }
             sourceSs << "}; // class " << serviceName << "Client\n";

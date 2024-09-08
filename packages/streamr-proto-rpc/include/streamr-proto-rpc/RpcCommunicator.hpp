@@ -32,8 +32,6 @@ using streamr::logger::SLogger;
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 using folly::coro::Task;
-using OutgoingMessageCallbackType =
-    RpcCommunicatorClientApi::OutgoingMessageCallbackType;
 
 constexpr std::chrono::milliseconds defaultRpcRequestTimeout = 5000ms;
 
@@ -44,12 +42,16 @@ enum class StatusCode { OK, STOPPED, DEADLINE_EXCEEDED, SERVER_ERROR };
 struct RpcCommunicatorOptions{
     std::chrono::milliseconds rpcRequestTimeout;
 };
+
+template <typename CallContextType>
 class RpcCommunicator {
 private:
-    RpcCommunicatorClientApi mRpcCommunicatorClientApi;
-    RpcCommunicatorServerApi mRpcCommunicatorServerApi;
+    RpcCommunicatorClientApi<CallContextType> mRpcCommunicatorClientApi;
+    RpcCommunicatorServerApi<CallContextType> mRpcCommunicatorServerApi;
 
 public:
+    using OutgoingMessageCallbackType =
+        RpcCommunicatorClientApi<CallContextType>::OutgoingMessageCallbackType;
     explicit RpcCommunicator(
         std::optional<RpcCommunicatorOptions> options = std::nullopt)
         : mRpcCommunicatorClientApi(
@@ -79,6 +81,7 @@ public:
      *
      */
 
+    /*
     template <typename F>
         requires std::is_assignable_v<OutgoingMessageCallbackType, F>
     void setOutgoingMessageCallback(F&& callback) {
@@ -86,7 +89,14 @@ public:
             std::forward<F>(callback));
         mRpcCommunicatorServerApi.setOutgoingMessageCallback(
             std::forward<F>(callback));
+    }*/
+    void setOutgoingMessageCallback(OutgoingMessageCallbackType callback) {
+        mRpcCommunicatorClientApi.setOutgoingMessageCallback(
+            std::move(callback));
+        mRpcCommunicatorServerApi.setOutgoingMessageCallback(
+            std::move(callback));
     }
+
 
     // Client-side API
 
@@ -105,7 +115,7 @@ public:
         const std::string& methodName,
         const RequestType& methodParam,
         const ProtoCallContext& callContext) {
-        return mRpcCommunicatorClientApi.request<ReturnType, RequestType>(
+        return mRpcCommunicatorClientApi.template request<ReturnType, RequestType>(
             methodName, methodParam, callContext);
     }
 
@@ -124,7 +134,7 @@ public:
         const std::string_view notificationName,
         const RequestType& notificationParam,
         const ProtoCallContext& callContext) {
-        return mRpcCommunicatorClientApi.notify<RequestType>(
+        return mRpcCommunicatorClientApi.template notify<RequestType>(
             notificationName, notificationParam, callContext);
     }
 
@@ -144,7 +154,7 @@ public:
             F>
     void registerRpcMethod(
         const std::string& name, const F& fn, MethodOptions options = {}) {
-        mRpcCommunicatorServerApi.registerRpcMethod<RequestType, ReturnType, F>(
+        mRpcCommunicatorServerApi.template registerRpcMethod<RequestType, ReturnType, F>(
             name, fn, options);
     }
 
@@ -162,7 +172,7 @@ public:
             F>
     void registerRpcNotification(
         const std::string& name, const F& fn, MethodOptions options = {}) {
-        mRpcCommunicatorServerApi.registerRpcNotification<RequestType, F>(
+        mRpcCommunicatorServerApi.template registerRpcNotification<RequestType, F>(
             name, fn, options);
     }
 

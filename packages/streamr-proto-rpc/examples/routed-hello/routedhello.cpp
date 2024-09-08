@@ -14,6 +14,8 @@ using streamr::protorpc::RoutedHelloRpcService;
 using streamr::protorpc::RoutedHelloRpcServiceClient;
 using streamr::protorpc::RpcCommunicator;
 using streamr::protorpc::RpcMessage;
+using RpcCommunicatorType = streamr::protorpc::RpcCommunicator<ProtoCallContext>;
+
 class RoutedHelloService : public RoutedHelloRpcService {
 private:
     std::string mServiceId;
@@ -36,12 +38,12 @@ public:
 };
 
 int main() {
-    std::map<std::string, std::shared_ptr<RpcCommunicator>>
+    std::map<std::string, std::shared_ptr<RpcCommunicatorType>>
         clientCommunicators;
 
     // Setup server
     
-    RpcCommunicator serverCommunicator1;
+    RpcCommunicatorType serverCommunicator1;
     RoutedHelloService helloService1("1");
 
     serverCommunicator1
@@ -55,7 +57,7 @@ int main() {
 
     // Setup server 2
     
-    RpcCommunicator serverCommunicator2;
+    RpcCommunicatorType serverCommunicator2;
     RoutedHelloService helloService2("2");
 
     serverCommunicator2
@@ -69,13 +71,13 @@ int main() {
 
     // Setup client1
     
-    auto communicator1 = std::make_shared<RpcCommunicator>();
+    auto communicator1 = std::make_shared<RpcCommunicatorType>();
     RoutedHelloRpcServiceClient helloClient1(*communicator1);
     clientCommunicators["1"] = communicator1;
 
     // Setup client2
     
-    auto communicator2 = std::make_shared<RpcCommunicator>();
+    auto communicator2 = std::make_shared<RpcCommunicatorType>();
     RoutedHelloRpcServiceClient helloClient2(*communicator2);
     clientCommunicators["2"] = communicator2;
 
@@ -112,7 +114,7 @@ int main() {
             // Choose the server to send the message to based on context
             // information passed through the RPC stack as client context
             // information
-            RpcCommunicator* server;
+            RpcCommunicatorType* server;
             std::string targetServerId = context.at("targetServerId");
 
             if (targetServerId == "2") {
@@ -144,7 +146,7 @@ int main() {
             const RpcMessage& message,
             const std::string& /* requestId */,
             const ProtoCallContext& context) -> void {
-            RpcCommunicator* server;
+            RpcCommunicatorType* server;
             std::string targetServerId = context.at("targetServerId");
 
             if (targetServerId == "2") {
@@ -167,7 +169,7 @@ int main() {
     context["targetServerId"] = "2";
 
     auto response =
-        folly::coro::blockingWait(helloClient1.sayHello(request, context));
+        folly::coro::blockingWait(helloClient1.sayHello(std::move(request), std::move(context)));
 
     std::cout << "Client 1 (Alice) got message from server: " +
             response.greeting()
@@ -179,7 +181,7 @@ int main() {
     context2["targetServerId"] = "1";
 
     auto response2 =
-        folly::coro::blockingWait(helloClient2.sayHello(request2, context2));
+        folly::coro::blockingWait(helloClient2.sayHello(std::move(request2), std::move(context2)));
 
     std::cout << "Client 2 (Bob) got message from server: " +
             response2.greeting()

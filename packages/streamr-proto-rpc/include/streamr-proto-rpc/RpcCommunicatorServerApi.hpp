@@ -9,10 +9,11 @@ namespace streamr::protorpc {
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 
+template <typename CallContextType>
 class RpcCommunicatorServerApi {
 public:
     using OutgoingMessageCallbackType = std::function<void(
-        RpcMessage, std::string /*requestId*/, ProtoCallContext)>;
+        RpcMessage, std::string /*requestId*/, CallContextType)>;
 
 private:
     ServerRegistry mServerRegistry;

@@ -22,8 +22,10 @@
 
 namespace streamr::protorpc {
 
+using RpcCommunicatorType = RpcCommunicator<ProtoCallContext>;
+
 template <typename T>
-void setOutgoingCallbackWithException(RpcCommunicator& sender) {
+void setOutgoingCallbackWithException(RpcCommunicatorType& sender) {
     sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
@@ -60,8 +62,8 @@ public:
 
 class ProtoRpcClientTest : public ::testing::Test {
 protected:
-    RpcCommunicator communicator1; // NOLINT
-    RpcCommunicator communicator2; // NOLINT
+    RpcCommunicatorType communicator1; // NOLINT
+    RpcCommunicatorType communicator2; // NOLINT
 
     void SetUp() override {}
 
@@ -89,7 +91,7 @@ protected:
     }
 };
 
-void registerTestRcpMethod(RpcCommunicator& communicator) {
+void registerTestRcpMethod(RpcCommunicatorType& communicator) {
     communicator.registerRpcMethod<HelloRequest, HelloResponse>(
         "sayHello",
         [](const HelloRequest& request,
@@ -102,7 +104,7 @@ void registerTestRcpMethod(RpcCommunicator& communicator) {
         });
 }
 
-void registerTestRcpMethodWithOptionalFields(RpcCommunicator& communicator) {
+void registerTestRcpMethodWithOptionalFields(RpcCommunicatorType& communicator) {
     communicator.registerRpcMethod<OptionalRequest, OptionalResponse>(
         "getOptional",
         [](const OptionalRequest& /* request */,
@@ -115,11 +117,11 @@ void registerTestRcpMethodWithOptionalFields(RpcCommunicator& communicator) {
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
     registerTestRcpMethod(communicator1);
     setCallbacks();
-    HelloRpcServiceClient client(communicator2);
+    HelloRpcServiceClient<ProtoCallContext> client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
     auto result =
-        folly::coro::blockingWait(client.sayHello(request, ProtoCallContext()));
+        folly::coro::blockingWait(client.sayHello(std::move(request), ProtoCallContext()));
     EXPECT_EQ("Hello, Test", result.greeting());
 }
 
@@ -138,21 +140,21 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
             SLogger::info("wakeUpService: called with", reason);
             promise.set_value(reason);
         });
-    WakeUpRpcServiceClient client(communicator2);
+    WakeUpRpcServiceClient<ProtoCallContext> client(communicator2);
     WakeUpRequest request;
     request.set_reason("School");
-    folly::coro::blockingWait(client.wakeUp(request, ProtoCallContext()));
+    folly::coro::blockingWait(client.wakeUp(std::move(request), ProtoCallContext()));
     EXPECT_EQ("School", promise.get_future().get());
 }
 
 TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
     registerTestRcpMethodWithOptionalFields(communicator1);
     setCallbacks();
-    OptionalServiceClient client(communicator2);
+    OptionalServiceClient<ProtoCallContext> client(communicator2);
     OptionalRequest request;
     request.set_someoptionalfield("something");
     auto result = folly::coro::blockingWait(
-        client.getOptional(request, ProtoCallContext()));
+        client.getOptional(std::move(request), ProtoCallContext()));
     EXPECT_EQ(false, result.has_someoptionalfield());
 }
 
@@ -161,11 +163,11 @@ TEST_F(
     TestHandlesClientSideExceptionOnRPCCallsWithRuntimeError) {
     registerTestRcpMethod(communicator1);
     setOutgoingCallbackWithException<std::runtime_error>(communicator2);
-    HelloRpcServiceClient client(communicator2);
+    HelloRpcServiceClient<ProtoCallContext> client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
     try {
-        folly::coro::blockingWait(client.sayHello(request, ProtoCallContext()));
+        folly::coro::blockingWait(client.sayHello(std::move(request), ProtoCallContext()));
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcClientError& ex) {
