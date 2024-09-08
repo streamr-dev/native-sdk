@@ -16,7 +16,7 @@ using streamr::protorpc::RpcCommunicator;
 using streamr::protorpc::RpcMessage;
 using RpcCommunicatorType = streamr::protorpc::RpcCommunicator<ProtoCallContext>;
 
-class RoutedHelloService : public RoutedHelloRpcService {
+class RoutedHelloService : public RoutedHelloRpcService<ProtoCallContext> {
 private:
     std::string mServiceId;
 

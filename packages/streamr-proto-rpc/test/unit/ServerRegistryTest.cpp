@@ -3,6 +3,7 @@
 #include <google/protobuf/any.pb.h>
 #include "HelloRpc.pb.h"
 #include "streamr-proto-rpc/ServerRegistry.hpp"
+#include "streamr-proto-rpc/ProtoCallContext.hpp"
 
 // BEGINNOLINT
 
@@ -10,7 +11,7 @@ namespace streamr::protorpc {
 
 class ServerRegistryTest : public ::testing::Test {
 protected:
-    ServerRegistry registry; // NOLINT
+    ServerRegistry<ProtoCallContext> registry; // NOLINT
     void SetUp() override {}
 };
 

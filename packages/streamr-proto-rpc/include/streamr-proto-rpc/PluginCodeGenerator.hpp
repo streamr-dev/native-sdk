@@ -80,7 +80,6 @@ private:
         headerSs << "#define " << headerGuard << "\n\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
         headerSs << "#include <folly/experimental/coro/Task.h>\n";
-        headerSs << "#include \"streamr-proto-rpc/ProtoCallContext.hpp\" // NOLINT\n";
 
         std::stringstream sourceSs;
 
@@ -89,7 +88,6 @@ private:
         } else {
             sourceSs << "namespace " << file->package() << " {\n";
         }
-        headerSs << "using streamr::protorpc::ProtoCallContext;\n\n";
         // for each services
         int numServices = file->service_count();
         for (int i = 0; i < numServices; i++) {
@@ -98,6 +96,7 @@ private:
             const std::string serviceFullname = service->full_name();
             const std::string& serviceName = service->name();
 
+            sourceSs << "template <typename CallContextType>\n";
             sourceSs << "class " << serviceName << " {\n";
             sourceSs << "public:\n";
             sourceSs << "   virtual ~" << serviceName << "() = default;\n";
@@ -138,7 +137,7 @@ private:
                 sourceSs
                     << "   virtual " << methodOutputName + " " << methodName
                     << "(const " << methodInputName
-                    << "& request, const ProtoCallContext& callContext) = 0;\n";
+                    << "& request, const CallContextType& callContext) = 0;\n";
             }
             sourceSs << "}; // class " << serviceName << "\n";
         }
@@ -193,7 +192,6 @@ private:
         headerSs << "#define " << headerGuard << "\n\n";
         headerSs << "#include <folly/experimental/coro/Task.h>\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
-        headerSs << "#include \"streamr-proto-rpc/ProtoCallContext.hpp\"\n";
         headerSs << "#include \"streamr-proto-rpc/RpcCommunicator.hpp\"\n";
 
         headerSs << "\n";
@@ -206,7 +204,7 @@ private:
             sourceSs << "namespace " << file->package() << " {\n";
         }
         sourceSs << "using streamr::protorpc::RpcCommunicator;\n";
-        sourceSs << "using streamr::protorpc::ProtoCallContext;\n";
+
         // for each services
         int numServices = file->service_count();
         for (int i = 0; i < numServices; i++) {

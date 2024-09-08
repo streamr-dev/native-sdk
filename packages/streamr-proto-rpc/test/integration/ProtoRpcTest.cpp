@@ -50,7 +50,7 @@ using streamr::eventemitter::EventEmitter;
 struct WakeUpCalled : public Event<std::string> {};
 using WakeUpEvents = std::tuple<WakeUpCalled>;
 
-class WakeUpRpcServiceImpl : public WakeUpRpcService,
+class WakeUpRpcServiceImpl : public WakeUpRpcService<ProtoCallContext>,
                              public EventEmitter<WakeUpEvents> {
 public:
     void wakeUp(
