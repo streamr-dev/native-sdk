@@ -6,15 +6,13 @@
 
 #include "WakeUpRpc.pb.h" // NOLINT
 #include <folly/experimental/coro/Task.h>
-#include "streamr-proto-rpc/ProtoCallContext.hpp" // NOLINT
-using streamr::protorpc::ProtoCallContext;
-
 
 namespace streamr::protorpc {
+template <typename CallContextType>
 class WakeUpRpcService {
 public:
    virtual ~WakeUpRpcService() = default;
-   virtual void wakeUp(const WakeUpRequest& request, const ProtoCallContext& callContext) = 0;
+   virtual void wakeUp(const WakeUpRequest& request, const CallContextType& callContext) = 0;
 }; // class WakeUpRpcService
 }; // namespace streamr::protorpc
 

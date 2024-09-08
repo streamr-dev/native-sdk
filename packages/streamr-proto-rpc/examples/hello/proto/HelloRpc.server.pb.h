@@ -6,15 +6,13 @@
 
 #include "HelloRpc.pb.h" // NOLINT
 #include <folly/experimental/coro/Task.h>
-#include "streamr-proto-rpc/ProtoCallContext.hpp" // NOLINT
-using streamr::protorpc::ProtoCallContext;
-
 
 namespace streamr::protorpc {
+template <typename CallContextType>
 class HelloRpcService {
 public:
    virtual ~HelloRpcService() = default;
-   virtual HelloResponse sayHello(const HelloRequest& request, const ProtoCallContext& callContext) = 0;
+   virtual HelloResponse sayHello(const HelloRequest& request, const CallContextType& callContext) = 0;
 }; // class HelloRpcService
 }; // namespace streamr::protorpc
 

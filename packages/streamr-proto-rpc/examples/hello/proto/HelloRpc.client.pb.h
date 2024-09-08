@@ -6,13 +6,11 @@
 
 #include <folly/experimental/coro/Task.h>
 #include "HelloRpc.pb.h" // NOLINT
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
 #include "streamr-proto-rpc/RpcCommunicator.hpp"
 
 
 namespace streamr::protorpc {
 using streamr::protorpc::RpcCommunicator;
-using streamr::protorpc::ProtoCallContext;
 template <typename CallContextType>
 class HelloRpcServiceClient {
 private:

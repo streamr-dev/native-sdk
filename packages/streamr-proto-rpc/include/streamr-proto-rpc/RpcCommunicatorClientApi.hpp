@@ -9,7 +9,6 @@
 #include <folly/coro/Timeout.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include "Errors.hpp"
-#include "ProtoCallContext.hpp"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-logger/SLogger.hpp"
 namespace streamr::protorpc {
@@ -124,7 +123,7 @@ public:
 
     void onIncomingMessage(
         const RpcMessage& rpcMessage,
-        const ProtoCallContext& /* callContext */) {
+        const CallContextType& /* callContext */) {
         std::lock_guard lock(mOngoingRequestsMutex);
 
         const auto& header = rpcMessage.header();
@@ -158,19 +157,20 @@ public:
     Task<ReturnType> request(
         const std::string& methodName,
         const RequestType& methodParam,
-        const CallContextType& callContext) {
+        const CallContextType& callContext,
+        std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         SLogger::trace("request(): methodName:", methodName);
 
-        std::chrono::milliseconds timeout = mRpcRequestTimeout;
-        if (callContext.timeout.has_value()) {
-            timeout = callContext.timeout.value();
+        std::chrono::milliseconds timeoutValue = mRpcRequestTimeout;
+        if (timeout.has_value()) {
+            timeoutValue = timeout.value();
         }
 
         auto requestMessage =
             this->createRequestRpcMessage(methodName, methodParam);
 
         auto task = folly::coro::co_invoke(
-            [requestMessage, callContext, timeout, this]()
+            [requestMessage, callContext, timeoutValue, this]()
                 -> folly::coro::Task<ReturnType> {
                 auto callMakingTask = folly::coro::co_invoke(
                     [requestMessage,
@@ -186,7 +186,7 @@ public:
                     co_return co_await folly::coro::timeout(
                         folly::coro::detachOnCancel(
                             std::move(callMakingTask).scheduleOn(&mExecutor)),
-                        std::chrono::milliseconds(timeout));
+                        timeoutValue);
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace(
                         "request() caught folly::FutureTimeout", e.what());
@@ -209,12 +209,13 @@ public:
     Task<void> notify(
         const std::string_view notificationName,
         const RequestType& notificationParam,
-        const CallContextType& callContext) {
+        const CallContextType& callContext,
+        std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         SLogger::trace("notify() notificationName:", notificationName);
 
-        std::chrono::milliseconds timeout = mRpcRequestTimeout;
-        if (callContext.timeout.has_value()) {
-            timeout = callContext.timeout.value();
+        std::chrono::milliseconds timeoutValue = mRpcRequestTimeout;
+        if (timeout.has_value()) {
+            timeoutValue = timeout.value();
         }
 
         SLogger::trace(
@@ -249,7 +250,7 @@ public:
             co_return co_await folly::coro::timeout(
                 folly::coro::detachOnCancel(std::move(promiseContract.second))
                     .scheduleOn(&mExecutor),
-                std::chrono::milliseconds(timeout));
+                timeoutValue);
         } catch (const folly::FutureTimeout& e) {
             SLogger::trace("notify() timed out");
             throw RpcTimeout("notify() timed out");
@@ -273,7 +274,7 @@ public:
 private:
     template <typename ReturnType>
     std::shared_ptr<OngoingRequest<ReturnType>> makeRpcRequest(
-        const RpcMessage& requestMessage, const ProtoCallContext& callContext) {
+        const RpcMessage& requestMessage, const CallContextType& callContext) {
         auto ongoingRequest = std::make_shared<OngoingRequest<ReturnType>>();
         {
             std::lock_guard lock(mOngoingRequestsMutex);

@@ -6,22 +6,21 @@
 
 #include "TestProtos.pb.h" // NOLINT
 #include <folly/experimental/coro/Task.h>
-#include "streamr-proto-rpc/ProtoCallContext.hpp" // NOLINT
-using streamr::protorpc::ProtoCallContext;
-
 
 namespace streamr::protorpc {
+template <typename CallContextType>
 class DhtRpcService {
 public:
    virtual ~DhtRpcService() = default;
-   virtual ClosestPeersResponse getClosestPeers(const ClosestPeersRequest& request, const ProtoCallContext& callContext) = 0;
-   virtual PingResponse ping(const PingRequest& request, const ProtoCallContext& callContext) = 0;
-   virtual RouteMessageAck routeMessage(const RouteMessageWrapper& request, const ProtoCallContext& callContext) = 0;
+   virtual ClosestPeersResponse getClosestPeers(const ClosestPeersRequest& request, const CallContextType& callContext) = 0;
+   virtual PingResponse ping(const PingRequest& request, const CallContextType& callContext) = 0;
+   virtual RouteMessageAck routeMessage(const RouteMessageWrapper& request, const CallContextType& callContext) = 0;
 }; // class DhtRpcService
+template <typename CallContextType>
 class OptionalService {
 public:
    virtual ~OptionalService() = default;
-   virtual OptionalResponse getOptional(const OptionalRequest& request, const ProtoCallContext& callContext) = 0;
+   virtual OptionalResponse getOptional(const OptionalRequest& request, const CallContextType& callContext) = 0;
 }; // class OptionalService
 }; // namespace streamr::protorpc
 

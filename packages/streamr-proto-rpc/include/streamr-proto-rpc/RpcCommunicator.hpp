@@ -15,8 +15,6 @@
 #include <folly/experimental/coro/Timeout.h>
 
 #include <magic_enum.hpp>
-
-#include "ProtoCallContext.hpp"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "RpcCommunicatorClientApi.hpp"
 #include "RpcCommunicatorServerApi.hpp"
@@ -68,7 +66,7 @@ public:
      */
 
     void handleIncomingMessage(
-        const RpcMessage& message, const ProtoCallContext& callContext) {
+        const RpcMessage& message, const CallContextType& callContext) {
         this->onIncomingMessage(message, callContext);
     }
 
@@ -114,9 +112,10 @@ public:
     Task<ReturnType> request(
         const std::string& methodName,
         const RequestType& methodParam,
-        const ProtoCallContext& callContext) {
+        const CallContextType& callContext,
+        std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         return mRpcCommunicatorClientApi.template request<ReturnType, RequestType>(
-            methodName, methodParam, callContext);
+            methodName, methodParam, callContext, timeout);
     }
 
     /**
@@ -133,9 +132,10 @@ public:
     Task<void> notify(
         const std::string_view notificationName,
         const RequestType& notificationParam,
-        const ProtoCallContext& callContext) {
+        const CallContextType& callContext,
+        std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         return mRpcCommunicatorClientApi.template notify<RequestType>(
-            notificationName, notificationParam, callContext);
+            notificationName, notificationParam, callContext, timeout);
     }
 
     // Server-side API
@@ -150,7 +150,7 @@ public:
 
     template <typename RequestType, typename ReturnType, typename F>
         requires std::is_assignable_v<
-            std::function<ReturnType(RequestType, ProtoCallContext)>,
+            std::function<ReturnType(RequestType, CallContextType)>,
             F>
     void registerRpcMethod(
         const std::string& name, const F& fn, MethodOptions options = {}) {
@@ -168,7 +168,7 @@ public:
 
     template <typename RequestType, typename F>
         requires std::is_assignable_v<
-            std::function<void(RequestType, ProtoCallContext)>,
+            std::function<void(RequestType, CallContextType)>,
             F>
     void registerRpcNotification(
         const std::string& name, const F& fn, MethodOptions options = {}) {
@@ -178,7 +178,7 @@ public:
 
 private:
     void onIncomingMessage(
-        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
+        const RpcMessage& rpcMessage, const CallContextType& callContext) {
         SLogger::trace("onIncomingMessage", rpcMessage.DebugString());
 
         const auto& header = rpcMessage.header();

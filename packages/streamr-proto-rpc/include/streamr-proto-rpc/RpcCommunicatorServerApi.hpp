@@ -2,7 +2,6 @@
 #define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_SERVER_API_HPP
 
 #include "Errors.hpp"
-#include "ProtoCallContext.hpp"
 #include "ServerRegistry.hpp"
 
 namespace streamr::protorpc {
@@ -16,7 +15,7 @@ public:
         RpcMessage, std::string /*requestId*/, CallContextType)>;
 
 private:
-    ServerRegistry mServerRegistry;
+    ServerRegistry<CallContextType> mServerRegistry;
     OutgoingMessageCallbackType mOutgoingMessageCallback;
 
     struct RpcResponseParams {
@@ -64,7 +63,7 @@ private:
     }
 
     void handleRequest(
-        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
+        const RpcMessage& rpcMessage, const CallContextType& callContext) {
         RpcMessage response;
         try {
             SLogger::trace("handleRequest()");
@@ -112,7 +111,7 @@ private:
     }
 
     void handleNotification(
-        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
+        const RpcMessage& rpcMessage, const CallContextType& callContext) {
         try {
             mServerRegistry.handleNotification(rpcMessage, callContext);
         } catch (const std::exception& err) {
@@ -122,7 +121,7 @@ private:
 
 public:
     void onIncomingMessage(
-        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
+        const RpcMessage& rpcMessage, const CallContextType& callContext) {
         const auto& header = rpcMessage.header();
 
         if (header.find("request") != header.end() &&
@@ -153,21 +152,21 @@ public:
 
     template <typename RequestType, typename ReturnType, typename F>
         requires std::is_assignable_v<
-            std::function<ReturnType(RequestType, ProtoCallContext)>,
+            std::function<ReturnType(RequestType, CallContextType)>,
             F>
     void registerRpcMethod(
         const std::string& name, const F& fn, MethodOptions options = {}) {
-        mServerRegistry.registerRpcMethod<RequestType, ReturnType, F>(
+        mServerRegistry.template registerRpcMethod<RequestType, ReturnType, F>(
             name, fn, options);
     }
 
     template <typename RequestType, typename F>
         requires std::is_assignable_v<
-            std::function<void(RequestType, ProtoCallContext)>,
+            std::function<void(RequestType, CallContextType)>,
             F>
     void registerRpcNotification(
         const std::string& name, const F& fn, MethodOptions options = {}) {
-        mServerRegistry.registerRpcNotification<RequestType, F>(
+        mServerRegistry.template registerRpcNotification<RequestType, F>(
             name, fn, options);
     }
 };

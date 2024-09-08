@@ -13,7 +13,7 @@ using streamr::protorpc::RpcCommunicator;
 using streamr::protorpc::RpcMessage;
 using RpcCommunicatorType = streamr::protorpc::RpcCommunicator<ProtoCallContext>;
 
-class HelloService : public HelloRpcService {
+class HelloService : public HelloRpcService<ProtoCallContext> {
 public:
     HelloResponse sayHello(
         const HelloRequest& request,

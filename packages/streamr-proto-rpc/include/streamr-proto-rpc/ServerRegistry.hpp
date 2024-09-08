@@ -1,50 +1,41 @@
 #ifndef STREAMR_PROTO_RPC_SERVER_REGISTRY_HPP
 #define STREAMR_PROTO_RPC_SERVER_REGISTRY_HPP
 
-#include <type_traits>
 #include <google/protobuf/any.pb.h>
 #include <google/protobuf/empty.pb.h>
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-proto-rpc/Errors.hpp"
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
 
 namespace streamr::protorpc {
 
 using Any = google::protobuf::Any;
 using Empty = google::protobuf::Empty;
-
 using RpcMessage = ::protorpc::RpcMessage;
 using SLogger = streamr::logger::SLogger;
-
-using RpcMethodType =
-    std::function<Any(Any request, ProtoCallContext callContext)>;
-
-using RpcNotificationType =
-    std::function<Empty(Any request, ProtoCallContext callContext)>;
-
-template <typename T>
-concept AssignableToRpcMethod = std::is_assignable_v<RpcMethodType, T>;
-
-template <typename T>
-concept AssignableToRpcNotification =
-    std::is_assignable_v<RpcNotificationType, T>;
 struct MethodOptions {
     size_t timeout = 0;
 };
 
-struct RegisteredMethod {
-    RpcMethodType fn;
-    MethodOptions options;
-};
-
-struct RegisteredNotification {
-    RpcNotificationType fn;
-    MethodOptions options;
-};
-
+template <typename CallContextType>
 class ServerRegistry {
+
 private:
+    using RpcMethodType =
+        std::function<Any(Any request, CallContextType callContext)>;
+
+    using RpcNotificationType =
+        std::function<Empty(Any request, CallContextType callContext)>;
+    struct RegisteredMethod {
+        RpcMethodType fn;
+        MethodOptions options;
+    };
+
+    struct RegisteredNotification {
+        RpcNotificationType fn;
+        MethodOptions options;
+    };
+
     std::map<std::string, RegisteredMethod> mMethods;
     std::map<std::string, RegisteredNotification> mNotifications;
 
@@ -74,7 +65,7 @@ public:
     }
 
     Any handleRequest(
-        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
+        const RpcMessage& rpcMessage, const CallContextType& callContext) {
         SLogger::trace(
             ("Server processing RPC call " + rpcMessage.requestid()));
         auto implementation = getImplementation(rpcMessage, mMethods);
@@ -82,7 +73,7 @@ public:
     }
 
     Empty handleNotification(
-        const RpcMessage& rpcMessage, const ProtoCallContext& callContext) {
+        const RpcMessage& rpcMessage, const CallContextType& callContext) {
         SLogger::trace(
             ("Server processing RPC notification " + rpcMessage.requestid()));
         auto implementation = getImplementation(rpcMessage, mNotifications);
@@ -93,7 +84,7 @@ public:
     void registerRpcMethod(
         const std::string& name, const F& fn, MethodOptions options = {}) {
         RegisteredMethod method = {
-            .fn = [fn](const Any& data, const ProtoCallContext& callContext)
+            .fn = [fn](const Any& data, const CallContextType& callContext)
                 -> Any {
                 RequestType request;
                 ServerRegistry::wrappedParseAny(request, data);
@@ -110,7 +101,7 @@ public:
     void registerRpcNotification(
         const std::string& name, const F& fn, MethodOptions options = {}) {
         RegisteredNotification notification = {
-            .fn = [fn](const Any& data, const ProtoCallContext& callContext)
+            .fn = [fn](const Any& data, const CallContextType& callContext)
                 -> Empty {
                 RequestType request;
                 ServerRegistry::wrappedParseAny(request, data);
