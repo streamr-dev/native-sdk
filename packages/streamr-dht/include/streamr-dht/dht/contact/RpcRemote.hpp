@@ -18,9 +18,9 @@ using streamr::dht::helpers::Connectivity;
 template <typename ProtoRpcClient>
 class RpcRemote {
 private:
-    const PeerDescriptor& localPeerDescriptor;
-    const PeerDescriptor& remotePeerDescriptor;
-    ProtoRpcClient& client;
+    PeerDescriptor localPeerDescriptor;
+    PeerDescriptor remotePeerDescriptor;
+    ProtoRpcClient client;
     std::optional<std::chrono::milliseconds> timeout;
 
     
@@ -36,7 +36,7 @@ private:
     // default timeout for existing connections
     static constexpr std::chrono::milliseconds existingConnectionTimeout{5000};
 
-    static std::chrono::milliseconds getTimeout(const PeerDescriptor& localPeerDescriptor, const PeerDescriptor& remotePeerDescriptor) { // NOLINT
+    static std::chrono::milliseconds calculateTimeout(const PeerDescriptor& localPeerDescriptor, const PeerDescriptor& remotePeerDescriptor) { // NOLINT
         const ConnectionType connectionType = Connectivity::expectedConnectionType(localPeerDescriptor, remotePeerDescriptor);
         if (connectionType == ConnectionType::WEBSOCKET_CLIENT) {
             return websocketClientTimeout;
@@ -52,22 +52,22 @@ private:
 
 protected:
     RpcRemote(
-        const PeerDescriptor& localPeerDescriptor, // NOLINT
-        const PeerDescriptor& remotePeerDescriptor,
-        ProtoRpcClient& client,
+        PeerDescriptor localPeerDescriptor, // NOLINT
+        PeerDescriptor remotePeerDescriptor,
+        ProtoRpcClient client,
         std::optional<std::chrono::milliseconds> timeout = std::nullopt)
-        : localPeerDescriptor(localPeerDescriptor),
-          remotePeerDescriptor(remotePeerDescriptor),
+        : localPeerDescriptor(std::move(localPeerDescriptor)),
+          remotePeerDescriptor(std::move(remotePeerDescriptor)),
           timeout(timeout),
-          client(client) {
+          client(std::move(client)) {
     }
 
 public:
-    [[nodiscard]] PeerDescriptor getPeerDescriptor() const {
+    [[nodiscard]] const PeerDescriptor& getPeerDescriptor() const {
         return this->remotePeerDescriptor;
     }
 
-    [[nodiscard]] PeerDescriptor getLocalPeerDescriptor() const {
+    [[nodiscard]] const PeerDescriptor& getLocalPeerDescriptor() const {
         return this->localPeerDescriptor;
     }
 
@@ -83,13 +83,15 @@ public:
         }
         ret.sourceDescriptor = this->localPeerDescriptor;
         ret.targetDescriptor = this->remotePeerDescriptor;
-        if (this->timeout.has_value()) {
-            ret.timeout = this->timeout.value();
-        } else {
-            ret.timeout = getTimeout(this->localPeerDescriptor, this->remotePeerDescriptor);
-        }
         
         return ret;
+    }
+
+    [[nodiscard]] std::chrono::milliseconds getTimeout() const {
+        if (this->timeout.has_value()) {
+            return this->timeout.value();
+        }
+        return calculateTimeout(this->localPeerDescriptor, this->remotePeerDescriptor);
     }
 };
 

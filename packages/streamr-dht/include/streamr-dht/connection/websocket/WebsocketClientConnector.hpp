@@ -9,6 +9,7 @@
 #include "streamr-dht/connection/websocket/WebsocketClientConnection.hpp"
 #include "streamr-dht/connection/websocket/WebsocketClientConnectorRpcLocal.hpp"
 #include "streamr-dht/helpers/Connectivity.hpp"
+#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
 #include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
 
 namespace streamr::dht::connection::websocket {
@@ -62,7 +63,7 @@ public:
                 "requestConnection",
                 [this](
                     const WebsocketConnectionRequest& req,
-                    const ProtoCallContext& context) -> void {
+                    const DhtCallContext& context) -> void {
                     if (this->abortController.signal.aborted) {
                         return;
                     }

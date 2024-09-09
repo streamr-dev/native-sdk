@@ -4,9 +4,11 @@
   "dependencies": [
     "boost-algorithm",
     "boost-pfr",
+    "boost-stacktrace",
     "boost-uuid",
     "folly",
     "gtest",
+    "libbacktrace",
     "libdatachannel",
     "magic-enum",
     "nlohmann-json",

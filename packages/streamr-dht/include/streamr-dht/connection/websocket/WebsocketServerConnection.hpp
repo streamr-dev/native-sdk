@@ -36,11 +36,11 @@ public:
         SLogger::trace("~WebsocketServerConnection()");
     }
 
-    void setDataChannelWebSocket(std::shared_ptr<rtc::WebSocket>&& ws) {
+    void setDataChannelWebSocket(std::shared_ptr<rtc::WebSocket> ws) {
         SLogger::trace("WebsocketServerConnection() setting socket");
-        setSocket(std::move(ws));
+        setSocket(ws);
         SLogger::trace(
-            "WebsocketServerConnection() setSocket() finished in constructor");
+            "WebsocketServerConnection() setSocket() finished");
     }
 
     [[nodiscard]] Url getResourceURL() const { return mResourceURL; }

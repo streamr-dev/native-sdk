@@ -122,6 +122,7 @@ public:
                     // localPeerDescriptor is set.
 
                     if (this->localPeerDescriptor.has_value()) {
+                        SLogger::trace("Server attaching handshaker");
                         this->attachHandshaker(serverSocket);
                     } else {
                         SLogger::trace(

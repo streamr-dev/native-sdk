@@ -4,127 +4,136 @@
 #ifndef STREAMR_PROTORPC_DHTRPC_CLIENT_PB_H
 #define STREAMR_PROTORPC_DHTRPC_CLIENT_PB_H
 
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
+#include <chrono>
+#include <optional>
 #include "DhtRpc.pb.h" // NOLINT
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
 #include "streamr-proto-rpc/RpcCommunicator.hpp"
 
 
 namespace dht {
 using streamr::protorpc::RpcCommunicator;
-using streamr::protorpc::ProtoCallContext;
+template <typename CallContextType>
 class DhtNodeRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit DhtNodeRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<ClosestPeersResponse> getClosestPeers(const ClosestPeersRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", request, callContext);
+    explicit DhtNodeRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<ClosestPeersResponse> getClosestPeers(ClosestPeersRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<ClosestRingPeersResponse> getClosestRingPeers(const ClosestRingPeersRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<ClosestRingPeersResponse, ClosestRingPeersRequest>("getClosestRingPeers", request, callContext);
+    folly::coro::Task<ClosestRingPeersResponse> getClosestRingPeers(ClosestRingPeersRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<ClosestRingPeersResponse, ClosestRingPeersRequest>("getClosestRingPeers", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<PingResponse> ping(const PingRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<PingResponse, PingRequest>("ping", request, callContext);
+    folly::coro::Task<PingResponse> ping(PingRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<PingResponse, PingRequest>("ping", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<void> leaveNotice(const LeaveNotice& request, const ProtoCallContext& callContext) {
-        return communicator.notify<LeaveNotice>("leaveNotice", request, callContext);
+    folly::coro::Task<void> leaveNotice(LeaveNotice&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<LeaveNotice>("leaveNotice", std::move(request), std::move(callContext), timeout);
     }
 }; // class DhtNodeRpcClient
+template <typename CallContextType>
 class RouterRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit RouterRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<RouteMessageAck> routeMessage(const RouteMessageWrapper& request, const ProtoCallContext& callContext) {
-        return communicator.request<RouteMessageAck, RouteMessageWrapper>("routeMessage", request, callContext);
+    explicit RouterRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<RouteMessageAck> routeMessage(RouteMessageWrapper&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<RouteMessageAck, RouteMessageWrapper>("routeMessage", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<RouteMessageAck> forwardMessage(const RouteMessageWrapper& request, const ProtoCallContext& callContext) {
-        return communicator.request<RouteMessageAck, RouteMessageWrapper>("forwardMessage", request, callContext);
+    folly::coro::Task<RouteMessageAck> forwardMessage(RouteMessageWrapper&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<RouteMessageAck, RouteMessageWrapper>("forwardMessage", std::move(request), std::move(callContext), timeout);
     }
 }; // class RouterRpcClient
+template <typename CallContextType>
 class RecursiveOperationRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit RecursiveOperationRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<RouteMessageAck> routeRequest(const RouteMessageWrapper& request, const ProtoCallContext& callContext) {
-        return communicator.request<RouteMessageAck, RouteMessageWrapper>("routeRequest", request, callContext);
+    explicit RecursiveOperationRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<RouteMessageAck> routeRequest(RouteMessageWrapper&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<RouteMessageAck, RouteMessageWrapper>("routeRequest", std::move(request), std::move(callContext), timeout);
     }
 }; // class RecursiveOperationRpcClient
+template <typename CallContextType>
 class StoreRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit StoreRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<StoreDataResponse> storeData(const StoreDataRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<StoreDataResponse, StoreDataRequest>("storeData", request, callContext);
+    explicit StoreRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<StoreDataResponse> storeData(StoreDataRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<StoreDataResponse, StoreDataRequest>("storeData", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<void> replicateData(const ReplicateDataRequest& request, const ProtoCallContext& callContext) {
-        return communicator.notify<ReplicateDataRequest>("replicateData", request, callContext);
+    folly::coro::Task<void> replicateData(ReplicateDataRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<ReplicateDataRequest>("replicateData", std::move(request), std::move(callContext), timeout);
     }
 }; // class StoreRpcClient
+template <typename CallContextType>
 class RecursiveOperationSessionRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit RecursiveOperationSessionRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<void> sendResponse(const RecursiveOperationResponse& request, const ProtoCallContext& callContext) {
-        return communicator.notify<RecursiveOperationResponse>("sendResponse", request, callContext);
+    explicit RecursiveOperationSessionRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<void> sendResponse(RecursiveOperationResponse&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<RecursiveOperationResponse>("sendResponse", std::move(request), std::move(callContext), timeout);
     }
 }; // class RecursiveOperationSessionRpcClient
+template <typename CallContextType>
 class WebsocketClientConnectorRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit WebsocketClientConnectorRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<void> requestConnection(const WebsocketConnectionRequest& request, const ProtoCallContext& callContext) {
-        return communicator.notify<WebsocketConnectionRequest>("requestConnection", request, callContext);
+    explicit WebsocketClientConnectorRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<void> requestConnection(WebsocketConnectionRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<WebsocketConnectionRequest>("requestConnection", std::move(request), std::move(callContext), timeout);
     }
 }; // class WebsocketClientConnectorRpcClient
+template <typename CallContextType>
 class WebrtcConnectorRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit WebrtcConnectorRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<void> requestConnection(const WebrtcConnectionRequest& request, const ProtoCallContext& callContext) {
-        return communicator.notify<WebrtcConnectionRequest>("requestConnection", request, callContext);
+    explicit WebrtcConnectorRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<void> requestConnection(WebrtcConnectionRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<WebrtcConnectionRequest>("requestConnection", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<void> rtcOffer(const RtcOffer& request, const ProtoCallContext& callContext) {
-        return communicator.notify<RtcOffer>("rtcOffer", request, callContext);
+    folly::coro::Task<void> rtcOffer(RtcOffer&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<RtcOffer>("rtcOffer", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<void> rtcAnswer(const RtcAnswer& request, const ProtoCallContext& callContext) {
-        return communicator.notify<RtcAnswer>("rtcAnswer", request, callContext);
+    folly::coro::Task<void> rtcAnswer(RtcAnswer&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<RtcAnswer>("rtcAnswer", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<void> iceCandidate(const IceCandidate& request, const ProtoCallContext& callContext) {
-        return communicator.notify<IceCandidate>("iceCandidate", request, callContext);
+    folly::coro::Task<void> iceCandidate(IceCandidate&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<IceCandidate>("iceCandidate", std::move(request), std::move(callContext), timeout);
     }
 }; // class WebrtcConnectorRpcClient
+template <typename CallContextType>
 class ConnectionLockRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit ConnectionLockRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<LockResponse> lockRequest(const LockRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<LockResponse, LockRequest>("lockRequest", request, callContext);
+    explicit ConnectionLockRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<LockResponse> lockRequest(LockRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<LockResponse, LockRequest>("lockRequest", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<void> unlockRequest(const UnlockRequest& request, const ProtoCallContext& callContext) {
-        return communicator.notify<UnlockRequest>("unlockRequest", request, callContext);
+    folly::coro::Task<void> unlockRequest(UnlockRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<UnlockRequest>("unlockRequest", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<void> gracefulDisconnect(const DisconnectNotice& request, const ProtoCallContext& callContext) {
-        return communicator.notify<DisconnectNotice>("gracefulDisconnect", request, callContext);
+    folly::coro::Task<void> gracefulDisconnect(DisconnectNotice&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<DisconnectNotice>("gracefulDisconnect", std::move(request), std::move(callContext), timeout);
     }
 }; // class ConnectionLockRpcClient
+template <typename CallContextType>
 class ExternalApiRpcClient {
 private:
-RpcCommunicator& communicator;
+RpcCommunicator<CallContextType>& communicator;
 public:
-    explicit ExternalApiRpcClient(RpcCommunicator& communicator) : communicator(communicator) {}
-    folly::coro::Task<ExternalFetchDataResponse> externalFetchData(const ExternalFetchDataRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<ExternalFetchDataResponse, ExternalFetchDataRequest>("externalFetchData", request, callContext);
+    explicit ExternalApiRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<ExternalFetchDataResponse> externalFetchData(ExternalFetchDataRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<ExternalFetchDataResponse, ExternalFetchDataRequest>("externalFetchData", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<ExternalStoreDataResponse> externalStoreData(const ExternalStoreDataRequest& request, const ProtoCallContext& callContext) {
-        return communicator.request<ExternalStoreDataResponse, ExternalStoreDataRequest>("externalStoreData", request, callContext);
+    folly::coro::Task<ExternalStoreDataResponse> externalStoreData(ExternalStoreDataRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<ExternalStoreDataResponse, ExternalStoreDataRequest>("externalStoreData", std::move(request), std::move(callContext), timeout);
     }
 }; // class ExternalApiRpcClient
 }; // namespace dht

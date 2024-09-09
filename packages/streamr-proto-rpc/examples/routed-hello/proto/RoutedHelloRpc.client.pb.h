@@ -4,7 +4,9 @@
 #ifndef STREAMR_PROTORPC_ROUTEDHELLORPC_CLIENT_PB_H
 #define STREAMR_PROTORPC_ROUTEDHELLORPC_CLIENT_PB_H
 
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
+#include <chrono>
+#include <optional>
 #include "RoutedHelloRpc.pb.h" // NOLINT
 #include "streamr-proto-rpc/RpcCommunicator.hpp"
 
@@ -17,8 +19,8 @@ private:
 RpcCommunicator<CallContextType>& communicator;
 public:
     explicit RoutedHelloRpcServiceClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
-    folly::coro::Task<RoutedHelloResponse> sayHello(RoutedHelloRequest&& request, CallContextType&& callContext) {
-        return communicator.template request<RoutedHelloResponse, RoutedHelloRequest>("sayHello", std::move(request), std::move(callContext));
+    folly::coro::Task<RoutedHelloResponse> sayHello(RoutedHelloRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<RoutedHelloResponse, RoutedHelloRequest>("sayHello", std::move(request), std::move(callContext), timeout);
     }
 }; // class RoutedHelloRpcServiceClient
 }; // namespace streamr::protorpc

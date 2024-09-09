@@ -7,7 +7,6 @@
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
 #include "streamr-utils/AbortController.hpp"
 
 namespace streamr::dht::connection::websocket {
@@ -17,7 +16,6 @@ using ::dht::WebsocketClientConnectorRpc;
 using ::dht::WebsocketConnectionRequest;
 using streamr::dht::DhtAddress;
 using streamr::dht::rpcprotocol::DhtCallContext;
-using streamr::protorpc::ProtoCallContext;
 using streamr::utils::AbortSignal;
 
 struct WebsocketClientConnectorRpcLocalOptions {
@@ -27,7 +25,7 @@ struct WebsocketClientConnectorRpcLocalOptions {
     AbortSignal& abortSignal;
 };
 
-class WebsocketClientConnectorRpcLocal : public WebsocketClientConnectorRpc {
+class WebsocketClientConnectorRpcLocal : public WebsocketClientConnectorRpc<DhtCallContext> {
 private:
     WebsocketClientConnectorRpcLocalOptions options;
 
@@ -39,11 +37,11 @@ public:
 
     void requestConnection(
         const WebsocketConnectionRequest& /*request*/,
-        const ProtoCallContext& context) override {
+        const DhtCallContext& dhtCallContext) override {
         if (this->options.abortSignal.aborted) {
             return;
         }
-        auto dhtCallContext = static_cast<const DhtCallContext&>(context);
+
         const auto senderPeerDescriptor =
             dhtCallContext.incomingSourceDescriptor.value();
         if (!this->options.hasConnection(

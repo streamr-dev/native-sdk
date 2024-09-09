@@ -103,7 +103,7 @@ private:
     // are fully ready, otherwise they would get destroyed when the smart
     // pointer falls out of scope.
 
-    void handleIncomingClient(std::shared_ptr<rtc::WebSocket>&& ws) {
+    void handleIncomingClient(std::shared_ptr<rtc::WebSocket> ws) {
         auto websocketServerConnection =
             std::make_shared<WebsocketServerConnection>();
         auto id = boost::uuids::to_string(boost::uuids::random_generator()());
@@ -153,7 +153,7 @@ private:
             mHalfReadyConnections.erase(it);
         });
 
-        websocketServerConnection->setDataChannelWebSocket(std::move(ws));
+        websocketServerConnection->setDataChannelWebSocket(ws);
     }
 
     void startServer(
@@ -165,8 +165,13 @@ private:
             .port = port,
             .enableTls = false,
             .bindAddress = "0.0.0.0",
-            .maxMessageSize =
-                mConfig.maxMessageSize.value_or(defaultMaxMessageSize)};
+            .maxMessageSize = defaultMaxMessageSize};
+
+        if (mConfig.maxMessageSize.has_value() &&
+            mConfig.maxMessageSize.value() > 0) {
+            webSocketServerConfiguration.maxMessageSize =
+                mConfig.maxMessageSize.value();
+        }
 
         if (certs || mConfig.tlsCertificateFiles || tls) {
             webSocketServerConfiguration.enableTls = true;
@@ -206,10 +211,10 @@ private:
         SLogger::trace(
             "WebSocket server started on port " + std::to_string(port));
 
-        mServer->onClient([&](std::shared_ptr<rtc::WebSocket>&& ws) {
+        mServer->onClient([&](std::shared_ptr<rtc::WebSocket> ws) {
             SLogger::trace("onClient()");
 
-            handleIncomingClient(std::move(ws));
+            handleIncomingClient(ws);
         });
     }
 };

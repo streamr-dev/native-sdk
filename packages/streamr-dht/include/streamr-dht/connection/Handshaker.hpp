@@ -38,16 +38,19 @@ using HandshakerEvents = std::tuple<
     handshakerevents::HandshakeFailed,
     handshakerevents::HandshakerStopped>;
 
-class Handshaker : public EventEmitter<HandshakerEvents> {
+class Handshaker : public EventEmitter<HandshakerEvents>, public std::enable_shared_from_this<Handshaker> {
 public:
     static constexpr auto handshakerServiceId = "system/handshaker";
 
-    virtual ~Handshaker() = default;
+    virtual ~Handshaker() {
+        SLogger::debug("Handshaker::~Handshaker()");
+    };
 
     void stop() {
-        this->connection->off<Data>(this->onDataHandlerToken);
-        this->emit<handshakerevents::HandshakerStopped>();
-        this->removeAllListeners();
+        auto self = this->shared_from_this();
+        self->connection->off<Data>(this->onDataHandlerToken);
+        self->emit<handshakerevents::HandshakerStopped>();
+        self->removeAllListeners();
     }
 
 private:
@@ -144,7 +147,8 @@ private:
         try {
             Message message;
             message.ParseFromArray(data.data(), static_cast<int>(data.size()));
-
+            const auto debugString = message.DebugString();
+            SLogger::trace("handshake message received " + message.DebugString());
             if (message.has_handshakerequest()) {
                 SLogger::trace("handshake request received");
                 const auto& handshake = message.handshakerequest();

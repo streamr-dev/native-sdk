@@ -29,7 +29,7 @@ struct ConnectionLockRpcLocalOptions {
     std::function<PeerDescriptor()> getLocalPeerDescriptor;
 };
 
-class ConnectionLockRpcLocal : public ConnectionLockRpc {
+class ConnectionLockRpcLocal : public ConnectionLockRpc<DhtCallContext> {
 private:
     ConnectionLockRpcLocalOptions options;
 
@@ -41,7 +41,7 @@ public:
 
     LockResponse lockRequest(
         const LockRequest& request,
-        const ProtoCallContext& callContext) override {
+        const DhtCallContext& callContext) override {
         const auto senderPeerDescriptor =
             static_cast<const DhtCallContext&>(callContext)
                 .incomingSourceDescriptor;
@@ -65,7 +65,7 @@ public:
 
     void unlockRequest(
         const UnlockRequest& request,
-        const ProtoCallContext& callContext) override {
+        const DhtCallContext& callContext) override {
         const auto senderPeerDescriptor =
             static_cast<const DhtCallContext&>(callContext)
                 .incomingSourceDescriptor;
@@ -76,7 +76,7 @@ public:
 
     void gracefulDisconnect(
         const DisconnectNotice& request,
-        const ProtoCallContext& callContext) override {
+        const DhtCallContext& callContext) override {
         const auto senderPeerDescriptor =
             static_cast<const DhtCallContext&>(callContext)
                 .incomingSourceDescriptor;
