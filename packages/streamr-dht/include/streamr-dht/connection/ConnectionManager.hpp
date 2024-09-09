@@ -2,8 +2,10 @@
 #define STREAMR_DHT_CONNECTION_CONNECTIONMANAGER_HPP
 
 #include <chrono>
-#include <memory>
 #include <map>
+#include <memory>
+#include <utility>
+#include <boost/stacktrace/stacktrace.hpp>
 #include <folly/coro/Task.h>
 #include <folly/coro/blockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
@@ -20,7 +22,7 @@
 #include "streamr-dht/transport/RoutingRpcCommunicator.hpp"
 #include "streamr-dht/transport/Transport.hpp"
 #include "streamr-utils/waitForEvent.hpp"
-
+#include "streamr-logger/SLogger.hpp"
 namespace streamr::dht::connection {
 
 using ::dht::LockRequest;
@@ -43,6 +45,7 @@ using streamr::dht::transport::RoutingRpcCommunicator;
 using streamr::dht::transport::SendOptions;
 using streamr::dht::transport::Transport;
 using streamr::dht::transport::transportevents::Disconnected;
+using streamr::logger::SLogger;
 using streamr::utils::waitForEvent;
 
 using namespace std::chrono_literals;
@@ -68,11 +71,20 @@ private:
     ConnectionManagerState state = ConnectionManagerState::IDLE;
     DuplicateDetector duplicateMessageDetector;
 
+    std::recursive_mutex mutex;
+
     void addEndpoint(std::shared_ptr<PendingConnection> pendingConnection) {
+        SLogger::debug("ConnectionManager::addEndpoint start");
+        SLogger::debug("Trying to acquire mutex lock in addEndpoint");
+        std::scoped_lock lock(this->mutex);
+        SLogger::debug("Acquired mutex lock in addEndpoint");
         auto peerDescriptor = pendingConnection->getPeerDescriptor();
         auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
         auto endpoint = std::make_shared<Endpoint>(
             pendingConnection, [this, peerDescriptor, nodeId]() {
+                SLogger::debug("Trying to acquire mutex lock in endpoint callback");
+                std::scoped_lock lock(this->mutex);
+                SLogger::debug("Acquired mutex lock in endpoint callback");
                 if (this->endpoints.find(nodeId) != this->endpoints.end()) {
                     this->endpoints.erase(nodeId);
                 }
@@ -89,6 +101,7 @@ private:
         });
 
         this->endpoints[nodeId] = std::move(endpoint);
+        SLogger::debug("ConnectionManager::addEndpoint end");
     }
 
 public:
@@ -103,6 +116,8 @@ public:
           rpcCommunicator(
               ServiceID{INTERNAL_SERVICE_ID},
               [this](const Message& message, const SendOptions& sendOptions) {
+                  SLogger::trace(
+                      "outgoingmessagecallback() of rpcCommunicator");
                   return this->send(message, sendOptions);
               },
               RpcCommunicatorOptions{.rpcRequestTimeout = 10s}), // NOLINT
@@ -120,36 +135,46 @@ public:
                       const PeerDescriptor& peerDescriptor,
                       bool gracefulLeave,
                       const std::optional<std::string>& reason) {
+                      SLogger::debug("closeConnection() callback of RpcLocal");
                       this->closeConnection(
                           peerDescriptor, gracefulLeave, reason);
                   },
               .getLocalPeerDescriptor =
                   [this]() { return this->getLocalPeerDescriptor(); }}) {
+        SLogger::debug("ConnectionManager constructor start");
+        SLogger::info("ConnectionManager constructor");
         this->connectorFacade = options.createConnectorFacade();
+
         this->rpcCommunicator.registerRpcMethod<LockRequest, LockResponse>(
             "lockRequest",
-            [this](const LockRequest& req, const ProtoCallContext& context) {
+            [this](const LockRequest& req, const DhtCallContext& context) {
                 return this->connectionLockRpcLocal.lockRequest(req, context);
             });
         this->rpcCommunicator.registerRpcNotification<UnlockRequest>(
             "unlockRequest",
-            [this](const UnlockRequest& req, const ProtoCallContext& context) {
+            [this](const UnlockRequest& req, const DhtCallContext& context) {
                 return this->connectionLockRpcLocal.unlockRequest(req, context);
             });
         this->rpcCommunicator.registerRpcNotification<DisconnectNotice>(
             "gracefulDisconnect",
-            [this](
-                const DisconnectNotice& req, const ProtoCallContext& context) {
+            [this](const DisconnectNotice& req, const DhtCallContext& context) {
                 return this->connectionLockRpcLocal.gracefulDisconnect(
                     req, context);
             });
+        SLogger::debug("ConnectionManager constructor end");
     }
 
-    ~ConnectionManager() override = default;
+    ~ConnectionManager() override {
+        SLogger::debug("~ConnectionManager() start");
+        SLogger::trace("~ConnectionManager()");
+        this->stop();
+        SLogger::debug("~ConnectionManager() end");
+    };
 
     // garbageCollectConnections() not implemented in native-sdk
 
     void start() {
+        SLogger::debug("ConnectionManager::start() start");
         if (this->state == ConnectionManagerState::RUNNING ||
             this->state == ConnectionManagerState::STOPPED) {
             throw CouldNotStart(
@@ -167,71 +192,157 @@ public:
             });
 
         // Garbage collection of connections not implemented in native-sdk
+        SLogger::debug("ConnectionManager::start() end");
+    }
+
+    void stop() override {
+        SLogger::debug("ConnectionManager::stop() start");
+        std::map<DhtAddress, std::shared_ptr<Endpoint>> endpointsCopy;
+        {
+            SLogger::debug("Trying to acquire mutex lock in stop");
+            std::scoped_lock lock(this->mutex);
+            SLogger::debug("Acquired mutex lock in stop");
+            if (this->state == ConnectionManagerState::STOPPED ||
+                this->state == ConnectionManagerState::STOPPING) {
+                SLogger::debug("ConnectionManager::stop() end (early return)");
+                return;
+            }
+            this->state = ConnectionManagerState::STOPPING;
+            SLogger::trace("Stopping ConnectionManager");
+
+            // make temporary copy of endpoints to avoid iterator invalidation
+            endpointsCopy = this->endpoints;
+        }
+        // pop one by one from copy to avoid iterator invalidation
+
+        while (!endpointsCopy.empty()) {
+            auto it = endpointsCopy.begin();
+            auto peerDescriptorToDisconnect = it->second->getPeerDescriptor();
+            endpointsCopy.erase(it);
+            this->gracefullyDisconnect(
+                peerDescriptorToDisconnect, DisconnectMode::LEAVING);
+        }
+
+        this->connectorFacade->stop();
+        this->state = ConnectionManagerState::STOPPED;
+        // this->rpcCommunicator.stop();
+        this->duplicateMessageDetector.clear();
+        this->locks.clear();
+        this->removeAllListeners();
+        SLogger::debug("ConnectionManager::stop() end");
     }
 
     void send(const Message& message, const SendOptions& sendOptions) override {
+        SLogger::debug("ConnectionManager::send() start");
+        SLogger::debug("Trying to acquire mutex lock in send");
+        std::scoped_lock lock(this->mutex);
+        SLogger::debug("Acquired mutex lock in send");
+        SLogger::trace("send()");
+        SLogger::debug("Traced send() function entry");
         if ((this->state == ConnectionManagerState::STOPPED ||
              this->state == ConnectionManagerState::STOPPING) &&
             !sendOptions.sendIfStopped) {
+            SLogger::debug("Returning early due to stopped state");
+            SLogger::debug("ConnectionManager::send() end (early return)");
             return;
         }
+        SLogger::debug("Passed state check");
         const auto& peerDescriptor = message.targetdescriptor();
+        SLogger::debug("Retrieved peer descriptor");
         if (this->isConnectionToSelf(peerDescriptor)) {
+            SLogger::debug("Detected connection to self, throwing exception");
             throw CannotConnectToSelf("Cannot send to self");
         }
+        SLogger::debug("Passed self-connection check");
 
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
+        SLogger::debug("Retrieved node ID");
         SLogger::trace("Sending message to: " + nodeId);
+        SLogger::debug("Traced sending message to node");
 
         Message messageWithSource = message;
+        SLogger::debug("Created message with source");
         messageWithSource.mutable_sourcedescriptor()->CopyFrom(
             this->getLocalPeerDescriptor());
+        SLogger::debug("Copied local peer descriptor to message");
+
+        const auto debugMessage = messageWithSource.DebugString();
+        SLogger::debug("Created debug message string");
+        SLogger::trace("Sending message: " + debugMessage);
+        SLogger::debug("Traced sending message details");
 
         if (this->endpoints.find(nodeId) == this->endpoints.end()) {
+            SLogger::debug("Node ID not found in endpoints");
             if (sendOptions.connect) {
+                SLogger::debug("Creating new connection");
                 auto connection =
                     this->connectorFacade->createConnection(peerDescriptor);
+                SLogger::debug("Created new connection");
                 this->onNewConnection(connection);
+                SLogger::debug("Handled new connection");
             } else {
+                SLogger::debug("Throwing SendFailed exception");
                 throw SendFailed(
                     "No connection to target, connect flag is false");
             }
         } else if (
             !this->endpoints.at(nodeId)->isConnected() &&
             !sendOptions.connect) {
+            SLogger::debug(
+                "Throwing SendFailed exception due to disconnected endpoint");
             throw SendFailed("No connection to target, connect flag is false");
         }
+        SLogger::debug("Passed connection checks");
 
         size_t nBytes = messageWithSource.ByteSizeLong();
+        SLogger::debug("Calculated message size");
         if (nBytes == 0) {
+            SLogger::debug("Message size is zero, throwing exception");
             SLogger::error("send(): serialized message is empty");
             throw SendFailed("send(): serialized message is empty");
         }
+        SLogger::debug("Passed message size check");
         std::vector<std::byte> byteVec(nBytes);
+        SLogger::debug("Created byte vector");
         messageWithSource.SerializeToArray(
             byteVec.data(), static_cast<int>(nBytes));
+        SLogger::debug("Serialized message to byte vector");
         this->endpoints.at(nodeId)->send(byteVec);
+        SLogger::debug("Sent message through endpoint");
+        SLogger::debug("ConnectionManager::send() end");
     }
 
-    [[nodiscard]] PeerDescriptor getLocalPeerDescriptor() const {
-        return this->connectorFacade->getLocalPeerDescriptor();
+    [[nodiscard]] PeerDescriptor getLocalPeerDescriptor() const override {
+        SLogger::debug("ConnectionManager::getLocalPeerDescriptor() start");
+        auto result = this->connectorFacade->getLocalPeerDescriptor();
+        SLogger::debug("ConnectionManager::getLocalPeerDescriptor() end");
+        return result;
     }
 
     [[nodiscard]] bool hasConnection(const DhtAddress& nodeId) const override {
-        return std::ranges::any_of(
+        SLogger::debug("ConnectionManager::hasConnection() start");
+        auto result = std::ranges::any_of(
             this->getConnections(), [&nodeId](const auto& c) {
                 return Identifiers::getNodeIdFromPeerDescriptor(c) == nodeId;
             });
+        SLogger::debug("ConnectionManager::hasConnection() end");
+        return result;
     }
 
     [[nodiscard]] size_t getConnectionCount() const override {
-        return this->getConnections().size();
+        SLogger::debug("ConnectionManager::getConnectionCount() start");
+        auto result = this->getConnections().size();
+        SLogger::debug("ConnectionManager::getConnectionCount() end");
+        return result;
     }
 
     [[nodiscard]] bool hasLocalLockedConnection(
         const DhtAddress& nodeId) const {
-        return this->locks.isLocalLocked(nodeId);
+        SLogger::debug("ConnectionManager::hasLocalLockedConnection() start");
+        auto result = this->locks.isLocalLocked(nodeId);
+        SLogger::debug("ConnectionManager::hasLocalLockedConnection() end");
+        return result;
     }
 
     [[nodiscard]] bool hasRemoteLockedConnection(
@@ -256,20 +367,24 @@ public:
         this->locks.addLocalLocked(nodeId, lockId);
 
         try {
-            auto accepted =
-                folly::coro::blockingWait(rpcRemote.lockRequest(lockId));
+            auto accepted = folly::coro::blockingWait(
+                rpcRemote.lockRequest(std::move(lockId)));
             if (accepted) {
                 SLogger::trace("LockRequest successful");
             } else {
                 SLogger::debug("LockRequest failed");
             }
         } catch (const std::exception& err) {
-            SLogger::error("Caught exception when making lockRequest " + std::string(err.what()));
+            SLogger::error(
+                "Caught exception when making lockRequest " +
+                std::string(err.what()));
         }
     }
 
     void unlockConnection(
         const PeerDescriptor& targetDescriptor, const LockID& lockId) override {
+        SLogger::debug("Trying to acquire mutex lock in unlockConnection");
+        std::scoped_lock lock(this->mutex);
         if (this->state == ConnectionManagerState::STOPPED ||
             Identifiers::areEqualPeerDescriptors(
                 targetDescriptor, this->getLocalPeerDescriptor())) {
@@ -285,7 +400,8 @@ public:
             ConnectionLockRpcRemote rpcRemote(
                 this->getLocalPeerDescriptor(), targetDescriptor, client);
 
-            folly::coro::blockingWait(rpcRemote.unlockRequest(lockId));
+            folly::coro::blockingWait(
+                rpcRemote.unlockRequest(std::move(lockId)));
         }
     }
 
@@ -353,6 +469,7 @@ private:
 
     bool acceptNewConnection(
         const std::shared_ptr<PendingConnection>& newConnection) {
+        std::scoped_lock lock(this->mutex);
         const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
             newConnection->getPeerDescriptor());
         SLogger::trace(nodeId + " acceptNewConnection()");
@@ -377,6 +494,7 @@ private:
         const PeerDescriptor& peerDescriptor,
         bool gracefulLeave,
         const std::optional<std::string>& reason) {
+        std::scoped_lock lock(this->mutex);
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
         SLogger::trace(nodeId + " closeConnection() " + reason.value_or(""));
@@ -392,46 +510,59 @@ private:
         }
     }
 
-    void gracefullyDisconnectAsync(
-        const PeerDescriptor& targetDescriptor,
-        const DisconnectMode& disconnectMode) {
+    void gracefullyDisconnect(
+        const PeerDescriptor& targetDescriptor, DisconnectMode disconnectMode) {
+        std::unique_lock lock(this->mutex);
         if (this->endpoints.find(Identifiers::getNodeIdFromPeerDescriptor(
                 targetDescriptor)) == this->endpoints.end()) {
             SLogger::debug(
-                "gracefullyDisconnectedAsync() tried on a non-existing connection");
+                "gracefullyDisconnected() tried on a non-existing connection");
             return;
         }
+        auto debugString = targetDescriptor.DebugString();
         const auto endpoint = this->endpoints.at(
             Identifiers::getNodeIdFromPeerDescriptor(targetDescriptor));
 
         if (endpoint->isConnected()) {
             try {
+                lock.unlock();
                 folly::coro::blockingWait(folly::coro::co_invoke(
-                    [this, &endpoint, &targetDescriptor, &disconnectMode]()
+                    [this, endpoint, targetDescriptor, disconnectMode]()
                         -> folly::coro::Task<void> {
                         co_await folly::coro::collectAll(
                             waitForEvent<endpointevents::Disconnected>(
                                 *endpoint, 2000ms), // NOLINT
                             folly::coro::co_invoke(
                                 [this,
-                                 &endpoint,
-                                 &targetDescriptor,
-                                 &disconnectMode]() -> folly::coro::Task<void> {
-                                    co_await this->doGracefullyDisconnectAsync(
-                                        targetDescriptor, disconnectMode);
+                                 endpoint,
+                                 targetDescriptor,
+                                 disconnectMode]() -> folly::coro::Task<void> {
+                                    auto debugString =
+                                        targetDescriptor.DebugString();
+
+                                    //
+                                    co_return co_await this
+                                        ->doGracefullyDisconnectAsync(
+                                            targetDescriptor, disconnectMode);
                                 }));
                     }));
             } catch (const std::exception& err) {
+                // auto trace = boost::stacktrace::from_current_exception();
+                // throw err;
                 SLogger::error(
-                    "Caught exception in gracefullyDisconnectAsync " + std::string(err.what()));
+                    "Caught exception in gracefullyDisconnect " +
+                    std::string(err.what()) + "\n");
                 endpoint->close(true);
             }
+        } else {
+            SLogger::debug(
+                "gracefullyDisconnected() failed, force-closing endpoint");
+            endpoint->close(true);
         }
     }
 
     folly::coro::Task<void> doGracefullyDisconnectAsync(
-        const PeerDescriptor& targetDescriptor,
-        const DisconnectMode disconnectMode) {
+        PeerDescriptor targetDescriptor, DisconnectMode disconnectMode) {
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(targetDescriptor);
         SLogger::trace(nodeId + " gracefullyDisconnectAsync()");
@@ -440,7 +571,8 @@ private:
         ConnectionLockRpcRemote rpcRemote(
             this->getLocalPeerDescriptor(), targetDescriptor, client);
 
-        return rpcRemote.gracefulDisconnect(disconnectMode);
+        co_return co_await rpcRemote.gracefulDisconnect(
+            std::move(disconnectMode));
     }
 
     void handleMessage(const Message& message) {

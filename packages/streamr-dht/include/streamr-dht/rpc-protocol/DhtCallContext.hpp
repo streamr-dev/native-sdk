@@ -3,14 +3,12 @@
 
 #include <optional>
 #include "packages/dht/protos/DhtRpc.pb.h"
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
 
 namespace streamr::dht::rpcprotocol {
 
 using ::dht::PeerDescriptor;
-using streamr::protorpc::ProtoCallContext;
 
-struct DhtCallContext : public ProtoCallContext {
+struct DhtCallContext {
     // used by client
     std::optional<PeerDescriptor> targetDescriptor;
     std::optional<PeerDescriptor> sourceDescriptor;

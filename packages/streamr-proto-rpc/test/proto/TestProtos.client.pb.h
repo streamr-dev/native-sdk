@@ -4,7 +4,9 @@
 #ifndef STREAMR_PROTORPC_TESTPROTOS_CLIENT_PB_H
 #define STREAMR_PROTORPC_TESTPROTOS_CLIENT_PB_H
 
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
+#include <chrono>
+#include <optional>
 #include "TestProtos.pb.h" // NOLINT
 #include "streamr-proto-rpc/RpcCommunicator.hpp"
 
@@ -17,14 +19,14 @@ private:
 RpcCommunicator<CallContextType>& communicator;
 public:
     explicit DhtRpcServiceClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
-    folly::coro::Task<ClosestPeersResponse> getClosestPeers(ClosestPeersRequest&& request, CallContextType&& callContext) {
-        return communicator.template request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", std::move(request), std::move(callContext));
+    folly::coro::Task<ClosestPeersResponse> getClosestPeers(ClosestPeersRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<ClosestPeersResponse, ClosestPeersRequest>("getClosestPeers", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<PingResponse> ping(PingRequest&& request, CallContextType&& callContext) {
-        return communicator.template request<PingResponse, PingRequest>("ping", std::move(request), std::move(callContext));
+    folly::coro::Task<PingResponse> ping(PingRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<PingResponse, PingRequest>("ping", std::move(request), std::move(callContext), timeout);
     }
-    folly::coro::Task<RouteMessageAck> routeMessage(RouteMessageWrapper&& request, CallContextType&& callContext) {
-        return communicator.template request<RouteMessageAck, RouteMessageWrapper>("routeMessage", std::move(request), std::move(callContext));
+    folly::coro::Task<RouteMessageAck> routeMessage(RouteMessageWrapper&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<RouteMessageAck, RouteMessageWrapper>("routeMessage", std::move(request), std::move(callContext), timeout);
     }
 }; // class DhtRpcServiceClient
 template <typename CallContextType>
@@ -33,8 +35,8 @@ private:
 RpcCommunicator<CallContextType>& communicator;
 public:
     explicit OptionalServiceClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
-    folly::coro::Task<OptionalResponse> getOptional(OptionalRequest&& request, CallContextType&& callContext) {
-        return communicator.template request<OptionalResponse, OptionalRequest>("getOptional", std::move(request), std::move(callContext));
+    folly::coro::Task<OptionalResponse> getOptional(OptionalRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<OptionalResponse, OptionalRequest>("getOptional", std::move(request), std::move(callContext), timeout);
     }
 }; // class OptionalServiceClient
 }; // namespace streamr::protorpc

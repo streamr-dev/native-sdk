@@ -14,9 +14,10 @@
 
 namespace streamr::dht::connection {
 
-using ::dht::ConnectionLockRpcClient;
-using ::dht::PeerDescriptor;
-using ::dht::LockRequest;
+using streamr::dht::rpcprotocol::DhtCallContext;
+using ConnectionLockRpcClient = ::dht::ConnectionLockRpcClient<DhtCallContext>;
+using PeerDescriptor = ::dht::PeerDescriptor;
+using LockRequest = ::dht::LockRequest;
 using ::dht::UnlockRequest;
 using ::dht::DisconnectNotice;
 using ::dht::DisconnectMode;
@@ -28,23 +29,23 @@ class ConnectionLockRpcRemote : public RpcRemote<ConnectionLockRpcClient> {
 
 public:
 ConnectionLockRpcRemote(
-        const PeerDescriptor& localPeerDescriptor,  // NOLINT
-        const PeerDescriptor& remotePeerDescriptor,
-        ConnectionLockRpcClient& client,
+        PeerDescriptor localPeerDescriptor,  // NOLINT
+        PeerDescriptor remotePeerDescriptor,
+        ConnectionLockRpcClient client,
         std::optional<std::chrono::milliseconds> timeout = std::nullopt)
-        : RpcRemote<ConnectionLockRpcClient>(localPeerDescriptor, remotePeerDescriptor, client, timeout) {
+        : RpcRemote<ConnectionLockRpcClient>(std::move(localPeerDescriptor), std::move(remotePeerDescriptor), client, timeout) {
     }
 
 
-    folly::coro::Task<bool> lockRequest(const LockID& lockId) {
+    folly::coro::Task<bool> lockRequest(const LockID&& lockId) {
         SLogger::trace("Requesting locked connection to " + Identifiers::getNodeIdFromPeerDescriptor(this->getPeerDescriptor()));
         LockRequest request;
         request.set_lockid(lockId);
 
-
-        const auto options = this->formDhtRpcOptions();
+        auto options = this->formDhtRpcOptions();
+        auto timeout = this->getTimeout();
         try {
-            const auto res = co_await this->getClient().lockRequest(request, options);
+            const auto res = co_await this->getClient().lockRequest(std::move(request), std::move(options), timeout);
             co_return res.accepted();
         } catch (const std::exception& err) {
             SLogger::debug("Connection lock rejected " + std::string(err.what()));
@@ -52,19 +53,20 @@ ConnectionLockRpcRemote(
         }
     }
 
-    folly::coro::Task<void> unlockRequest(const LockID& lockId) {
+    folly::coro::Task<void> unlockRequest(const LockID&& lockId) {
         SLogger::trace("Requesting connection to be unlocked from " + Identifiers::getNodeIdFromPeerDescriptor(this->getPeerDescriptor()));
         UnlockRequest request;
         request.set_lockid(lockId);
-        const auto options = this->formDhtRpcOptions();
+        auto options = this->formDhtRpcOptions();
+        auto timeout = this->getTimeout();
         try {
-            co_await this->getClient().unlockRequest(request, options);
+            co_await this->getClient().unlockRequest(std::move(request), std::move(options), timeout);
         } catch (const std::exception& err) {
             SLogger::trace("failed to send unlockRequest " + std::string(err.what()));
         }
     }
 
-    folly::coro::Task<void> gracefulDisconnect(const DisconnectMode& disconnectMode) {
+    folly::coro::Task<void> gracefulDisconnect(DisconnectMode&& disconnectMode) {
         SLogger::trace("Notifying a graceful disconnect to " + Identifiers::getNodeIdFromPeerDescriptor(this->getPeerDescriptor()));
         DisconnectNotice request;
         request.set_disconnectmode(disconnectMode);
@@ -72,11 +74,11 @@ ConnectionLockRpcRemote(
         DhtCallContext context;
         context.connect = false;
         context.sendIfStopped = true;
-        context.timeout = std::chrono::milliseconds(2000); // NOLINT
+        auto timeout = std::chrono::milliseconds(2000); // NOLINT
 
-        const auto options = this->formDhtRpcOptions(context);
+        auto options = this->formDhtRpcOptions(context);
 
-        co_await this->getClient().gracefulDisconnect(request, options);
+        co_await this->getClient().gracefulDisconnect(std::move(request), std::move(options), timeout);
     }
 
 

@@ -5,7 +5,7 @@
 #define STREAMR_PROTORPC_ROUTEDHELLORPC_SERVER_PB_H
 
 #include "RoutedHelloRpc.pb.h" // NOLINT
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
 
 namespace streamr::protorpc {
 template <typename CallContextType>

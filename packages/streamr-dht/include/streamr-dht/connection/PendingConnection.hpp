@@ -31,16 +31,16 @@ using PendingConnectionEvents = std::tuple<pendingconnectionevents::Connected, p
 class PendingConnection : public EventEmitter<PendingConnectionEvents> {
 private:
     AbortController connectingAbortController;
-    const PeerDescriptor& remotePeerDescriptor;
+    PeerDescriptor remotePeerDescriptor;
     bool replacedAsDuplicate = false;
     bool stopped = false;
 
 public:
     explicit PendingConnection(
-        const PeerDescriptor& remotePeerDescriptor,
+        PeerDescriptor remotePeerDescriptor,
         std::chrono::milliseconds timeout =
             std::chrono::milliseconds(15 * 1000)) // NOLINT
-        : remotePeerDescriptor(remotePeerDescriptor) {
+        : remotePeerDescriptor(std::move(remotePeerDescriptor)) {
         AbortableTimers::setAbortableTimeout(
             [this]() { this->close(false); },
             timeout,

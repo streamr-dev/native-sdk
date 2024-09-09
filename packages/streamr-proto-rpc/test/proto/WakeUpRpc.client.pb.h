@@ -4,7 +4,9 @@
 #ifndef STREAMR_PROTORPC_WAKEUPRPC_CLIENT_PB_H
 #define STREAMR_PROTORPC_WAKEUPRPC_CLIENT_PB_H
 
-#include <folly/experimental/coro/Task.h>
+#include <folly/coro/Task.h>
+#include <chrono>
+#include <optional>
 #include "WakeUpRpc.pb.h" // NOLINT
 #include "streamr-proto-rpc/RpcCommunicator.hpp"
 
@@ -17,8 +19,8 @@ private:
 RpcCommunicator<CallContextType>& communicator;
 public:
     explicit WakeUpRpcServiceClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
-    folly::coro::Task<void> wakeUp(WakeUpRequest&& request, CallContextType&& callContext) {
-        return communicator.template notify<WakeUpRequest>("wakeUp", std::move(request), std::move(callContext));
+    folly::coro::Task<void> wakeUp(WakeUpRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<WakeUpRequest>("wakeUp", std::move(request), std::move(callContext), timeout);
     }
 }; // class WakeUpRpcServiceClient
 }; // namespace streamr::protorpc

@@ -52,7 +52,7 @@ struct DefaultConnectorFacadeOptions {
     // int webrtcDatachannelBufferThresholdHigh;
     // std::optional<std::string> externalIp;
     // PortRange webrtcPortRange;
-    size_t maxMessageSize;
+    std::optional<size_t> maxMessageSize;
     // TlsCertificate tlsCertificate;
     // bool websocketServerEnableTls;
     // std::optional<std::string> autoCertifierUrl;

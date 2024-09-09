@@ -79,7 +79,7 @@ private:
         headerSs << "#ifndef " << headerGuard << "\n";
         headerSs << "#define " << headerGuard << "\n\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
-        headerSs << "#include <folly/experimental/coro/Task.h>\n";
+        headerSs << "#include <folly/coro/Task.h>\n";
 
         std::stringstream sourceSs;
 
@@ -190,7 +190,9 @@ private:
         headerSs << "\n";
         headerSs << "#ifndef " << headerGuard << "\n";
         headerSs << "#define " << headerGuard << "\n\n";
-        headerSs << "#include <folly/experimental/coro/Task.h>\n";
+        headerSs << "#include <folly/coro/Task.h>\n";
+        headerSs << "#include <chrono>\n";
+        headerSs << "#include <optional>\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
         headerSs << "#include \"streamr-proto-rpc/RpcCommunicator.hpp\"\n";
 
@@ -258,7 +260,7 @@ private:
                 sourceSs
                     << "    folly::coro::Task<" + methodOutputName + "> "
                     << methodName << "(" << methodInputName
-                    << "&& request, CallContextType&& callContext) {\n";
+                    << "&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {\n";
                 sourceSs << "        return communicator.";
                 if (methodOutputName == "void") {
                     sourceSs << "template notify<" << methodInputName << ">";
@@ -267,7 +269,7 @@ private:
                              << methodInputName << ">";
                 }
                 sourceSs << "(\"" << methodName
-                         << "\", std::move(request), std::move(callContext));\n";
+                         << "\", std::move(request), std::move(callContext), timeout);\n";
                 sourceSs << "    }\n";
             }
             sourceSs << "}; // class " << serviceName << "Client\n";

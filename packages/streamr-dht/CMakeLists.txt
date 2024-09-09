@@ -45,6 +45,7 @@ target_sources(streamr-dht
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc
     )
 
+target_compile_options(streamr-dht PUBLIC -D_GNU_SOURCE)    
 target_link_libraries(streamr-dht 
     INTERFACE streamr::streamr-logger
     INTERFACE streamr::streamr-eventemitter
@@ -76,15 +77,18 @@ if(NOT IOS)
         test/unit/ConnectionManagerTest.cpp
     )
 
-    #target_include_directories(streamr-dht-test-unit 
-    #    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/proto>
-    #)
+    target_include_directories(streamr-dht-test-unit
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
+        )
 
     target_link_libraries(streamr-dht-test-unit 
         PUBLIC streamr-dht
         INTERFACE streamr::streamr-logger
         PUBLIC GTest::gtest
         PUBLIC GTest::gtest_main
+        PUBLIC Folly::folly
     )
 
     add_executable(streamr-dht-test-integration

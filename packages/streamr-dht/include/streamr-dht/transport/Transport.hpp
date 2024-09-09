@@ -34,7 +34,7 @@ class Transport : public EventEmitter<TransportEvents> {
 
 public:
     virtual void send(const Message& message, const SendOptions& sendOptions) = 0;
-    virtual PeerDescriptor getLocalPeerDescriptor() = 0;
+    [[nodiscard]] virtual PeerDescriptor getLocalPeerDescriptor() const = 0;
     virtual void stop() = 0;
 };
 

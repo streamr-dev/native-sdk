@@ -38,10 +38,10 @@ public:
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
         const PeerDescriptor& targetPeerDescriptor,
-        std::shared_ptr<PendingConnection>&& pendingConnection)
+        const std::shared_ptr<PendingConnection>& pendingConnection)
         : Handshaker(localPeerDescriptor, connection),
           targetPeerDescriptor(targetPeerDescriptor),
-          pendingConnection(std::move(pendingConnection)) {
+          pendingConnection(pendingConnection) {
         // send handshake request when the connection is established
         this->connectedHandlerToken =
             this->connection->once<connectionevents::Connected>([this]() {
@@ -60,7 +60,7 @@ public:
                 });
         // disconnecting pending connection will close the connection
         this->pendingDisconnectedHandlerToken =
-            pendingConnection->once<pendingconnectionevents::Disconnected>(
+            this->pendingConnection->once<pendingconnectionevents::Disconnected>(
                 [this](bool /*gracefulLeave*/) {
                     this->connection->close(false);
                     stopHandshaker();

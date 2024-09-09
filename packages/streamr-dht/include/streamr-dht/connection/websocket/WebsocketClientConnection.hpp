@@ -28,9 +28,10 @@ public:
             .disableTlsVerification = selfSigned,
             .maxMessageSize = maxMessageSize};
 
-        setSocket(std::make_unique<rtc::WebSocket>(webSocketConfig));
+        auto socket = std::make_shared<rtc::WebSocket>(webSocketConfig);
+        setSocket(socket);
         SLogger::trace("socket created");
-        mSocket->open(address);
+        socket->open(address);
         SLogger::trace("connect() mSocket->open() called");
     }
 };
