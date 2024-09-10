@@ -15,6 +15,9 @@ using streamr::eventemitter::HandlerToken;
 
 class OutgoingHandshaker : public Handshaker {
 private:
+    struct Private {
+        explicit Private() = default;
+    };
     const PeerDescriptor& targetPeerDescriptor;
     std::shared_ptr<PendingConnection> pendingConnection;
 
@@ -35,6 +38,7 @@ private:
 
 public:
     OutgoingHandshaker(
+        Private /* prevent direct construction */,
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
         const PeerDescriptor& targetPeerDescriptor,
@@ -60,11 +64,25 @@ public:
                 });
         // disconnecting pending connection will close the connection
         this->pendingDisconnectedHandlerToken =
-            this->pendingConnection->once<pendingconnectionevents::Disconnected>(
-                [this](bool /*gracefulLeave*/) {
-                    this->connection->close(false);
-                    stopHandshaker();
-                });
+            this->pendingConnection
+                ->once<pendingconnectionevents::Disconnected>(
+                    [this](bool /*gracefulLeave*/) {
+                        this->connection->close(false);
+                        stopHandshaker();
+                    });
+    }
+
+    [[nodiscard]] static std::shared_ptr<OutgoingHandshaker> newInstance(
+        const PeerDescriptor& localPeerDescriptor,
+        const std::shared_ptr<Connection>& connection,
+        const PeerDescriptor& targetPeerDescriptor,
+        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        return std::make_shared<OutgoingHandshaker>(
+            Private{},
+            localPeerDescriptor,
+            connection,
+            targetPeerDescriptor,
+            pendingConnection);
     }
 
     [[nodiscard]] std::shared_ptr<PendingConnection> getPendingConnection()

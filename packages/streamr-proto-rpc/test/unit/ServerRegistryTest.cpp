@@ -2,8 +2,8 @@
 
 #include <google/protobuf/any.pb.h>
 #include "HelloRpc.pb.h"
-#include "streamr-proto-rpc/ServerRegistry.hpp"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
+#include "streamr-proto-rpc/ServerRegistry.hpp"
 
 // BEGINNOLINT
 

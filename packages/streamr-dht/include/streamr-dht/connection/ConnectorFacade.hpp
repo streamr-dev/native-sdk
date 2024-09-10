@@ -1,7 +1,6 @@
 #ifndef STREAMR_DHT_CONNECTION_CONNECTORFACADE_HPP
 #define STREAMR_DHT_CONNECTION_CONNECTORFACADE_HPP
 
-#include <chrono>
 #include <memory>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/connection/PendingConnection.hpp"
@@ -88,7 +87,8 @@ public:
               RpcCommunicatorOptions{.rpcRequestTimeout = 15000ms}) {} // NOLINT
 
     void start(
-        std::function<bool(const std::shared_ptr<PendingConnection>&)> onNewConnection,
+        std::function<bool(const std::shared_ptr<PendingConnection>&)>
+            onNewConnection,
         std::function<bool(const DhtAddress& nodeId)> hasConnection /*,
         Transport& autoCertifierTransport */
         ) override {

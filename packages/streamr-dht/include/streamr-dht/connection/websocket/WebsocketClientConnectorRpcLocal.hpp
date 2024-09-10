@@ -19,13 +19,16 @@ using streamr::dht::rpcprotocol::DhtCallContext;
 using streamr::utils::AbortSignal;
 
 struct WebsocketClientConnectorRpcLocalOptions {
-    std::function<std::shared_ptr<PendingConnection>(const PeerDescriptor&)> connect;
+    std::function<std::shared_ptr<PendingConnection>(const PeerDescriptor&)>
+        connect;
     std::function<bool(const DhtAddress& /*nodeId*/)> hasConnection;
-    std::function<bool(const std::shared_ptr<PendingConnection>&)> onNewConnection;
+    std::function<bool(const std::shared_ptr<PendingConnection>&)>
+        onNewConnection;
     AbortSignal& abortSignal;
 };
 
-class WebsocketClientConnectorRpcLocal : public WebsocketClientConnectorRpc<DhtCallContext> {
+class WebsocketClientConnectorRpcLocal
+    : public WebsocketClientConnectorRpc<DhtCallContext> {
 private:
     WebsocketClientConnectorRpcLocalOptions options;
 

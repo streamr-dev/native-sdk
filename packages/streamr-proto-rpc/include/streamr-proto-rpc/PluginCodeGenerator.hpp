@@ -268,8 +268,9 @@ private:
                     sourceSs << "template request<" << methodOutputName << ", "
                              << methodInputName << ">";
                 }
-                sourceSs << "(\"" << methodName
-                         << "\", std::move(request), std::move(callContext), timeout);\n";
+                sourceSs
+                    << "(\"" << methodName
+                    << "\", std::move(request), std::move(callContext), timeout);\n";
                 sourceSs << "    }\n";
             }
             sourceSs << "}; // class " << serviceName << "Client\n";

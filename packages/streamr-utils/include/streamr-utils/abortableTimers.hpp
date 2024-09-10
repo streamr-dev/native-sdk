@@ -14,7 +14,6 @@ public:
         std::function<void()>&& callback,
         std::chrono::milliseconds timeout,
         AbortSignal& abortSignal) {
-        
         if (abortSignal.aborted) {
             return;
         }

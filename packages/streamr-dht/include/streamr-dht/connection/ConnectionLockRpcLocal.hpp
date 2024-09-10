@@ -24,7 +24,8 @@ using streamr::logger::SLogger;
 struct ConnectionLockRpcLocalOptions {
     std::function<void(const DhtAddress&, const LockID&)> addRemoteLocked;
     std::function<void(const DhtAddress&, const LockID&)> removeRemoteLocked;
-    std::function<void(const PeerDescriptor&, bool, const std::optional<std::string>&)>
+    std::function<void(
+        const PeerDescriptor&, bool, const std::optional<std::string>&)>
         closeConnection;
     std::function<PeerDescriptor()> getLocalPeerDescriptor;
 };
@@ -90,7 +91,9 @@ public:
                 senderPeerDescriptor.value(), true, "graceful leave notified");
         } else {
             this->options.closeConnection(
-                senderPeerDescriptor.value(), false, "graceful disconnect notified");
+                senderPeerDescriptor.value(),
+                false,
+                "graceful disconnect notified");
         }
     }
 };

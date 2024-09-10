@@ -14,6 +14,7 @@ private:
     Transport& transport;
     std::function<void(const Message&)> listener;
     HandlerToken onMessageHandlerToken;
+
 public:
     ListeningRpcCommunicator(
         ServiceID&& serviceId,
@@ -36,8 +37,8 @@ public:
     void destroy() {
         transport.off<transportevents::Message>(this->onMessageHandlerToken);
     }
-    using RpcCommunicator::registerRpcNotification;
     using RpcCommunicator::registerRpcMethod;
+    using RpcCommunicator::registerRpcNotification;
 };
 
 } // namespace streamr::dht::transport

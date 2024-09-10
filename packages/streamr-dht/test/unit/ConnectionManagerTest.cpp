@@ -9,7 +9,6 @@
 #include "FakeTransport.hpp"
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
-#include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/transport/Transport.hpp"
 #include "streamr-dht/types/PortRange.hpp"
 #include "streamr-logger/SLogger.hpp"
@@ -19,7 +18,6 @@ using ::dht::Message;
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;
 using ::protorpc::RpcMessage;
-using streamr::dht::Identifiers;
 using streamr::dht::connection::ConnectionManager;
 using streamr::dht::connection::ConnectionManagerOptions;
 using streamr::dht::connection::DefaultConnectorFacade;

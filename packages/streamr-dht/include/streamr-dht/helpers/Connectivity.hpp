@@ -28,14 +28,12 @@ public:
         const PeerDescriptor& remotePeerDescriptor) {
         if (remotePeerDescriptor.has_websocket() &&
             (localPeerDescriptor.type() != NodeType::BROWSER ||
-                 canOpenConnectionFromBrowser(
-                     remotePeerDescriptor.websocket()))) {
+             canOpenConnectionFromBrowser(remotePeerDescriptor.websocket()))) {
             return ConnectionType::WEBSOCKET_CLIENT;
-        } 
-        if (
-            localPeerDescriptor.has_websocket() &&
+        }
+        if (localPeerDescriptor.has_websocket() &&
             (remotePeerDescriptor.type() != NodeType::BROWSER ||
-                 canOpenConnectionFromBrowser(localPeerDescriptor.websocket()))) {
+             canOpenConnectionFromBrowser(localPeerDescriptor.websocket()))) {
             return ConnectionType::WEBSOCKET_SERVER;
         }
         return ConnectionType::WEBRTC;

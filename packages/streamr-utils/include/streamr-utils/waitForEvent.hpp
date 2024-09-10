@@ -3,7 +3,6 @@
 
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <tuple>
 #include <folly/coro/Promise.h>
 #include <folly/coro/Task.h>
@@ -45,7 +44,8 @@ inline folly::coro::Task<typename EventType::ArgumentTypes> waitForEvent(
     if (abortSignal) {
         co_return co_await folly::coro::co_withCancellation(
             abortSignal->getCancellationToken(),
-            folly::coro::timeout(std::move(waiter.promiseContract.second), timeout));
+            folly::coro::timeout(
+                std::move(waiter.promiseContract.second), timeout));
     }
     co_return co_await folly::coro::timeout(
         std::move(waiter.promiseContract.second), timeout);

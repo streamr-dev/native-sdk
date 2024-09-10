@@ -32,7 +32,8 @@ using streamr::utils::Ipv4Helper;
 namespace NatType = streamr::dht::types::NatType;
 
 struct WebsocketServerConnectorOptions {
-    std::function<bool(const std::shared_ptr<PendingConnection>&)> onNewConnection;
+    std::function<bool(const std::shared_ptr<PendingConnection>&)>
+        onNewConnection;
     ListeningRpcCommunicator& rpcCommunicator;
     std::function<bool(DhtAddress)> hasConnection;
     std::optional<PortRange> portRange;
@@ -140,7 +141,7 @@ public:
         }
     }
 
-ConnectivityResponse checkConnectivity(
+    ConnectivityResponse checkConnectivity(
         bool /* allowSelfSignedCertificate */) const {
         ConnectivityResponse response;
 
@@ -190,7 +191,7 @@ private:
         const std::shared_ptr<WebsocketServerConnection>& serverSocket) {
         const auto handshakerId = Uuid::v4();
 
-        auto handshaker = std::make_shared<IncomingHandshaker>(
+        auto handshaker = IncomingHandshaker::newInstance(
             this->localPeerDescriptor.value(),
             serverSocket,
             [this, handshakerId](const DhtAddress& nodeId)

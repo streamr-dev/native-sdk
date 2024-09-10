@@ -34,7 +34,10 @@ public:
 
     [[nodiscard]] size_t size() const { return this->values.size(); }
 
-    void clear() { this->values.clear(); this->queue.clear(); }
+    void clear() {
+        this->values.clear();
+        this->queue.clear();
+    }
 };
 
 } // namespace streamr::dht::routing

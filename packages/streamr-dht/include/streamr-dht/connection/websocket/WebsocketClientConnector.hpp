@@ -9,7 +9,6 @@
 #include "streamr-dht/connection/websocket/WebsocketClientConnection.hpp"
 #include "streamr-dht/connection/websocket/WebsocketClientConnectorRpcLocal.hpp"
 #include "streamr-dht/helpers/Connectivity.hpp"
-#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
 #include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
 
 namespace streamr::dht::connection::websocket {
@@ -24,7 +23,8 @@ using streamr::dht::helpers::Connectivity;
 using streamr::dht::transport::ListeningRpcCommunicator;
 
 struct WebsocketClientConnectorOptions {
-    std::function<bool(const std::shared_ptr<PendingConnection>&)> onNewConnection;
+    std::function<bool(const std::shared_ptr<PendingConnection>&)>
+        onNewConnection;
     std::function<bool(DhtAddress)> hasConnection;
     ListeningRpcCommunicator& rpcCommunicator;
 };
@@ -32,7 +32,8 @@ struct WebsocketClientConnectorOptions {
 class WebsocketClientConnector {
 private:
     PeerDescriptor localPeerDescriptor;
-    std::map<DhtAddress, std::shared_ptr<OutgoingHandshaker>> connectingHandshakers;
+    std::map<DhtAddress, std::shared_ptr<OutgoingHandshaker>>
+        connectingHandshakers;
     AbortController abortController;
     WebsocketClientConnectorOptions options;
     WebsocketClientConnectorRpcLocal rpcLocal;
@@ -86,39 +87,40 @@ public:
         return connectionType == ConnectionType::WEBSOCKET_CLIENT;
     }
 
-    std::shared_ptr<PendingConnection> connect(const PeerDescriptor& targetPeerDescriptor) {
+    std::shared_ptr<PendingConnection> connect(
+        const PeerDescriptor& targetPeerDescriptor) {
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(targetPeerDescriptor);
         const auto existingHandshaker =
-        this->connectingHandshakers.find(nodeId);
+            this->connectingHandshakers.find(nodeId);
         if (existingHandshaker != this->connectingHandshakers.end()) {
             return existingHandshaker->second->getPendingConnection();
         }
-        
-        auto socket = std::make_shared<WebsocketClientConnection>();
+
+        auto socket = WebsocketClientConnection::newInstance();
 
         const auto url =
             connectivityMethodToWebsocketUrl(targetPeerDescriptor.websocket());
 
-        auto pendingConnection = std::make_shared<PendingConnection>(
-            targetPeerDescriptor);
+        auto pendingConnection =
+            std::make_shared<PendingConnection>(targetPeerDescriptor);
 
         std::shared_ptr<OutgoingHandshaker> outgoingHandshaker =
-            std::make_shared<OutgoingHandshaker>(
+            OutgoingHandshaker::newInstance(
                 this->localPeerDescriptor,
                 socket,
                 targetPeerDescriptor,
-                std::move(pendingConnection)
-                );
+                pendingConnection);
 
         this->connectingHandshakers.emplace(nodeId, outgoingHandshaker);
- 
-        outgoingHandshaker->on<handshakerevents::HandshakerStopped>([this, nodeId]() {
-            if (this->connectingHandshakers.find(nodeId) !=
-                this->connectingHandshakers.end()) {
-                this->connectingHandshakers.erase(nodeId);
-            }
-        });
+
+        outgoingHandshaker->on<handshakerevents::HandshakerStopped>(
+            [this, nodeId]() {
+                if (this->connectingHandshakers.find(nodeId) !=
+                    this->connectingHandshakers.end()) {
+                    this->connectingHandshakers.erase(nodeId);
+                }
+            });
 
         socket->connect(url, false);
 
@@ -135,7 +137,7 @@ public:
         for (const auto& [_, handshaker] : this->connectingHandshakers) {
             handshaker->getPendingConnection()->close(true);
         }
-        
+
         this->connectingHandshakers.clear();
     }
 };

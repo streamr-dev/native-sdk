@@ -15,10 +15,10 @@
 #include <folly/experimental/coro/Timeout.h>
 
 #include <magic_enum.hpp>
-#include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "RpcCommunicatorClientApi.hpp"
 #include "RpcCommunicatorServerApi.hpp"
 #include "ServerRegistry.hpp"
+#include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 #include "streamr-logger/SLogger.hpp"
 
@@ -37,7 +37,7 @@ constexpr std::chrono::milliseconds defaultRpcRequestTimeout = 5000ms;
 enum class StatusCode { OK, STOPPED, DEADLINE_EXCEEDED, SERVER_ERROR };
 // NOLINTEND
 
-struct RpcCommunicatorOptions{
+struct RpcCommunicatorOptions {
     std::chrono::milliseconds rpcRequestTimeout;
 };
 
@@ -54,7 +54,7 @@ public:
         std::optional<RpcCommunicatorOptions> options = std::nullopt)
         : mRpcCommunicatorClientApi(
               options.has_value() ? options.value().rpcRequestTimeout
-                                 : defaultRpcRequestTimeout) {}
+                                  : defaultRpcRequestTimeout) {}
 
     // Messaging API
 
@@ -95,7 +95,6 @@ public:
             std::move(callback));
     }
 
-
     // Client-side API
 
     /**
@@ -114,8 +113,9 @@ public:
         const RequestType& methodParam,
         const CallContextType& callContext,
         std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
-        return mRpcCommunicatorClientApi.template request<ReturnType, RequestType>(
-            methodName, methodParam, callContext, timeout);
+        return mRpcCommunicatorClientApi
+            .template request<ReturnType, RequestType>(
+                methodName, methodParam, callContext, timeout);
     }
 
     /**
@@ -154,8 +154,9 @@ public:
             F>
     void registerRpcMethod(
         const std::string& name, const F& fn, MethodOptions options = {}) {
-        mRpcCommunicatorServerApi.template registerRpcMethod<RequestType, ReturnType, F>(
-            name, fn, options);
+        mRpcCommunicatorServerApi
+            .template registerRpcMethod<RequestType, ReturnType, F>(
+                name, fn, options);
     }
 
     /**
@@ -172,8 +173,9 @@ public:
             F>
     void registerRpcNotification(
         const std::string& name, const F& fn, MethodOptions options = {}) {
-        mRpcCommunicatorServerApi.template registerRpcNotification<RequestType, F>(
-            name, fn, options);
+        mRpcCommunicatorServerApi
+            .template registerRpcNotification<RequestType, F>(
+                name, fn, options);
     }
 
 private:

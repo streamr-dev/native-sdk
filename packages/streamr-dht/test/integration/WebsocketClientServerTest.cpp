@@ -1,74 +1,78 @@
 #include <string_view>
+#include <gtest/gtest.h>
 #include <rtc/global.hpp>
 #include <streamr-dht/connection/websocket/WebsocketClientConnection.hpp>
-#include <streamr-dht/connection/websocket/WebsocketServerConnection.hpp>
 #include <streamr-dht/connection/websocket/WebsocketServer.hpp>
+#include <streamr-dht/connection/websocket/WebsocketServerConnection.hpp>
 #include <streamr-logger/SLogger.hpp>
-#include <gtest/gtest.h>
 
-using streamr::dht::connection::websocket::WebsocketServer;
-using streamr::dht::connection::websocket::WebsocketClientConnection;
-using streamr::dht::connection::websocket::WebsocketServerConnection;
-using streamr::dht::connection::websocket::WebsocketServerConfig;
 using streamr::dht::connection::connectionevents::Connected;
 using streamr::dht::connection::connectionevents::Data;
+using streamr::dht::connection::websocket::WebsocketClientConnection;
+using streamr::dht::connection::websocket::WebsocketServer;
+using streamr::dht::connection::websocket::WebsocketServerConfig;
+using streamr::dht::connection::websocket::WebsocketServerConnection;
 using streamr::logger::SLogger;
 
-namespace websocketserverevents = streamr::dht::connection::websocket::websocketserverevents;
+namespace websocketserverevents =
+    streamr::dht::connection::websocket::websocketserverevents;
 
 TEST(WebsocketClientServerTest, TestServerCanAcceptConnection) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
-    WebsocketServerConfig config {
+    WebsocketServerConfig config{
         .portRange = {10001, 10001}, // NOLINT
         .enableTls = false,
         .tlsCertificateFiles = std::nullopt,
-        .maxMessageSize = std::nullopt
-    };
+        .maxMessageSize = std::nullopt};
 
     WebsocketServer server(std::move(config));
-   
+
     std::promise<std::string_view> connectionEstablishedPromise;
-    server.on<websocketserverevents::Connected>([&](const std::shared_ptr<WebsocketServerConnection>& /*connection*/) {
-        SLogger::trace("in onConnected() event handler");
-        connectionEstablishedPromise.set_value("Hello, world!");
-    });
+    server.on<websocketserverevents::Connected>(
+        [&](const std::shared_ptr<WebsocketServerConnection>& /*connection*/) {
+            SLogger::trace("in onConnected() event handler");
+            connectionEstablishedPromise.set_value("Hello, world!");
+        });
 
     server.start();
 
-    WebsocketClientConnection client;
-    client.connect("ws://127.0.0.1:10001", false); // NOLINT
+    auto client = WebsocketClientConnection::newInstance();
+    client->connect("ws://127.0.0.1:10001", false); // NOLINT
 
-    const std::string_view message = connectionEstablishedPromise.get_future().get();
+    const std::string_view message =
+        connectionEstablishedPromise.get_future().get();
     SLogger::trace("message: {}", message);
     ASSERT_EQ(message, "Hello, world!");
-    
-    client.close(false);
+
+    client->close(false);
     server.stop();
 }
 
 TEST(WebsocketClientServerTest, TestServerCanTrasmitMessageToServer) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
-    WebsocketServerConfig config {
+    WebsocketServerConfig config{
         .portRange = {10001, 10001}, // NOLINT
         .enableTls = false,
         .tlsCertificateFiles = std::nullopt,
-        .maxMessageSize = std::nullopt
-    };
+        .maxMessageSize = std::nullopt};
 
     WebsocketServer server(std::move(config));
 
     std::promise<std::vector<std::byte>> messagePromise;
-    
+
     std::shared_ptr<WebsocketServerConnection> serverConnection;
-    
-    server.on<websocketserverevents::Connected>([&](const std::shared_ptr<WebsocketServerConnection>& connection) {
-        SLogger::trace("in onConnected() event handler");
-        serverConnection = connection;  // make sure the connection does not get destroyed
-        serverConnection->on<Data>([&](const std::vector<std::byte>& message) {
-            SLogger::trace("in onMessage() event handler");
-            messagePromise.set_value(message);
+
+    server.on<websocketserverevents::Connected>(
+        [&](const std::shared_ptr<WebsocketServerConnection>& connection) {
+            SLogger::trace("in onConnected() event handler");
+            serverConnection =
+                connection; // make sure the connection does not get destroyed
+            serverConnection->on<Data>(
+                [&](const std::vector<std::byte>& message) {
+                    SLogger::trace("in onMessage() event handler");
+                    messagePromise.set_value(message);
+                });
         });
-    });
 
     server.start();
 
@@ -77,20 +81,20 @@ TEST(WebsocketClientServerTest, TestServerCanTrasmitMessageToServer) {
     message.push_back(std::byte{2});
     message.push_back(std::byte{3});
 
-    WebsocketClientConnection client;
-    
-    client.on<streamr::dht::connection::connectionevents::Connected>([&]() {
-        client.send(message);
+    auto client = WebsocketClientConnection::newInstance();
+
+    client->on<streamr::dht::connection::connectionevents::Connected>([&]() {
+        SLogger::trace("in client onConnected() event handler");
+        client->send(message);
     });
 
-    client.connect("ws://127.0.0.1:10001", false); // NOLINT
+    client->connect("ws://127.0.0.1:10001", false); // NOLINT
 
     auto receivedMessage = messagePromise.get_future().get();
-    
+
     ASSERT_EQ(message, receivedMessage);
-    
-    client.close(false);
+
+    client->close(false);
     serverConnection->close(false);
     server.stop();
-
 }

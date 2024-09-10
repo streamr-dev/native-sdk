@@ -107,7 +107,8 @@ private:
     folly::CPUThreadPoolExecutor mExecutor;
 
 public:
-    explicit RpcCommunicatorClientApi(std::chrono::milliseconds rpcRequestTimeout)
+    explicit RpcCommunicatorClientApi(
+        std::chrono::milliseconds rpcRequestTimeout)
         : mRpcRequestTimeout(rpcRequestTimeout), mExecutor(threadPoolSize) {}
 
     /*
@@ -116,7 +117,7 @@ public:
     void setOutgoingMessageCallback(F&& callback) {
         mOutgoingMessageCallback = std::forward<F>(callback);
     }*/
-    
+
     void setOutgoingMessageCallback(OutgoingMessageCallbackType callback) {
         mOutgoingMessageCallback = std::move(callback);
     }

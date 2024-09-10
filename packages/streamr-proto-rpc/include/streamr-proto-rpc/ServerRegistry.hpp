@@ -19,7 +19,6 @@ struct MethodOptions {
 
 template <typename CallContextType>
 class ServerRegistry {
-
 private:
     using RpcMethodType =
         std::function<Any(Any request, CallContextType callContext)>;

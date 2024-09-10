@@ -18,7 +18,6 @@ private:
     std::string mRemoteAddress;
     HandlerToken mHalfReadyConnectedHandlerToken;
 
-public:
     WebsocketServerConnection()
         : WebsocketConnection(ConnectionType::WEBSOCKET_SERVER),
           mResourceURL(Url{""}) {
@@ -28,8 +27,16 @@ public:
                 "WebsocketServerConnection() The half-ready socket is fully connected");
             mResourceURL = Url{mSocket->path().value()};
             mRemoteAddress = mSocket->remoteAddress().value();
-            this->off<connectionevents::Connected>(this->mHalfReadyConnectedHandlerToken);
+            this->off<connectionevents::Connected>(
+                this->mHalfReadyConnectedHandlerToken);
         });
+    }
+
+public:
+    [[nodiscard]] static std::shared_ptr<WebsocketServerConnection>
+    newInstance() {
+        struct MakeSharedEnabler : public WebsocketServerConnection {};
+        return std::make_shared<MakeSharedEnabler>();
     }
 
     ~WebsocketServerConnection() override {
@@ -38,9 +45,8 @@ public:
 
     void setDataChannelWebSocket(std::shared_ptr<rtc::WebSocket> ws) {
         SLogger::trace("WebsocketServerConnection() setting socket");
-        setSocket(ws);
-        SLogger::trace(
-            "WebsocketServerConnection() setSocket() finished");
+        setSocket(std::move(ws));
+        SLogger::trace("WebsocketServerConnection() setSocket() finished");
     }
 
     [[nodiscard]] Url getResourceURL() const { return mResourceURL; }

@@ -22,7 +22,7 @@ constexpr size_t kademliaIdLengthInBytes = 20;
 
 struct Identifiers {
     using PeerDescriptor = ::dht::PeerDescriptor;
-    
+
     static DhtAddress getDhtAddressFromRaw(const DhtAddressRaw& raw) {
         std::stringstream res;
         for (const auto& byte : raw) {

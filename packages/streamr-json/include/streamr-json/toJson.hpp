@@ -126,7 +126,7 @@ template <typename T>
 json pointerToJson(T value) {
     // if (isNullPointer(*value)) {
     if (!value) {
-        return json(nullptr);
+        return json{nullptr};
     }
 
     return toJson(*value);

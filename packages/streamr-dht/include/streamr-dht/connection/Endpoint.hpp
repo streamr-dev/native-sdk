@@ -10,7 +10,7 @@
 #include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-logger/SLogger.hpp"
-
+#include "streamr-utils/EnableSharedFromThis.hpp"
 namespace streamr::dht::connection {
 
 using ::dht::PeerDescriptor;
@@ -18,7 +18,7 @@ using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
 using streamr::eventemitter::HandlerToken;
 using streamr::logger::SLogger;
-
+using streamr::utils::EnableSharedFromThis;
 class Endpoint;
 class EndpointState;
 
@@ -36,22 +36,18 @@ public:
     void handleConnected();
 };
 
-class EndpointState {
+class EndpointState : public EnableSharedFromThis {
 protected:
-    EndpointState() {
-        SLogger::debug("EndpointState constructor");
-    }
+    EndpointState() { SLogger::debug("EndpointState constructor"); }
 
 public:
-    virtual ~EndpointState() {
-        SLogger::debug("EndpointState destructor");
-    }
+    ~EndpointState() override { SLogger::debug("EndpointState destructor"); }
 
-    virtual void close(bool graceful){
+    virtual void close(bool /*graceful*/) {
         SLogger::debug("EndpointState::close start");
         SLogger::debug("EndpointState::close end");
     };
-    virtual void send(const std::vector<std::byte>& data){
+    virtual void send(const std::vector<std::byte>& /* data */) {
         SLogger::debug("EndpointState::send start");
         SLogger::debug("EndpointState::send end");
     };
@@ -65,17 +61,26 @@ public:
     [[nodiscard]] virtual bool isConnected() const = 0;
 };
 
-class ConnectedEndpointState : public EndpointState, public std::enable_shared_from_this<ConnectedEndpointState> {
+class ConnectedEndpointState : public EndpointState {
 private:
     EndpointStateInterface& stateInterface;
     std::shared_ptr<Connection> connection;
     HandlerToken dataHandlerToken;
     HandlerToken disconnectHandlerToken;
 
-public:
     explicit ConnectedEndpointState(EndpointStateInterface& stateInterface)
         : stateInterface(stateInterface) {
         SLogger::debug("ConnectedEndpointState constructor");
+    }
+
+public:
+    [[nodiscard]] static std::shared_ptr<ConnectedEndpointState> newInstance(
+        EndpointStateInterface& stateInterface) {
+        struct MakeSharedEnabler : public ConnectedEndpointState {
+            explicit MakeSharedEnabler(EndpointStateInterface& stateInterface)
+                : ConnectedEndpointState(stateInterface) {}
+        };
+        return std::make_shared<MakeSharedEnabler>(stateInterface);
     }
 
     ~ConnectedEndpointState() override {
@@ -88,7 +93,7 @@ public:
         this->dataHandlerToken = this->connection->on<connectionevents::Data>(
             [this](const std::vector<std::byte>& data) {
                 SLogger::debug("ConnectedEndpointState::enterState data");
-                auto self = shared_from_this();
+                auto self = sharedFromThis<ConnectedEndpointState>();
                 self->stateInterface.emitData(data);
                 SLogger::debug("ConnectedEndpointState::enterState data end");
             });
@@ -98,10 +103,12 @@ public:
                     bool gracefulLeave,
                     uint64_t /*code*/,
                     const std::string& /*reason*/) {
-                    SLogger::debug("ConnectedEndpointState::enterState disconnected");
-                    auto self = shared_from_this();
+                    SLogger::debug(
+                        "ConnectedEndpointState::enterState disconnected");
+                    auto self = sharedFromThis<ConnectedEndpointState>();
                     self->stateInterface.handleDisconnect(gracefulLeave);
-                    SLogger::debug("ConnectedEndpointState::enterState disconnected end");
+                    SLogger::debug(
+                        "ConnectedEndpointState::enterState disconnected end");
                 });
         SLogger::debug("ConnectedEndpointState::enterState end");
     }
@@ -156,10 +163,19 @@ private:
     HandlerToken connectedHandlerToken;
     HandlerToken disconnectedHandlerToken;
 
-public:
     explicit ConnectingEndpointState(EndpointStateInterface& stateInterface)
         : stateInterface(stateInterface) {
         SLogger::debug("ConnectingEndpointState constructor");
+    }
+
+public:
+    [[nodiscard]] static std::shared_ptr<ConnectingEndpointState> newInstance(
+        EndpointStateInterface& stateInterface) {
+        struct MakeSharedEnabler : public ConnectingEndpointState {
+            explicit MakeSharedEnabler(EndpointStateInterface& stateInterface)
+                : ConnectingEndpointState(stateInterface) {}
+        };
+        return std::make_shared<MakeSharedEnabler>(stateInterface);
     }
 
     ~ConnectingEndpointState() override {
@@ -172,19 +188,21 @@ public:
         this->pendingConnection = pendingConnection;
         this->pendingConnection->on<
             pendingconnectionevents::Disconnected>([this](bool gracefulLeave) {
-            this->pendingConnection->off<pendingconnectionevents::Disconnected>(
+            auto self = sharedFromThis<ConnectingEndpointState>();
+            self->pendingConnection->off<pendingconnectionevents::Disconnected>(
                 this->disconnectedHandlerToken);
-            this->pendingConnection->off<pendingconnectionevents::Connected>(
+            self->pendingConnection->off<pendingconnectionevents::Connected>(
                 this->connectedHandlerToken);
 
-            this->stateInterface.handleDisconnect(gracefulLeave);
+            self->stateInterface.handleDisconnect(gracefulLeave);
         });
         this->pendingConnection->on<pendingconnectionevents::Connected>(
             [this](
                 const PeerDescriptor& /*peerDescriptor*/,
                 const std::shared_ptr<Connection>& connection) {
-                this->changeToConnectedState(connection);
-                this->stateInterface.handleConnected();
+                auto self = sharedFromThis<ConnectingEndpointState>();
+                self->changeToConnectedState(connection);
+                self->stateInterface.handleConnected();
             });
         SLogger::debug("ConnectingEndpointState::enterState end");
     }
@@ -215,7 +233,8 @@ public:
 
     void changeToConnectingState(
         const std::shared_ptr<PendingConnection>& pendingConnection) override {
-        SLogger::debug("ConnectingEndpointState::changeToConnectingState start");
+        SLogger::debug(
+            "ConnectingEndpointState::changeToConnectingState start");
         this->removeEventHandlers();
         this->enterState(pendingConnection);
         SLogger::debug("ConnectingEndpointState::changeToConnectingState end");
@@ -249,23 +268,24 @@ using EndpointEvents = std::tuple<
     endpointevents::Connected,
     endpointevents::Disconnected>;
 
-class Endpoint : public EventEmitter<EndpointEvents>, public std::enable_shared_from_this<Endpoint> {
+class Endpoint : public EventEmitter<EndpointEvents>,
+                 public EnableSharedFromThis {
 private:
     std::function<void()> removeSelfFromContainer;
     EndpointState* state;
 
     void emitData(const std::vector<std::byte>& data) {
         SLogger::debug("Endpoint::emitData start");
-        auto self = shared_from_this();
+        auto self = sharedFromThis<Endpoint>();
         this->emit<endpointevents::Data>(data);
         SLogger::debug("Endpoint::emitData end");
     }
 
-    void handleDisconnect(bool gracefulLeave) {
+    void handleDisconnect(bool /*gracefulLeave*/) {
         SLogger::debug("Endpoint::handleDisconnect start");
         this->emit<endpointevents::Disconnected>();
         this->removeAllListeners();
-        auto self = shared_from_this();
+        auto self = sharedFromThis<Endpoint>();
         this->removeSelfFromContainer();
         SLogger::debug("Endpoint::handleDisconnect end");
     }
@@ -287,7 +307,7 @@ private:
 
     void handleConnected() {
         SLogger::debug("Endpoint::handleConnected start");
-        auto self = shared_from_this();
+        auto self = sharedFromThis<Endpoint>();
         this->emit<endpointevents::Connected>();
         SLogger::debug("Endpoint::handleConnected end");
     }
@@ -299,13 +319,14 @@ private:
     std::shared_ptr<ConnectingEndpointState> connectingState;
     PeerDescriptor peerDescriptor;
 
-public:
-    explicit Endpoint(
-        const std::shared_ptr<PendingConnection>& pendingConnection,
-        const std::function<void()>& removeSelfFromContainer)
+    Endpoint(
+        std::shared_ptr<PendingConnection>&& pendingConnection,
+        std::function<void()>&& removeSelfFromContainer)
         : stateInterface(*this),
-          connectedState(std::make_shared<ConnectedEndpointState>(this->stateInterface)),
-          connectingState(std::make_shared<ConnectingEndpointState>(this->stateInterface)),
+          connectedState(
+              ConnectedEndpointState::newInstance(this->stateInterface)),
+          connectingState(
+              ConnectingEndpointState::newInstance(this->stateInterface)),
           removeSelfFromContainer(removeSelfFromContainer) {
         SLogger::debug("Endpoint constructor start");
         this->state = this->connectingState.get();
@@ -314,9 +335,23 @@ public:
         SLogger::debug("Endpoint constructor end");
     }
 
-    virtual ~Endpoint() {
-        SLogger::debug("Endpoint destructor");
+public:
+    [[nodiscard]] static std::shared_ptr<Endpoint> newInstance(
+        std::shared_ptr<PendingConnection>&& pendingConnection,
+        std::function<void()>&& removeSelfFromContainer) {
+        struct MakeSharedEnabler : public Endpoint {
+            explicit MakeSharedEnabler(
+                std::shared_ptr<PendingConnection>&& pendingConnection,
+                std::function<void()>&& removeSelfFromContainer)
+                : Endpoint(
+                      std::move(pendingConnection),
+                      std::move(removeSelfFromContainer)) {}
+        };
+        return std::make_shared<MakeSharedEnabler>(
+            std::move(pendingConnection), std::move(removeSelfFromContainer));
     }
+
+    ~Endpoint() override { SLogger::debug("Endpoint destructor"); }
 
     [[nodiscard]] bool isConnected() const {
         SLogger::debug("Endpoint::isConnected");
@@ -332,7 +367,7 @@ public:
         SLogger::debug("Endpoint::close start");
         this->state->close(graceful);
         this->removeAllListeners();
-        auto self = shared_from_this();
+        auto self = sharedFromThis<Endpoint>();
         this->removeSelfFromContainer();
         SLogger::debug("Endpoint::close end");
     }

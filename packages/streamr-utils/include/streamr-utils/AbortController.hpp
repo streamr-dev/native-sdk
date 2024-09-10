@@ -11,7 +11,7 @@ using streamr::eventemitter::EventEmitter;
 
 namespace abortsignalevents {
 struct Aborted : Event<> {};
-}
+} // namespace abortsignalevents
 
 using abortsignalevents::Aborted;
 using AbortSignalEvents = std::tuple<Aborted>;
@@ -22,7 +22,9 @@ class AbortSignal : public EventEmitter<AbortSignalEvents> {
 public:
     bool aborted; // NOLINT
     std::string reason; // NOLINT
-    folly::CancellationToken getCancellationToken() { return cancelSource.getToken(); }
+    folly::CancellationToken getCancellationToken() {
+        return cancelSource.getToken();
+    }
 
 private:
     folly::CancellationSource cancelSource;
