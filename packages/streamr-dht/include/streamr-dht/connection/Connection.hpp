@@ -43,10 +43,13 @@ struct Disconnected
 
 struct Error : Event<std::string /*name*/> {};
 
-} // namespace events
+} // namespace connectionevents
 
-using ConnectionEvents = std::
-    tuple<connectionevents::Data, connectionevents::Connected, connectionevents::Disconnected, connectionevents::Error>;
+using ConnectionEvents = std::tuple<
+    connectionevents::Data,
+    connectionevents::Connected,
+    connectionevents::Disconnected,
+    connectionevents::Error>;
 
 class Connection : public EventEmitter<ConnectionEvents> {
 private:

@@ -16,7 +16,7 @@ public:
     [[nodiscard]] std::string getB() const { return b; }
     // NOLINTNEXTLINE (readability-convert-member-functions-to-static)
     [[nodiscard]] std::string toString() const {
-        return std::string("Hello world!");
+        return std::string{"Hello world!"};
     }
     // NOLINTNEXTLINE (readability-convert-member-functions-to-static)
     [[nodiscard]] json toJson() const { return json{{"a", a}, {"b", b}}; }

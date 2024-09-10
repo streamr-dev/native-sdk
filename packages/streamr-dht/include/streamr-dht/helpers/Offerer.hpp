@@ -15,7 +15,8 @@ enum class Offerer { LOCAL, REMOTE };
 class OffererHelper {
 public:
     static Offerer getOfferer(
-        const DhtAddress& localNodeId, const DhtAddress& remoteNodeId) { // NOLINT
+        const DhtAddress& localNodeId,
+        const DhtAddress& remoteNodeId) { // NOLINT
         return getOfferingHash(localNodeId + "," + remoteNodeId) <
                 getOfferingHash(remoteNodeId + "," + localNodeId)
             ? Offerer::LOCAL

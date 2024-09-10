@@ -1,19 +1,18 @@
+#include <gtest/gtest.h>
 #include <streamr-dht/connection/websocket/WebsocketServer.hpp>
 #include <streamr-dht/helpers/Errors.hpp>
-#include <gtest/gtest.h>
 
+using streamr::dht::connection::websocket::TlsCertificateFiles;
 using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketServerConfig;
 using streamr::dht::helpers::WebsocketServerStartError;
-using streamr::dht::connection::websocket::TlsCertificateFiles;
 
 TEST(WebsocketServerTest, TestStartAndStopServer) {
-    WebsocketServerConfig config {
+    WebsocketServerConfig config{
         .portRange = {10000, 10001}, // NOLINT
         .enableTls = false,
         .tlsCertificateFiles = std::nullopt,
-        .maxMessageSize = std::nullopt
-    };
+        .maxMessageSize = std::nullopt};
 
     WebsocketServer server(std::move(config));
     server.start();
@@ -21,18 +20,17 @@ TEST(WebsocketServerTest, TestStartAndStopServer) {
 }
 
 TEST(WebsocketServerTest, TestServerThrowsIfPortIsInUse) {
-    WebsocketServerConfig config {
+    WebsocketServerConfig config{
         .portRange = {10001, 10001}, // NOLINT
         .enableTls = false,
         .tlsCertificateFiles = std::nullopt,
-        .maxMessageSize = std::nullopt
-    };
+        .maxMessageSize = std::nullopt};
 
     WebsocketServerConfig config2 = config;
 
     WebsocketServer server(std::move(config));
     server.start();
-    
+
     WebsocketServer server2(std::move(config2));
     EXPECT_THROW(server2.start(), WebsocketServerStartError);
 
@@ -40,35 +38,38 @@ TEST(WebsocketServerTest, TestServerThrowsIfPortIsInUse) {
 }
 
 TEST(WebsocketServerTest, TestCanThrowIfCertificateNotFound) {
-    WebsocketServerConfig config {
+    WebsocketServerConfig config{
         .portRange = {10000, 10001}, // NOLINT
         .enableTls = false,
-        .tlsCertificateFiles = std::optional<TlsCertificateFiles>{TlsCertificateFiles{"", ""}},
-        .maxMessageSize = std::nullopt
-    };
+        .tlsCertificateFiles =
+            std::optional<TlsCertificateFiles>{TlsCertificateFiles{"", ""}},
+        .maxMessageSize = std::nullopt};
     WebsocketServer server(std::move(config));
     EXPECT_THROW(server.start(), WebsocketServerStartError);
+    server.stop();
 }
 
 TEST(WebsocketServerTest, TestStartAndStopServerWithSpecifiedCertificate) {
-    WebsocketServerConfig config {
+    WebsocketServerConfig config{
         .portRange = {10000, 10001}, // NOLINT
         .enableTls = false,
-        .tlsCertificateFiles = std::optional<TlsCertificateFiles>{TlsCertificateFiles{"../test/unit/example.key", "../test/unit/example.crt"}},
-        .maxMessageSize = std::nullopt
-    };
+        .tlsCertificateFiles =
+            std::optional<TlsCertificateFiles>{TlsCertificateFiles{
+                "../test/unit/example.key", "../test/unit/example.crt"}},
+        .maxMessageSize = std::nullopt};
     WebsocketServer server(std::move(config));
     server.start();
     server.stop();
 }
 
 TEST(WebsocketServerTest, UpdateCertificate) {
-    WebsocketServerConfig config {
+    WebsocketServerConfig config{
         .portRange = {10004, 10005}, // NOLINT
         .enableTls = true,
-        .tlsCertificateFiles = std::optional<TlsCertificateFiles>{TlsCertificateFiles{"../test/unit/example.key", "../test/unit/example.crt"}},  
-        .maxMessageSize = std::nullopt
-    };
+        .tlsCertificateFiles =
+            std::optional<TlsCertificateFiles>{TlsCertificateFiles{
+                "../test/unit/example.key", "../test/unit/example.crt"}},
+        .maxMessageSize = std::nullopt};
 
     WebsocketServer server(std::move(config));
     server.start();
@@ -93,7 +94,7 @@ F+9OvISm466xjM/uaGEPndhA7O9WdeRA2qCKmuxFGYRKuaZbmZroIM1KOeDfiZRS
 GEiOqUnpnId09QU=
 -----END CERTIFICATE-----)";
 
-std::string keyContent = R"(-----BEGIN PRIVATE KEY-----
+    std::string keyContent = R"(-----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC5MSmJyMgvoHzk
 YIrD0ZpFDENZeiLwVbRgUpfr22YF3ulGO9O8vtOWFNy/baQU/RKrPxFDw+rnMFRS
 BrFpd852Q8fK/hziTVaCM5XJ4TyCzz0coujkWCZeCpMEmQ4ViNEg/7Og7MBVt0xc
@@ -122,15 +123,18 @@ HdxDqpEPa/uGsv+EPnapodKuXO5a2rUCRMEJBcqRIWNZE4Gsey0s61hGCz5O9PpG
 noOPvyLe52Hc2twPb9+w8g==
 -----END PRIVATE KEY-----)";
     EXPECT_NO_THROW(server.updateCertificate(certContent, keyContent));
+
+    server.stop();
 }
 
 TEST(WebsocketServerTest, UpdateCertificateWithInvalidCertificate) {
-    WebsocketServerConfig config {
+    WebsocketServerConfig config{
         .portRange = {10004, 10005}, // NOLINT
         .enableTls = true,
-        .tlsCertificateFiles = std::optional<TlsCertificateFiles>{TlsCertificateFiles{"../test/unit/example.key", "../test/unit/example.crt"}},  
-        .maxMessageSize = std::nullopt
-    };
+        .tlsCertificateFiles =
+            std::optional<TlsCertificateFiles>{TlsCertificateFiles{
+                "../test/unit/example.key", "../test/unit/example.crt"}},
+        .maxMessageSize = std::nullopt};
 
     WebsocketServer server(std::move(config));
     server.start();
@@ -142,7 +146,7 @@ OTEyMDYzOFowRDELMAkGA1UEBhMCRkkxEDAOBgNVBAgMB1V1c2ltYWExETAPBgNV
 BAcMCEhlbHNpbmtpMRAwDgYDVQQKDAdTdHJlYW1yMIIBIjANBgkqhkiG9w0BAQEF
 )";
 
-std::string keyContent = R"(-----BEGIN PRIVATE KEY-----
+    std::string keyContent = R"(-----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC5MSmJyMgvoHzk
 YIrD0ZpFDENZeiLwVbRgUpfr22YF3ulGO9O8vtOWFNy/baQU/RKrPxFDw+rnMFRS
 BrFpd852Q8fK/hziTVaCM5XJ4TyCzz0coujkWCZeCpMEmQ4ViNEg/7Og7MBVt0xc
@@ -171,7 +175,9 @@ HdxDqpEPa/uGsv+EPnapodKuXO5a2rUCRMEJBcqRIWNZE4Gsey0s61hGCz5O9PpG
 noOPvyLe52Hc2twPb9+w8g==
 -----END PRIVATE KEY-----)";
 
-EXPECT_THROW(server.updateCertificate(certContent, keyContent), WebsocketServerStartError);
+    EXPECT_THROW(
+        server.updateCertificate(certContent, keyContent),
+        WebsocketServerStartError);
 
-
+    server.stop();
 }

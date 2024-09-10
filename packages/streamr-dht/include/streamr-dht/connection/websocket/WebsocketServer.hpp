@@ -105,7 +105,7 @@ private:
 
     void handleIncomingClient(std::shared_ptr<rtc::WebSocket> ws) {
         auto websocketServerConnection =
-            std::make_shared<WebsocketServerConnection>();
+            WebsocketServerConnection::newInstance();
         auto id = boost::uuids::to_string(boost::uuids::random_generator()());
         mHalfReadyConnections.insert({id, websocketServerConnection});
 
@@ -153,7 +153,7 @@ private:
             mHalfReadyConnections.erase(it);
         });
 
-        websocketServerConnection->setDataChannelWebSocket(ws);
+        websocketServerConnection->setDataChannelWebSocket(std::move(ws));
     }
 
     void startServer(
@@ -214,7 +214,7 @@ private:
         mServer->onClient([&](std::shared_ptr<rtc::WebSocket> ws) {
             SLogger::trace("onClient()");
 
-            handleIncomingClient(ws);
+            handleIncomingClient(std::move(ws));
         });
     }
 };

@@ -9,7 +9,7 @@
 #include <optional>
 #include <tuple>
 #include <type_traits>
-#include <iostream>
+
 namespace streamr::eventemitter {
 
 // Event class that all events must inherit from.
@@ -79,9 +79,7 @@ public:
         // https://blog.mbedded.ninja/programming/languages/c-plus-plus/magic-statics/
         static size_t counter = 1;
         static std::mutex handlerReferenceCounterMutex;
-        std::cout << "Thread " << std::this_thread::get_id() << " create() attempting to lock handlerReferenceCounterMutex" << std::endl;
         std::lock_guard<std::mutex> lock{handlerReferenceCounterMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " create() locked handlerReferenceCounterMutex" << std::endl;
         return HandlerToken(counter++);
     }
     [[nodiscard]] size_t getId() const { return mId; }
@@ -109,16 +107,12 @@ private:
 
     // this if called by off()
     void removeHandlerFromExecutingEmitLoops(HandlerToken token) {
-        std::cout << "Thread " << std::this_thread::get_id() << " removeHandlerFromExecutingEmitLoops() attempting to lock mExecutingEmitLoopHandlersMutex" << std::endl;
         std::lock_guard guard{mExecutingEmitLoopHandlersMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " removeHandlerFromExecutingEmitLoops() locked mExecutingEmitLoopHandlersMutex" << std::endl;
         mExecutingEmitLoopHandlers.erase(token.getId());
     }
 
     void createExecutingEmitLoopHandlersMap() {
-        std::cout << "Thread " << std::this_thread::get_id() << " createExecutingEmitLoopHandlersMap() attempting to lock mExecutingEmitLoopHandlersMutex" << std::endl;
         std::lock_guard guard{mExecutingEmitLoopHandlersMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " createExecutingEmitLoopHandlersMap() locked mExecutingEmitLoopHandlersMutex" << std::endl;
         mExecutingEmitLoopHandlers.clear();
         for (const auto& handler : mEventHandlers) {
             mExecutingEmitLoopHandlers[handler.getId()] = handler;
@@ -127,9 +121,7 @@ private:
 
     std::optional<typename EmitterEventType::Handler>
     popHandlerFromExecutingEmitLoopHandlersMap() {
-        std::cout << "Thread " << std::this_thread::get_id() << " popHandlerFromExecutingEmitLoopHandlersMap() attempting to lock mExecutingEmitLoopHandlersMutex" << std::endl;
         std::lock_guard guard{mExecutingEmitLoopHandlersMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " popHandlerFromExecutingEmitLoopHandlersMap() locked mExecutingEmitLoopHandlersMutex" << std::endl;
 
         if (mExecutingEmitLoopHandlers.empty()) {
             return std::nullopt;
@@ -160,9 +152,7 @@ public:
         MatchingEventType<EmitterEventType> EventType,
         MatchingCallbackType<EmitterEventType> CallbackType>
     HandlerToken on(const CallbackType& callback, bool once = false) {
-        std::cout << "Thread " << std::this_thread::get_id() << " on() attempting to lock mEventHandlersMutex" << std::endl;
         std::lock_guard guard{mEventHandlersMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " on() locked mEventHandlersMutex" << std::endl;
         typename EmitterEventType::Handler::HandlerFunction handlerFunction =
             callback;
         // silently ignore null callbacks
@@ -204,9 +194,7 @@ public:
 
     template <MatchingEventType<EmitterEventType> EventType>
     void off(HandlerToken handlerReference) {
-        std::cout << "Thread " << std::this_thread::get_id() << " off() attempting to lock mEventHandlersMutex" << std::endl;
         std::lock_guard guard{mEventHandlersMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " off() locked mEventHandlersMutex" << std::endl;
 
         mEventHandlers.remove_if(
             [&handlerReference](
@@ -224,10 +212,8 @@ public:
      */
 
     template <MatchingEventType<EmitterEventType> EventType>
-    size_t listenerCount() {    
-        std::cout << "Thread " << std::this_thread::get_id() << " listenerCount() attempting to lock mEventHandlersMutex" << std::endl;
+    size_t listenerCount() {
         std::lock_guard guard{mEventHandlersMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " listenerCount() locked mEventHandlersMutex" << std::endl;
         return mEventHandlers.size();
     }
 
@@ -239,9 +225,7 @@ public:
 
     template <MatchingEventType<EmitterEventType> EventType>
     void removeAllListeners() {
-        std::cout << "Thread " << std::this_thread::get_id() << " removeAllListeners() attempting to lock mEventHandlersMutex" << std::endl;
         std::lock_guard guard{mEventHandlersMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " removeAllListeners() locked mEventHandlersMutex" << std::endl;
         mEventHandlers.clear();
     }
 
@@ -258,19 +242,15 @@ public:
         MatchingEventType<EmitterEventType> EventType,
         typename... EventArgs>
     void emit(EventArgs&&... args) {
-        std::cout << "Thread " << std::this_thread::get_id() << " emit() attempting to lock mEmitLoopMutex" << std::endl;
         std::lock_guard guard{mEmitLoopMutex};
-        std::cout << "Thread " << std::this_thread::get_id() << " emit() locked mEmitLoopMutex" << std::endl;
         createExecutingEmitLoopHandlersMap();
 
         while (auto ret = popHandlerFromExecutingEmitLoopHandlersMap()) {
             auto handler = ret.value();
             std::invoke(handler, std::forward<EventArgs>(args)...);
             if (handler.isOnce()) {
-                std::cout << "Thread " << std::this_thread::get_id() << " emit() once() removing handler from mEventHandlers" << std::endl;
                 std::lock_guard guard{mEventHandlersMutex};
                 mEventHandlers.remove(handler);
-                std::cout << "Thread " << std::this_thread::get_id() << " emit() once() removed handler from mEventHandlers" << std::endl;
             }
         }
     }

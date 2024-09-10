@@ -4,6 +4,7 @@
 #include <rtc/rtc.hpp>
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-utils/EnableSharedFromThis.hpp"
 
 namespace streamr::dht::connection::websocket {
 
@@ -12,10 +13,11 @@ using streamr::dht::connection::connectionevents::Data;
 using streamr::dht::connection::connectionevents::Disconnected;
 using streamr::dht::connection::connectionevents::Error;
 using streamr::logger::SLogger;
+using streamr::utils::EnableSharedFromThis;
 
 constexpr size_t maxMessageSize = 1048576;
 
-class WebsocketConnection : public Connection, public std::enable_shared_from_this<WebsocketConnection> {
+class WebsocketConnection : public Connection, public EnableSharedFromThis {
 protected:
     std::shared_ptr<rtc::WebSocket> mSocket; // NOLINT
     std::atomic<bool> mDestroyed{false}; // NOLINT
@@ -29,7 +31,7 @@ protected:
         SLogger::debug("Trying to acquire mutex lock in setSocket");
         std::lock_guard<std::recursive_mutex> lock(mMutex);
         SLogger::debug("Acquired mutex lock in setSocket");
-        mSocket = socket;
+        mSocket = std::move(socket);
 
         SLogger::trace("setSocket() after move " + getConnectionTypeString());
         // Set socket callbacks
@@ -42,7 +44,7 @@ protected:
                         {"connectionType", getConnectionTypeString()},
                         {"mDestroyed", mDestroyed.load()},
                     });
-                auto self = shared_from_this();
+                auto self = sharedFromThis<WebsocketConnection>();
                 if (!mDestroyed) {
                     if (!data.empty()) {
                         SLogger::trace(
@@ -66,7 +68,7 @@ protected:
                 {{"connectionType", getConnectionTypeString()},
                  {"mDestroyed", mDestroyed.load()}});
             if (!mDestroyed) {
-                auto self = shared_from_this();
+                auto self = sharedFromThis<WebsocketConnection>();
                 emit<Error>(error);
             }
         });
@@ -80,7 +82,7 @@ protected:
                 });
 
             if (!mDestroyed) {
-                auto self = shared_from_this();
+                auto self = sharedFromThis<WebsocketConnection>();
                 SLogger::debug("Trying to acquire mutex lock in onClosed");
                 std::lock_guard<std::recursive_mutex> lock(mMutex);
                 SLogger::debug("Acquired mutex lock in onClosed");
@@ -95,6 +97,7 @@ protected:
         });
 
         mSocket->onOpen([this]() {
+            auto self = sharedFromThis<WebsocketConnection>();
             SLogger::trace(
                 "onOpen()",
                 {{"connectionType", getConnectionTypeString()},
@@ -102,7 +105,6 @@ protected:
             if (!mDestroyed) {
                 if (mSocket &&
                     mSocket->readyState() == rtc::WebSocket::State::Open) {
-                    auto self = shared_from_this();
                     SLogger::trace(
                         "onOpen() emitting Connected " +
                             getConnectionTypeString(),

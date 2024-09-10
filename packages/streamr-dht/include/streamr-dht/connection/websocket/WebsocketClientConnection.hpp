@@ -10,9 +10,17 @@ namespace streamr::dht::connection::websocket {
 using streamr::logger::SLogger;
 
 class WebsocketClientConnection : public WebsocketConnection {
+private:
+    WebsocketClientConnection()
+        : WebsocketConnection(ConnectionType::WEBSOCKET_CLIENT) {}
+
 public:
-    explicit WebsocketClientConnection() : WebsocketConnection(ConnectionType::WEBSOCKET_CLIENT) {}
-        
+    [[nodiscard]] static std::shared_ptr<WebsocketClientConnection>
+    newInstance() {
+        struct MakeSharedEnabler : public WebsocketClientConnection {};
+        return std::make_shared<MakeSharedEnabler>();
+    }
+
     ~WebsocketClientConnection() override {
         SLogger::trace("~WebsocketClientConnection()");
     }

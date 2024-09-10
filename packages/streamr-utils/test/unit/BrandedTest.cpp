@@ -105,7 +105,7 @@ TEST(Branded, TestStringCopyConstructor) {
 
     TestString original("Hello, World!");
     TestString copied( // NOLINT(performance-unnecessary-copy-initialization)
-        original); 
+        original);
 
     EXPECT_EQ(original, "Hello, World!");
     EXPECT_EQ(copied, "Hello, World!");

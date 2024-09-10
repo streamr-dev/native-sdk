@@ -13,6 +13,10 @@ using streamr::eventemitter::HandlerToken;
 
 class IncomingHandshaker : public Handshaker {
 private:
+    struct Private {
+        explicit Private() = default;
+    };
+
     std::optional<std::function<bool(std::shared_ptr<PendingConnection>)>>
         onNewConnectionCallback;
     std::function<std::shared_ptr<PendingConnection>(DhtAddress)>
@@ -44,6 +48,7 @@ private:
 
 public:
     IncomingHandshaker(
+        Private /* prevent direct construction */,
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
         std::function<std::shared_ptr<PendingConnection>(DhtAddress)>&&
@@ -73,12 +78,25 @@ public:
         }
     }
 
+    [[nodiscard]] static std::shared_ptr<IncomingHandshaker> newInstance(
+        const PeerDescriptor& localPeerDescriptor,
+        const std::shared_ptr<Connection>& connection,
+        std::function<std::shared_ptr<PendingConnection>(DhtAddress)>&&
+            getPendingConnectionCallback,
+        const std::optional<
+            std::function<bool(std::shared_ptr<PendingConnection>)>>&
+            onNewConnectionCallback = std::nullopt) {
+        return std::make_shared<IncomingHandshaker>(
+            Private{},
+            localPeerDescriptor,
+            connection,
+            std::move(getPendingConnectionCallback),
+            onNewConnectionCallback);
+    }
+
     [[nodiscard]] std::shared_ptr<PendingConnection> getPendingConnection()
         const {
-        if (this->pendingConnection) {
-            return this->pendingConnection;
-        }
-        return nullptr;
+        return this->pendingConnection;
     }
 
 protected:
@@ -102,8 +120,8 @@ protected:
             Identifiers::getNodeIdFromPeerDescriptor(source));
 
         if (!this->pendingConnection) {
-            this->pendingConnection = std::make_shared<PendingConnection>(
-                source);
+            this->pendingConnection =
+                std::make_shared<PendingConnection>(source);
             if (this->onNewConnectionCallback) {
                 if (!this->onNewConnectionCallback.value()(
                         this->pendingConnection)) {

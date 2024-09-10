@@ -4,16 +4,16 @@
 #include <chrono>
 #include <optional>
 #include "packages/dht/protos/DhtRpc.pb.h"
-#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/helpers/Connectivity.hpp"
+#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
 
 namespace streamr::dht::contact {
 
 using ::dht::PeerDescriptor;
-using streamr::dht::rpcprotocol::DhtCallContext;
 using streamr::dht::connection::ConnectionType;
 using streamr::dht::helpers::Connectivity;
+using streamr::dht::rpcprotocol::DhtCallContext;
 
 template <typename ProtoRpcClient>
 class RpcRemote {
@@ -23,27 +23,30 @@ private:
     ProtoRpcClient client;
     std::optional<std::chrono::milliseconds> timeout;
 
-    
     // Should connect directly to the server, timeout can be low
     static constexpr std::chrono::milliseconds websocketClientTimeout{5000};
-    // Requires a WebsocketConnectionRequest to be routed to the client before the
-    // connection can be opened
-    // takes a little bit longer than WEBSOCKET_CLIENT
+    // Requires a WebsocketConnectionRequest to be routed to the client before
+    // the connection can be opened takes a little bit longer than
+    // WEBSOCKET_CLIENT
     static constexpr std::chrono::milliseconds websocketServerTimeout{7500};
-    // WebRTC connections require lots of signalling to open and might take a longer
-    // time.
+    // WebRTC connections require lots of signalling to open and might take a
+    // longer time.
     static constexpr std::chrono::milliseconds webrtcTimeout{10000};
     // default timeout for existing connections
     static constexpr std::chrono::milliseconds existingConnectionTimeout{5000};
 
-    static std::chrono::milliseconds calculateTimeout(const PeerDescriptor& localPeerDescriptor, const PeerDescriptor& remotePeerDescriptor) { // NOLINT
-        const ConnectionType connectionType = Connectivity::expectedConnectionType(localPeerDescriptor, remotePeerDescriptor);
+    static std::chrono::milliseconds calculateTimeout(
+        const PeerDescriptor& localPeerDescriptor,
+        const PeerDescriptor& remotePeerDescriptor) { // NOLINT
+        const ConnectionType connectionType =
+            Connectivity::expectedConnectionType(
+                localPeerDescriptor, remotePeerDescriptor);
         if (connectionType == ConnectionType::WEBSOCKET_CLIENT) {
             return websocketClientTimeout;
-        } 
+        }
         if (connectionType == ConnectionType::WEBSOCKET_SERVER) {
             return websocketServerTimeout;
-        } 
+        }
         if (connectionType == ConnectionType::WEBRTC) {
             return webrtcTimeout;
         }
@@ -59,8 +62,7 @@ protected:
         : localPeerDescriptor(std::move(localPeerDescriptor)),
           remotePeerDescriptor(std::move(remotePeerDescriptor)),
           timeout(timeout),
-          client(std::move(client)) {
-    }
+          client(std::move(client)) {}
 
 public:
     [[nodiscard]] const PeerDescriptor& getPeerDescriptor() const {
@@ -71,9 +73,7 @@ public:
         return this->localPeerDescriptor;
     }
 
-    ProtoRpcClient& getClient() {
-        return this->client;
-    }
+    ProtoRpcClient& getClient() { return this->client; }
 
     [[nodiscard]] DhtCallContext formDhtRpcOptions(
         std::optional<DhtCallContext> opts = std::nullopt) const {
@@ -83,7 +83,7 @@ public:
         }
         ret.sourceDescriptor = this->localPeerDescriptor;
         ret.targetDescriptor = this->remotePeerDescriptor;
-        
+
         return ret;
     }
 
@@ -91,7 +91,8 @@ public:
         if (this->timeout.has_value()) {
             return this->timeout.value();
         }
-        return calculateTimeout(this->localPeerDescriptor, this->remotePeerDescriptor);
+        return calculateTimeout(
+            this->localPeerDescriptor, this->remotePeerDescriptor);
     }
 };
 

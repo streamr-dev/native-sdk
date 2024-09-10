@@ -6,12 +6,11 @@
 #define SHARED_LOCAL __attribute__((visibility("hidden")))
 #endif
 
-#if defined (__swift__)
+#if defined(__swift__)
 #define EXTERN_C
 #else
 #define EXTERN_C extern "C"
 #endif
-
 
 EXTERN_C const char* SHARED_EXPORT testRpc();
 

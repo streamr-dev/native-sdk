@@ -1,7 +1,6 @@
 #ifndef STREAMR_DHT_CONNECTION_CONNECTIONMANAGER_HPP
 #define STREAMR_DHT_CONNECTION_CONNECTIONMANAGER_HPP
 
-#include <chrono>
 #include <map>
 #include <memory>
 #include <utility>
@@ -21,8 +20,8 @@
 #include "streamr-dht/helpers/Offerer.hpp"
 #include "streamr-dht/transport/RoutingRpcCommunicator.hpp"
 #include "streamr-dht/transport/Transport.hpp"
-#include "streamr-utils/waitForEvent.hpp"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-utils/waitForEvent.hpp"
 namespace streamr::dht::connection {
 
 using ::dht::LockRequest;
@@ -80,9 +79,10 @@ private:
         SLogger::debug("Acquired mutex lock in addEndpoint");
         auto peerDescriptor = pendingConnection->getPeerDescriptor();
         auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
-        auto endpoint = std::make_shared<Endpoint>(
-            pendingConnection, [this, peerDescriptor, nodeId]() {
-                SLogger::debug("Trying to acquire mutex lock in endpoint callback");
+        auto endpoint = Endpoint::newInstance(
+            std::move(pendingConnection), [this, peerDescriptor, nodeId]() {
+                SLogger::debug(
+                    "Trying to acquire mutex lock in endpoint callback");
                 std::scoped_lock lock(this->mutex);
                 SLogger::debug("Acquired mutex lock in endpoint callback");
                 if (this->endpoints.find(nodeId) != this->endpoints.end()) {
@@ -220,7 +220,7 @@ public:
             auto peerDescriptorToDisconnect = it->second->getPeerDescriptor();
             endpointsCopy.erase(it);
             this->gracefullyDisconnect(
-                peerDescriptorToDisconnect, DisconnectMode::LEAVING);
+                std::move(peerDescriptorToDisconnect), DisconnectMode::LEAVING);
         }
 
         this->connectorFacade->stop();
@@ -351,7 +351,7 @@ public:
     }
 
     void lockConnection(
-        const PeerDescriptor& targetDescriptor, const LockID& lockId) override {
+        PeerDescriptor&& targetDescriptor, LockID&& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             Identifiers::areEqualPeerDescriptors(
                 targetDescriptor, this->getLocalPeerDescriptor())) {
@@ -382,7 +382,7 @@ public:
     }
 
     void unlockConnection(
-        const PeerDescriptor& targetDescriptor, const LockID& lockId) override {
+        PeerDescriptor&& targetDescriptor, LockID&& lockId) override {
         SLogger::debug("Trying to acquire mutex lock in unlockConnection");
         std::scoped_lock lock(this->mutex);
         if (this->state == ConnectionManagerState::STOPPED ||
@@ -405,8 +405,7 @@ public:
         }
     }
 
-    void weakLockConnection(
-        const DhtAddress& nodeId, const LockID& lockId) override {
+    void weakLockConnection(DhtAddress&& nodeId, LockID&& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             (nodeId ==
              Identifiers::getNodeIdFromPeerDescriptor(
@@ -416,8 +415,7 @@ public:
         this->locks.addWeakLocked(nodeId, lockId);
     }
 
-    void weakUnlockConnection(
-        const DhtAddress& nodeId, const LockID& lockId) override {
+    void weakUnlockConnection(DhtAddress&& nodeId, LockID&& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             (nodeId ==
              Identifiers::getNodeIdFromPeerDescriptor(
@@ -511,7 +509,7 @@ private:
     }
 
     void gracefullyDisconnect(
-        const PeerDescriptor& targetDescriptor, DisconnectMode disconnectMode) {
+        PeerDescriptor&& targetDescriptor, DisconnectMode&& disconnectMode) {
         std::unique_lock lock(this->mutex);
         if (this->endpoints.find(Identifiers::getNodeIdFromPeerDescriptor(
                 targetDescriptor)) == this->endpoints.end()) {
@@ -527,8 +525,10 @@ private:
             try {
                 lock.unlock();
                 folly::coro::blockingWait(folly::coro::co_invoke(
-                    [this, endpoint, targetDescriptor, disconnectMode]()
-                        -> folly::coro::Task<void> {
+                    [this,
+                     endpoint,
+                     targetDescriptor = std::move(targetDescriptor),
+                     disconnectMode]() -> folly::coro::Task<void> {
                         co_await folly::coro::collectAll(
                             waitForEvent<endpointevents::Disconnected>(
                                 *endpoint, 2000ms), // NOLINT
@@ -540,7 +540,6 @@ private:
                                     auto debugString =
                                         targetDescriptor.DebugString();
 
-                                    //
                                     co_return co_await this
                                         ->doGracefullyDisconnectAsync(
                                             targetDescriptor, disconnectMode);
@@ -572,7 +571,7 @@ private:
             this->getLocalPeerDescriptor(), targetDescriptor, client);
 
         co_return co_await rpcRemote.gracefulDisconnect(
-            std::move(disconnectMode));
+            std::forward<DisconnectMode>(disconnectMode));
     }
 
     void handleMessage(const Message& message) {

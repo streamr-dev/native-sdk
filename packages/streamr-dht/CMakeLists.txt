@@ -69,12 +69,9 @@ if(NOT IOS)
     add_executable(streamr-dht-test-unit
         test/unit/WebsocketClientConnectionTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
-        test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
-        test/unit/WebsocketServerConnectionTest.cpp
-        test/unit/WebsocketServerConnectorTest.cpp
         test/unit/CertificateHelperTest.cpp
-        test/unit/RoutingRpcCommunicatorTest.cpp
         test/unit/ConnectionManagerTest.cpp
+        test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit

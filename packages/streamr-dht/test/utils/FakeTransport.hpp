@@ -4,9 +4,9 @@
 #include <map>
 #include <memory>
 #include <ranges>
-#include "streamr-dht/connection/ConnectionsView.hpp"
-#include "streamr-dht/Identifiers.hpp"
 #include "packages/dht/protos/DhtRpc.pb.h"
+#include "streamr-dht/Identifiers.hpp"
+#include "streamr-dht/connection/ConnectionsView.hpp"
 #include "streamr-dht/transport/Transport.hpp"
 
 namespace streamr::dht::test::utils {
@@ -82,22 +82,24 @@ private:
 public:
     [[nodiscard]] std::shared_ptr<FakeTransport> createTransport(
         const PeerDescriptor& peerDescriptor) {
-        
         auto transport = std::make_shared<FakeTransport>(
             peerDescriptor, [this](const Message& msg) {
-                const auto targetNodeId = Identifiers::getNodeIdFromPeerDescriptor(
-                    msg.targetdescriptor());
+                const auto targetNodeId =
+                    Identifiers::getNodeIdFromPeerDescriptor(
+                        msg.targetdescriptor());
 
-                const auto targetTransport = this->transports.find(targetNodeId);
+                const auto targetTransport =
+                    this->transports.find(targetNodeId);
                 if (targetTransport != this->transports.end()) {
-                    targetTransport->second->emit<transport::transportevents::Message>(msg);
+                    targetTransport->second
+                        ->emit<transport::transportevents::Message>(msg);
                 }
             });
 
         this->transports.emplace(
             Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor),
             transport);
-        
+
         return transport;
     }
 };

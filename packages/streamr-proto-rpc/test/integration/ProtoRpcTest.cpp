@@ -104,7 +104,8 @@ void registerTestRcpMethod(RpcCommunicatorType& communicator) {
         });
 }
 
-void registerTestRcpMethodWithOptionalFields(RpcCommunicatorType& communicator) {
+void registerTestRcpMethodWithOptionalFields(
+    RpcCommunicatorType& communicator) {
     communicator.registerRpcMethod<OptionalRequest, OptionalResponse>(
         "getOptional",
         [](const OptionalRequest& /* request */,
@@ -120,8 +121,8 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
     HelloRpcServiceClient<ProtoCallContext> client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
-    auto result =
-        folly::coro::blockingWait(client.sayHello(std::move(request), ProtoCallContext()));
+    auto result = folly::coro::blockingWait(
+        client.sayHello(std::move(request), ProtoCallContext()));
     EXPECT_EQ("Hello, Test", result.greeting());
 }
 
@@ -143,7 +144,8 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
     WakeUpRpcServiceClient<ProtoCallContext> client(communicator2);
     WakeUpRequest request;
     request.set_reason("School");
-    folly::coro::blockingWait(client.wakeUp(std::move(request), ProtoCallContext()));
+    folly::coro::blockingWait(
+        client.wakeUp(std::move(request), ProtoCallContext()));
     EXPECT_EQ("School", promise.get_future().get());
 }
 
@@ -167,7 +169,8 @@ TEST_F(
     HelloRequest request;
     request.set_myname("Test");
     try {
-        folly::coro::blockingWait(client.sayHello(std::move(request), ProtoCallContext()));
+        folly::coro::blockingWait(
+            client.sayHello(std::move(request), ProtoCallContext()));
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcClientError& ex) {

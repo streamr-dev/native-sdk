@@ -10,7 +10,12 @@
 namespace streamr::dht::helpers {
 
 // NOLINTBEGIN
-enum class ErrorCode { STARTING_WEBSOCKET_SERVER_FAILED, COULD_NOT_START, CANNOT_CONNECT_TO_SELF, SEND_FAILED };
+enum class ErrorCode {
+    STARTING_WEBSOCKET_SERVER_FAILED,
+    COULD_NOT_START,
+    CANNOT_CONNECT_TO_SELF,
+    SEND_FAILED
+};
 // NOLINTEND
 
 class Err : public std::runtime_error {
@@ -64,30 +69,28 @@ struct CouldNotStart : public Err {
     explicit CouldNotStart(
         const std::string& message,
         const std::optional<std::string>& originalErrorInfo = std::nullopt)
-        : Err(ErrorCode::COULD_NOT_START,
-              message,
-              originalErrorInfo) {}
+        : Err(ErrorCode::COULD_NOT_START, message, originalErrorInfo) {}
 };
 
 struct CannotConnectToSelf : public Err {
     explicit CannotConnectToSelf(
         const std::string& message,
         const std::optional<std::string>& originalErrorInfo = std::nullopt)
-        : Err(ErrorCode::CANNOT_CONNECT_TO_SELF,
-              message,
-              originalErrorInfo) {}
+        : Err(ErrorCode::CANNOT_CONNECT_TO_SELF, message, originalErrorInfo) {}
 };
 
 struct SendFailed : public Err {
     explicit SendFailed(
         const std::string& message,
         const std::optional<std::string>& originalErrorInfo = std::nullopt)
-        : Err(ErrorCode::SEND_FAILED,
-              message,
-              originalErrorInfo) {}
+        : Err(ErrorCode::SEND_FAILED, message, originalErrorInfo) {}
 };
 
-using DhtException = std::variant<WebsocketServerStartError, CouldNotStart, CannotConnectToSelf, SendFailed>;
+using DhtException = std::variant<
+    WebsocketServerStartError,
+    CouldNotStart,
+    CannotConnectToSelf,
+    SendFailed>;
 
 } // namespace streamr::dht::helpers
 

@@ -41,11 +41,11 @@ public:
         // Read one smaller than the buffer to make sure we end up with a null
         // terminator no matter what
         BIO_read(bio.get(), buffer, max_len - 1);
-        return std::string(buffer);
+        return std::string{buffer};
     }
 
-// The code below uses the deprecated OpenSSL functions
-// beacuse example code was easier to find for the old API.
+    // The code below uses the deprecated OpenSSL functions
+    // beacuse example code was easier to find for the old API.
 
 #if defined(__clang__)
 #pragma clang diagnostic push

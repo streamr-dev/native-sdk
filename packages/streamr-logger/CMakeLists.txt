@@ -50,6 +50,7 @@ if(NOT IOS)
     NAME env_category_wrongly_written_as_fatal_and_info_log_test
     COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 4
   )
+  set_property(TEST env_category_wrongly_written_as_fatal_and_info_log_test PROPERTY ENVIRONMENT "LOG_LEVEL=\"\"")
 endif()
 
 target_include_directories(

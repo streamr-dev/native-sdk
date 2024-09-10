@@ -21,8 +21,10 @@ public:
         const auto localVersionNumber = parseVersion(localProtocolVersion);
         const auto remoteVersionNumber = parseVersion(remoteVersion);
 
-        return (localVersionNumber.has_value() && remoteVersionNumber.has_value() &&
-            (remoteVersionNumber.value().major >= localVersionNumber.value().major)); 
+        return (
+            localVersionNumber.has_value() && remoteVersionNumber.has_value() &&
+            (remoteVersionNumber.value().major >=
+             localVersionNumber.value().major));
     }
 
     static std::optional<VersionNumber> parseVersion(

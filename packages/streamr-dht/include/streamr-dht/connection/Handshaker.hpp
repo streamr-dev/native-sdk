@@ -9,6 +9,7 @@
 #include "streamr-dht/helpers/Version.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-utils/EnableSharedFromThis.hpp"
 #include "streamr-utils/Uuid.hpp"
 
 namespace streamr::dht::connection {
@@ -24,8 +25,8 @@ using streamr::dht::helpers::Version;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
 using streamr::logger::SLogger;
+using streamr::utils::EnableSharedFromThis;
 using streamr::utils::Uuid;
-
 namespace handshakerevents {
 
 struct HandshakeCompleted : Event<PeerDescriptor /*remote*/> {};
@@ -38,16 +39,15 @@ using HandshakerEvents = std::tuple<
     handshakerevents::HandshakeFailed,
     handshakerevents::HandshakerStopped>;
 
-class Handshaker : public EventEmitter<HandshakerEvents>, public std::enable_shared_from_this<Handshaker> {
+class Handshaker : public EventEmitter<HandshakerEvents>,
+                   public EnableSharedFromThis {
 public:
     static constexpr auto handshakerServiceId = "system/handshaker";
 
-    virtual ~Handshaker() {
-        SLogger::debug("Handshaker::~Handshaker()");
-    };
+    ~Handshaker() override { SLogger::debug("Handshaker::~Handshaker()"); };
 
     void stop() {
-        auto self = this->shared_from_this();
+        auto self = this->sharedFromThis<Handshaker>();
         self->connection->off<Data>(this->onDataHandlerToken);
         self->emit<handshakerevents::HandshakerStopped>();
         self->removeAllListeners();
@@ -55,7 +55,7 @@ public:
 
 private:
     eventemitter::HandlerToken onDataHandlerToken;
-   
+
 protected:
     const PeerDescriptor& localPeerDescriptor; // NOLINT
     std::shared_ptr<Connection> connection; // NOLINT
@@ -63,9 +63,7 @@ protected:
     Handshaker(
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection)
-        : localPeerDescriptor(localPeerDescriptor),
-          connection(connection) {
-        
+        : localPeerDescriptor(localPeerDescriptor), connection(connection) {
         this->onDataHandlerToken = this->connection->on<Data>(
             [this](const std::vector<std::byte>& data) { this->onData(data); });
     }
@@ -116,7 +114,8 @@ protected:
         SLogger::trace("sendHandshakeRequest(): handshake request sent");
     }
 
-    void sendHandshakeResponse(std::optional<HandshakeError> error = std::nullopt) {
+    void sendHandshakeResponse(
+        std::optional<HandshakeError> error = std::nullopt) {
         const auto msg = createHandshakeResponse(error);
         size_t nBytes = msg.ByteSizeLong();
         if (nBytes == 0) {
@@ -148,7 +147,8 @@ private:
             Message message;
             message.ParseFromArray(data.data(), static_cast<int>(data.size()));
             const auto debugString = message.DebugString();
-            SLogger::trace("handshake message received " + message.DebugString());
+            SLogger::trace(
+                "handshake message received " + message.DebugString());
             if (message.has_handshakerequest()) {
                 SLogger::trace("handshake request received");
                 const auto& handshake = message.handshakerequest();

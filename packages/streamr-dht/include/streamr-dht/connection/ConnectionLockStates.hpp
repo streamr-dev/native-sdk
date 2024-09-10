@@ -126,5 +126,4 @@ public:
 
 } // namespace streamr::dht::connection
 
-
 #endif // STREAMR_DHT_CONNECTION_CONNECTIONLOCKSTATES_HPP
