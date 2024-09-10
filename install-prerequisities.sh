@@ -12,6 +12,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     PROFILE_FILE=./setenvs.sh
     
     xcode-select --install
+    export HOMEBREW_PREFIX=$(brew --prefix)
+    if [[ -n "$GITHUB_ENV" ]]; then
+        echo "HOMEBREW_PREFIX=$(brew --prefix)" >> $GITHUB_ENV
+    fi
+    TEMP_PROFILE_CONTENTS+="export HOMEBREW_PREFIX=$(brew --prefix)\n"
+
     brew install jq
     brew uninstall llvm
     brew install llvm@17
@@ -21,7 +27,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     brew link --overwrite --force llvm@17
     
     rm -f $HOMEBREW_PREFIX/bin/clang-tidy
-
+    
 else
     #PROFILE_FILE=~/.profile
     PROFILE_FILE=./setenvs.sh
