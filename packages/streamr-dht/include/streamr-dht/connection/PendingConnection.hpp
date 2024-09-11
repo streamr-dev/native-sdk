@@ -7,7 +7,7 @@
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-utils/AbortController.hpp"
-#include "streamr-utils/abortableTimers.hpp"
+#include "streamr-utils/AbortableTimers.hpp"
 
 namespace streamr::dht::connection {
 
@@ -47,7 +47,7 @@ public:
         AbortableTimers::setAbortableTimeout(
             [this]() { this->close(false); },
             timeout,
-            this->connectingAbortController.signal);
+            this->connectingAbortController.getSignal());
     }
 
     void replaceAsDuplicate() {

@@ -1,4 +1,4 @@
-#include "streamr-utils/abortableTimers.hpp"
+#include "streamr-utils/AbortableTimers.hpp"
 #include <future>
 #include <gtest/gtest.h>
 #include "streamr-utils/AbortController.hpp"
@@ -13,7 +13,7 @@ TEST(AbortableTimers, CallbackCalled) {
     AbortableTimers::setAbortableTimeout(
         [&promise]() { promise.set_value("test"); },
         std::chrono::milliseconds(100), // NOLINT
-        controller.signal);
+        controller.getSignal());
     EXPECT_EQ(future.get(), "test");
 }
 
@@ -24,11 +24,11 @@ TEST(AbortableTimers, CallingAbotAfterTimeout) {
     AbortableTimers::setAbortableTimeout(
         [&promise]() { promise.set_value("test"); },
         std::chrono::milliseconds(100), // NOLINT
-        controller.signal);
+        controller.getSignal());
     EXPECT_EQ(future.get(), "test");
     controller.abort("test");
-    EXPECT_TRUE(controller.signal.aborted);
-    EXPECT_EQ(controller.signal.reason, "test");
+    EXPECT_TRUE(controller.getSignal().aborted);
+    EXPECT_EQ(controller.getSignal().reason, "test");
 }
 
 TEST(AbortableTimers, Abort) {
@@ -36,10 +36,10 @@ TEST(AbortableTimers, Abort) {
     AbortableTimers::setAbortableTimeout(
         []() { FAIL() << "Callback should not be called"; },
         std::chrono::milliseconds(100), // NOLINT
-        controller.signal);
+        controller.getSignal());
     controller.abort("test");
-    EXPECT_TRUE(controller.signal.aborted);
-    EXPECT_EQ(controller.signal.reason, "test");
+    EXPECT_TRUE(controller.getSignal().aborted);
+    EXPECT_EQ(controller.getSignal().reason, "test");
 }
 
 TEST(AbortableTimers, Interval) {
@@ -48,7 +48,7 @@ TEST(AbortableTimers, Interval) {
     AbortableTimers::setAbortableInterval(
         [&counter]() { counter++; },
         std::chrono::milliseconds(100), // NOLINT
-        controller.signal);
+        controller.getSignal());
     std::this_thread::sleep_for(std::chrono::milliseconds(550)); // NOLINT
     EXPECT_EQ(counter, 6);
 }

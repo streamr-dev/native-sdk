@@ -58,14 +58,14 @@ public:
                   [this](const std::shared_ptr<PendingConnection>& connection) {
                       return this->options.onNewConnection(connection);
                   },
-              .abortSignal = this->abortController.signal}) {
+              .abortSignal = this->abortController.getSignal()}) {
         this->options.rpcCommunicator
             .registerRpcNotification<WebsocketConnectionRequest>(
                 "requestConnection",
                 [this](
                     const WebsocketConnectionRequest& req,
                     const DhtCallContext& context) -> void {
-                    if (this->abortController.signal.aborted) {
+                    if (this->abortController.getSignal().aborted) {
                         return;
                     }
                     return this->rpcLocal.requestConnection(req, context);

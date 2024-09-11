@@ -93,7 +93,7 @@ public:
     }
 
     void start() {
-        if (!this->abortController.signal.aborted && this->websocketServer) {
+        if (!this->abortController.getSignal().aborted && this->websocketServer) {
             this->websocketServer->on<
                 websocketserverevents::
                     Connected>([this](const std::shared_ptr<
@@ -142,11 +142,11 @@ public:
     }
 
     ConnectivityResponse checkConnectivity(
-        bool /* allowSelfSignedCertificate */) const {
+        bool /* allowSelfSignedCertificate */) {
         ConnectivityResponse response;
 
         // if already aborted or websocket server not started
-        if (this->abortController.signal.aborted ||
+        if (this->abortController.getSignal().aborted ||
             !this->selectedPort.has_value()) {
             response.set_host("127.0.0.1");
             response.set_nattype(NatType::UNKNOWN);

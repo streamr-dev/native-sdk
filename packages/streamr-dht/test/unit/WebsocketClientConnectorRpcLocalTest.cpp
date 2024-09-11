@@ -22,6 +22,6 @@ TEST(WebsocketClientConnectorRpcLocal, TestCanBeCreated) {
             [](const std::shared_ptr<PendingConnection>& /*connection*/) {
                 return true;
             },
-        .abortSignal = abortController.signal};
+        .abortSignal = abortController.getSignal()};
     WebsocketClientConnectorRpcLocal connectorLocal(std::move(options));
 }

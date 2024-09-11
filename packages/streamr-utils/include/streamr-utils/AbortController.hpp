@@ -42,10 +42,13 @@ private:
 };
 
 class AbortController {
+private:
+    AbortSignal signal;
+
 public:
-    AbortSignal signal; // NOLINT
     void abort() { signal.doAbort(); }
     void abort(std::string_view reason) { signal.doAbort(reason); }
+    AbortSignal& getSignal() { return signal; }
 };
 
 } // namespace streamr::utils
