@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": [
     "boost-algorithm",
+    "boost-endian",
     "boost-pfr",
     "boost-stacktrace",
     "boost-uuid",
