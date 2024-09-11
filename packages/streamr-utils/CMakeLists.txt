@@ -19,6 +19,12 @@ if(NOT TARGET Boost::uuid)
   set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 endif()
 
+if(NOT TARGET Boost::endian)
+  add_library(Boost::endian INTERFACE IMPORTED)
+  set_target_properties(Boost::endian PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+endif()
+
+
 add_library(streamr-utils INTERFACE)
 add_library(streamr::streamr-utils ALIAS streamr-utils)
 
@@ -29,6 +35,8 @@ target_include_directories(
 target_link_libraries(streamr-utils
     INTERFACE Folly::folly
     INTERFACE streamr::streamr-eventemitter
+    INTERFACE Boost::uuid
+    INTERFACE Boost::endian
 )
 
 export(TARGETS streamr-utils
@@ -42,6 +50,10 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-utils-config.cmake"
     "if(NOT TARGET Boost::uuid)\n"
     "    add_library(Boost::uuid INTERFACE IMPORTED)\n"
     "    set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
+    "endif()\n"
+    "if(NOT TARGET Boost::endian)\n"
+    "    add_library(Boost::endian INTERFACE IMPORTED)\n"
+    "    set_target_properties(Boost::endian PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
     "endif()\n"
     "include(${CMAKE_BINARY_DIR}/streamr-utils-config-in.cmake)\n")
 

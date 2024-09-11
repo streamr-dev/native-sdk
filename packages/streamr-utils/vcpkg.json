@@ -1,7 +1,7 @@
 {
   "name": "streamr-utils",
   "version": "1.0.0",
-  "dependencies": ["gtest", "folly", "boost-uuid"],
+  "dependencies": ["gtest", "folly", "boost-uuid", "boost-endian"],
   "features": {
     "monorepo": {
         "description": "Monorepo dependencies",
