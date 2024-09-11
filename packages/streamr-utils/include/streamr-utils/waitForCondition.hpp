@@ -7,6 +7,7 @@
 #include "streamr-utils/AbortController.hpp"
 #include "streamr-utils/AbortableTimers.hpp"
 #include "streamr-utils/waitForEvent.hpp"
+#include <folly/coro/Collect.h>
 
 namespace streamr::utils {
 
@@ -31,6 +32,7 @@ public:
             [this, conditionFn]() {
                 if (conditionFn()) {
                     this->stop();
+                    std::cout << "!!!EMIT";
                     this->emit<ConditionMet>();
                 }
             },
@@ -47,15 +49,12 @@ inline folly::coro::Task<void> waitForCondition(
     std::chrono::milliseconds retryInterval = defaultRetryInterval,
     AbortSignal* abortSignal = nullptr) {
     Poller poller;
-
-    poller.start(conditionFn, retryInterval);
-
-    try {
-        co_await waitForEvent<ConditionMet>(poller, timeout, abortSignal);
-    } catch (std::exception& e) {
-        poller.stop();
-        throw;
-    }
+    co_await folly::coro::collectAll(
+        waitForEvent<ConditionMet>(poller, timeout, abortSignal), // NOLINT
+        folly::coro::co_invoke([&poller, &conditionFn, retryInterval]() -> folly::coro::Task<void> {                   
+            poller.start(conditionFn, retryInterval);
+            co_return;
+        }));
 }
 
 } // namespace streamr::utils
