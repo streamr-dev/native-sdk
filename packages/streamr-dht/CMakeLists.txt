@@ -45,7 +45,6 @@ target_sources(streamr-dht
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc
     )
 
-target_compile_options(streamr-dht PUBLIC -D_GNU_SOURCE)    
 target_link_libraries(streamr-dht 
     INTERFACE streamr::streamr-logger
     INTERFACE streamr::streamr-eventemitter
@@ -61,6 +60,29 @@ target_link_libraries(streamr-dht
     PRIVATE LibDataChannel::LibDataChannelStatic
     INTERFACE ipaddress::ipaddress
     )
+
+export(TARGETS streamr-dht 
+    NAMESPACE streamr::
+    FILE streamr-dht-config-in.cmake)
+  
+file(WRITE "${CMAKE_BINARY_DIR}/streamr-dht-config.cmake" 
+    "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
+    "find_package(streamr-logger CONFIG REQUIRED)\n"
+    "find_package(streamr-utils CONFIG REQUIRED)\n"
+    "find_package(streamr-proto-rpc CONFIG REQUIRED)\n"
+    "find_package(streamr-eventemitter CONFIG REQUIRED)\n"
+    "find_package(Protobuf REQUIRED)\n"
+    "find_package(Boost CONFIG REQUIRED)\n"
+    "find_package(magic_enum CONFIG REQUIRED)\n"
+    "find_package(folly REQUIRED)\n"
+    "find_package(libdatachannel CONFIG REQUIRED)\n"
+    "find_package(OpenSSL REQUIRED)\n"
+    "find_package(ipaddress CONFIG REQUIRED)\n"
+    "if(NOT TARGET Boost::uuid)\n"
+    "  add_library(Boost::uuid INTERFACE IMPORTED)\n"
+    "  set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
+    "endif()\n"
+    "include(${CMAKE_BINARY_DIR}/streamr-dht-config-in.cmake)\n")
 
 if(NOT IOS)
     enable_testing()

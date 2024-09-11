@@ -4,7 +4,6 @@
 #include <map>
 #include <memory>
 #include <utility>
-#include <boost/stacktrace/stacktrace.hpp>
 #include <folly/coro/Task.h>
 #include <folly/coro/blockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
@@ -546,8 +545,6 @@ private:
                                 }));
                     }));
             } catch (const std::exception& err) {
-                // auto trace = boost::stacktrace::from_current_exception();
-                // throw err;
                 SLogger::error(
                     "Caught exception in gracefullyDisconnect " +
                     std::string(err.what()) + "\n");
