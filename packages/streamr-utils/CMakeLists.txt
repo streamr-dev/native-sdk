@@ -65,6 +65,7 @@ if(NOT IOS)
     test/unit/BrandedTest.cpp
     test/unit/AbortableTimersTest.cpp
     test/unit/waitForEventTest.cpp
+    test/unit/waitForConditionTest.cpp
   )
   target_link_libraries(streamr-utils-test-unit 
     PUBLIC streamr-utils
