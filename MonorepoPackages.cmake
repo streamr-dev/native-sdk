@@ -5,4 +5,5 @@ set(MonorepoPackages
     streamr-utils
     streamr-proto-rpc
     streamr-dht
+    streamr-trackerless-network
 )
