@@ -63,7 +63,7 @@ if(NOT IOS)
 
   add_executable(streamr-utils-test-unit 
     test/unit/BrandedTest.cpp
-    test/unit/abortableTimersTest.cpp
+    test/unit/AbortableTimersTest.cpp
     test/unit/waitForEventTest.cpp
   )
   target_link_libraries(streamr-utils-test-unit 
