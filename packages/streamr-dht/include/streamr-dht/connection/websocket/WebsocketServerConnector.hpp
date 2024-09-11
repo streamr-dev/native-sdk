@@ -93,7 +93,8 @@ public:
     }
 
     void start() {
-        if (!this->abortController.getSignal().aborted && this->websocketServer) {
+        if (!this->abortController.getSignal().aborted &&
+            this->websocketServer) {
             this->websocketServer->on<
                 websocketserverevents::
                     Connected>([this](const std::shared_ptr<

@@ -45,7 +45,6 @@ public:
         std::function<void()>&& callback,
         std::chrono::milliseconds interval,
         AbortSignal& abortSignal) {
-       
         const auto signalName = std::to_string(getNextId());
         auto& scheduler = getScheduler();
 

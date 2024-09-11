@@ -75,7 +75,9 @@ TEST(WaitForEventTest, WaitForStringEventWithAbortSignal) {
             [&emitter, &abortController]() -> folly::coro::Task<void> {
                 auto result = co_await folly::coro::collectAll(
                     waitForEvent<Disconnected>(
-                        emitter, 1000ms, &(abortController.getSignal())), // NOLINT
+                        emitter,
+                        1000ms,
+                        &(abortController.getSignal())), // NOLINT
                     folly::coro::co_invoke(
                         [&abortController]() -> folly::coro::Task<void> {
                             abortController.abort();
