@@ -90,6 +90,11 @@ if(NOT IOS)
 
     add_executable(streamr-dht-test-integration
         test/integration/WebsocketClientServerTest.cpp
+        test/integration/ConnectionLockingTest.cpp
+    )
+
+    target_include_directories(streamr-dht-test-integration
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
     )
 
     target_link_libraries(streamr-dht-test-integration 
