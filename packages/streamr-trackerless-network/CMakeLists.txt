@@ -50,6 +50,7 @@ target_link_libraries(streamr-trackerless-network
     PUBLIC streamr::streamr-proto-rpc
     PUBLIC streamr::streamr-dht
     INTERFACE streamr::streamr-utils
+    INTERFACE Boost::algorithm
     PRIVATE protobuf::libprotobuf
     PRIVATE protobuf::libprotoc
     INTERFACE Boost::uuid
@@ -57,27 +58,27 @@ target_link_libraries(streamr-trackerless-network
     PRIVATE Folly::folly
     )
 
-# if(NOT IOS)
-#     enable_testing()
-#     find_package(GTest CONFIG REQUIRED)
+ if(NOT IOS)
+     enable_testing()
+    find_package(GTest CONFIG REQUIRED)
 
-#     add_executable(streamr-trackerless-network-test-unit
-#         test/unit/WebsocketClientConnectionTest.cpp
-#     )
+    add_executable(streamr-trackerless-network-test-unit
+        test/unit/NodeListTest.cpp
+    )
 
-#     target_include_directories(streamr-dht-test-unit
-#         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
-#         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
-#         )
+    target_include_directories(streamr-trackerless-network-test-unit
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
+        )
 
-#     target_link_libraries(streamr-dht-test-unit 
-#         PUBLIC streamr-dht
-#         INTERFACE streamr::streamr-logger
-#         PUBLIC GTest::gtest
-#         PUBLIC GTest::gtest_main
-#         PUBLIC Folly::folly
-#     )
+    target_link_libraries(streamr-trackerless-network-test-unit 
+        PUBLIC streamr-trackerless-network
+        INTERFACE streamr::streamr-logger
+        PUBLIC GTest::gtest
+        PUBLIC GTest::gtest_main
+        PUBLIC Folly::folly
+    )
 
 #     add_executable(streamr-dht-test-integration
 #         test/integration/WebsocketClientServerTest.cpp
@@ -89,9 +90,8 @@ target_link_libraries(streamr-trackerless-network
 #         PUBLIC GTest::gtest
 #         PUBLIC GTest::gtest_main
 #     )
-#     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
-#         include(GoogleTest)
-#         gtest_discover_tests(streamr-dht-test-unit)
-#         gtest_discover_tests(streamr-dht-test-integration)
-#     endif()
-# endif()
+     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
+         include(GoogleTest)
+         gtest_discover_tests(streamr-trackerless-network-test-unit)
+     endif()
+endif()
