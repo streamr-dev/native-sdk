@@ -60,7 +60,9 @@ public:
         this->setFileLogCategoriesFromEnv(std::string(fileCategoryName));
 
         auto* fileCategory = mLoggerDB.getCategory(fileCategoryName);
-
+        std::thread::id this_id = std::this_thread::get_id();
+        std::string meta = std::string(metadata) +  threadIdToString(this_id); 
+ 
         folly::LogStreamProcessor(
             fileCategory,
             messageFollyLogLevel,
@@ -69,7 +71,7 @@ public:
             location.function_name(),
             ::folly::LogStreamProcessor::APPEND,
             msg,
-            metadata)
+            meta)
             .stream();
     }
 
@@ -135,6 +137,13 @@ private:
             }
         }
     }
+
+std::string threadIdToString(const std::thread::id& id) {
+    std::stringstream ss;
+    ss << id;
+    return ss.str();
+}
+
 
     void initializeLoggerDB(const folly::LogLevel& rootLogLevel) {
         mLoggerDB.registerHandlerFactory(std::move(mLogHandlerFactory), true);
