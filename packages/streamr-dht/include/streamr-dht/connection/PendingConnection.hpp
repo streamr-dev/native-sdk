@@ -21,8 +21,7 @@ using streamr::utils::AbortController;
 
 namespace pendingconnectionevents {
 
-struct Connected
-    : Event<const PeerDescriptor&, const std::shared_ptr<Connection>&> {};
+struct Connected : Event<PeerDescriptor, std::shared_ptr<Connection>> {};
 struct Disconnected : Event<bool /*gracefulLeave*/> {};
 
 } // namespace pendingconnectionevents

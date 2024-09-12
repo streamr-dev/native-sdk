@@ -1,21 +1,22 @@
+#include "streamr-utils/waitForCondition.hpp"
 #include <gtest/gtest.h>
 #include <folly/experimental/coro/BlockingWait.h>
-#include "streamr-utils/waitForCondition.hpp"
 
-using namespace streamr::utils;
+using streamr::utils::AbortController;
+using streamr::utils::waitForCondition;
 using namespace std::chrono_literals;
 
 class WaitForConditionTest : public ::testing::Test {
 protected:
-    AbortController abortController;
+    AbortController abortController; // NOLINT
 };
 
 TEST_F(WaitForConditionTest, ConditionMetImmediately) {
     bool conditionMet = false;
-   //    auto task = waitForCondition([&]() { return conditionMet; });
-    std::function<bool()> condition = [&conditionMet]() { 
+    //    auto task = waitForCondition([&]() { return conditionMet; });
+    std::function<bool()> condition = [&conditionMet]() {
         conditionMet = true;
-        return conditionMet;  
+        return conditionMet;
     };
     auto task = waitForCondition(condition);
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
@@ -24,17 +25,17 @@ TEST_F(WaitForConditionTest, ConditionMetImmediately) {
 TEST_F(WaitForConditionTest, ConditionMetAfterDelay) {
     bool conditionMet = false;
     auto start = std::chrono::steady_clock::now();
-    
+
     auto task = waitForCondition(
         [&]() {
             auto elapsed = std::chrono::steady_clock::now() - start;
-            if (elapsed >= 500ms) {
+            if (elapsed >= 500ms) { // NOLINT
                 conditionMet = true;
             }
             return conditionMet;
         },
-        5s,
-        100ms
+        5s, // NOLINT
+        100ms // NOLINT
     );
 
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
@@ -42,8 +43,10 @@ TEST_F(WaitForConditionTest, ConditionMetAfterDelay) {
 }
 
 TEST_F(WaitForConditionTest, TimeoutExceeded) {
-    auto task = waitForCondition([&]() { return false; }, 500ms, 100ms);
-    EXPECT_THROW(folly::coro::blockingWait(std::move(task)), folly::FutureTimeout);
+    auto task =
+        waitForCondition([&]() { return false; }, 500ms, 100ms); // NOLINT
+    EXPECT_THROW(
+        folly::coro::blockingWait(std::move(task)), folly::FutureTimeout);
 }
 /*
 TEST_F(WaitForConditionTest, AbortSignalTriggered) {
@@ -61,7 +64,8 @@ TEST_F(WaitForConditionTest, AbortSignalTriggered) {
         abortController.abort();
     }).detach();
 
-    EXPECT_THROW(folly::coro::blockingWait(std::move(task)), std::runtime_error);
+    EXPECT_THROW(folly::coro::blockingWait(std::move(task)),
+std::runtime_error);
 }
 */
 
@@ -74,8 +78,8 @@ TEST_F(WaitForConditionTest, CustomRetryInterval) {
             callCount++;
             return callCount >= 3;
         },
-        5s,
-        200ms
+        5s, // NOLINT
+        200ms // NOLINT
     );
 
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
@@ -84,5 +88,3 @@ TEST_F(WaitForConditionTest, CustomRetryInterval) {
     EXPECT_LT(elapsed, 600ms);
     EXPECT_EQ(callCount, 3);
 }
-
-
