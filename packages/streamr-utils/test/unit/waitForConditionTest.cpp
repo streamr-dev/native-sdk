@@ -13,7 +13,6 @@ protected:
 
 TEST_F(WaitForConditionTest, ConditionMetImmediately) {
     bool conditionMet = false;
-    //    auto task = waitForCondition([&]() { return conditionMet; });
     std::function<bool()> condition = [&conditionMet]() {
         conditionMet = true;
         return conditionMet;
@@ -48,26 +47,24 @@ TEST_F(WaitForConditionTest, TimeoutExceeded) {
     EXPECT_THROW(
         folly::coro::blockingWait(std::move(task)), folly::FutureTimeout);
 }
-/*
+
 TEST_F(WaitForConditionTest, AbortSignalTriggered) {
     bool conditionMet = false;
     auto task = waitForCondition(
         [&]() { return conditionMet; },
-        5s,
-        100ms,
-        &abortController.getSignal()
-    );
+        5s, // NOLINT
+        100ms, // NOLINT
+        &abortController.getSignal());
 
     // Abort the operation after a short delay
     std::thread([this]() {
-        std::this_thread::sleep_for(200ms);
+        std::this_thread::sleep_for(200ms); // NOLINT
         abortController.abort();
     }).detach();
 
-    EXPECT_THROW(folly::coro::blockingWait(std::move(task)),
-std::runtime_error);
+    EXPECT_THROW(
+        folly::coro::blockingWait(std::move(task)), folly::OperationCancelled);
 }
-*/
 
 TEST_F(WaitForConditionTest, CustomRetryInterval) {
     int callCount = 0;
