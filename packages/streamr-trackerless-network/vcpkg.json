@@ -5,7 +5,8 @@
         "gtest",
         "protobuf",
         "folly",
-        "magic-enum"
+        "magic-enum",
+        "boost-algorithm"
     ],
     "features": {
         "monorepo": {
