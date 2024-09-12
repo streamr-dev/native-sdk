@@ -51,6 +51,25 @@ struct Event {
     };
 };
 
+template <typename... HandlerArgumentTypes>
+class StoredEvent;
+
+template <typename... HandlerArgumentTypes>
+class StoredEvent<std::tuple<HandlerArgumentTypes...>>
+    : Event<HandlerArgumentTypes...> {
+private:
+    Event<HandlerArgumentTypes...>::ArgumentTypes arguments;
+
+public:
+    explicit StoredEvent(HandlerArgumentTypes... args)
+        : arguments(std::forward<HandlerArgumentTypes>(args)...) {}
+
+    [[nodiscard]] const Event<HandlerArgumentTypes...>::ArgumentTypes&
+    getArguments() const {
+        return arguments;
+    }
+};
+
 template <typename T, typename EmitterEventType>
 concept MatchingEventType = std::is_same_v<T, EmitterEventType>;
 
@@ -86,7 +105,9 @@ public:
 };
 
 // Each event type gets generated its own EventEmitterImpl
-template <typename EmitterEventType>
+template <
+    typename EmitterEventType,
+    bool ReplayLatestEventToNewListeners = false>
 class EventEmitterImpl {
 private:
     std::recursive_mutex mEventHandlersMutex;
@@ -104,6 +125,16 @@ private:
     std::mutex mExecutingEmitLoopHandlersMutex;
     std::map<size_t, typename EmitterEventType::Handler>
         mExecutingEmitLoopHandlers;
+
+    std::optional<StoredEvent<typename EmitterEventType::ArgumentTypes>>
+        mLatestEvent;
+    std::mutex mLatestEventMutex;
+
+    void invokeLatestEvent(
+        typename EmitterEventType::Handler& handler,
+        typename EmitterEventType::ArgumentTypes args) {
+        std::apply(handler, std::move(args));
+    }
 
     // this if called by off()
     void removeHandlerFromExecutingEmitLoops(HandlerToken token) {
@@ -159,9 +190,20 @@ public:
         if (!handlerFunction) {
             return HandlerToken{}; // return a non-existent token
         }
+
         auto handlerReference = HandlerToken::create();
         typename EmitterEventType::Handler handler(
             handlerFunction, handlerReference.getId(), once);
+
+        if (ReplayLatestEventToNewListeners) {
+            std::lock_guard guard{mLatestEventMutex};
+            if (mLatestEvent.has_value()) {
+                invokeLatestEvent(handler, mLatestEvent.value().getArguments());
+                if (once) {
+                    return HandlerToken{};
+                }
+            }
+        }
 
         mEventHandlers.push_back(handler);
         return handlerReference;
@@ -242,6 +284,11 @@ public:
         MatchingEventType<EmitterEventType> EventType,
         typename... EventArgs>
     void emit(EventArgs&&... args) {
+        if (ReplayLatestEventToNewListeners) {
+            mLatestEvent =
+                std::move(StoredEvent<typename EmitterEventType::ArgumentTypes>(
+                    std::forward<EventArgs>(args)...));
+        }
         std::lock_guard guard{mEmitLoopMutex};
         createExecutingEmitLoopHandlersMap();
 
@@ -292,6 +339,42 @@ public:
         // Use C++ 17 fold expression to remove all listeners for all event
         // types https://www.foonathan.net/2020/05/fold-tricks/
         (EventEmitterImpl<EventTypes>::template removeAllListeners<
+             EventTypes>(),
+         ...);
+    }
+};
+
+// ReplayEventEmitter is an EventEmitter that replays the latest event to new
+// listeners the same way as ReplaySubject in Rx.
+
+template <typename... EventTypes>
+struct ReplayEventEmitter;
+
+template <typename... EventTypes>
+class ReplayEventEmitter<std::tuple<EventTypes...>>
+    : public EventEmitterImpl<EventTypes, true>... { // inherit from
+                                                     // EventEmitterImpl
+    // for each EventType
+
+public:
+    // Make the inherited methods visible to the templating system
+    using EventEmitterImpl<EventTypes, true>::on...;
+    using EventEmitterImpl<EventTypes, true>::once...;
+    using EventEmitterImpl<EventTypes, true>::off...;
+    using EventEmitterImpl<EventTypes, true>::listenerCount...;
+    using EventEmitterImpl<EventTypes, true>::removeAllListeners...;
+    using EventEmitterImpl<EventTypes, true>::emit...;
+
+    /**
+     * @brief Remove all listeners for all event types.
+     *
+     */
+
+    template <typename T = std::nullopt_t>
+    void removeAllListeners() {
+        // Use C++ 17 fold expression to remove all listeners for all event
+        // types https://www.foonathan.net/2020/05/fold-tricks/
+        (EventEmitterImpl<EventTypes, true>::template removeAllListeners<
              EventTypes>(),
          ...);
     }
