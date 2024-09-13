@@ -110,6 +110,9 @@ protected:
         std::vector<std::byte> byteVec(nBytes);
         msg.SerializeToArray(byteVec.data(), static_cast<int>(nBytes));
         this->connection->send(byteVec);
+        SLogger::debug(
+            "sendHandshakeRequest() sending handshake request:" +
+            msg.DebugString());
 
         SLogger::trace("sendHandshakeRequest(): handshake request sent");
     }
