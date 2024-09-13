@@ -352,6 +352,7 @@ public:
 
     void lockConnection(
         PeerDescriptor&& targetDescriptor, LockID&& lockId) override {
+        SLogger::trace("lockConnection() start");
         if (this->state == ConnectionManagerState::STOPPED ||
             Identifiers::areEqualPeerDescriptors(
                 targetDescriptor, this->getLocalPeerDescriptor())) {

@@ -18,7 +18,7 @@ private:
     struct Private {
         explicit Private() = default;
     };
-    const PeerDescriptor& targetPeerDescriptor;
+    PeerDescriptor targetPeerDescriptor;
     std::shared_ptr<PendingConnection> pendingConnection;
 
     HandlerToken connectedHandlerToken;
@@ -41,11 +41,14 @@ public:
         Private /* prevent direct construction */,
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
-        const PeerDescriptor& targetPeerDescriptor,
+        PeerDescriptor targetPeerDescriptor,
         const std::shared_ptr<PendingConnection>& pendingConnection)
         : Handshaker(localPeerDescriptor, connection),
-          targetPeerDescriptor(targetPeerDescriptor),
+          targetPeerDescriptor(std::move(targetPeerDescriptor)),
           pendingConnection(pendingConnection) {
+        SLogger::debug(
+            "OutgoingHandshaker() created for " +
+            this->targetPeerDescriptor.DebugString());
         // send handshake request when the connection is established
         this->connectedHandlerToken =
             this->connection->once<connectionevents::Connected>([this]() {
