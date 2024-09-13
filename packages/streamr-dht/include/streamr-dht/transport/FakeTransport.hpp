@@ -1,5 +1,5 @@
-#ifndef STREAMR_DHT_TEST_UTILS_FAKE_TRANSPORT_HPP
-#define STREAMR_DHT_TEST_UTILS_FAKE_TRANSPORT_HPP
+#ifndef STREAMR_DHT_FAKE_TRANSPORT_HPP
+#define STREAMR_DHT_FAKE_TRANSPORT_HPP
 #include <functional>
 #include <map>
 #include <memory>
@@ -9,7 +9,7 @@
 #include "streamr-dht/connection/ConnectionsView.hpp"
 #include "streamr-dht/transport/Transport.hpp"
 
-namespace streamr::dht::test::utils {
+namespace streamr::dht::transport {
 
 using ::dht::Message;
 using ::dht::PeerDescriptor;
@@ -104,6 +104,6 @@ public:
     }
 };
 
-} // namespace streamr::dht::test::utils
+} // namespace streamr::dht::transport
 
-#endif // STREAMR_DHT_TEST_UTILS_FAKE_TRANSPORT_HPP
+#endif // STREAMR_DHT_FAKE_TRANSPORT_HPP

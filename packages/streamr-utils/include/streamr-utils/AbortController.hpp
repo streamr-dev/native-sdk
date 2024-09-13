@@ -22,7 +22,7 @@ class AbortSignal : public EventEmitter<AbortSignalEvents> {
 public:
     bool aborted; // NOLINT
     std::string reason; // NOLINT
-    folly::CancellationToken getCancellationToken() {
+    [[nodiscard]] folly::CancellationToken getCancellationToken() const {
         return cancelSource.getToken();
     }
 

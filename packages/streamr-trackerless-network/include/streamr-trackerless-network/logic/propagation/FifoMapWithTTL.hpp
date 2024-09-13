@@ -5,6 +5,18 @@
 #include <functional>
 #include <optional>
 #include "RandomAccessQueue.hpp"
+#include <ranges>
+#include <map>
+#include <mutex>
+#include "packages/network/protos/NetworkRpc.pb.h"
+
+
+inline bool operator<(const MessageRef& r1, const MessageRef& r2){
+    if (r1.sequencenumber() != r2.sequencenumber()) {
+        return r1.sequencenumber() < r2.sequencenumber();
+    }
+    return r1.timestamp() < r2.timestamp();
+}
 
 namespace streamr::trackerlessnetwork::propagation {
 
@@ -13,7 +25,7 @@ struct FifoMapWithTtlOptions {
     std::chrono::milliseconds ttl;
     size_t maxSize;
     std::optional<std::function<void(KeyType)>> onItemDropped;
-    std::optional<std::function<int64_t()>> timeProvider;
+    std::optional<std::function<std::chrono::milliseconds()>> timeProvider;
 };
 
 template <typename KeyType, typename ValueType>
@@ -22,7 +34,7 @@ private:
     struct Item {
         ValueType value;
         QueueToken dropQueueToken;
-        int64_t expiresAt;
+        std::chrono::milliseconds expiresAt;
     };
 
     std::recursive_mutex itemsMutex;
@@ -31,17 +43,10 @@ private:
     std::chrono::milliseconds ttl;
     size_t maxSize;
     std::function<void(KeyType)> onItemDropped;
-    std::function<int64_t()> timeProvider;
+    std::function<std::chrono::milliseconds()> timeProvider;
 
 public:
     explicit FifoMapWithTTL(const FifoMapWithTtlOptions<KeyType>& options) {
-        if (options.ttl < 0) {
-            throw std::invalid_argument("ttl cannot be < 0");
-        }
-        if (options.maxSize < 0) {
-            throw std::invalid_argument("maxSize cannot be < 0");
-        }
-
         this->ttl = options.ttl;
         this->maxSize = options.maxSize;
         
@@ -56,8 +61,7 @@ public:
         } else {
             this->timeProvider = []() {
                 return std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::system_clock::now().time_since_epoch())
-                    .count();
+                    std::chrono::system_clock::now().time_since_epoch());
             };
         }
     }
@@ -126,7 +130,7 @@ public:
     std::vector<ValueType> values() {
         std::scoped_lock lock{this->itemsMutex};
 
-        const auto keys = std::vector<KeyType>(this->items.keys());
+        const auto keys = this->items | std::views::keys | std::ranges::to<std::vector>();
         std::vector<ValueType> values;
         for (const auto& key : keys) {
             const auto value = this->get(key);
