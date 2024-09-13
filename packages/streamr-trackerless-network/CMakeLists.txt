@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-include(homebrewClang.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/homebrewClang.cmake)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -80,18 +80,20 @@ target_link_libraries(streamr-trackerless-network
         PUBLIC Folly::folly
     )
 
-#     add_executable(streamr-dht-test-integration
-#         test/integration/WebsocketClientServerTest.cpp
-#     )
+     add_executable(streamr-trackerless-network-test-integration
+         test/integration/ProxyClientTsIntegrationTest.cpp
+     )
 
-#     target_link_libraries(streamr-dht-test-integration 
-#         PUBLIC streamr-dht
-#         INTERFACE streamr::streamr-logger
-#         PUBLIC GTest::gtest
-#         PUBLIC GTest::gtest_main
-#     )
+     target_link_libraries(streamr-trackerless-network-test-integration 
+         PUBLIC streamr-trackerless-network
+         INTERFACE streamr::streamr-logger
+         PUBLIC GTest::gtest
+         PUBLIC GTest::gtest_main
+     )
+     
      if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
          include(GoogleTest)
          gtest_discover_tests(streamr-trackerless-network-test-unit)
+         gtest_discover_tests(streamr-trackerless-network-test-integration)
      endif()
 endif()

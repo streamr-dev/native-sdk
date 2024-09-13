@@ -350,7 +350,7 @@ public:
     }
 
     void lockConnection(
-        PeerDescriptor&& targetDescriptor, LockID&& lockId) override {
+        PeerDescriptor targetDescriptor, LockID lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             Identifiers::areEqualPeerDescriptors(
                 targetDescriptor, this->getLocalPeerDescriptor())) {
@@ -381,7 +381,7 @@ public:
     }
 
     void unlockConnection(
-        PeerDescriptor&& targetDescriptor, LockID&& lockId) override {
+        PeerDescriptor targetDescriptor, LockID lockId) override {
         SLogger::debug("Trying to acquire mutex lock in unlockConnection");
         std::scoped_lock lock(this->mutex);
         if (this->state == ConnectionManagerState::STOPPED ||
@@ -404,7 +404,7 @@ public:
         }
     }
 
-    void weakLockConnection(DhtAddress&& nodeId, LockID&& lockId) override {
+    void weakLockConnection(const DhtAddress& nodeId, const LockID& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             (nodeId ==
              Identifiers::getNodeIdFromPeerDescriptor(
@@ -414,7 +414,7 @@ public:
         this->locks.addWeakLocked(nodeId, lockId);
     }
 
-    void weakUnlockConnection(DhtAddress&& nodeId, LockID&& lockId) override {
+    void weakUnlockConnection(const DhtAddress& nodeId, const LockID& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             (nodeId ==
              Identifiers::getNodeIdFromPeerDescriptor(

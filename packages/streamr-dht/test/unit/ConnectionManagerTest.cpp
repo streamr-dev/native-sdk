@@ -6,7 +6,7 @@
 #include <folly/coro/Collect.h>
 #include <folly/coro/Promise.h>
 #include <folly/coro/blockingWait.h>
-#include "FakeTransport.hpp"
+#include "streamr-dht/transport/FakeTransport.hpp"
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-dht/transport/Transport.hpp"
@@ -22,8 +22,8 @@ using streamr::dht::connection::ConnectionManager;
 using streamr::dht::connection::ConnectionManagerOptions;
 using streamr::dht::connection::DefaultConnectorFacade;
 using streamr::dht::connection::DefaultConnectorFacadeOptions;
-using streamr::dht::test::utils::FakeEnvironment;
-using streamr::dht::test::utils::FakeTransport;
+using streamr::dht::transport::FakeEnvironment;
+using streamr::dht::transport::FakeTransport;
 using streamr::dht::transport::SendOptions;
 using streamr::dht::types::PortRange;
 using streamr::logger::SLogger;

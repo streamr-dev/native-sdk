@@ -13,6 +13,7 @@ project(streamr-utils CXX)
 find_package(folly CONFIG REQUIRED)
 find_package(Boost CONFIG REQUIRED)
 find_package(streamr-eventemitter CONFIG REQUIRED)
+find_package(streamr-logger CONFIG REQUIRED)
 
 if(NOT TARGET Boost::uuid)
   add_library(Boost::uuid INTERFACE IMPORTED)
@@ -35,8 +36,10 @@ target_include_directories(
 target_link_libraries(streamr-utils
     INTERFACE Folly::folly
     INTERFACE streamr::streamr-eventemitter
+    INTERFACE streamr::streamr-logger
     INTERFACE Boost::uuid
     INTERFACE Boost::endian
+    INTERFACE Boost::algorithm
 )
 
 export(TARGETS streamr-utils

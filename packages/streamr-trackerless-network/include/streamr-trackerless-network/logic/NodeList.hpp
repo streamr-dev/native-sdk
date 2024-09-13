@@ -2,11 +2,12 @@
 #define STREAMR_TRACKERLESS_NETWORK_NODE_LIST_HPP
 
 #include <map>
+#include <ranges>
 #include <string>
 #include <vector>
-#include <ranges>
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
+#include "streamr-trackerless-network/logic/ContentDeliveryRpcRemote.hpp"
 
 namespace streamr::trackerlessnetwork {
 
@@ -16,8 +17,8 @@ using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
 
 class ContentDeliveryRpcRemote;
-struct NodeAdded : Event<DhtAddress, ContentDeliveryRpcRemote> {};
-struct NodeRemoved : Event<DhtAddress, ContentDeliveryRpcRemote> {};
+struct NodeAdded : Event<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> {};
+struct NodeRemoved : Event<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> {};
 
 using NodeListEvents = std::tuple<NodeAdded, NodeRemoved>;
 
@@ -25,39 +26,44 @@ using NodeListEvents = std::tuple<NodeAdded, NodeRemoved>;
 
 class NodeList : public EventEmitter<NodeListEvents> {
 private:
-    std::map<DhtAddress, ContentDeliveryRpcRemote> nodes;
+    std::map<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> nodes;
     size_t limit;
     DhtAddress ownId;
 
-    static std::vector<ContentDeliveryRpcRemote> getValuesOfIncludedKeys(
-        const std::map<DhtAddress, ContentDeliveryRpcRemote>& nodes,
-        const std::vector<DhtAddress>& exclude, 
+    static std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>
+    getValuesOfIncludedKeys(
+        const std::map<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>>&
+            nodes,
+        const std::vector<DhtAddress>& exclude,
         bool wsOnly = false) {
-        
-        nodes 
-        | std::views::values 
-        | std::views::filter([&exclude, &wsOnly](const auto& node) {
-            if (wsOnly && !node.getPeerDescriptor().websocket.has_value()) {
-                return false;
-            }
-            return std::find(exclude.begin(), exclude.end(), 
-                Identifiers::getNodeIdFromPeerDescriptor(node.getPeerDescriptor())) == exclude.end();
-        })
-        | std::ranges::to<std::vector>();
+        return nodes | std::views::values |
+            std::views::filter([&exclude, &wsOnly](const auto& node) {
+                   if (wsOnly && !node->getPeerDescriptor().has_websocket()) {
+                       return false;
+                   }
+                   return std::find(
+                              exclude.begin(),
+                              exclude.end(),
+                              Identifiers::getNodeIdFromPeerDescriptor(
+                                  node->getPeerDescriptor())) == exclude.end();
+               }) |
+            std::ranges::to<
+                   std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>>();
     }
 
 public:
-    NodeList(DhtAddress ownId, size_t limit) : limit(limit), ownId(ownId) {}
+    NodeList(DhtAddress ownId, size_t limit)
+        : limit(limit), ownId(std::move(ownId)) {}
 
-    void add(ContentDeliveryRpcRemote remote) {
-        const nodeId =
-            getNodeIdFromPeerDescriptor(remote.getPeerDescriptor()) if (
-                (this.ownId != = nodeId) && (this.nodes.size < this.limit)) {
-            const isExistingNode =
-                this.nodes.has(nodeId) this.nodes.set(nodeId, remote)
+    void add(std::shared_ptr<ContentDeliveryRpcRemote> remote) {
+        const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
+            remote->getPeerDescriptor());
+        if ((this->ownId != nodeId) && (this->nodes.size() < this->limit)) {
+            const auto isExistingNode = this->nodes.contains(nodeId);
+            this->nodes[nodeId] = remote;
 
-                    if (!isExistingNode) {
-                this.emit('nodeAdded', nodeId, remote)
+            if (!isExistingNode) {
+                this->emit<NodeAdded>(nodeId, remote);
             }
         }
     }
@@ -70,63 +76,88 @@ public:
         }
     }
 
-    bool has(DhtAddress nodeId) {
+    bool has(const DhtAddress& nodeId) const {
         return this->nodes.contains(nodeId);
     }
 
     // Replace nodes does not emit nodeRemoved events, use with caution
-    void replaceAll(std::vector<ContentDeliveryRpcRemote> neighbors) {
+    void replaceAll(
+        const std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>&
+            neighbors) {
         this->nodes.clear();
-        const limited = neighbors | std::views::take(this->limit) | std::ranges::to<std::vector>();
+        const auto limited =
+            neighbors | std::views::take(this->limit) |
+            std::ranges::to<
+                std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>>();
         for (const auto& remote : limited) {
             this->add(remote);
         }
     }
 
-    std::vector<DhtAddress> getIds() {
-        return std::vector<DhtAddress>(this->nodes | std::views::keys | std::ranges::to<std::vector>());
+    std::vector<DhtAddress> getIds() const {
+        return this->nodes | std::views::keys |
+            std::ranges::to<std::vector<DhtAddress>>();
     }
 
-    std::optional<ContentDeliveryRpcRemote> get(DhtAddress id) {
+    std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> get(
+        const DhtAddress& id) const {
         return this->nodes.at(id);
     }
 
-    size_t size(std::vector<DhtAddress> exclude = {}) {
-        return this->getIds().size();
+    size_t size(const std::vector<DhtAddress>& exclude = {}) const {
+        return NodeList::getValuesOfIncludedKeys(this->nodes, exclude).size();
     }
 
-    std::optional<ContentDeliveryRpcRemote> getRandom(std::vector<DhtAddress> exclude) {
-        return this->getValuesOfIncludedKeys(this->nodes, exclude);
-    }
-
-    std::optional<ContentDeliveryRpcRemote> getFirst(std::vector<DhtAddress> exclude, bool wsOnly = false) {
-        const included = this->getValuesOfIncludedKeys(this->nodes, exclude, wsOnly);
-        return included.empty() ? std::nullopt : std::make_optional(included[0]);
-    }
-    }
-
-    std::vector<ContentDeliveryRpcRemote> getFirstAndLast(std::vector<DhtAddress> exclude) {
-        const included = this->getValuesOfIncludedKeys(this->nodes, exclude);
-        if (included.empty()) {
-            return []
+    std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> getRandom(
+        const std::vector<DhtAddress>& exclude) {
+        const auto values =
+            NodeList::getValuesOfIncludedKeys(this->nodes, exclude);
+        if (values.empty()) {
+            return std::nullopt;
         }
-        return included.size() > 1
-            ? [ this->getFirst(exclude) !, this->getLast(exclude) !]
-            : [this->getFirst(exclude) !]
+        return values[rand() % values.size()];
     }
 
-    std::optional<ContentDeliveryRpcRemote> getLast(std::vector<DhtAddress> exclude) {
-        const included = this->getValuesOfIncludedKeys(this->nodes, exclude);
-        return included.empty() ? std::nullopt : std::make_optional(included.back());
+    std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> getFirst(
+        const std::vector<DhtAddress>& exclude, bool wsOnly = false) {
+        const auto included =
+            NodeList::getValuesOfIncludedKeys(this->nodes, exclude, wsOnly);
+        return included.empty() ? std::nullopt
+                                : std::make_optional(included[0]);
     }
 
-    std::vector<ContentDeliveryRpcRemote> getAll() {
-        return std::vector<ContentDeliveryRpcRemote>(this->nodes.values());
+    std::vector<std::shared_ptr<ContentDeliveryRpcRemote>> getFirstAndLast(
+        const std::vector<DhtAddress>& exclude) {
+        const auto included =
+            NodeList::getValuesOfIncludedKeys(this->nodes, exclude);
+        if (included.empty()) {
+            return {};
+        }
+        if (included.size() > 1) {
+            return {included.front(), included.back()};
+        }
+        return {included.front()};
+    }
+
+    static std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> getLast(
+        const std::map<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>>&
+            nodes,
+        const std::vector<DhtAddress>& exclude) {
+        const auto included = NodeList::getValuesOfIncludedKeys(nodes, exclude);
+        return included.empty() ? std::nullopt
+                                : std::make_optional(included.back());
+    }
+
+    std::vector<std::shared_ptr<ContentDeliveryRpcRemote>> getAll() {
+        return this->nodes | std::views::values |
+            std::ranges::to<
+                   std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>>();
     }
 
     void stop() {
-        for (const auto& node : this->nodes) {
-            this->remove(node.first);
+        for (const auto& node : this->getAll()) {
+            this->remove(Identifiers::getNodeIdFromPeerDescriptor(
+                node->getPeerDescriptor()));
         }
         this->removeAllListeners();
     }

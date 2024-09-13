@@ -32,8 +32,6 @@ private:
     // WebRTC connections require lots of signalling to open and might take a
     // longer time.
     static constexpr std::chrono::milliseconds webrtcTimeout{10000};
-    // default timeout for existing connections
-    static constexpr std::chrono::milliseconds existingConnectionTimeout{5000};
 
     static std::chrono::milliseconds calculateTimeout(
         const PeerDescriptor& localPeerDescriptor,
@@ -65,6 +63,9 @@ protected:
           client(std::move(client)) {}
 
 public:
+    // default timeout for existing connections
+    static constexpr std::chrono::milliseconds existingConnectionTimeout{5000};
+
     [[nodiscard]] const PeerDescriptor& getPeerDescriptor() const {
         return this->remotePeerDescriptor;
     }

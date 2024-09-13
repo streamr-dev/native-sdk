@@ -43,7 +43,7 @@ public:
 struct DefaultConnectorFacadeOptions {
     Transport& transport;
     std::optional<std::string> websocketHost;
-    PortRange websocketPortRange;
+    std::optional<PortRange> websocketPortRange;
     // std::vector<PeerDescriptor> entryPoints;
     // std::vector<IceServer> iceServers;
     // bool webrtcAllowPrivateAddresses;

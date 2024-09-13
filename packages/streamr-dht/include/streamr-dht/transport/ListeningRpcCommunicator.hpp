@@ -19,7 +19,7 @@ public:
     ListeningRpcCommunicator(
         ServiceID&& serviceId,
         Transport& transport,
-        std::optional<RpcCommunicatorOptions> options)
+        std::optional<RpcCommunicatorOptions> options = std::nullopt)
         : RoutingRpcCommunicator(
               std::move(serviceId),
               [this](const Message& message, SendOptions opts) {

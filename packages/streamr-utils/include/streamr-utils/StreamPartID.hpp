@@ -1,53 +1,62 @@
 #ifndef STREAMR_UTILS_STREAM_PART_ID_HPP
 #define STREAMR_UTILS_STREAM_PART_ID_HPP
 
-#include <string>
 #include <cstdint>
+#include <string>
 #include "streamr-utils/Branded.hpp"
+#include "streamr-utils/StreamID.hpp"
+#include "streamr-utils/partition.hpp"
 
 namespace streamr::utils {
 
-constexpr std::string_view DELIMITER = "#"; //NOLINT
+constexpr auto DELIMITER = "#"; // NOLINT
 
 using StreamPartID = Branded<std::string, struct StreamPartIDBrand>;
 
+inline StreamPartID toStreamPartID(
+    const StreamID& streamId, uint32_t streamPartition) {
+    ensureValidStreamPartitionIndex(streamPartition);
+    return StreamPartID(streamId + DELIMITER + std::to_string(streamPartition));
+}
 
 class StreamPartIDUtils {
-    static toStreamPartID(streamId: StreamID, streamPartition: number): StreamPartID | never {
-    ensureValidStreamPartitionIndex(streamPartition)
-    return `${streamId}${DELIMITER}${streamPartition}` as StreamPartID
-}
-    static parse(streamPartIdAsStr: string): StreamPartID | never {
-        const [streamId, streamPartition] = StreamPartIDUtils.parseRawElements(streamPartIdAsStr)
-        if (streamPartition === undefined) {
-            throw new Error(`invalid streamPartId string: ${streamPartIdAsStr}`)
+public:
+    static StreamPartID parse(const std::string& streamPartIdAsStr) {
+        const auto [streamId, streamPartition] =
+            StreamPartIDUtils::parseRawElements(streamPartIdAsStr);
+        if (streamPartition == std::nullopt) {
+            throw std::invalid_argument(
+                "invalid streamPartId string: " + streamPartIdAsStr);
         }
-        toStreamID(streamId) // throws if not valid
-        ensureValidStreamPartitionIndex(streamPartition)
-        return streamPartIdAsStr as StreamPartID
+        toStreamID(streamId); // throws if not valid
+        ensureValidStreamPartitionIndex(streamPartition);
+        return StreamPartID{streamPartIdAsStr};
     }
 
-    static getStreamID(streamPartId: StreamPartID): StreamID {
-        return this.getStreamIDAndPartition(streamPartId)[0]
+    static StreamID getStreamID(const StreamPartID& streamPartId) {
+        return StreamPartIDUtils::getStreamIDAndPartition(streamPartId).first;
     }
 
-    static getStreamPartition(streamPartId: StreamPartID): number {
-        return this.getStreamIDAndPartition(streamPartId)[1]
+    static std::optional<uint32_t> getStreamPartition(
+        const StreamPartID& streamPartId) {
+        return StreamPartIDUtils::getStreamIDAndPartition(streamPartId).second;
     }
 
-    static getStreamIDAndPartition(streamPartId: StreamPartID): [StreamID, number] {
-        return StreamPartIDUtils.parseRawElements(streamPartId) as [StreamID, number]
+    static std::pair<StreamID, std::optional<uint32_t>> getStreamIDAndPartition(
+        const StreamPartID& streamPartId) {
+        auto elements = StreamPartIDUtils::parseRawElements(streamPartId);
+        return {StreamID(elements.first), elements.second};
     }
 
-    static parseRawElements(str: string): [string, number | undefined] {
-        const lastIdx = str.lastIndexOf(DELIMITER)
-        if (lastIdx === -1 || lastIdx === str.length - 1) {
-            return [str, undefined]
+    static std::pair<std::string, std::optional<uint32_t>> parseRawElements(
+        const std::string& str) {
+        const auto lastIdx = str.find_last_of(DELIMITER);
+        if (lastIdx == std::string::npos || lastIdx == str.length() - 1) {
+            return {str, std::nullopt};
         }
-        return [str.substring(0, lastIdx), Number(str.substring(lastIdx + 1))]
+        return {str.substr(0, lastIdx), std::stoul(str.substr(lastIdx + 1))};
     }
-}
-
+};
 
 } // namespace streamr::utils
 
