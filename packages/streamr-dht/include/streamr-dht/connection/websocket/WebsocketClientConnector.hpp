@@ -89,6 +89,7 @@ public:
 
     std::shared_ptr<PendingConnection> connect(
         const PeerDescriptor& targetPeerDescriptor) {
+        SLogger::debug("connect() to " + targetPeerDescriptor.DebugString());
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(targetPeerDescriptor);
         const auto existingHandshaker =
