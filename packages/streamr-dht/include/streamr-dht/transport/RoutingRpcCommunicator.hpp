@@ -68,7 +68,7 @@ public:
             Message message;
             SLogger::debug("Created Message object");
             message.set_messageid(Uuid::v4());
-            SLogger::debug("Set message ID");
+            SLogger::debug("Set message ID " + message.messageid());
             message.set_serviceid(this->ownServiceId);
             SLogger::debug("Set service ID");
             message.mutable_rpcmessage()->CopyFrom(msg);
