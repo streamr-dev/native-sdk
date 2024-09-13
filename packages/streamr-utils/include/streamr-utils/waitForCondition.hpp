@@ -33,7 +33,6 @@ public:
             [this, conditionFn]() {
                 if (conditionFn()) {
                     this->stop();
-                    std::cout << "!!!EMIT";
                     this->emit<ConditionMet>();
                 }
             },
