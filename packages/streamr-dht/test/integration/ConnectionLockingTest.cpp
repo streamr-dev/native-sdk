@@ -128,22 +128,17 @@ TEST_F(
 
     SLogger::info("Starting connection manager 2");
     connectionManager2->start();
-    auto tmpMockPeerDescriptor2 = mockPeerDescriptor2;
-    auto tmpMockPeerDescriptor2Move = mockPeerDescriptor2;
-    auto tmpMockPeerDescriptor1 = mockPeerDescriptor1;
     SLogger::trace("before lockConnection() start");
-    connectionManager1->lockConnection(std::move(tmpMockPeerDescriptor2Move), std::move(LockID("testLock"))) ;
+    connectionManager1->lockConnection(mockPeerDescriptor2, std::move(LockID("testLock"))) ;
     SLogger::trace("lockConnection done");
-    //auto nodeId1 = Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1);
-   // auto nodeId2 = Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2);
-    std::function<bool()> condition = [&connectionManager2, &tmpMockPeerDescriptor1 ]() {
-        return connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1));
+    std::function<bool()> condition = [&]() {
+        return connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1));
     };
     auto task = waitForCondition(condition);
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
-    ASSERT_TRUE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
-    ASSERT_TRUE(connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
-    ASSERT_TRUE(connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1)));
+    ASSERT_TRUE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_TRUE(connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_TRUE(connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
 }
 
 TEST_F(
@@ -179,17 +174,14 @@ TEST_F(
 
     SLogger::info("Starting connection manager 2");
     connectionManager2->start();
-    auto tmpMockPeerDescriptor2 = mockPeerDescriptor2;
-    auto tmpMockPeerDescriptor2B = mockPeerDescriptor2;
-    auto tmpMockPeerDescriptor1 = mockPeerDescriptor1;
- 
-    std::function<bool()> condition = [&connectionManager2, &tmpMockPeerDescriptor1 ]() {
-        return connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1));
+
+    std::function<bool()> condition = [&]() {
+        return connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1));
     };
   
     auto task = folly::coro::collectAll(
         folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
-            connectionManager1->lockConnection(std::move(mockPeerDescriptor2), LockID("testLock1")) ;
+            connectionManager1->lockConnection(mockPeerDescriptor2, LockID("testLock1")) ;
             co_return;
         }),
         waitForCondition(condition) // NOLINT
@@ -197,15 +189,15 @@ TEST_F(
     folly::coro::blockingWait(std::move(task));
     auto task2 = folly::coro::collectAll(
         folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
-            connectionManager1->lockConnection(std::move(tmpMockPeerDescriptor2B), std::move(LockID("testLock2"))) ;
+            connectionManager1->lockConnection(mockPeerDescriptor2, std::move(LockID("testLock2"))) ;
             co_return;
         }),
         waitForCondition(condition) // NOLINT
     );
     folly::coro::blockingWait(std::move(task2));
-    ASSERT_TRUE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
-    ASSERT_TRUE(connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
-    ASSERT_TRUE(connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1)));
+    ASSERT_TRUE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_TRUE(connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_TRUE(connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
 }
 
 TEST_F(
@@ -241,26 +233,181 @@ TEST_F(
 
     SLogger::info("Starting connection manager 2");
     connectionManager2->start();
-    auto tmpMockPeerDescriptor2 = mockPeerDescriptor2;
-    auto tmpMockPeerDescriptor1 = mockPeerDescriptor1;
     SLogger::trace("before lockConnection() start");
-    connectionManager1->lockConnection(std::move(mockPeerDescriptor2), std::move(LockID("testLock"))) ;
+    connectionManager1->lockConnection(mockPeerDescriptor2, std::move(LockID("testLock"))) ;
     SLogger::trace("lockConnection done");
     //auto nodeId1 = Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1);
    // auto nodeId2 = Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2);
-    std::function<bool()> condition = [&connectionManager2, &tmpMockPeerDescriptor1 ]() {
-        return connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1));
+    std::function<bool()> condition = [&]() {
+        return connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1));
     };
     auto task = waitForCondition(condition);
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
-    ASSERT_TRUE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
-    ASSERT_FALSE(connectionManager2->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
-    ASSERT_TRUE(connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1)));
+    ASSERT_TRUE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_FALSE(connectionManager2->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_TRUE(connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
 
-    connectionManager1->unlockConnection(std::move(tmpMockPeerDescriptor2), std::move(LockID("testLock"))) ;
+    connectionManager1->unlockConnection(mockPeerDescriptor2, std::move(LockID("testLock"))) ;
     SLogger::trace("unlockConnection done");
   
-
+    ASSERT_FALSE(connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    auto task2 = waitForCondition(condition);
+    folly::coro::blockingWait(std::move(task2));
+    ASSERT_FALSE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
 
 }
+
+
+TEST_F(
+    ConnectionLockingTest, UnlockingMultipleServices) {
+  
+    rtc::InitLogger(rtc::LogLevel::Verbose);
+    SLogger::trace("In the beginning");
+    auto connectionManager1 =
+        createConnectionManager(DefaultConnectorFacadeOptions{
+            .transport = *mockConnectorTransport1,
+            .websocketHost = "127.0.0.1",
+            .websocketPortRange =
+                PortRange{
+                    .min = mockWebsocketPort1,
+                    .max = mockWebsocketPort1}, // NOLINT
+            .createLocalPeerDescriptor =
+                [this](const ConnectivityResponse& /* response */)
+                -> PeerDescriptor { return mockPeerDescriptor1; }});
+    SLogger::info("Starting connection manager 1");
+    connectionManager1->start();
+
+    auto connectionManager2 =
+        createConnectionManager(DefaultConnectorFacadeOptions{
+            .transport = *mockConnectorTransport2,
+            .websocketHost = "127.0.0.1",
+            .websocketPortRange =
+                PortRange{
+                    .min = mockWebsocketPort2,
+                    .max = mockWebsocketPort2}, // NOLINT
+            .createLocalPeerDescriptor =
+                [this](const ConnectivityResponse& /* response */)
+                -> PeerDescriptor { return mockPeerDescriptor2; }});
+
+    SLogger::info("Starting connection manager 2");
+    connectionManager2->start();
+
+    std::function<bool()> condition = [&]() {
+        return connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1));
+    };
+  
+    auto task = folly::coro::collectAll(
+        folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+            connectionManager1->lockConnection(mockPeerDescriptor2, LockID("testLock1")) ;
+            co_return;
+        }),
+        waitForCondition(condition) // NOLINT
+    );
+    folly::coro::blockingWait(std::move(task));
+    auto task2 = folly::coro::collectAll(
+        folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+            connectionManager1->lockConnection(mockPeerDescriptor2, std::move(LockID("testLock2"))) ;
+            co_return;
+        }),
+        waitForCondition(condition) // NOLINT
+    );
+    folly::coro::blockingWait(std::move(task2));  
+ 
+    ASSERT_TRUE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_FALSE(connectionManager2->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
+   
+    connectionManager1->unlockConnection(mockPeerDescriptor2, std::move(LockID("testLock1"))) ;
+    ASSERT_TRUE(connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+   
+    connectionManager1->unlockConnection(mockPeerDescriptor2, std::move(LockID("testLock2"))) ;
+    ASSERT_FALSE(connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_FALSE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
+  
+}
+
+
+TEST_F(
+    ConnectionLockingTest, MaintainsConnectionIfBothSidesInitiallyLockAndThenOneEndUnlocks) {
+  
+    rtc::InitLogger(rtc::LogLevel::Verbose);
+    SLogger::trace("In the beginning");
+
+    auto connectionManager1 =
+        createConnectionManager(DefaultConnectorFacadeOptions{
+            .transport = *mockConnectorTransport1,
+            .websocketHost = "127.0.0.1",
+            .websocketPortRange =
+                PortRange{
+                    .min = mockWebsocketPort1,
+                    .max = mockWebsocketPort1}, // NOLINT
+            .createLocalPeerDescriptor =
+                [this](const ConnectivityResponse& /* response */)
+                -> PeerDescriptor { return mockPeerDescriptor1; }});
+    SLogger::info("Starting connection manager 1");
+    connectionManager1->start();
+
+    auto connectionManager2 =
+        createConnectionManager(DefaultConnectorFacadeOptions{
+            .transport = *mockConnectorTransport2,
+            .websocketHost = "127.0.0.1",
+            .websocketPortRange =
+                PortRange{
+                    .min = mockWebsocketPort2,
+                    .max = mockWebsocketPort2}, // NOLINT
+            .createLocalPeerDescriptor =
+                [this](const ConnectivityResponse& /* response */)
+                -> PeerDescriptor { return mockPeerDescriptor2; }});
+
+    SLogger::info("Starting connection manager 2");
+    connectionManager2->start();
+
+    std::function<bool()> condition1 = [&]() {
+        return connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1));
+    };
+    std::function<bool()> condition2 = [&]() {
+        return connectionManager1->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2));
+    };
+
+    auto task = folly::coro::collectAll(
+        folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+            connectionManager1->lockConnection(mockPeerDescriptor2, LockID("testLock1")) ;
+            co_return;
+        }),
+        folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+            connectionManager2->lockConnection(mockPeerDescriptor1, LockID("testLock1")) ;
+            co_return;
+        }),
+        waitForCondition(condition1), // NOLINT
+        waitForCondition(condition2)
+    );
+    folly::coro::blockingWait(std::move(task));  
+    ASSERT_TRUE(connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+    ASSERT_TRUE(connectionManager2->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
+ 
+    connectionManager1->unlockConnection(mockPeerDescriptor2, std::move(LockID("testLock1"))) ;
+ 
+    std::function<bool()> condition3 = [&]() {
+        return !connectionManager1->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2));
+    };
+
+    std::function<bool()> condition4 = [&]() {
+        return !connectionManager2->hasRemoteLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1));
+    };
+    
+    std::function<bool()> condition5 = [&]() {
+        return connectionManager2->hasLocalLockedConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1));
+    };
+
+    auto task2 = folly::coro::collectAll( 
+        waitForCondition(condition2),
+        waitForCondition(condition4),
+        waitForCondition(condition4),
+        waitForCondition(condition5)
+    );
+    folly::coro::blockingWait(std::move(task2)); 
+    ASSERT_TRUE(connectionManager2->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
+    ASSERT_TRUE(connectionManager1->hasConnection(Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
+ 
+}
+
 

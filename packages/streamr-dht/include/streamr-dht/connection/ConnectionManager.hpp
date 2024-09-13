@@ -220,7 +220,7 @@ public:
             auto peerDescriptorToDisconnect = it->second->getPeerDescriptor();
             endpointsCopy.erase(it);
             this->gracefullyDisconnect(
-                std::move(peerDescriptorToDisconnect), DisconnectMode::LEAVING);
+                peerDescriptorToDisconnect, DisconnectMode::LEAVING);
         }
 
         this->connectorFacade->stop();
@@ -351,7 +351,7 @@ public:
     }
 
     void lockConnection(
-        PeerDescriptor&& targetDescriptor, LockID&& lockId) override {
+        const PeerDescriptor& targetDescriptor, LockID&& lockId) override {
         SLogger::trace("lockConnection() start");
         if (this->state == ConnectionManagerState::STOPPED ||
             Identifiers::areEqualPeerDescriptors(
@@ -383,7 +383,7 @@ public:
     }
 
     void unlockConnection(
-        PeerDescriptor&& targetDescriptor, LockID&& lockId) override {
+        const PeerDescriptor& targetDescriptor, LockID&& lockId) override {
         SLogger::debug("Trying to acquire mutex lock in unlockConnection");
         std::scoped_lock lock(this->mutex);
         if (this->state == ConnectionManagerState::STOPPED ||
@@ -406,7 +406,7 @@ public:
         }
     }
 
-    void weakLockConnection(DhtAddress&& nodeId, LockID&& lockId) override {
+    void weakLockConnection(const DhtAddress& nodeId, LockID&& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             (nodeId ==
              Identifiers::getNodeIdFromPeerDescriptor(
@@ -416,7 +416,7 @@ public:
         this->locks.addWeakLocked(nodeId, lockId);
     }
 
-    void weakUnlockConnection(DhtAddress&& nodeId, LockID&& lockId) override {
+    void weakUnlockConnection(const DhtAddress& nodeId, LockID&& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             (nodeId ==
              Identifiers::getNodeIdFromPeerDescriptor(
@@ -510,7 +510,7 @@ private:
     }
 
     void gracefullyDisconnect(
-        PeerDescriptor&& targetDescriptor, DisconnectMode&& disconnectMode) {
+        const PeerDescriptor& targetDescriptor, DisconnectMode&& disconnectMode) {
         std::unique_lock lock(this->mutex);
         if (this->endpoints.find(Identifiers::getNodeIdFromPeerDescriptor(
                 targetDescriptor)) == this->endpoints.end()) {

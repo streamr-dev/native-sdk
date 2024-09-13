@@ -154,7 +154,7 @@ public:
             "close()",
             {{"connectionType", getConnectionTypeString()},
              {"mDestroyed", mDestroyed.load()}});
-        if (!mDestroyed) {
+        if (!mDestroyed && mSocket) {
             mSocket->resetCallbacks();
             mSocket->close();
         } else {
