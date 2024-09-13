@@ -13,7 +13,8 @@
             "description": "Monorepo dependencies",
             "dependencies": [
                 "streamr-logger",
-                "streamr-eventemitter"
+                "streamr-eventemitter",
+                "streamr-utils"
             ]
         }
     }

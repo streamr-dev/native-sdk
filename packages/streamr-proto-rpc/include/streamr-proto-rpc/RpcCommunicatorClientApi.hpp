@@ -1,8 +1,6 @@
 #ifndef STREAMR_PROTO_RPC_RPC_COMMUNICATOR_CLIENT_API_HPP
 #define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_CLIENT_API_HPP
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <folly/coro/DetachOnCancel.h>
 #include <folly/coro/Promise.h>
 #include <folly/coro/Task.h>
@@ -11,6 +9,7 @@
 #include "Errors.hpp"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-utils/Uuid.hpp"
 namespace streamr::protorpc {
 
 using google::protobuf::Any;
@@ -325,8 +324,7 @@ private:
         SLogger::trace(
             "createRequestRpcMessage() printed request Any: ",
             body->DebugString());
-        boost::uuids::uuid uuid;
-        ret.set_requestid(boost::uuids::to_string(uuid));
+        ret.set_requestid(Uuid::v4());
         return ret;
     }
 

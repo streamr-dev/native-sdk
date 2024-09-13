@@ -5,20 +5,18 @@
 #include <cstdint>
 #include <tuple>
 #include <vector>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <magic_enum.hpp>
 #include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-utils/Branded.hpp"
-
+#include "streamr-utils/Uuid.hpp"
 namespace streamr::dht::connection {
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
 using streamr::logger::SLogger;
 using streamr::utils::Branded;
+using streamr::utils::Uuid;
 using ConnectionID = Branded<std::string, struct ConnectionIDBrand>;
 using Url = Branded<std::string, struct UrlBrand>;
 
@@ -72,8 +70,7 @@ public:
         return std::string(magic_enum::enum_name(mType));
     }
     static ConnectionID createRandomConnectionId() {
-        boost::uuids::uuid uuid = boost::uuids::random_generator()();
-        return ConnectionID{boost::uuids::to_string(uuid)};
+       return ConnectionID{Uuid::v4()};
     }
 };
 
