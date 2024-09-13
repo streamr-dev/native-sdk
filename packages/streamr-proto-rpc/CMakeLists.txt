@@ -16,6 +16,7 @@ project(proto-rpc CXX)
 
 find_package(streamr-logger CONFIG REQUIRED)
 find_package(streamr-eventemitter CONFIG REQUIRED)
+find_package(streamr-utils CONFIG REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Boost CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
@@ -42,6 +43,7 @@ target_sources(streamr-proto-rpc
 target_link_libraries(streamr-proto-rpc 
     INTERFACE streamr::streamr-logger
     INTERFACE streamr::streamr-eventemitter
+    INTERFACE streamr::streamr-utils
     PRIVATE protobuf::libprotobuf
     PRIVATE protobuf::libprotoc
     INTERFACE Boost::uuid
