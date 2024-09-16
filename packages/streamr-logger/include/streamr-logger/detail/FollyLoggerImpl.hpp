@@ -24,11 +24,16 @@ namespace streamr::logger::detail {
 using LoggerImpl = streamr::logger::LoggerImpl;
 
 constexpr std::string_view envCategoryLogLevelName = "LOG_LEVEL_";
+constexpr std::string_view envThreadIdName = "LOG_THREAD_ID";
+constexpr std::string_view envFunctionName = "LOG_FUNCTION_NAME";
+
 class FollyLoggerImpl : public LoggerImpl {
 private:
     std::shared_ptr<StreamrWriterFactory> mWriterFactory;
     folly::LoggerDB& mLoggerDB;
     std::unique_ptr<folly::LogHandlerFactory> mLogHandlerFactory;
+    bool mLogThreadId = false;
+    bool mLogFunctionName = false;
 
 public:
     explicit FollyLoggerImpl(
@@ -38,6 +43,9 @@ public:
             std::make_shared<StreamrWriterFactory>(std::move(logWriter));
         mLogHandlerFactory =
             std::make_unique<StreamrHandlerFactory>(mWriterFactory.get());
+
+        mLogThreadId = getenv(envThreadIdName.data()) != nullptr;
+        mLogFunctionName = getenv(envFunctionName.data()) != nullptr;
     }
 
     void init(const streamr::logger::StreamrLogLevel logLevel) override {
@@ -48,7 +56,7 @@ public:
 
     void sendLogMessage(
         const streamr::logger::StreamrLogLevel logLevel,
-        std::string_view msg,
+        std::string_view msg, // NOLINT
         std::string_view metadata,
         const std::source_location& location) override {
         const auto messageFollyLogLevel =
@@ -60,9 +68,15 @@ public:
         this->setFileLogCategoriesFromEnv(std::string(fileCategoryName));
 
         auto* fileCategory = mLoggerDB.getCategory(fileCategoryName);
-        std::thread::id this_id = std::this_thread::get_id();
-        std::string meta = std::string(metadata) +  threadIdToString(this_id); 
- 
+
+        std::string meta = std::string(metadata);
+        if (mLogThreadId) {
+            meta += " " + threadIdToString(std::this_thread::get_id());
+        }
+        if (mLogFunctionName) {
+            meta += " " + std::string(location.function_name());
+        }
+
         folly::LogStreamProcessor(
             fileCategory,
             messageFollyLogLevel,
@@ -138,12 +152,11 @@ private:
         }
     }
 
-std::string threadIdToString(const std::thread::id& id) {
-    std::stringstream ss;
-    ss << id;
-    return ss.str();
-}
-
+    static std::string threadIdToString(const std::thread::id& id) {
+        std::stringstream ss;
+        ss << id;
+        return ss.str();
+    }
 
     void initializeLoggerDB(const folly::LogLevel& rootLogLevel) {
         mLoggerDB.registerHandlerFactory(std::move(mLogHandlerFactory), true);

@@ -41,7 +41,7 @@ public:
         request.set_userid(BinaryUtils::hexToBinaryString(userId));
 
         auto options = this->formDhtRpcOptions();
-    
+
         try {
             auto result = co_await this->getClient().requestConnection(
                 std::move(request),

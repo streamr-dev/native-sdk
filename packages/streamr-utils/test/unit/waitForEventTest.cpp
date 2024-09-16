@@ -25,7 +25,7 @@ TEST(WaitForEventTest, WaitForVoidEvent) {
     folly::coro::blockingWait(
         folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
             auto result = co_await folly::coro::collectAll(
-                waitForEvent<Connected>(emitter), // NOLINT
+                waitForEvent<Connected>(&emitter), // NOLINT
                 folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
                     emitter.emit<Connected>();
                     co_return;
@@ -39,7 +39,7 @@ TEST(WaitForEventTest, WaitForStringEvent) {
     folly::coro::blockingWait(
         folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
             auto result = co_await folly::coro::collectAll(
-                waitForEvent<Disconnected>(emitter), // NOLINT
+                waitForEvent<Disconnected>(&emitter), // NOLINT
                 folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
                     emitter.emit<Disconnected>("test");
                     co_return;
@@ -55,7 +55,7 @@ TEST(WaitForEventTest, WaitForTimeout) {
         folly::coro::blockingWait(
             folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
                 auto result = co_await folly::coro::collectAll(
-                    waitForEvent<Disconnected>(emitter, 10ms), // NOLINT
+                    waitForEvent<Disconnected>(&emitter, 10ms), // NOLINT
                     folly::coro::co_invoke(
                         [&emitter]() -> folly::coro::Task<void> {
                             co_await folly::coro::sleep(1s); // NOLINT
@@ -75,7 +75,7 @@ TEST(WaitForEventTest, WaitForStringEventWithAbortSignal) {
             [&emitter, &abortController]() -> folly::coro::Task<void> {
                 auto result = co_await folly::coro::collectAll(
                     waitForEvent<Disconnected>(
-                        emitter,
+                        &emitter,
                         1000ms,
                         &(abortController.getSignal())), // NOLINT
                     folly::coro::co_invoke(

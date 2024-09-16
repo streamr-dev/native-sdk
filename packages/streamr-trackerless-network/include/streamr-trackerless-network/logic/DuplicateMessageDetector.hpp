@@ -2,10 +2,10 @@
 #define STREAMR_TRACKERLESS_NETWORK_DUPLICATE_MESSAGE_DETECTOR_HPP
 
 #include <optional>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include <sstream>
 namespace streamr::trackerlessnetwork {
 
 /**
@@ -68,8 +68,9 @@ public:
         const NumberPair& number)
         : std::runtime_error(
               "pre-condition: gap overlap in given numbers: \n previousNumber = " +
-              (previousNumber.has_value() ? previousNumber.value().toString() : "None") + " number = " + number.toString() +
-              " state = " + state) {}
+              (previousNumber.has_value() ? previousNumber.value().toString()
+                                          : "None") +
+              " number = " + number.toString() + " state = " + state) {}
 };
 
 /**
@@ -141,11 +142,12 @@ public:
         }
 
         for (int i = static_cast<int>(this->gaps.size()) - 1; i >= 0; --i) {
-            const auto& [lowerBound, upperBound] = this->gaps[i]; // invariant: upperBound > lowerBound
+            const auto& [lowerBound, upperBound] =
+                this->gaps[i]; // invariant: upperBound > lowerBound
 
-                // implies number > upperBound (would've been handled in
-                // previous iteration if gap exists)
-                if (previousNumber.value().greaterThanOrEqual(upperBound)) {
+            // implies number > upperBound (would've been handled in
+            // previous iteration if gap exists)
+            if (previousNumber.value().greaterThanOrEqual(upperBound)) {
                 return false;
             }
             if (previousNumber.value().greaterThanOrEqual(lowerBound)) {
@@ -160,11 +162,16 @@ public:
                         this->gaps[i] = std::make_pair(number, upperBound);
                     }
                 } else if (number.equalTo(upperBound)) {
-                    this->gaps[i] = std::make_pair(lowerBound, previousNumber.value());
+                    this->gaps[i] =
+                        std::make_pair(lowerBound, previousNumber.value());
                 } else {
                     this->gaps.erase(this->gaps.begin() + i);
-                    this->gaps.insert(this->gaps.begin() + i, std::make_pair(lowerBound, previousNumber.value()));
-                    this->gaps.insert(this->gaps.begin() + i + 1, std::make_pair(number, upperBound));
+                    this->gaps.insert(
+                        this->gaps.begin() + i,
+                        std::make_pair(lowerBound, previousNumber.value()));
+                    this->gaps.insert(
+                        this->gaps.begin() + i + 1,
+                        std::make_pair(number, upperBound));
                 }
 
                 // invariants after:
@@ -176,10 +183,10 @@ public:
 
                 this->dropLowestGapIfOverMaxGapCount();
                 return true;
-        }
-        if (number.greaterThan(lowerBound)) {
-            throw GapMisMatchError(
-                this->toString(), previousNumber, number);
+            }
+            if (number.greaterThan(lowerBound)) {
+                throw GapMisMatchError(
+                    this->toString(), previousNumber, number);
             }
         }
         return false;

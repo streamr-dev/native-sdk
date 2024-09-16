@@ -404,7 +404,8 @@ public:
         }
     }
 
-    void weakLockConnection(const DhtAddress& nodeId, const LockID& lockId) override {
+    void weakLockConnection(
+        const DhtAddress& nodeId, const LockID& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             (nodeId ==
              Identifiers::getNodeIdFromPeerDescriptor(
@@ -414,7 +415,8 @@ public:
         this->locks.addWeakLocked(nodeId, lockId);
     }
 
-    void weakUnlockConnection(const DhtAddress& nodeId, const LockID& lockId) override {
+    void weakUnlockConnection(
+        const DhtAddress& nodeId, const LockID& lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             (nodeId ==
              Identifiers::getNodeIdFromPeerDescriptor(
@@ -530,7 +532,7 @@ private:
                      disconnectMode]() -> folly::coro::Task<void> {
                         co_await folly::coro::collectAll(
                             waitForEvent<endpointevents::Disconnected>(
-                                *endpoint, 2000ms), // NOLINT
+                                endpoint.get(), 2000ms), // NOLINT
                             folly::coro::co_invoke(
                                 [this,
                                  endpoint,

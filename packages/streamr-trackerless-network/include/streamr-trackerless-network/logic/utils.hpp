@@ -17,8 +17,7 @@ using streamr::dht::Identifiers;
 class Utils {
 public:
     static bool markAndCheckDuplicate(
-        std::map<std::string, DuplicateMessageDetector>&
-            duplicateDetectors,
+        std::map<std::string, DuplicateMessageDetector>& duplicateDetectors,
         const MessageID& currentMessage,
         const std::optional<MessageRef>& previousMessageRef) {
         const auto& publisherIdRaw = currentMessage.publisherid();
@@ -26,7 +25,7 @@ public:
             Identifiers::getDhtAddressFromRaw(DhtAddressRaw{publisherIdRaw});
         const auto& detectorKey =
             publisherId + "-" + currentMessage.messagechainid();
-        
+
         std::optional<NumberPair> previousNumberPair =
             previousMessageRef.has_value()
             ? std::make_optional(NumberPair(

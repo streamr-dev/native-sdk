@@ -9,7 +9,6 @@
 #include <optional>
 #include <tuple>
 #include <type_traits>
-
 namespace streamr::eventemitter {
 
 // Event class that all events must inherit from.
@@ -62,7 +61,11 @@ private:
 
 public:
     explicit StoredEvent(HandlerArgumentTypes... args)
-        : arguments(std::forward<HandlerArgumentTypes>(args)...) {}
+        : arguments(
+              std::make_tuple(std::forward<HandlerArgumentTypes>(args)...)) {}
+
+    // explicit StoredEvent(std::tuple<HandlerArgumentTypes...> args)
+    //     : arguments(std::move(args)) {}
 
     [[nodiscard]] const Event<HandlerArgumentTypes...>::ArgumentTypes&
     getArguments() const {
@@ -195,7 +198,7 @@ public:
         typename EmitterEventType::Handler handler(
             handlerFunction, handlerReference.getId(), once);
 
-        if (ReplayLatestEventToNewListeners) {
+        if constexpr (ReplayLatestEventToNewListeners) {
             std::lock_guard guard{mLatestEventMutex};
             if (mLatestEvent.has_value()) {
                 invokeLatestEvent(handler, mLatestEvent.value().getArguments());
@@ -283,11 +286,11 @@ public:
     template <
         MatchingEventType<EmitterEventType> EventType,
         typename... EventArgs>
-    void emit(EventArgs&&... args) {
-        if (ReplayLatestEventToNewListeners) {
-            mLatestEvent =
-                std::move(StoredEvent<typename EmitterEventType::ArgumentTypes>(
-                    std::forward<EventArgs>(args)...));
+    void emit(EventArgs... args) {
+        if constexpr (ReplayLatestEventToNewListeners) {
+            StoredEvent<typename EmitterEventType::ArgumentTypes> storedEvent(
+                (args)...);
+            mLatestEvent = std::move(storedEvent);
         }
         std::lock_guard guard{mEmitLoopMutex};
         createExecutingEmitLoopHandlersMap();
@@ -301,6 +304,22 @@ public:
             }
         }
     }
+};
+
+template <typename BoundEmitterType, typename BoundEventType>
+class BoundEvent {
+public:
+    using EventType = BoundEventType;
+    using EmitterType = BoundEmitterType;
+
+private:
+    EmitterType& mEventEmitter;
+
+public:
+    explicit BoundEvent(EmitterType& eventEmitter)
+        : mEventEmitter(eventEmitter) {}
+
+    [[nodiscard]] EmitterType& getEmitter() const { return mEventEmitter; }
 };
 
 // Disable default specialization
@@ -321,13 +340,24 @@ class EventEmitter<std::tuple<EventTypes...>>
                                                // for each EventType
 
 public:
+    EventEmitter() = default;
+    virtual ~EventEmitter() = default;
+
     // Make the inherited methods visible to the templating system
+
     using EventEmitterImpl<EventTypes>::on...;
     using EventEmitterImpl<EventTypes>::once...;
     using EventEmitterImpl<EventTypes>::off...;
     using EventEmitterImpl<EventTypes>::listenerCount...;
     using EventEmitterImpl<EventTypes>::removeAllListeners...;
     using EventEmitterImpl<EventTypes>::emit...;
+
+    template <typename EventType>
+    [[nodiscard]] BoundEvent<EventEmitter<std::tuple<EventTypes...>>, EventType>
+    event() {
+        return BoundEvent<EventEmitter<std::tuple<EventTypes...>>, EventType>(
+            *this);
+    }
 
     /**
      * @brief Remove all listeners for all event types.
@@ -354,16 +384,28 @@ template <typename... EventTypes>
 class ReplayEventEmitter<std::tuple<EventTypes...>>
     : public EventEmitterImpl<EventTypes, true>... { // inherit from
                                                      // EventEmitterImpl
-    // for each EventType
-
 public:
+    ReplayEventEmitter() = default;
+    virtual ~ReplayEventEmitter() = default;
+
     // Make the inherited methods visible to the templating system
+
     using EventEmitterImpl<EventTypes, true>::on...;
     using EventEmitterImpl<EventTypes, true>::once...;
     using EventEmitterImpl<EventTypes, true>::off...;
     using EventEmitterImpl<EventTypes, true>::listenerCount...;
     using EventEmitterImpl<EventTypes, true>::removeAllListeners...;
     using EventEmitterImpl<EventTypes, true>::emit...;
+
+    template <typename EventType>
+    [[nodiscard]] BoundEvent<
+        ReplayEventEmitter<std::tuple<EventTypes...>>,
+        EventType>
+    event() {
+        return BoundEvent<
+            ReplayEventEmitter<std::tuple<EventTypes...>>,
+            EventType>(*this);
+    }
 
     /**
      * @brief Remove all listeners for all event types.

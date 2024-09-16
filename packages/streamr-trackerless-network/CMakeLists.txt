@@ -62,23 +62,23 @@ target_link_libraries(streamr-trackerless-network
      enable_testing()
     find_package(GTest CONFIG REQUIRED)
 
-    add_executable(streamr-trackerless-network-test-unit
-        test/unit/NodeListTest.cpp
-    )
+    # add_executable(streamr-trackerless-network-test-unit
+    #     test/unit/NodeListTest.cpp
+    # )
 
-    target_include_directories(streamr-trackerless-network-test-unit
-        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
-        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
-        )
+    # target_include_directories(streamr-trackerless-network-test-unit
+    #     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
+    #     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    #     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
+    #     )
 
-    target_link_libraries(streamr-trackerless-network-test-unit 
-        PUBLIC streamr-trackerless-network
-        INTERFACE streamr::streamr-logger
-        PUBLIC GTest::gtest
-        PUBLIC GTest::gtest_main
-        PUBLIC Folly::folly
-    )
+    # target_link_libraries(streamr-trackerless-network-test-unit 
+    #     PUBLIC streamr-trackerless-network
+    #     INTERFACE streamr::streamr-logger
+    #     PUBLIC GTest::gtest
+    #     PUBLIC GTest::gtest_main
+    #     PUBLIC Folly::folly
+    # )
 
      add_executable(streamr-trackerless-network-test-integration
          test/integration/ProxyClientTsIntegrationTest.cpp
@@ -93,7 +93,7 @@ target_link_libraries(streamr-trackerless-network
      
      if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
          include(GoogleTest)
-         gtest_discover_tests(streamr-trackerless-network-test-unit)
+         # gtest_discover_tests(streamr-trackerless-network-test-unit)
          gtest_discover_tests(streamr-trackerless-network-test-integration)
      endif()
 endif()

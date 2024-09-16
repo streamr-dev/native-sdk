@@ -3,7 +3,6 @@
 
 #include <map>
 #include <ranges>
-#include <string>
 #include <vector>
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
@@ -17,8 +16,10 @@ using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
 
 class ContentDeliveryRpcRemote;
-struct NodeAdded : Event<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> {};
-struct NodeRemoved : Event<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> {};
+struct NodeAdded
+    : Event<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> {};
+struct NodeRemoved
+    : Event<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> {};
 
 using NodeListEvents = std::tuple<NodeAdded, NodeRemoved>;
 
@@ -55,7 +56,7 @@ public:
     NodeList(DhtAddress ownId, size_t limit)
         : limit(limit), ownId(std::move(ownId)) {}
 
-    void add(std::shared_ptr<ContentDeliveryRpcRemote> remote) {
+    void add(const std::shared_ptr<ContentDeliveryRpcRemote>& remote) {
         const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
             remote->getPeerDescriptor());
         if ((this->ownId != nodeId) && (this->nodes.size() < this->limit)) {
@@ -68,7 +69,7 @@ public:
         }
     }
 
-    void remove(DhtAddress nodeId) {
+    void remove(const DhtAddress& nodeId) {
         if (this->nodes.contains(nodeId)) {
             const auto remote = this->nodes.at(nodeId);
             this->nodes.erase(nodeId);
@@ -76,7 +77,7 @@ public:
         }
     }
 
-    bool has(const DhtAddress& nodeId) const {
+    [[nodiscard]] bool has(const DhtAddress& nodeId) const {
         return this->nodes.contains(nodeId);
     }
 
@@ -94,22 +95,23 @@ public:
         }
     }
 
-    std::vector<DhtAddress> getIds() const {
+    [[nodiscard]] std::vector<DhtAddress> getIds() const {
         return this->nodes | std::views::keys |
             std::ranges::to<std::vector<DhtAddress>>();
     }
 
-    std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> get(
+    [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> get(
         const DhtAddress& id) const {
         return this->nodes.at(id);
     }
 
-    size_t size(const std::vector<DhtAddress>& exclude = {}) const {
+    [[nodiscard]] size_t size(
+        const std::vector<DhtAddress>& exclude = {}) const {
         return NodeList::getValuesOfIncludedKeys(this->nodes, exclude).size();
     }
 
-    std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> getRandom(
-        const std::vector<DhtAddress>& exclude) {
+    [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>>
+    getRandom(const std::vector<DhtAddress>& exclude) {
         const auto values =
             NodeList::getValuesOfIncludedKeys(this->nodes, exclude);
         if (values.empty()) {
@@ -118,16 +120,16 @@ public:
         return values[rand() % values.size()];
     }
 
-    std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> getFirst(
-        const std::vector<DhtAddress>& exclude, bool wsOnly = false) {
+    [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>>
+    getFirst(const std::vector<DhtAddress>& exclude, bool wsOnly = false) {
         const auto included =
             NodeList::getValuesOfIncludedKeys(this->nodes, exclude, wsOnly);
         return included.empty() ? std::nullopt
                                 : std::make_optional(included[0]);
     }
 
-    std::vector<std::shared_ptr<ContentDeliveryRpcRemote>> getFirstAndLast(
-        const std::vector<DhtAddress>& exclude) {
+    [[nodiscard]] std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>
+    getFirstAndLast(const std::vector<DhtAddress>& exclude) {
         const auto included =
             NodeList::getValuesOfIncludedKeys(this->nodes, exclude);
         if (included.empty()) {
@@ -139,7 +141,9 @@ public:
         return {included.front()};
     }
 
-    static std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> getLast(
+    [[nodiscard]] static std::optional<
+        std::shared_ptr<ContentDeliveryRpcRemote>>
+    getLast(
         const std::map<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>>&
             nodes,
         const std::vector<DhtAddress>& exclude) {
@@ -148,7 +152,8 @@ public:
                                 : std::make_optional(included.back());
     }
 
-    std::vector<std::shared_ptr<ContentDeliveryRpcRemote>> getAll() {
+    [[nodiscard]] std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>
+    getAll() {
         return this->nodes | std::views::values |
             std::ranges::to<
                    std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>>();

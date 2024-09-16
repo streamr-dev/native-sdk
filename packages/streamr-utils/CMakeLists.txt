@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(homebrewClang.cmake)
 
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
@@ -69,6 +71,9 @@ if(NOT IOS)
     test/unit/AbortableTimersTest.cpp
     test/unit/waitForEventTest.cpp
     test/unit/waitForConditionTest.cpp
+    test/unit/runAndWaitForEventsTest.cpp
+    test/unit/toCoroTaskTest.cpp
+    test/unit/collectTest.cpp
   )
   target_link_libraries(streamr-utils-test-unit 
     PUBLIC streamr-utils

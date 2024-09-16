@@ -30,9 +30,7 @@ public:
               .maxSize = maxTasks,
           }) {}
 
-    std::vector<PropagationTask> get() {
-        return this->tasks.values();
-    }
+    std::vector<PropagationTask> get() { return this->tasks.values(); }
 
     void add(const PropagationTask& task) {
         const auto messageId = task.message.messageid();
@@ -40,9 +38,7 @@ public:
         this->tasks.set(messageIdToMessageRef(messageId), task);
     }
 
-    void remove(const MessageRef& messageId) {
-        this->tasks.remove(messageId);
-    }
+    void remove(const MessageRef& messageId) { this->tasks.remove(messageId); }
 
     static MessageRef messageIdToMessageRef(const MessageID& messageId) {
         MessageRef messageRef;

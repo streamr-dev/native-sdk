@@ -62,7 +62,7 @@ public:
     virtual void close(bool gracefulLeave) = 0;
     virtual void destroy() = 0;
 
-    virtual ~Connection() { SLogger::trace("~Connection()"); }
+    ~Connection() override { SLogger::trace("~Connection()"); }
 
     [[nodiscard]] ConnectionID getConnectionID() const { return mID; }
     [[nodiscard]] ConnectionType getConnectionType() const { return mType; }
@@ -70,7 +70,7 @@ public:
         return std::string(magic_enum::enum_name(mType));
     }
     static ConnectionID createRandomConnectionId() {
-       return ConnectionID{Uuid::v4()};
+        return ConnectionID{Uuid::v4()};
     }
 };
 
