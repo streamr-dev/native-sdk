@@ -3,15 +3,14 @@
 
 #include <chrono>
 #include <functional>
-#include <optional>
-#include "RandomAccessQueue.hpp"
-#include <ranges>
 #include <map>
 #include <mutex>
+#include <optional>
+#include <ranges>
+#include "RandomAccessQueue.hpp"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
-
-inline bool operator<(const MessageRef& r1, const MessageRef& r2){
+inline bool operator<(const MessageRef& r1, const MessageRef& r2) {
     if (r1.sequencenumber() != r2.sequencenumber()) {
         return r1.sequencenumber() < r2.sequencenumber();
     }
@@ -49,7 +48,7 @@ public:
     explicit FifoMapWithTTL(const FifoMapWithTtlOptions<KeyType>& options) {
         this->ttl = options.ttl;
         this->maxSize = options.maxSize;
-        
+
         if (options.onItemDropped.has_value()) {
             this->onItemDropped = std::move(options.onItemDropped.value());
         } else {
@@ -130,7 +129,8 @@ public:
     std::vector<ValueType> values() {
         std::scoped_lock lock{this->itemsMutex};
 
-        const auto keys = this->items | std::views::keys | std::ranges::to<std::vector>();
+        const auto keys =
+            this->items | std::views::keys | std::ranges::to<std::vector>();
         std::vector<ValueType> values;
         for (const auto& key : keys) {
             const auto value = this->get(key);

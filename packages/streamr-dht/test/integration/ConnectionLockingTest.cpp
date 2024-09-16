@@ -2,17 +2,15 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
-#include <folly/coro/Collect.h>
 #include <folly/coro/Promise.h>
 #include <folly/coro/blockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/ConnectionManager.hpp"
 #include "streamr-dht/transport/FakeTransport.hpp"
-#include "streamr-dht/transport/Transport.hpp"
 #include "streamr-dht/types/PortRange.hpp"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-utils/collect.hpp"
 #include "streamr-utils/waitForCondition.hpp"
 
 using ::dht::ConnectivityResponse;
@@ -32,6 +30,7 @@ using streamr::dht::Identifiers;
 using streamr::dht::connection::LockID;
 using streamr::dht::types::PortRange;
 using streamr::logger::SLogger;
+using streamr::utils::collect;
 using streamr::utils::waitForCondition;
 
 // namespace transportevents = streamr::dht::transport::transportevents;
@@ -102,9 +101,7 @@ TEST_F(ConnectionLockingTest, CanLockConnections) {
             .transport = *mockConnectorTransport1,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =
-                PortRange{
-                    .min = mockWebsocketPort1,
-                    .max = mockWebsocketPort1}, // NOLINT
+                PortRange{.min = mockWebsocketPort1, .max = mockWebsocketPort1},
             .createLocalPeerDescriptor =
                 [this](const ConnectivityResponse& /* response */)
                 -> PeerDescriptor { return mockPeerDescriptor1; }});
@@ -116,9 +113,7 @@ TEST_F(ConnectionLockingTest, CanLockConnections) {
             .transport = *mockConnectorTransport2,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =
-                PortRange{
-                    .min = mockWebsocketPort2,
-                    .max = mockWebsocketPort2}, // NOLINT
+                PortRange{.min = mockWebsocketPort2, .max = mockWebsocketPort2},
             .createLocalPeerDescriptor =
                 [this](const ConnectivityResponse& /* response */)
                 -> PeerDescriptor { return mockPeerDescriptor2; }});
@@ -128,13 +123,9 @@ TEST_F(ConnectionLockingTest, CanLockConnections) {
     auto tmpMockPeerDescriptor2 = mockPeerDescriptor2;
     auto tmpMockPeerDescriptor1 = mockPeerDescriptor1;
     SLogger::trace("before lockConnection() start");
-    connectionManager1->lockConnection(
-        std::move(mockPeerDescriptor2), std::move(LockID("testLock")));
+    connectionManager1->lockConnection(mockPeerDescriptor2, LockID("testLock"));
     SLogger::trace("lockConnection done");
-    // auto nodeId1 =
-    // Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1);
-    // auto nodeId2 =
-    // Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2);
+
     std::function<bool()> condition = [&connectionManager2,
                                        &tmpMockPeerDescriptor1]() {
         return connectionManager2->hasRemoteLockedConnection(
@@ -181,43 +172,39 @@ TEST_F(ConnectionLockingTest, MultipleServicesOnTheSamePeer) {
 
     SLogger::info("Starting connection manager 2");
     connectionManager2->start();
-    auto tmpMockPeerDescriptor2 = mockPeerDescriptor2;
-    auto tmpMockPeerDescriptor2B = mockPeerDescriptor2;
-    auto tmpMockPeerDescriptor1 = mockPeerDescriptor1;
-    //   auto nodeId1 =
-    //   Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1); auto
-    //   nodeId2 =
-    //   Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2);
 
-    std::function<bool()> condition = [&connectionManager2,
-                                       &tmpMockPeerDescriptor1]() {
+    std::function<bool()> condition = [this,
+                                       &connectionManager2,
+                                       mockPeereerDescriptor1 =
+                                           this->mockPeerDescriptor1]() {
         return connectionManager2->hasRemoteLockedConnection(
-            Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1));
+            Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1));
     };
 
-    auto task = folly::coro::collectAll(
-        folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+    auto task = collect(
+        [&]() {
             connectionManager1->lockConnection(
-                std::move(mockPeerDescriptor2), LockID("testLock1"));
-            co_return;
-        }),
+                mockPeerDescriptor2, LockID("testLock1"));
+        },
         waitForCondition(condition) // NOLINT
     );
+
     folly::coro::blockingWait(std::move(task));
-    auto task2 = folly::coro::collectAll(
-        folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+
+    auto task2 = collect(
+        [&]() {
             connectionManager1->lockConnection(
-                std::move(tmpMockPeerDescriptor2B),
-                std::move(LockID("testLock2")));
-            co_return;
-        }),
+                mockPeerDescriptor2, LockID("testLock2"));
+        },
         waitForCondition(condition) // NOLINT
     );
+
     folly::coro::blockingWait(std::move(task2));
+
     ASSERT_TRUE(connectionManager1->hasConnection(
-        Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
+        Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
     ASSERT_TRUE(connectionManager1->hasLocalLockedConnection(
-        Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
+        Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor2)));
     ASSERT_TRUE(connectionManager2->hasRemoteLockedConnection(
-        Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1)));
+        Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor1)));
 }

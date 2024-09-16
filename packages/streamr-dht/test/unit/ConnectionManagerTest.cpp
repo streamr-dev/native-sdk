@@ -6,9 +6,9 @@
 #include <folly/coro/Collect.h>
 #include <folly/coro/Promise.h>
 #include <folly/coro/blockingWait.h>
-#include "streamr-dht/transport/FakeTransport.hpp"
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
+#include "streamr-dht/transport/FakeTransport.hpp"
 #include "streamr-dht/transport/Transport.hpp"
 #include "streamr-dht/types/PortRange.hpp"
 #include "streamr-logger/SLogger.hpp"

@@ -84,10 +84,12 @@ TEST(ProxyClientTsIntegrationTest, ItCanPublishAMessage) {
         .streamPartId =
             StreamPartID{"0xa000000000000000000000000000000000000000#01"},
         .connectionLocker = *connectionManager});
-    
+
     proxyClient.start();
-    
-    proxyClient.setProxies({proxyPeerDescriptor}, ProxyDirection::PUBLISH,
+
+    proxyClient.setProxies(
+        {proxyPeerDescriptor},
+        ProxyDirection::PUBLISH,
         EthereumAddress("0xABB0a4a3981c854615C9bBDd9a358488Ff2b8762"));
 
     StreamMessage message;
@@ -95,6 +97,6 @@ TEST(ProxyClientTsIntegrationTest, ItCanPublishAMessage) {
     MessageID messageId;
     messageId.set_sequencenumber(1);
     message.mutable_messageid()->CopyFrom(messageId);
-    
+
     proxyClient.broadcast(message);
 }

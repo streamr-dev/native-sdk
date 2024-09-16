@@ -8,8 +8,17 @@
 #include <folly/coro/Task.h>
 #include <folly/coro/Timeout.h>
 #include "streamr-utils/AbortController.hpp"
-
 namespace streamr::utils {
+
+template <typename T>
+struct remove_pointer { // NOLINT
+    using type = T;
+};
+
+template <typename T>
+struct remove_pointer<T*> {
+    using type = typename remove_pointer<T>::type;
+};
 
 constexpr auto defaultTimeout = std::chrono::milliseconds(5000);
 
@@ -35,12 +44,15 @@ struct Waiter<std::tuple<Args...>> {
 };
 
 template <typename EventType, typename EmitterType>
-inline folly::coro::Task<typename EventType::ArgumentTypes> waitForEvent(
-    EmitterType& emitter,
+inline folly::coro::Task<
+    typename remove_pointer<EventType>::type::ArgumentTypes>
+waitForEvent(
+    EmitterType* emitter,
     std::chrono::milliseconds timeout = defaultTimeout,
     AbortSignal* abortSignal = nullptr) {
-    Waiter<typename EventType::ArgumentTypes> waiter;
-    emitter.template once<EventType>(waiter.function);
+    Waiter<typename remove_pointer<EventType>::type::ArgumentTypes> waiter;
+    emitter->template once<typename remove_pointer<EventType>::type>(
+        waiter.function);
     if (abortSignal) {
         co_return co_await folly::coro::co_withCancellation(
             abortSignal->getCancellationToken(),

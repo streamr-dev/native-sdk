@@ -2,7 +2,6 @@
 #define STREAMR_UTILS_WAITFORCONDITION_HPP
 
 #include <chrono>
-#include <iostream>
 #include <folly/coro/Collect.h>
 #include <folly/coro/Task.h>
 #include "streamr-eventemitter/EventEmitter.hpp"
@@ -13,7 +12,7 @@
 namespace streamr::utils {
 
 using streamr::eventemitter::Event;
-using streamr::eventemitter::EventEmitter;
+using streamr::eventemitter::ReplayEventEmitter;
 
 constexpr auto defaultRetryInterval = std::chrono::milliseconds(100); // NOLINT
 
@@ -21,7 +20,7 @@ struct ConditionMet : public Event<> {};
 
 using PollerEvents = std::tuple<ConditionMet>;
 
-class Poller : public EventEmitter<PollerEvents> {
+class Poller : public ReplayEventEmitter<PollerEvents> {
 private:
     AbortController abortController;
 
@@ -49,15 +48,8 @@ inline folly::coro::Task<void> waitForCondition(
     std::chrono::milliseconds retryInterval = defaultRetryInterval,
     AbortSignal* abortSignal = nullptr) {
     Poller poller;
-    co_await folly::coro::collectAll(
-        waitForEvent<ConditionMet>(poller, timeout, abortSignal), // NOLINT
-        folly::coro::co_invoke(
-            [&poller,
-             &conditionFn,
-             retryInterval]() -> folly::coro::Task<void> {
-                poller.start(conditionFn, retryInterval);
-                co_return;
-            }));
+    poller.start(conditionFn, retryInterval);
+    co_await waitForEvent<ConditionMet>(&poller, timeout, abortSignal);
 }
 
 } // namespace streamr::utils

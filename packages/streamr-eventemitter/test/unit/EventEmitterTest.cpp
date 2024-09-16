@@ -396,3 +396,21 @@ TEST_F(EventEmitterTest, EventsAreReceivedInOrderEvenIfListenersAreSlow) {
     ASSERT_EQ(listenerACount.load(), 2);
     ASSERT_EQ(listenerBEventOrder, std::vector<int>({1, 2}));
 }
+
+TEST_F(EventEmitterTest, TestEventMethod) {
+    struct Greeting : Event<std::string_view> {};
+    using Events = std::tuple<Greeting>;
+
+    EventEmitter<Events> eventEmitter;
+
+    std::promise<std::string_view> promise1;
+
+    auto boundEvent = eventEmitter.event<Greeting>();
+    boundEvent.getEmitter().template on<decltype(boundEvent)::EventType>(
+        [&promise1](std::string_view message) -> void {
+            promise1.set_value(message);
+        });
+
+    eventEmitter.emit<Greeting>("Hello, world!");
+    ASSERT_EQ(promise1.get_future().get(), "Hello, world!");
+}

@@ -17,6 +17,7 @@ using streamr::logger::SLogger;
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 using folly::coro::Task;
+using utils::Uuid;
 
 constexpr size_t threadPoolSize = 20;
 

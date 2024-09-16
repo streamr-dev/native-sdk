@@ -1,10 +1,8 @@
 #ifndef STREAMR_UTILS_BINARYUTILS_HPP
 #define STREAMR_UTILS_BINARYUTILS_HPP
 
-#include <cstddef>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <boost/algorithm/hex.hpp>
 
 namespace streamr::utils {
@@ -39,7 +37,8 @@ public:
 
         if (hexString.length() != result.length() * 2) {
             throw std::runtime_error(
-                "Hex string input is likely malformed, received: 0x" + hexString);
+                "Hex string input is likely malformed, received: 0x" +
+                hexString);
         }
         return result;
     }

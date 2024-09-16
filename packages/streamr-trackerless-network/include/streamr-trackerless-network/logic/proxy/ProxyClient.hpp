@@ -156,6 +156,7 @@ private:
                     req, context);
             });
     }
+
 public:
     void setProxies(
         const std::vector<PeerDescriptor>& nodes,
@@ -301,7 +302,6 @@ public:
         this->connections.erase(nodeId);
         this->neighbors.remove(nodeId);
     }
-
 
     void broadcast(
         const StreamMessage& msg,
