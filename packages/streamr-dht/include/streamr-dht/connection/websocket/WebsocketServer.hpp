@@ -56,7 +56,12 @@ private:
 public:
     explicit WebsocketServer(WebsocketServerConfig&& config)
         : mConfig(std::move(config)) {}
-    // uint16_t start() {}
+
+    ~WebsocketServer() override {
+        SLogger::trace("~WebsocketServer() start");
+        stop();
+        SLogger::trace("~WebsocketServer() stop() end");
+    }
 
     uint16_t start() {
         uint32_t min = mConfig.portRange.min;
@@ -85,9 +90,11 @@ public:
     }
 
     void stop() {
-        SLogger::trace("stop()");
+        SLogger::trace("stop() start");
         removeAllListeners();
+        SLogger::trace("stop() removeAllListeners() end");
         mServer->stop();
+        SLogger::trace("stop() mServer->stop() end");
     }
 
     void updateCertificate(const std::string& cert, const std::string& key) {

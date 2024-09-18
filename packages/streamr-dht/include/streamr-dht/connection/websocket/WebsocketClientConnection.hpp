@@ -2,15 +2,18 @@
 #define STREAMR_DHT_CONNECTION_WEBSOCKET_CLIENTWEBSOCKET_HPP
 
 #include <rtc/rtc.hpp>
+#include <folly/coro/Collect.h>
 #include "streamr-dht/connection/websocket/WebsocketConnection.hpp"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-utils/waitForEvent.hpp"
 
 namespace streamr::dht::connection::websocket {
 
 using streamr::logger::SLogger;
-
+using streamr::utils::waitForEvent;
 class WebsocketClientConnection : public WebsocketConnection {
 private:
+    // Only allow creation of this class via newInstance()
     WebsocketClientConnection()
         : WebsocketConnection(ConnectionType::WEBSOCKET_CLIENT) {}
 

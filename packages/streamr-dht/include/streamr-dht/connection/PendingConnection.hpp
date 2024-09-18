@@ -34,15 +34,20 @@ class PendingConnection : public EventEmitter<PendingConnectionEvents> {
 private:
     AbortController connectingAbortController;
     PeerDescriptor remotePeerDescriptor;
+    std::optional<std::function<void(std::exception_ptr)>> errorCallback;
+    std::atomic<bool> errorCallbackCalled = false;
     bool replacedAsDuplicate = false;
     bool stopped = false;
 
 public:
     explicit PendingConnection(
         PeerDescriptor remotePeerDescriptor,
+        std::optional<std::function<void(std::exception_ptr)>> errorCallback =
+            std::nullopt,
         std::chrono::milliseconds timeout =
             std::chrono::milliseconds(15 * 1000)) // NOLINT
-        : remotePeerDescriptor(std::move(remotePeerDescriptor)) {
+        : errorCallback(std::move(errorCallback)),
+          remotePeerDescriptor(std::move(remotePeerDescriptor)) {
         AbortableTimers::setAbortableTimeout(
             [this]() { this->close(false); },
             timeout,
@@ -64,10 +69,36 @@ public:
         }
     }
 
+    void onError(const std::exception_ptr& error) {
+        SLogger::error(
+            Identifiers::getNodeIdFromPeerDescriptor(
+                this->remotePeerDescriptor) +
+            " PendingConnection onError");
+        if (this->errorCallback.has_value() && !this->errorCallbackCalled) {
+            SLogger::error(
+                Identifiers::getNodeIdFromPeerDescriptor(
+                    this->remotePeerDescriptor) +
+                " PendingConnection onError calling errorCallback");
+            this->errorCallback.value()(error);
+            this->errorCallbackCalled = true;
+        }
+    }
+
     void close(bool graceful) {
         if (this->stopped) {
             return;
         }
+        if (this->errorCallback.has_value() && !this->errorCallbackCalled) {
+            SLogger::error(
+                Identifiers::getNodeIdFromPeerDescriptor(
+                    this->remotePeerDescriptor) +
+                " PendingConnection onError calling errorCallback");
+            this->errorCallback.value()(
+                std::make_exception_ptr(std::runtime_error(
+                    "PendingConnection closed while connecting")));
+            this->errorCallbackCalled = true;
+        }
+
         this->stopped = true;
         this->connectingAbortController.abort();
         if (!this->replacedAsDuplicate) {

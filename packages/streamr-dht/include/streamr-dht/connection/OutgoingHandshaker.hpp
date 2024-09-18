@@ -24,12 +24,14 @@ private:
     HandlerToken connectedHandlerToken;
     HandlerToken disconnectedHandlerToken;
     HandlerToken pendingDisconnectedHandlerToken;
+    HandlerToken errorHandlerToken;
 
     void stopHandshaker() {
         this->connection->off<connectionevents::Connected>(
             this->connectedHandlerToken);
         this->connection->off<connectionevents::Disconnected>(
             this->disconnectedHandlerToken);
+        this->connection->off<connectionevents::Error>(this->errorHandlerToken);
         this->pendingConnection->off<pendingconnectionevents::Disconnected>(
             this->pendingDisconnectedHandlerToken);
 
@@ -64,6 +66,14 @@ public:
                     const std::string& /*reason*/) {
                     this->pendingConnection->close(gracefulLeave);
                     stopHandshaker();
+                });
+
+        this->errorHandlerToken =
+            this->connection->once<connectionevents::Error>(
+                [this](const std::string& name) {
+                    SLogger::error("OutgoingHandshaker got error: " + name);
+                    this->pendingConnection->onError(
+                        std::make_exception_ptr(std::runtime_error(name)));
                 });
         // disconnecting pending connection will close the connection
         this->pendingDisconnectedHandlerToken =

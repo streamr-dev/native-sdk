@@ -87,6 +87,7 @@ int main() {
         [&clientCommunicators](
             const RpcMessage& message,
             const std::string& /* requestId */,
+            const std::optional<std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& context) -> void {
             // Send the reply message to the calling client based on
             // sourceId passed
@@ -100,6 +101,7 @@ int main() {
         [&clientCommunicators](
             const RpcMessage& message,
             const std::string& /* requestId */,
+            const std::optional<std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& context) -> void {
             const std::string sourceId = context.at("sourceId");
             clientCommunicators[sourceId]->handleIncomingMessage(
@@ -110,6 +112,7 @@ int main() {
         [&clientCommunicators, &serverCommunicator1, &serverCommunicator2](
             const RpcMessage& message,
             const std::string& /* requestId */,
+            const std::optional<std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& context) -> void {
             // Choose the server to send the message to based on context
             // information passed through the RPC stack as client context
@@ -145,6 +148,7 @@ int main() {
         [&clientCommunicators, &serverCommunicator1, &serverCommunicator2](
             const RpcMessage& message,
             const std::string& /* requestId */,
+            const std::optional<std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& context) -> void {
             RpcCommunicatorType* server;
             std::string targetServerId = context.at("targetServerId");
