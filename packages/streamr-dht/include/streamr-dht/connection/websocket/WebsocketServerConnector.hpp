@@ -36,16 +36,16 @@ struct WebsocketServerConnectorOptions {
         onNewConnection;
     ListeningRpcCommunicator& rpcCommunicator;
     std::function<bool(DhtAddress)> hasConnection;
-    std::optional<PortRange> portRange;
-    std::optional<size_t> maxMessageSize;
-    std::optional<std::string> host;
-    std::optional<std::vector<PeerDescriptor>> entrypoints;
-    std::optional<TlsCertificateFiles> tlsCertificateFiles;
-    std::optional<Transport*> autoCertifierTransport;
-    std::optional<std::string> autoCertifierUrl;
-    std::optional<std::string> autoCertifierConfigFile;
-    std::optional<bool> serverEnableTls;
-    std::optional<std::string> geoIpDatabaseFolder;
+    std::optional<PortRange> portRange = std::nullopt;
+    std::optional<size_t> maxMessageSize = std::nullopt;
+    std::optional<std::string> host = std::nullopt;
+    std::optional<std::vector<PeerDescriptor>> entrypoints = std::nullopt;
+    std::optional<TlsCertificateFiles> tlsCertificateFiles = std::nullopt;
+    std::optional<Transport*> autoCertifierTransport = std::nullopt;
+    std::optional<std::string> autoCertifierUrl = std::nullopt;
+    std::optional<std::string> autoCertifierConfigFile = std::nullopt;
+    std::optional<bool> serverEnableTls = std::nullopt;
+    std::optional<std::string> geoIpDatabaseFolder = std::nullopt;
 };
 
 class WebsocketServerConnector {
@@ -64,7 +64,7 @@ private:
 public:
     explicit WebsocketServerConnector(WebsocketServerConnectorOptions&& options)
         : host(options.host), options(std::move(options)) {
-        if (this->options.portRange) {
+        if (this->options.portRange.has_value()) {
             this->websocketServer = std::make_unique<WebsocketServer>(
                 std::move(WebsocketServerConfig{
                     .portRange = this->options.portRange.value(),
@@ -184,7 +184,10 @@ public:
         }
         this->connectingHandshakers.clear();
         this->ongoingConnectRequests.clear();
-        this->websocketServer->stop();
+
+        if (this->websocketServer != nullptr) {
+            this->websocketServer->stop();
+        }
     }
 
 private:

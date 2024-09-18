@@ -1,6 +1,7 @@
 #ifndef STREAMR_PROTO_RPC_RPC_COMMUNICATOR_SERVER_API_HPP
 #define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_SERVER_API_HPP
 
+#include <exception>
 #include "Errors.hpp"
 #include "ServerRegistry.hpp"
 
@@ -12,7 +13,11 @@ template <typename CallContextType>
 class RpcCommunicatorServerApi {
 public:
     using OutgoingMessageCallbackType = std::function<void(
-        RpcMessage, std::string /*requestId*/, CallContextType)>;
+        RpcMessage,
+        std::string /*requestId*/,
+        std::optional<
+            std::function<void(std::exception_ptr)>> /*errorCallback*/,
+        CallContextType)>;
 
 private:
     ServerRegistry<CallContextType> mServerRegistry;
@@ -101,7 +106,7 @@ private:
         if (mOutgoingMessageCallback) {
             try {
                 mOutgoingMessageCallback(
-                    response, response.requestid(), callContext);
+                    response, response.requestid(), std::nullopt, callContext);
             } catch (const std::exception& clientSideException) {
                 SLogger::debug(
                     "error when calling outgoing message callback from server",
@@ -144,10 +149,8 @@ public:
         }
     }
 
-    template <typename F>
-        requires std::is_assignable_v<OutgoingMessageCallbackType, F>
-    void setOutgoingMessageCallback(F&& callback) {
-        mOutgoingMessageCallback = std::forward<F>(callback);
+    void setOutgoingMessageCallback(OutgoingMessageCallbackType callback) {
+        mOutgoingMessageCallback = std::move(callback);
     }
 
     template <typename RequestType, typename ReturnType, typename F>

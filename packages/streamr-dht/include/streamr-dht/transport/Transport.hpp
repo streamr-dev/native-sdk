@@ -1,18 +1,23 @@
 #ifndef STREAMR_DHT_TRANSPORT_CONNECTION_HPP
 #define STREAMR_DHT_TRANSPORT_CONNECTION_HPP
 
+#include <exception>
+#include <functional>
+#include <optional>
 #include "packages/dht/protos/DhtRpc.pb.h"
+#include "streamr-dht/helpers/Errors.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
-
 namespace streamr::dht::transport {
 
 using ::dht::PeerDescriptor;
+using streamr::dht::helpers::Err;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
-
 struct SendOptions {
     bool connect = true;
     bool sendIfStopped = false;
+    std::optional<std::function<void(std::exception_ptr err)>> errorCallback =
+        std::nullopt;
 };
 
 namespace transportevents {

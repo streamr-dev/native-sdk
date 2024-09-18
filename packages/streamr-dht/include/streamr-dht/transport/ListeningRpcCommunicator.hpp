@@ -22,7 +22,7 @@ public:
         std::optional<RpcCommunicatorOptions> options = std::nullopt)
         : RoutingRpcCommunicator(
               std::move(serviceId),
-              [this](const Message& message, SendOptions opts) {
+              [this](const Message& message, const SendOptions& opts) {
                   this->transport.send(message, opts);
               },
               options),

@@ -275,8 +275,20 @@ public:
             SLogger::debug("Node ID not found in endpoints");
             if (sendOptions.connect) {
                 SLogger::debug("Creating new connection");
-                auto connection =
-                    this->connectorFacade->createConnection(peerDescriptor);
+
+                std::shared_ptr<PendingConnection> connection;
+                if (sendOptions.errorCallback.has_value()) {
+                    SLogger::debug(
+                        "Error callback is set, creating connection with error callback");
+                    connection = this->connectorFacade->createConnection(
+                        peerDescriptor, sendOptions.errorCallback.value());
+                } else {
+                    SLogger::debug(
+                        "Error callback is not set, creating connection without error callback");
+                    connection =
+                        this->connectorFacade->createConnection(peerDescriptor);
+                }
+
                 SLogger::debug("Created new connection");
                 this->onNewConnection(connection);
                 SLogger::debug("Handled new connection");

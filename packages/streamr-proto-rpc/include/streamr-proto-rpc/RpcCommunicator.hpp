@@ -79,20 +79,10 @@ public:
      *
      */
 
-    /*
-    template <typename F>
-        requires std::is_assignable_v<OutgoingMessageCallbackType, F>
-    void setOutgoingMessageCallback(F&& callback) {
-        mRpcCommunicatorClientApi.setOutgoingMessageCallback(
-            std::forward<F>(callback));
-        mRpcCommunicatorServerApi.setOutgoingMessageCallback(
-            std::forward<F>(callback));
-    }*/
-    void setOutgoingMessageCallback(OutgoingMessageCallbackType callback) {
-        mRpcCommunicatorClientApi.setOutgoingMessageCallback(
-            std::move(callback));
-        mRpcCommunicatorServerApi.setOutgoingMessageCallback(
-            std::move(callback));
+    void setOutgoingMessageCallback(
+        const OutgoingMessageCallbackType& callback) {
+        mRpcCommunicatorClientApi.setOutgoingMessageCallback(callback);
+        mRpcCommunicatorServerApi.setOutgoingMessageCallback(callback);
     }
 
     // Client-side API

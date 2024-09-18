@@ -47,7 +47,7 @@ public:
           rpcLocal(WebsocketClientConnectorRpcLocalOptions{
               .connect =
                   [this](const PeerDescriptor& targetPeerDescriptor) {
-                      return this->connect(targetPeerDescriptor);
+                      return this->connect(targetPeerDescriptor, std::nullopt);
                   },
               .hasConnection = [this](const DhtAddress& nodeId) -> bool {
                   return this->connectingHandshakers.find(nodeId) !=
@@ -88,7 +88,9 @@ public:
     }
 
     std::shared_ptr<PendingConnection> connect(
-        const PeerDescriptor& targetPeerDescriptor) {
+        const PeerDescriptor& targetPeerDescriptor,
+        std::optional<std::function<void(std::exception_ptr)>> errorCallback =
+            std::nullopt) {
         SLogger::debug("connect() to " + targetPeerDescriptor.DebugString());
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(targetPeerDescriptor);
@@ -102,9 +104,13 @@ public:
 
         const auto url =
             connectivityMethodToWebsocketUrl(targetPeerDescriptor.websocket());
-
-        auto pendingConnection =
-            std::make_shared<PendingConnection>(targetPeerDescriptor);
+        if (errorCallback.has_value()) {
+            SLogger::error("errorCallback has value");
+        } else {
+            SLogger::error("errorCallback has no value");
+        }
+        auto pendingConnection = std::make_shared<PendingConnection>(
+            targetPeerDescriptor, std::move(errorCallback));
 
         std::shared_ptr<OutgoingHandshaker> outgoingHandshaker =
             OutgoingHandshaker::newInstance(

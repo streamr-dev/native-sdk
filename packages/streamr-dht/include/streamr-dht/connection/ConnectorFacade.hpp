@@ -32,6 +32,9 @@ protected:
 public:
     virtual std::shared_ptr<PendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor) = 0;
+    virtual std::shared_ptr<PendingConnection> createConnection(
+        const PeerDescriptor& peerDescriptor,
+        std::function<void(std::exception_ptr)> errorCallback) = 0;
     [[nodiscard]] virtual PeerDescriptor getLocalPeerDescriptor() const = 0;
     virtual void start(
         std::function<bool(const std::shared_ptr<PendingConnection>&)> onNewConnection,
@@ -42,8 +45,8 @@ public:
 
 struct DefaultConnectorFacadeOptions {
     Transport& transport;
-    std::optional<std::string> websocketHost;
-    std::optional<PortRange> websocketPortRange;
+    std::optional<std::string> websocketHost = std::nullopt;
+    std::optional<PortRange> websocketPortRange = std::nullopt;
     // std::vector<PeerDescriptor> entryPoints;
     // std::vector<IceServer> iceServers;
     // bool webrtcAllowPrivateAddresses;
@@ -104,9 +107,9 @@ public:
             .onNewConnection = onNewConnection,
             .rpcCommunicator = websocketConnectorRpcCommunicator,
             .hasConnection = hasConnection,
-            .portRange = options.websocketPortRange,
-            .maxMessageSize = options.maxMessageSize,
-            .host = options.websocketHost,
+            .portRange = this->options.websocketPortRange,
+            .maxMessageSize = this->options.maxMessageSize,
+            .host = this->options.websocketHost,
             //.entrypoints = options.entryPoints,
             //.tlsCertificate = options.tlsCertificate,
             .serverEnableTls = false,
@@ -133,6 +136,18 @@ public:
         if (this->websocketClientConnector->isPossibleToFormConnection(
                 peerDescriptor)) {
             return this->websocketClientConnector->connect(peerDescriptor);
+        }
+
+        return nullptr;
+    }
+
+    std::shared_ptr<PendingConnection> createConnection(
+        const PeerDescriptor& peerDescriptor,
+        std::function<void(std::exception_ptr)> errorCallback) override {
+        if (this->websocketClientConnector->isPossibleToFormConnection(
+                peerDescriptor)) {
+            return this->websocketClientConnector->connect(
+                peerDescriptor, std::move(errorCallback));
         }
 
         return nullptr;

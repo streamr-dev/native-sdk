@@ -1,6 +1,7 @@
 #ifndef STREAMR_PROTO_RPC_RPC_COMMUNICATOR_CLIENT_API_HPP
 #define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_CLIENT_API_HPP
 
+#include <exception>
 #include <folly/coro/DetachOnCancel.h>
 #include <folly/coro/Promise.h>
 #include <folly/coro/Task.h>
@@ -25,14 +26,18 @@ template <typename CallContextType>
 class RpcCommunicatorClientApi {
 public:
     using OutgoingMessageCallbackType = std::function<void(
-        RpcMessage, std::string /*requestId*/, CallContextType)>;
+        RpcMessage,
+        std::string /*requestId*/,
+        std::optional<
+            std::function<void(std::exception_ptr)>> /*errorCallback*/,
+        CallContextType)>;
 
 private:
     class OngoingRequestBase {
     public:
         virtual ~OngoingRequestBase() = default;
         virtual void resolveRequest(const RpcMessage& response) = 0;
-        virtual void resolveNotification() = 0;
+        // virtual void resolveNotification() = 0;
         virtual void rejectRequest(const RpcException& error) = 0;
     };
 
@@ -60,10 +65,11 @@ private:
         void resolveRequest(const RpcMessage& response) override {
             this->resolvePromise(response);
         }
-
+        /*
         void resolveNotification() override {
             mPromiseContract.first.setValue();
         }
+        */
 
         void rejectRequest(const RpcException& error) override {
             std::visit(
@@ -110,13 +116,6 @@ public:
     explicit RpcCommunicatorClientApi(
         std::chrono::milliseconds rpcRequestTimeout)
         : mRpcRequestTimeout(rpcRequestTimeout), mExecutor(threadPoolSize) {}
-
-    /*
-    template <typename F>
-        requires std::is_assignable_v<OutgoingMessageCallbackType, F>
-    void setOutgoingMessageCallback(F&& callback) {
-        mOutgoingMessageCallback = std::forward<F>(callback);
-    }*/
 
     void setOutgoingMessageCallback(OutgoingMessageCallbackType callback) {
         mOutgoingMessageCallback = std::move(callback);
@@ -237,6 +236,7 @@ public:
                         outgoingMessageCallback(
                             requestMessage,
                             requestMessage.requestid(),
+                            std::nullopt,
                             callContext);
                         promise.setValue();
                     } catch (const std::exception& clientSideException) {
@@ -264,10 +264,10 @@ public:
     void handleClientError(
         const std::string& requestId, const RpcException& error) {
         std::lock_guard lock(mOngoingRequestsMutex);
-        const auto& ongoingRequest = mOngoingRequests.at(requestId);
+        const auto& ongoingRequest = mOngoingRequests.find(requestId);
 
-        if (ongoingRequest) {
-            ongoingRequest->rejectRequest(error);
+        if (ongoingRequest != mOngoingRequests.end()) {
+            ongoingRequest->second->rejectRequest(error);
             mOngoingRequests.erase(requestId);
         }
     }
@@ -285,7 +285,22 @@ private:
         if (mOutgoingMessageCallback) {
             try {
                 mOutgoingMessageCallback(
-                    requestMessage, requestMessage.requestid(), callContext);
+                    requestMessage,
+                    requestMessage.requestid(),
+                    [this, &requestMessage](const std::exception_ptr& eptr) {
+                        try {
+                            if (eptr) {
+                                std::rethrow_exception(eptr);
+                            }
+                        } catch (const std::exception& e) {
+                            RpcClientError error(
+                                "Error callback was called with exception",
+                                e.what());
+                            this->handleClientError(
+                                requestMessage.requestid(), error);
+                        }
+                    },
+                    callContext);
             } catch (const std::exception& clientSideException) {
                 std::lock_guard lock(mOngoingRequestsMutex);
                 if (mOngoingRequests.find(requestMessage.requestid()) !=
