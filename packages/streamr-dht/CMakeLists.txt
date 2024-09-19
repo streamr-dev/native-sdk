@@ -77,6 +77,7 @@ if(NOT IOS)
         test/unit/CertificateHelperTest.cpp
         test/unit/ConnectionManagerTest.cpp
         test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
+        test/unit/WebsocketServerTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit

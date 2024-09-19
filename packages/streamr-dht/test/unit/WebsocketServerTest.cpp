@@ -181,3 +181,23 @@ noOPvyLe52Hc2twPb9+w8g==
 
     server.stop();
 }
+
+TEST(WebsocketServerTest, StartsServerInNextPortIfFirstOneIsAlreadyInUse) {
+    WebsocketServerConfig config{
+        .portRange = {19792, 19793}, // NOLINT
+        .enableTls = false,
+        .tlsCertificateFiles = std::nullopt,
+        .maxMessageSize = std::nullopt};
+
+    WebsocketServerConfig config2 = config;
+
+    WebsocketServer server(std::move(config));
+    server.start();
+
+    WebsocketServer server2(std::move(config2));
+    auto port2 = server2.start();
+
+    EXPECT_EQ(port2, 19793);
+    server.stop();
+    server2.stop();
+}
