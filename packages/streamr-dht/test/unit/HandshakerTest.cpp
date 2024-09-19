@@ -1,10 +1,10 @@
 #include "streamr-dht/connection/Handshaker.hpp"
+#include <memory>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/OutgoingHandshaker.hpp"
-#include <memory>
 
 using ::dht::HandshakeError;
 using ::dht::Message;
@@ -47,6 +47,7 @@ protected:
     std::shared_ptr<Handshaker> handshaker;
     PeerDescriptor localPeerDescriptor;
     PeerDescriptor remotePeerDescriptor;
+    
     void SetUp() override {
         pendingConnection = std::make_shared<MockPendingConnection>();
         connection = std::make_shared<MockConnection>();
