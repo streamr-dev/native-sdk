@@ -18,12 +18,13 @@ using ::dht::PeerDescriptor;
 using ::dht::WebsocketConnectionRequest;
 using streamr::dht::Identifiers;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::websocket::WebsocketClientConnection;
 using streamr::dht::helpers::Connectivity;
 using streamr::dht::transport::ListeningRpcCommunicator;
 
 struct WebsocketClientConnectorOptions {
-    std::function<bool(const std::shared_ptr<PendingConnection>&)>
+    std::function<bool(const std::shared_ptr<IPendingConnection>&)>
         onNewConnection;
     std::function<bool(DhtAddress)> hasConnection;
     ListeningRpcCommunicator& rpcCommunicator;
@@ -55,7 +56,7 @@ public:
                       this->options.hasConnection(nodeId);
               },
               .onNewConnection =
-                  [this](const std::shared_ptr<PendingConnection>& connection) {
+                  [this](const std::shared_ptr<IPendingConnection>& connection) {
                       return this->options.onNewConnection(connection);
                   },
               .abortSignal = this->abortController.getSignal()}) {
@@ -87,7 +88,7 @@ public:
         return connectionType == ConnectionType::WEBSOCKET_CLIENT;
     }
 
-    std::shared_ptr<PendingConnection> connect(
+    std::shared_ptr<IPendingConnection> connect(
         const PeerDescriptor& targetPeerDescriptor) {
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(targetPeerDescriptor);

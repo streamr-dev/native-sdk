@@ -69,6 +69,7 @@ if(NOT IOS)
     add_executable(streamr-dht-test-unit
         test/unit/WebsocketClientConnectionTest.cpp
         test/unit/WebsocketClientConnectorTest.cpp
+        test/unit/HandshakerTest.cpp
         test/unit/AddressToolsTest.cpp
         test/unit/ConnectivityTest.cpp
         test/unit/DuplicateDetectorTest.cpp
@@ -93,6 +94,8 @@ if(NOT IOS)
         PUBLIC GTest::gtest
         PUBLIC GTest::gtest_main
         PUBLIC Folly::folly
+        PUBLIC GTest::gmock 
+        PUBLIC GTest::gmock_main
     )
 
     add_executable(streamr-dht-test-integration

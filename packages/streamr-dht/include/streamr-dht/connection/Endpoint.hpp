@@ -7,7 +7,7 @@
 #include <vector>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/connection/Connection.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-utils/EnableSharedFromThis.hpp"
@@ -29,7 +29,7 @@ private:
 public:
     explicit EndpointStateInterface(Endpoint& ep);
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection);
+        const std::shared_ptr<IPendingConnection>& pendingConnection);
     void changeToConnectedState(const std::shared_ptr<Connection>& connection);
     void emitData(const std::vector<std::byte>& data);
     void handleDisconnect(bool gracefulLeave);
@@ -53,7 +53,7 @@ public:
     };
 
     virtual void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) = 0;
+        const std::shared_ptr<IPendingConnection>& pendingConnection) = 0;
 
     virtual void changeToConnectedState(
         const std::shared_ptr<Connection>& connection) = 0;
@@ -138,7 +138,7 @@ public:
     }
 
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) override;
+        const std::shared_ptr<IPendingConnection>& pendingConnection) override;
 
     void changeToConnectedState(
         const std::shared_ptr<Connection>& connection) override {
@@ -158,7 +158,7 @@ class ConnectingEndpointState : public EndpointState {
 private:
     EndpointStateInterface& stateInterface;
     std::vector<std::byte> buffer;
-    std::shared_ptr<PendingConnection> pendingConnection;
+    std::shared_ptr<IPendingConnection> pendingConnection;
 
     HandlerToken connectedHandlerToken;
     HandlerToken disconnectedHandlerToken;
@@ -183,7 +183,7 @@ public:
     }
 
     void enterState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         SLogger::debug("ConnectingEndpointState::enterState start");
         this->pendingConnection = pendingConnection;
         this->pendingConnection->on<
@@ -232,7 +232,7 @@ public:
     }
 
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) override {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) override {
         SLogger::debug(
             "ConnectingEndpointState::changeToConnectingState start");
         this->removeEventHandlers();
@@ -291,7 +291,7 @@ private:
     }
 
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         SLogger::debug("Endpoint::changeToConnectingState start");
         this->state = this->connectingState.get();
         this->connectingState->enterState(pendingConnection);
@@ -320,7 +320,7 @@ private:
     PeerDescriptor peerDescriptor;
 
     Endpoint(
-        std::shared_ptr<PendingConnection>&& pendingConnection,
+        std::shared_ptr<IPendingConnection>&& pendingConnection,
         std::function<void()>&& removeSelfFromContainer)
         : stateInterface(*this),
           connectedState(
@@ -337,11 +337,11 @@ private:
 
 public:
     [[nodiscard]] static std::shared_ptr<Endpoint> newInstance(
-        std::shared_ptr<PendingConnection>&& pendingConnection,
+        std::shared_ptr<IPendingConnection>&& pendingConnection,
         std::function<void()>&& removeSelfFromContainer) {
         struct MakeSharedEnabler : public Endpoint {
             explicit MakeSharedEnabler(
-                std::shared_ptr<PendingConnection>&& pendingConnection,
+                std::shared_ptr<IPendingConnection>&& pendingConnection,
                 std::function<void()>&& removeSelfFromContainer)
                 : Endpoint(
                       std::move(pendingConnection),
@@ -379,7 +379,7 @@ public:
     }
 
     void setConnecting(
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         SLogger::debug("Endpoint::setConnecting start");
         this->state->changeToConnectingState(pendingConnection);
         SLogger::debug("Endpoint::setConnecting end");
@@ -393,7 +393,7 @@ public:
 };
 
 inline void ConnectedEndpointState::changeToConnectingState(
-    const std::shared_ptr<PendingConnection>& pendingConnection) {
+    const std::shared_ptr<IPendingConnection>& pendingConnection) {
     SLogger::debug("ConnectedEndpointState::changeToConnectingState start");
     this->connection->close(true);
     this->removeEventHandlers();
@@ -407,7 +407,7 @@ inline EndpointStateInterface::EndpointStateInterface(Endpoint& ep)
 }
 
 inline void EndpointStateInterface::changeToConnectingState(
-    const std::shared_ptr<PendingConnection>& pendingConnection) {
+    const std::shared_ptr<IPendingConnection>& pendingConnection) {
     SLogger::debug("EndpointStateInterface::changeToConnectingState start");
     this->endpoint.changeToConnectingState(pendingConnection);
     SLogger::debug("EndpointStateInterface::changeToConnectingState end");

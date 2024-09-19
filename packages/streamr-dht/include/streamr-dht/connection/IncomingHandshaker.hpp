@@ -3,12 +3,12 @@
 
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/Handshaker.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
 
 namespace streamr::dht::connection {
 
-using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::eventemitter::HandlerToken;
 
 class IncomingHandshaker : public Handshaker {
@@ -17,11 +17,11 @@ private:
         explicit Private() = default;
     };
 
-    std::optional<std::function<bool(std::shared_ptr<PendingConnection>)>>
+    std::optional<std::function<bool(std::shared_ptr<IPendingConnection>)>>
         onNewConnectionCallback;
-    std::function<std::shared_ptr<PendingConnection>(DhtAddress)>
+    std::function<std::shared_ptr<IPendingConnection>(DhtAddress)>
         getPendingConnectionCallback;
-    std::shared_ptr<PendingConnection> pendingConnection;
+    std::shared_ptr<IPendingConnection> pendingConnection;
 
     HandlerToken disconnectedHandlerToken;
     HandlerToken pendingDisconnectedHandlerToken;
@@ -51,10 +51,10 @@ public:
         Private /* prevent direct construction */,
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
-        std::function<std::shared_ptr<PendingConnection>(DhtAddress)>&&
+        std::function<std::shared_ptr<IPendingConnection>(DhtAddress)>&&
             getPendingConnectionCallback,
         const std::optional<
-            std::function<bool(std::shared_ptr<PendingConnection>)>>&
+            std::function<bool(std::shared_ptr<IPendingConnection>)>>&
             onNewConnectionCallback = std::nullopt)
         : Handshaker(localPeerDescriptor, connection),
           getPendingConnectionCallback(std::move(getPendingConnectionCallback)),
@@ -81,10 +81,10 @@ public:
     [[nodiscard]] static std::shared_ptr<IncomingHandshaker> newInstance(
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
-        std::function<std::shared_ptr<PendingConnection>(DhtAddress)>&&
+        std::function<std::shared_ptr<IPendingConnection>(DhtAddress)>&&
             getPendingConnectionCallback,
         const std::optional<
-            std::function<bool(std::shared_ptr<PendingConnection>)>>&
+            std::function<bool(std::shared_ptr<IPendingConnection>)>>&
             onNewConnectionCallback = std::nullopt) {
         return std::make_shared<IncomingHandshaker>(
             Private{},
@@ -94,7 +94,7 @@ public:
             onNewConnectionCallback);
     }
 
-    [[nodiscard]] std::shared_ptr<PendingConnection> getPendingConnection()
+    [[nodiscard]] std::shared_ptr<IPendingConnection> getPendingConnection()
         const {
         return this->pendingConnection;
     }

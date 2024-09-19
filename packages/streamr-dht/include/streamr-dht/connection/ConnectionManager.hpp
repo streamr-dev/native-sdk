@@ -33,7 +33,7 @@ using streamr::dht::connection::ConnectionLocker;
 using streamr::dht::connection::ConnectionLockRpcLocal;
 using streamr::dht::connection::ConnectionsView;
 using streamr::dht::connection::Endpoint;
-using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::helpers::CannotConnectToSelf;
 using streamr::dht::helpers::CouldNotStart;
 using streamr::dht::helpers::Offerer;
@@ -72,7 +72,7 @@ private:
 
     std::recursive_mutex mutex;
 
-    void addEndpoint(std::shared_ptr<PendingConnection> pendingConnection) {
+    void addEndpoint(std::shared_ptr<IPendingConnection> pendingConnection) {
         SLogger::debug("ConnectionManager::addEndpoint start");
         SLogger::debug("Trying to acquire mutex lock in addEndpoint");
         std::scoped_lock lock(this->mutex);
@@ -170,7 +170,6 @@ public:
         this->stop();
         SLogger::debug("~ConnectionManager() end");
     };
-
     // garbageCollectConnections() not implemented in native-sdk
 
     void start() {
@@ -184,7 +183,7 @@ public:
 
         SLogger::trace("Starting ConnectionManager...");
         this->connectorFacade->start(
-            [this](const std::shared_ptr<PendingConnection>& connection) {
+            [this](const std::shared_ptr<IPendingConnection>& connection) {
                 return this->onNewConnection(connection);
             },
             [this](const DhtAddress& nodeId) {
@@ -450,7 +449,7 @@ public:
     }
 
 private:
-    bool onNewConnection(const std::shared_ptr<PendingConnection>& connection) {
+    bool onNewConnection(const std::shared_ptr<IPendingConnection>& connection) {
         if (this->state == ConnectionManagerState::STOPPED) {
             return false;
         }
@@ -467,7 +466,7 @@ private:
     }
 
     bool acceptNewConnection(
-        const std::shared_ptr<PendingConnection>& newConnection) {
+        const std::shared_ptr<IPendingConnection>& newConnection) {
         std::scoped_lock lock(this->mutex);
         const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
             newConnection->getPeerDescriptor());
@@ -532,7 +531,7 @@ private:
                      disconnectMode]() -> folly::coro::Task<void> {
                         co_await folly::coro::collectAll(
                             waitForEvent<endpointevents::Disconnected>(
-                                *endpoint, 2000ms), // NOLINT
+                                 endpoint.get(), 2000ms), // NOLINT
                             folly::coro::co_invoke(
                                 [this,
                                  endpoint,

@@ -32,7 +32,7 @@ using streamr::utils::Ipv4Helper;
 namespace NatType = streamr::dht::types::NatType;
 
 struct WebsocketServerConnectorOptions {
-    std::function<bool(const std::shared_ptr<PendingConnection>&)>
+    std::function<bool(const std::shared_ptr<IPendingConnection>&)>
         onNewConnection;
     ListeningRpcCommunicator& rpcCommunicator;
     std::function<bool(DhtAddress)> hasConnection;
@@ -58,7 +58,7 @@ private:
     std::optional<uint16_t> selectedPort;
     std::map<std::string, std::shared_ptr<IncomingHandshaker>>
         connectingHandshakers;
-    std::map<DhtAddress, std::shared_ptr<PendingConnection>>
+    std::map<DhtAddress, std::shared_ptr<IPendingConnection>>
         ongoingConnectRequests;
 
 public:
@@ -196,7 +196,7 @@ private:
             this->localPeerDescriptor.value(),
             serverSocket,
             [this, handshakerId](const DhtAddress& nodeId)
-                -> std::shared_ptr<PendingConnection> {
+                -> std::shared_ptr<IPendingConnection> {
                 // move handshaker to its right key in the map
                 // auto handshaker =
                 //     std::move(this->connectingHandshakers.at(handshakerId));

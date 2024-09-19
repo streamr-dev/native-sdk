@@ -16,6 +16,14 @@ private:
     HandlerToken onMessageHandlerToken;
 
 public:
+/*
+    ListeningRpcCommunicator()
+        : RoutingRpcCommunicator(),
+          transport(nullptr),
+          listener(),
+          onMessageHandlerToken() {}
+*/
+
     ListeningRpcCommunicator(
         ServiceID&& serviceId,
         Transport& transport,

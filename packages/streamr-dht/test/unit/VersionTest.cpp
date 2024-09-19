@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include "streamr-dht/helpers/Version.hpp"
 
-using  streamr::dht::helpers::Version;
+using streamr::dht::helpers::Version;
 
 class VersionTest : public ::testing::Test {
 protected:

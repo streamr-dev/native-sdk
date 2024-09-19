@@ -7,11 +7,12 @@
 #include "streamr-dht/transport/Transport.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-proto-rpc/ProtoCallContext.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;
 using streamr::dht::DhtAddress;
-using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::pendingconnectionevents::Disconnected;
 using streamr::dht::connection::websocket::WebsocketClientConnector;
 using streamr::dht::connection::websocket::WebsocketClientConnectorOptions;
@@ -63,7 +64,7 @@ protected:
             std::nullopt);
         WebsocketClientConnectorOptions options{
             .onNewConnection =
-                [](const std::shared_ptr<PendingConnection>& /*connection*/) {
+                [](const std::shared_ptr<IPendingConnection>& /*connection*/) {
                     return true;
                 },
             .hasConnection = [](DhtAddress) { return false; },

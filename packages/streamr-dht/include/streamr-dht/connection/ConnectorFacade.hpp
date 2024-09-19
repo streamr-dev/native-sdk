@@ -30,11 +30,11 @@ protected:
     ConnectorFacade() = default;
 
 public:
-    virtual std::shared_ptr<PendingConnection> createConnection(
+    virtual std::shared_ptr<IPendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor) = 0;
     [[nodiscard]] virtual PeerDescriptor getLocalPeerDescriptor() const = 0;
     virtual void start(
-        std::function<bool(const std::shared_ptr<PendingConnection>&)> onNewConnection,
+        std::function<bool(const std::shared_ptr<IPendingConnection>&)> onNewConnection,
         std::function<bool(const DhtAddress& nodeId)> hasConnection /*,
         Transport& autoCertifierTransport*/ ) = 0;
     virtual void stop() = 0;
@@ -87,7 +87,7 @@ public:
               RpcCommunicatorOptions{.rpcRequestTimeout = 15000ms}) {} // NOLINT
 
     void start(
-        std::function<bool(const std::shared_ptr<PendingConnection>&)>
+        std::function<bool(const std::shared_ptr<IPendingConnection>&)>
             onNewConnection,
         std::function<bool(const DhtAddress& nodeId)> hasConnection /*,
         Transport& autoCertifierTransport */
@@ -128,7 +128,7 @@ public:
         this->setLocalPeerDescriptor(localPeerDescriptor);
     }
 
-    std::shared_ptr<PendingConnection> createConnection(
+    std::shared_ptr<IPendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor) override {
         if (this->websocketClientConnector->isPossibleToFormConnection(
                 peerDescriptor)) {

@@ -28,6 +28,7 @@ private:
     std::function<void(Message, SendOptions)> sendFn;
 
 public:
+  //  RoutingRpcCommunicator() = default;
     RoutingRpcCommunicator(
         ServiceID&& ownServiceId,
         std::function<void(Message, SendOptions)>&& sendFn,

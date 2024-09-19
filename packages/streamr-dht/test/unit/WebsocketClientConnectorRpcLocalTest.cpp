@@ -5,6 +5,7 @@
 using ::dht::PeerDescriptor;
 using streamr::dht::DhtAddress;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::websocket::WebsocketClientConnectorRpcLocal;
 using streamr::dht::connection::websocket::
     WebsocketClientConnectorRpcLocalOptions;
@@ -19,7 +20,7 @@ TEST(WebsocketClientConnectorRpcLocal, TestCanBeCreated) {
             },
         .hasConnection = [](const DhtAddress& /*nodeId*/) { return false; },
         .onNewConnection =
-            [](const std::shared_ptr<PendingConnection>& /*connection*/) {
+            [](const std::shared_ptr<IPendingConnection>& /*connection*/) {
                 return true;
             },
         .abortSignal = abortController.getSignal()};

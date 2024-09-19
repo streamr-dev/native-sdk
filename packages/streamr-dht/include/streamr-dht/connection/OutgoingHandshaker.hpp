@@ -19,7 +19,7 @@ private:
         explicit Private() = default;
     };
     PeerDescriptor targetPeerDescriptor;
-    std::shared_ptr<PendingConnection> pendingConnection;
+    std::shared_ptr<IPendingConnection> pendingConnection;
 
     HandlerToken connectedHandlerToken;
     HandlerToken disconnectedHandlerToken;
@@ -42,7 +42,7 @@ public:
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
         PeerDescriptor targetPeerDescriptor,
-        const std::shared_ptr<PendingConnection>& pendingConnection)
+        const std::shared_ptr<IPendingConnection>& pendingConnection)
         : Handshaker(localPeerDescriptor, connection),
           targetPeerDescriptor(std::move(targetPeerDescriptor)),
           pendingConnection(pendingConnection) {
@@ -79,7 +79,7 @@ public:
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
         const PeerDescriptor& targetPeerDescriptor,
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         return std::make_shared<OutgoingHandshaker>(
             Private{},
             localPeerDescriptor,
@@ -88,7 +88,7 @@ public:
             pendingConnection);
     }
 
-    [[nodiscard]] std::shared_ptr<PendingConnection> getPendingConnection()
+    [[nodiscard]] std::shared_ptr<IPendingConnection> getPendingConnection()
         const {
         return this->pendingConnection;
     }
