@@ -69,6 +69,7 @@ if(NOT IOS)
     add_executable(streamr-dht-test-unit
         test/unit/WebsocketClientConnectionTest.cpp
         test/unit/WebsocketClientConnectorTest.cpp
+        test/unit/AddressToolsTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
         test/unit/CertificateHelperTest.cpp
         test/unit/ConnectionManagerTest.cpp
