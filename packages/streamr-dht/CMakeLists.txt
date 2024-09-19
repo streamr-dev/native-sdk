@@ -73,6 +73,7 @@ if(NOT IOS)
         test/unit/ConnectivityTest.cpp
         test/unit/DuplicateDetectorTest.cpp
         test/unit/PendingConnectionTest.cpp
+        test/unit/VersionTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
         test/unit/CertificateHelperTest.cpp
         test/unit/ConnectionManagerTest.cpp
