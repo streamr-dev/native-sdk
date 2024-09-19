@@ -70,6 +70,7 @@ if(NOT IOS)
         test/unit/WebsocketClientConnectionTest.cpp
         test/unit/WebsocketClientConnectorTest.cpp
         test/unit/AddressToolsTest.cpp
+        test/unit/ConnectivityTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
         test/unit/CertificateHelperTest.cpp
         test/unit/ConnectionManagerTest.cpp
