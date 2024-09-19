@@ -4,10 +4,8 @@
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/OutgoingHandshaker.hpp"
-// #include "streamr-dht/proto/DhtRpc.pb.h"
 #include <memory>
 
-// using namespace streamr::dht::connection;
 using ::dht::HandshakeError;
 using ::dht::Message;
 using ::dht::PeerDescriptor;
@@ -69,29 +67,11 @@ protected:
 };
 
 TEST_F(HandshakerTest, OutgoingSendsRequestAfterConnected) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     EXPECT_CALL(*connection, send(::testing::_)).Times(1);
     connection->emit<Connected>();
 }
 
 TEST_F(HandshakerTest, OutgoingOnHandshakeCompleted) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     auto message = handshaker->createHandshakeResponse(std::nullopt);
     EXPECT_CALL(*pendingConnection, onHandshakeCompleted(::testing::_))
         .Times(1);
@@ -103,15 +83,6 @@ TEST_F(HandshakerTest, OutgoingOnHandshakeCompleted) {
 }
 
 TEST_F(HandshakerTest, OutgoingOnHandshakeFailedInvalidPeerDescriptor) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     EXPECT_CALL(*pendingConnection, onHandshakeCompleted(::testing::_))
         .Times(0);
     handshaker->emit<HandshakeFailed>(
@@ -119,15 +90,6 @@ TEST_F(HandshakerTest, OutgoingOnHandshakeFailedInvalidPeerDescriptor) {
 }
 
 TEST_F(HandshakerTest, OutgoingOnHandshakeFailedUnsupportedVersion) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     EXPECT_CALL(*pendingConnection, onHandshakeCompleted(::testing::_))
         .Times(0);
     EXPECT_CALL(*pendingConnection, close(::testing::_)).Times(1);
@@ -135,15 +97,6 @@ TEST_F(HandshakerTest, OutgoingOnHandshakeFailedUnsupportedVersion) {
 }
 
 TEST_F(HandshakerTest, OutgoingOnHandshakeFailedDuplicateConnection) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     EXPECT_CALL(*pendingConnection, destroy()).Times(0);
     EXPECT_CALL(*pendingConnection, onHandshakeCompleted(::testing::_))
         .Times(0);
@@ -151,29 +104,11 @@ TEST_F(HandshakerTest, OutgoingOnHandshakeFailedDuplicateConnection) {
 }
 
 TEST_F(HandshakerTest, OutgoingCallsPendingConnectionCloseIfConnectionCloses) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     EXPECT_CALL(*pendingConnection, close(::testing::_)).Times(1);
     connection->emit<Disconnected>(true, 0, "");
 }
 
 TEST_F(HandshakerTest, OutgoingClosesConnectionIfManagedConnectionCloses) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     EXPECT_CALL(*connection, close(::testing::_)).Times(1);
     pendingConnection
         ->emit<streamr::dht::connection::pendingconnectionevents::Disconnected>(
@@ -181,29 +116,11 @@ TEST_F(HandshakerTest, OutgoingClosesConnectionIfManagedConnectionCloses) {
 }
 
 TEST_F(HandshakerTest, IncomingCallsPendingConnectionCloseIfConnectionCloses) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     EXPECT_CALL(*pendingConnection, close(::testing::_)).Times(1);
     connection->emit<Disconnected>(true, 0, "");
 }
 
 TEST_F(HandshakerTest, IncomingClosesConnectionIfManagedConnectionCloses) {
-    /*
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
-        */
     EXPECT_CALL(*connection, close(::testing::_)).Times(1);
     pendingConnection
         ->emit<streamr::dht::connection::pendingconnectionevents::Disconnected>(
@@ -212,13 +129,6 @@ TEST_F(HandshakerTest, IncomingClosesConnectionIfManagedConnectionCloses) {
 
 /*
 TEST_F(HandshakerTest, IncomingDestroysConnectionIfHandshakeIsRejected) {
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
     EXPECT_CALL(*pendingConnection, destroy()).Times(1);
     EXPECT_CALL(*connection, destroy()).Times(1);
     rejectHandshake(
@@ -231,13 +141,6 @@ TEST_F(HandshakerTest, IncomingDestroysConnectionIfHandshakeIsRejected) {
 
 /*
 TEST_F(HandshakerTest, IncomingCallsOnHandshakeCompletedIfHandshakeIsAccepted) {
-    auto localPeerDescriptor = createMockPeerDescriptor();
-    auto remotePeerDescriptor = createMockPeerDescriptor();
-    handshaker = OutgoingHandshaker::newInstance(
-        localPeerDescriptor,
-        connection,
-        remotePeerDescriptor,
-        pendingConnection);
     EXPECT_CALL(*pendingConnection, onHandshakeCompleted(::testing::_))
         .Times(1);
     acceptHandshake(handshaker, pendingConnection, connection);
