@@ -49,8 +49,15 @@ jobs:
           # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-          security cms -D -i $PP_PATH -o $RUNNER_TEMP/Profile_Explainer_iOS_Dev-payload.plist
+          # Attempt to decode the provisioning profile
+          if ! security cms -D -i $PP_PATH -o $RUNNER_TEMP/Profile_Explainer_iOS_Dev-payload.plist; then
+              echo "Failed to decode provisioning profile. Attempting to print raw content:"
+              cat $PP_PATH
+              exit 1
+          fi
+          echo "Decoded provisioning profile content:"
           cat $RUNNER_TEMP/Profile_Explainer_iOS_Dev-payload.plist
+
     - name: Run iOS tests
       run: ./iostest.sh
       
