@@ -49,7 +49,7 @@ jobs:
           # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-          cat $PP_PATH
+          security cms -D -i $PP_PATH
     - name: Run iOS tests
       run: ./iostest.sh
       
