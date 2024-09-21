@@ -49,7 +49,8 @@ jobs:
           # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-          security cms -D -i $PP_PATH
+          security cms -D -i $PP_PATH -o $RUNNER_TEMP/Profile_Explainer_iOS_Dev-payload.plist
+          cat $RUNNER_TEMP/Profile_Explainer_iOS_Dev-payload.plist
     - name: Run iOS tests
       run: ./iostest.sh
       
