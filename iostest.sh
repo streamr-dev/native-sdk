@@ -5,7 +5,7 @@ rm -rf build/ios
 brew install chargepoint/xcparse/xcparse
 
 # Run tests
-xcodebuild test -project test/ios/iOSUnitTesting/iOSUnitTesting.xcodeproj -allowProvisioningUpdates -scheme iOSUnitTesting -destination 'platform=macOS' -configuration Debug -resultBundlePath build/ios/TestResults.xcresult
+xcodebuild test -project test/ios/iOSUnitTesting/iOSUnitTesting.xcodeproj -scheme iOSUnitTesting -destination 'platform=macOS' -configuration Debug -resultBundlePath build/ios/TestResults.xcresult CODE_SIGNING_ALLOWED='NO'
 
 # Check if xcodebuild was successful
 if [ $? -ne 0 ]; then
