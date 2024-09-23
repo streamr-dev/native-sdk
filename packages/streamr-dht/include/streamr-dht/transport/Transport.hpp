@@ -16,8 +16,6 @@ using streamr::eventemitter::EventEmitter;
 struct SendOptions {
     bool connect = true;
     bool sendIfStopped = false;
-    std::optional<std::function<void(std::exception_ptr err)>> errorCallback =
-        std::nullopt;
 };
 
 namespace transportevents {

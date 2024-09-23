@@ -43,13 +43,24 @@ struct RpcCommunicatorOptions {
 
 template <typename CallContextType>
 class RpcCommunicator {
+public:
+    using OutgoingMessageCallbackType = std::function<void(
+        RpcMessage, std::string /*requestId*/, CallContextType)>;
+
 private:
-    RpcCommunicatorClientApi<CallContextType> mRpcCommunicatorClientApi;
-    RpcCommunicatorServerApi<CallContextType> mRpcCommunicatorServerApi;
+    RpcCommunicatorClientApi<CallContextType, OutgoingMessageCallbackType>
+        mRpcCommunicatorClientApi;
+    RpcCommunicatorServerApi<CallContextType, OutgoingMessageCallbackType>
+        mRpcCommunicatorServerApi;
 
 public:
-    using OutgoingMessageCallbackType =
-        RpcCommunicatorClientApi<CallContextType>::OutgoingMessageCallbackType;
+    using RequestId =
+        RpcCommunicatorClientApi<CallContextType, OutgoingMessageCallbackType>::
+            RequestId;
+    using OngoingRequestBase =
+        RpcCommunicatorClientApi<CallContextType, OutgoingMessageCallbackType>::
+            OngoingRequestBase;
+
     explicit RpcCommunicator(
         std::optional<RpcCommunicatorOptions> options = std::nullopt)
         : mRpcCommunicatorClientApi(
@@ -190,7 +201,23 @@ private:
                 "onIncomingMessage() message is not a valid request or response");
         }
     }
-    // Client-side functions
+
+protected:
+    using OngoingRequestPredicate =
+        RpcCommunicatorClientApi<CallContextType, OutgoingMessageCallbackType>::
+            OngoingRequestPredicate;
+
+    [[nodiscard]] std::vector<RequestId>
+    getOngoingRequestIdsFulfillingPredicate(
+        const OngoingRequestPredicate& predicate) {
+        return mRpcCommunicatorClientApi
+            .getOngoingRequestIdsFulfillingPredicate(predicate);
+    }
+
+    void handleClientError(
+        const RequestId& requestId, const RpcException& error) {
+        mRpcCommunicatorClientApi.handleClientError(requestId, error);
+    }
 };
 
 } // namespace streamr::protorpc

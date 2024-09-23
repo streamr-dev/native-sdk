@@ -37,6 +37,7 @@ private:
     AbortController abortController;
     WebsocketClientConnectorOptions options;
     WebsocketClientConnectorRpcLocal rpcLocal;
+    std::recursive_mutex mutex;
 
 public:
     static constexpr auto websocketConnectorServiceId =
@@ -50,6 +51,7 @@ public:
                       return this->connect(targetPeerDescriptor, std::nullopt);
                   },
               .hasConnection = [this](const DhtAddress& nodeId) -> bool {
+                  std::scoped_lock lock(this->mutex);
                   return this->connectingHandshakers.find(nodeId) !=
                       this->connectingHandshakers.end() ||
                       this->options.hasConnection(nodeId);
@@ -65,6 +67,7 @@ public:
                 [this](
                     const WebsocketConnectionRequest& req,
                     const DhtCallContext& context) -> void {
+                    std::scoped_lock lock(this->mutex);
                     if (this->abortController.getSignal().aborted) {
                         return;
                     }
@@ -82,6 +85,7 @@ public:
 
     bool isPossibleToFormConnection(
         const PeerDescriptor& targetPeerDescriptor) {
+        std::scoped_lock lock(this->mutex);
         const auto connectionType = Connectivity::expectedConnectionType(
             this->localPeerDescriptor, targetPeerDescriptor);
         return connectionType == ConnectionType::WEBSOCKET_CLIENT;
@@ -92,6 +96,7 @@ public:
         std::optional<std::function<void(std::exception_ptr)>> errorCallback =
             std::nullopt) {
         SLogger::debug("connect() to " + targetPeerDescriptor.DebugString());
+        std::scoped_lock lock(this->mutex);
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(targetPeerDescriptor);
         const auto existingHandshaker =
@@ -123,6 +128,7 @@ public:
 
         outgoingHandshaker->on<handshakerevents::HandshakerStopped>(
             [this, nodeId]() {
+                std::scoped_lock lock(this->mutex);
                 if (this->connectingHandshakers.find(nodeId) !=
                     this->connectingHandshakers.end()) {
                     this->connectingHandshakers.erase(nodeId);
@@ -135,10 +141,12 @@ public:
     }
 
     void setLocalPeerDescriptor(const PeerDescriptor& peerDescriptor) {
+        std::scoped_lock lock(this->mutex);
         this->localPeerDescriptor = peerDescriptor;
     }
 
     void destroy() {
+        std::scoped_lock lock(this->mutex);
         this->abortController.abort();
 
         for (const auto& [_, handshaker] : this->connectingHandshakers) {

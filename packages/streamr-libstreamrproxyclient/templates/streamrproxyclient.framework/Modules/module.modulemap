@@ -1,4 +1,4 @@
 framework module streamrproxyclient {
-    umbrella header "streamrproxyclient.hpp"
+    umbrella header "streamrproxyclient.h"
     export *
 }

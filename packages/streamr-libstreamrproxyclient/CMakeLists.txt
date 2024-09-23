@@ -14,27 +14,59 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
-project(streamr-libstreamrproxyclient CXX)
-add_library(libstreamrproxyclient SHARED
-            src/libstreamrproxyclient.cpp
-            include/libstreamrproxyclient.hpp
+project(streamr-streamrproxyclient CXX)
+add_library(streamrproxyclient SHARED
+            src/streamrproxyclient.cpp
+            include/streamrproxyclient.h
 )
 
-target_include_directories(libstreamrproxyclient PUBLIC include)
+find_package(streamr-trackerless-network CONFIG REQUIRED)
+find_package(streamr-dht CONFIG REQUIRED)
+find_package(streamr-logger CONFIG REQUIRED)
+find_package(streamr-utils CONFIG REQUIRED)
+find_package(ada CONFIG REQUIRED)
+
+target_include_directories(streamrproxyclient PUBLIC include)
+target_link_libraries(streamrproxyclient 
+    PRIVATE streamr::streamr-trackerless-network
+    PRIVATE streamr::streamr-logger
+    PRIVATE streamr::streamr-dht
+    PRIVATE streamr::streamr-utils
+    PRIVATE ada::ada
+)
 
 if (IOS)
     message(STATUS "Building dylib for iOS")
-    target_link_libraries(libstreamrproxyclient ${FOUNDATION_LIBRARY})
-    target_compile_definitions(libstreamrproxyclient PUBLIC IS_BUILDING_SHARED)
-    set_target_properties(libstreamrproxyclient PROPERTIES
+    target_link_libraries(streamrproxyclient ${FOUNDATION_LIBRARY})
+    target_compile_definitions(streamrproxyclient PUBLIC IS_BUILDING_SHARED)
+    set_target_properties(streamrproxyclient PROPERTIES
         FRAMEWORK TRUE
         FRAMEWORK_VERSION A
         MACOSX_FRAMEWORK_IDENTIFIER network.streamr.streamrproxyclient
         VERSION 1.0.0
         SOVERSION 1.0.0
-        PUBLIC_HEADER include/libstreamrproxyclient.hpp
+        PUBLIC_HEADER include/streamrproxyclient.h
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Petri Savolainen"
     )
     install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/createiosframework.sh)")
+endif()
+
+if (NOT IOS)
+    enable_testing()
+    find_package(GTest CONFIG REQUIRED)
+
+    add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp)
+    target_link_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
+    target_include_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
+    target_link_libraries(streamr-streamrproxyclient-test-integration 
+        PUBLIC streamrproxyclient
+        PUBLIC GTest::gtest 
+        PUBLIC GTest::gtest_main 
+    )
+
+    if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
+        include(GoogleTest)
+        gtest_discover_tests(streamr-streamrproxyclient-test-integration)
+    endif()
 endif()
 

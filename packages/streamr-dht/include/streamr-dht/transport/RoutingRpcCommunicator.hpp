@@ -38,9 +38,6 @@ public:
         this->setOutgoingMessageCallback([this](
                                              const RpcMessage& msg,
                                              const std::string& /*requestId*/,
-                                             const std::optional<std::function<
-                                                 void(std::exception_ptr)>>&
-                                                 errorCallback,
                                              const DhtCallContext&
                                                  callContext) {
             SLogger::debug("Entered outgoing message callback");
@@ -98,10 +95,6 @@ public:
                     callContext.sendIfStopped.value()) {
                     sendOpts.sendIfStopped = true;
                     SLogger::debug("Set sendOpts.sendIfStopped to true");
-                }
-                if (errorCallback.has_value()) {
-                    sendOpts.errorCallback = errorCallback.value();
-                    SLogger::debug("Set sendOpts.errorCallback");
                 }
             }
             SLogger::debug("Calling sendFn with message and sendOpts");

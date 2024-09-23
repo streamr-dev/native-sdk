@@ -60,6 +60,7 @@ private:
         connectingHandshakers;
     std::map<DhtAddress, std::shared_ptr<PendingConnection>>
         ongoingConnectRequests;
+    std::recursive_mutex mMutex;
 
 public:
     explicit WebsocketServerConnector(WebsocketServerConnectorOptions&& options)
@@ -144,6 +145,8 @@ public:
 
     ConnectivityResponse checkConnectivity(
         bool /* allowSelfSignedCertificate */) {
+        std::scoped_lock lock(this->mMutex);
+
         ConnectivityResponse response;
 
         // if already aborted or websocket server not started
@@ -170,10 +173,12 @@ public:
     }
 
     void setLocalPeerDescriptor(const PeerDescriptor& localPeerDescriptor) {
+        std::scoped_lock lock(this->mMutex);
         this->localPeerDescriptor = localPeerDescriptor;
     }
 
     void destroy() {
+        std::scoped_lock lock(this->mMutex);
         this->abortController.abort();
 
         for (const auto& request : this->ongoingConnectRequests) {
@@ -193,6 +198,7 @@ public:
 private:
     void attachHandshaker(
         const std::shared_ptr<WebsocketServerConnection>& serverSocket) {
+        std::scoped_lock lock(this->mMutex);
         const auto handshakerId = Uuid::v4();
 
         auto handshaker = IncomingHandshaker::newInstance(
@@ -200,18 +206,12 @@ private:
             serverSocket,
             [this, handshakerId](const DhtAddress& nodeId)
                 -> std::shared_ptr<PendingConnection> {
-                // move handshaker to its right key in the map
-                // auto handshaker =
-                //     std::move(this->connectingHandshakers.at(handshakerId));
-                // this->connectingHandshakers.erase(handshakerId);
-                // this->connectingHandshakers.emplace(
-                //     nodeId, std::move(handshaker));
+                std::scoped_lock lock(this->mMutex);
 
                 if (this->ongoingConnectRequests.contains(nodeId)) {
                     return this->ongoingConnectRequests.at(nodeId);
                 }
-                // no pending connection found, the caller needs to crate a new
-                // one
+
                 return nullptr;
             },
             this->options.onNewConnection);
@@ -221,6 +221,7 @@ private:
 
         this->connectingHandshakers.at(handshakerId)
             ->on<handshakerevents::HandshakerStopped>([this, handshakerId]() {
+                std::scoped_lock lock(this->mMutex);
                 if (this->connectingHandshakers.contains(handshakerId)) {
                     this->connectingHandshakers.erase(handshakerId);
                 }

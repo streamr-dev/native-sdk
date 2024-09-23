@@ -1,4 +1,3 @@
-#include <exception>
 #include <gtest/gtest.h>
 #include <streamr-proto-rpc/RpcCommunicator.hpp>
 #include <folly/Portability.h>
@@ -30,8 +29,6 @@ void setOutgoingCallbackWithException(RpcCommunicatorType& sender) {
     sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
-           const std::optional<
-               std::function<void(std::exception_ptr)>>& /* errorCallback */,
            const ProtoCallContext& /* context */) -> void {
             SLogger::info("onOutgoingMessageCallback() throws");
             throw T("TestException");
@@ -75,8 +72,6 @@ protected:
             [this](
                 const RpcMessage& message,
                 const std::string& /* requestId */,
-                const std::optional<std::function<void(
-                    std::exception_ptr)>>& /* errorCallback */,
                 const ProtoCallContext& /* context */) -> void {
                 SLogger::info("onOutgoingMessageCallback()");
                 communicator1.handleIncomingMessage(
@@ -87,8 +82,6 @@ protected:
                 [this](
                     const RpcMessage& message,
                     const std::string& /* requestId */,
-                    const std::optional<std::function<void(
-                        std::exception_ptr)>>& /* errorCallback */,
                     const ProtoCallContext& /* context */) -> void {
                     SLogger::info("onOutgoingMessageCallback()");
                     communicator2.handleIncomingMessage(

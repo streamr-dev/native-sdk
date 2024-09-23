@@ -72,6 +72,11 @@ private:
         ProxyDirection direction;
     };
 
+    struct ProxyConnectionError {
+        PeerDescriptor peerDescriptor;
+        ProxyDirection direction;
+    };
+    
     ListeningRpcCommunicator rpcCommunicator;
     ContentDeliveryRpcLocal contentDeliveryRpcLocal;
     ProxyClientOptions options;
@@ -303,7 +308,15 @@ public:
         this->neighbors.remove(nodeId);
     }
 
-    void broadcast(
+    /**
+     * @brief Broadcast a message to all connected nodes.
+     * 
+     * @param msg The message to broadcast.
+     * @param previousNode The node that sent the message.
+     * @return The number of proxy nodes that received the message immediately.
+     */
+
+    size_t broadcast(
         const StreamMessage& msg,
         const std::optional<DhtAddress>& previousNode = std::nullopt) {
         if (!previousNode.has_value()) {
@@ -313,7 +326,7 @@ public:
                 msg.previousmessageref());
         }
         this->emit<Message>(msg);
-        this->propagation.feedUnseenMessage(
+        return this->propagation.feedUnseenMessage(
             msg, this->neighbors.getIds(), previousNode);
     }
 
