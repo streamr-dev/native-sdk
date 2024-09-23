@@ -13,6 +13,7 @@
 #include "streamr-dht/helpers/Errors.hpp"
 #include "streamr-dht/types/PortRange.hpp"
 #include "streamr-dht/types/TlsCertificateFiles.hpp"
+#include "streamr-utils/Uuid.hpp"
 #include "streamr-logger/SLogger.hpp"
 
 namespace streamr::dht::connection::websocket {
@@ -27,6 +28,8 @@ using streamr::dht::helpers::WebsocketServerStartError;
 using streamr::dht::types::PortRange;
 using streamr::dht::types::TlsCertificateFiles;
 using streamr::logger::SLogger;
+using streamr::utils::Uuid;
+
 struct WebsocketServerConfig {
     PortRange portRange;
     bool enableTls;
@@ -52,6 +55,7 @@ private:
     bool mTls;
     std::unordered_map<std::string, std::shared_ptr<WebsocketServerConnection>>
         mHalfReadyConnections;
+    std::recursive_mutex mHalfReadyConnectionsMutex;
 
 public:
     explicit WebsocketServer(WebsocketServerConfig&& config)
@@ -111,16 +115,17 @@ private:
     // pointer falls out of scope.
 
     void handleIncomingClient(std::shared_ptr<rtc::WebSocket> ws) {
+        std::scoped_lock lock(mHalfReadyConnectionsMutex);
         auto websocketServerConnection =
             WebsocketServerConnection::newInstance();
-        auto id = boost::uuids::to_string(boost::uuids::random_generator()());
+        auto id = Uuid::v4();
         mHalfReadyConnections.insert({id, websocketServerConnection});
 
         websocketServerConnection->on<Connected>([this, id]() {
             SLogger::info(
                 "Half-ready WebSocketServerConnection emitted Connected, emitting it as Connected");
-
-            auto readyConnection = this->mHalfReadyConnections.at(id);
+            std::scoped_lock lock(mHalfReadyConnectionsMutex);
+            auto readyConnection = mHalfReadyConnections.at(id);
 
             readyConnection->removeAllListeners();
 
@@ -136,6 +141,7 @@ private:
                               const std::string& /* reason */) {
             SLogger::info(
                 "Half-ready WebSocketServerConnection emitted Disconnected event, erasing it");
+            std::scoped_lock lock(mHalfReadyConnectionsMutex);
             const auto& it = mHalfReadyConnections.find(id);
             if (it == mHalfReadyConnections.end()) {
                 // Already erased
@@ -150,7 +156,7 @@ private:
             SLogger::trace(
                 "Half-ready WebSocketServerConnection emitted Error event, erasing it, error: " +
                 error);
-
+            std::scoped_lock lock(mHalfReadyConnectionsMutex);
             const auto& it = mHalfReadyConnections.find(id);
             if (it == mHalfReadyConnections.end()) {
                 // Already erased

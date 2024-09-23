@@ -47,8 +47,6 @@ protected:
             [this](
                 const RpcMessage& message,
                 const std::string& /* requestId */,
-                const std::optional<std::function<void(
-                    std::exception_ptr)>>& /* errorCallback */,
                 const ProtoCallContext& /* context */) -> void {
                 SLogger::info("onOutgoingMessageCallback()");
                 communicator1.handleIncomingMessage(
@@ -59,8 +57,6 @@ protected:
                 [this](
                     const RpcMessage& message,
                     const std::string& /* requestId */,
-                    const std::optional<std::function<void(
-                        std::exception_ptr)>>& /* errorCallback */,
                     const ProtoCallContext& /* context */) -> void {
                     SLogger::info("onOutgoingMessageCallback()");
                     communicator2.handleIncomingMessage(
@@ -124,8 +120,6 @@ void setOutgoingCallbackWithException(RpcCommunicatorType& sender) {
     sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
-           const std::optional<
-               std::function<void(std::exception_ptr)>>& /* errorCallback */,
            const ProtoCallContext& /* context */) -> void {
             SLogger::info("onOutgoingMessageCallback() throws");
             throw T("TestException");
@@ -137,8 +131,6 @@ void setOutgoingCallbackWithThrownUnknown(RpcCommunicatorType& sender) {
     sender.setOutgoingMessageCallback(
         [](const RpcMessage& /* message */,
            const std::string& /* requestId */,
-           const std::optional<
-               std::function<void(std::exception_ptr)>>& /* errorCallback */,
            const ProtoCallContext& /* context */) -> void {
             SLogger::info("onOutgoingMessageCallback() throws");
             throw unknownThrow; // NOLINT
@@ -356,8 +348,6 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
         [&communicator1 = this->communicator1](
             const RpcMessage& /* message */,
             const std::string& /* requestId */,
-            const std::optional<
-                std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& /* context */) -> void {
             SLogger::info("setOutgoingMessageCallback() sleeping 1s");
             std::this_thread::sleep_for(std::chrono::seconds(1)); // NOLINT
@@ -394,8 +384,6 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
         [&communicator1 = this->communicator1, &thread](
             const RpcMessage& message,
             const std::string& /* requestId */,
-            const std::optional<
-                std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& context) -> void {
             thread = std::make_shared<std::thread>(
                 [&communicator1, message, context]() {
@@ -407,8 +395,6 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
         [&communicator2 = this->communicator2](
             const RpcMessage& message,
             const std::string& /* requestId */,
-            const std::optional<
-                std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& context) -> void {
             communicator2.handleIncomingMessage(message, context);
         });
@@ -451,8 +437,6 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
         [&communicator1 = this->communicator1](
             const RpcMessage& /* message */,
             const std::string& /* requestId */,
-            const std::optional<
-                std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& /* context */) -> void {
             std::cout << "setOutgoingMessageCallback() sleeping 1s, thread id: "
                       << std::this_thread::get_id() << "\n";

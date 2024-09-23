@@ -49,8 +49,9 @@ public:
 
     /**
      * Node should invoke this when it learns about a new message
+     * @return number of neighbors the message was sent to immediately
      */
-    void feedUnseenMessage(
+    size_t feedUnseenMessage(
         const StreamMessage& message,
         const std::vector<DhtAddress>& targets,
         const std::optional<DhtAddress>& source) {
@@ -60,10 +61,13 @@ public:
             .handledNeighbors = std::set<DhtAddress>()};
 
         this->activeTaskStore.add(task);
-
+        size_t sentTo = 0;
         for (const auto& target : targets) {
-            this->sendAndAwaitThenMark(task, target);
+            if (this->sendAndAwaitThenMark(task, target)) {
+                sentTo++;
+            }
         }
+        return sentTo;
     }
 
     /**
@@ -77,14 +81,14 @@ public:
     }
 
 private:
-    void sendAndAwaitThenMark(
+    bool sendAndAwaitThenMark(
         PropagationTask& task, const DhtAddress& neighborId) {
         if (!task.handledNeighbors.contains(neighborId) &&
             neighborId != task.source) {
             try {
                 this->sendToNeighbor(neighborId, task.message);
             } catch (...) {
-                return;
+                return false;
             }
             // Side-note: due to asynchronicity, the task being modified at
             // this point could already be stale and deleted from
@@ -97,7 +101,9 @@ private:
                     PropagationTaskStore::messageIdToMessageRef(
                         task.message.messageid()));
             }
+            return true;
         }
+        return false;
     }
 };
 

@@ -9,16 +9,8 @@ namespace streamr::protorpc {
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 
-template <typename CallContextType>
+template <typename CallContextType, typename OutgoingMessageCallbackType>
 class RpcCommunicatorServerApi {
-public:
-    using OutgoingMessageCallbackType = std::function<void(
-        RpcMessage,
-        std::string /*requestId*/,
-        std::optional<
-            std::function<void(std::exception_ptr)>> /*errorCallback*/,
-        CallContextType)>;
-
 private:
     ServerRegistry<CallContextType> mServerRegistry;
     OutgoingMessageCallbackType mOutgoingMessageCallback;
@@ -106,7 +98,7 @@ private:
         if (mOutgoingMessageCallback) {
             try {
                 mOutgoingMessageCallback(
-                    response, response.requestid(), std::nullopt, callContext);
+                    response, response.requestid(), callContext);
             } catch (const std::exception& clientSideException) {
                 SLogger::debug(
                     "error when calling outgoing message callback from server",

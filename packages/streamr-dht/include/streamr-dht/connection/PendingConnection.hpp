@@ -15,7 +15,7 @@ using ::dht::PeerDescriptor;
 using streamr::dht::Identifiers;
 using streamr::dht::connection::Connection;
 using streamr::eventemitter::Event;
-using streamr::eventemitter::EventEmitter;
+using streamr::eventemitter::ReplayEventEmitter;
 using streamr::utils::AbortableTimers;
 using streamr::utils::AbortController;
 
@@ -30,7 +30,7 @@ using PendingConnectionEvents = std::tuple<
     pendingconnectionevents::Connected,
     pendingconnectionevents::Disconnected>;
 
-class PendingConnection : public EventEmitter<PendingConnectionEvents> {
+class PendingConnection : public ReplayEventEmitter<PendingConnectionEvents> {
 private:
     AbortController connectingAbortController;
     PeerDescriptor remotePeerDescriptor;

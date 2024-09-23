@@ -6,4 +6,5 @@ set(MonorepoPackages
     streamr-proto-rpc
     streamr-dht
     streamr-trackerless-network
+    streamr-libstreamrproxyclient
 )

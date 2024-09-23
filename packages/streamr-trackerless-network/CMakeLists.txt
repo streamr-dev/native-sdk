@@ -58,7 +58,28 @@ target_link_libraries(streamr-trackerless-network
     PRIVATE Folly::folly
     )
 
- if(NOT IOS)
+export(TARGETS streamr-trackerless-network 
+    NAMESPACE streamr::
+    FILE streamr-trackerless-network-config-in.cmake)
+  
+file(WRITE "${CMAKE_BINARY_DIR}/streamr-trackerless-network-config.cmake" 
+    "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
+    "find_package(streamr-utils CONFIG REQUIRED)\n"
+    "find_package(streamr-logger CONFIG REQUIRED)\n"
+    "find_package(streamr-proto-rpc CONFIG REQUIRED)\n"
+    "find_package(streamr-eventemitter CONFIG REQUIRED)\n"
+    "find_package(streamr-dht CONFIG REQUIRED)\n"
+    "find_package(Protobuf REQUIRED)\n"
+    "find_package(Boost CONFIG REQUIRED)\n"
+    "find_package(magic_enum CONFIG REQUIRED)\n"
+    "find_package(folly REQUIRED)\n"
+    "if(NOT TARGET Boost::uuid)\n"
+    "  add_library(Boost::uuid INTERFACE IMPORTED)\n"
+    "  set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
+    "endif()\n"
+    "include(${CMAKE_BINARY_DIR}/streamr-trackerless-network-config-in.cmake)\n")
+
+if(NOT IOS)
      enable_testing()
     find_package(GTest CONFIG REQUIRED)
 

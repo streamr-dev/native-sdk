@@ -47,7 +47,6 @@ int main() {
         [&communicator2](
             const RpcMessage& message,
             const std::string& /* requestId */,
-            const std::optional<std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& /* context */) -> void {
             communicator2.handleIncomingMessage(message, ProtoCallContext());
         });
@@ -56,7 +55,6 @@ int main() {
         [&communicator1](
             const RpcMessage& message,
             const std::string& /* requestId */,
-            const std::optional<std::function<void(std::exception_ptr)>>& /* errorCallback */,
             const ProtoCallContext& /* context */) -> void {
             communicator1.handleIncomingMessage(message, ProtoCallContext());
         });

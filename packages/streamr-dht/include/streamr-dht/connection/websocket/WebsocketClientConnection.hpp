@@ -29,7 +29,7 @@ public:
     }
 
     void connect(const std::string& address, bool selfSigned = true) {
-        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        std::scoped_lock lock(mMutex);
         if (mDestroyed) {
             SLogger::debug("connect() on destroyed connection");
             return;

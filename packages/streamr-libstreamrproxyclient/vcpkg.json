@@ -1,0 +1,16 @@
+{
+    "name": "streamr-libstreamrproxyclient",
+    "version": "1.0.0",
+    "dependencies": [
+        "gtest",
+        "ada-url"
+    ],
+    "features": {
+        "monorepo": {
+            "description": "Monorepo dependencies",
+            "dependencies": [
+                "streamr-trackerless-network"
+            ]
+        }
+    }
+}

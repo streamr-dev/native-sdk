@@ -2,6 +2,7 @@
 #define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_CLIENT_API_HPP
 
 #include <exception>
+#include <map>
 #include <folly/coro/DetachOnCancel.h>
 #include <folly/coro/Promise.h>
 #include <folly/coro/Task.h>
@@ -10,6 +11,7 @@
 #include "Errors.hpp"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-utils/Branded.hpp"
 #include "streamr-utils/Uuid.hpp"
 namespace streamr::protorpc {
 
@@ -18,29 +20,39 @@ using streamr::logger::SLogger;
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 using folly::coro::Task;
-using utils::Uuid;
+using streamr::utils::Branded;
+using streamr::utils::Uuid;
 
 constexpr size_t threadPoolSize = 20;
 
-template <typename CallContextType>
+template <typename CallContextType, typename OutgoingMessageCallbackType>
 class RpcCommunicatorClientApi {
 public:
-    using OutgoingMessageCallbackType = std::function<void(
-        RpcMessage,
-        std::string /*requestId*/,
-        std::optional<
-            std::function<void(std::exception_ptr)>> /*errorCallback*/,
-        CallContextType)>;
+    using RequestId = Branded<std::string, struct RequestIdTag>;
 
-private:
     class OngoingRequestBase {
+    private:
+        CallContextType mCallContext;
+
     public:
+        explicit OngoingRequestBase(CallContextType callContext)
+            : mCallContext(std::move(callContext)) {}
         virtual ~OngoingRequestBase() = default;
         virtual void resolveRequest(const RpcMessage& response) = 0;
         // virtual void resolveNotification() = 0;
         virtual void rejectRequest(const RpcException& error) = 0;
+        virtual bool fulfilsPredicate(
+            const std::function<bool(const OngoingRequestBase&)>& predicate)
+            const {
+            return predicate(*this);
+        };
+        const CallContextType& getCallContext() const { return mCallContext; }
     };
 
+    using OngoingRequestPredicate =
+        std::function<bool(const OngoingRequestBase&)>;
+
+private:
     template <typename ResultType>
     class OngoingRequest : public OngoingRequestBase {
     private:
@@ -50,8 +62,9 @@ private:
             mPromiseContract;
 
     public:
-        OngoingRequest()
-            : mPromiseContract(folly::coro::makePromiseContract<ResultType>()) {
+        explicit OngoingRequest(CallContextType callContext)
+            : OngoingRequestBase(std::move(callContext)),
+              mPromiseContract(folly::coro::makePromiseContract<ResultType>()) {
         }
 
         folly::coro::Promise<ResultType>& getPromise() {
@@ -106,8 +119,7 @@ private:
     };
 
     OutgoingMessageCallbackType mOutgoingMessageCallback;
-    std::unordered_map<std::string, std::shared_ptr<OngoingRequestBase>>
-        mOngoingRequests;
+    std::map<RequestId, std::shared_ptr<OngoingRequestBase>> mOngoingRequests;
     std::recursive_mutex mOngoingRequestsMutex;
     std::chrono::milliseconds mRpcRequestTimeout;
     folly::CPUThreadPoolExecutor mExecutor;
@@ -129,7 +141,7 @@ public:
         const auto& header = rpcMessage.header();
         if (header.find("response") != header.end()) {
             SLogger::trace("onIncomingMessage() message is a response");
-            if (mOngoingRequests.find(rpcMessage.requestid()) !=
+            if (mOngoingRequests.find(RequestId{rpcMessage.requestid()}) !=
                 mOngoingRequests.end()) {
                 SLogger::trace("onIncomingMessage() ongoing request found");
                 if (rpcMessage.has_errortype()) {
@@ -191,12 +203,14 @@ public:
                     SLogger::trace(
                         "request() caught folly::FutureTimeout", e.what());
                     std::lock_guard lock(mOngoingRequestsMutex);
-                    mOngoingRequests.erase(requestMessage.requestid());
+                    mOngoingRequests.erase(
+                        RequestId{requestMessage.requestid()});
                     throw RpcTimeout("request() timed out");
                 } catch (...) {
                     SLogger::trace("request() caught other exception");
                     std::lock_guard lock(mOngoingRequestsMutex);
-                    mOngoingRequests.erase(requestMessage.requestid());
+                    mOngoingRequests.erase(
+                        RequestId{requestMessage.requestid()});
                     throw;
                 }
             });
@@ -236,7 +250,6 @@ public:
                         outgoingMessageCallback(
                             requestMessage,
                             requestMessage.requestid(),
-                            std::nullopt,
                             callContext);
                         promise.setValue();
                     } catch (const std::exception& clientSideException) {
@@ -261,8 +274,21 @@ public:
         }
     }
 
+    [[nodiscard]] std::vector<RequestId>
+    getOngoingRequestIdsFulfillingPredicate(
+        const OngoingRequestPredicate& predicate) {
+        std::scoped_lock lock(mOngoingRequestsMutex);
+        std::vector<RequestId> ongoingRequestIds;
+        for (const auto& ongoingRequest : mOngoingRequests) {
+            if (ongoingRequest.second->fulfilsPredicate(predicate)) {
+                ongoingRequestIds.push_back(ongoingRequest.first);
+            }
+        }
+        return ongoingRequestIds;
+    }
+
     void handleClientError(
-        const std::string& requestId, const RpcException& error) {
+        const RequestId& requestId, const RpcException& error) {
         std::lock_guard lock(mOngoingRequestsMutex);
         const auto& ongoingRequest = mOngoingRequests.find(requestId);
 
@@ -276,34 +302,21 @@ private:
     template <typename ReturnType>
     std::shared_ptr<OngoingRequest<ReturnType>> makeRpcRequest(
         const RpcMessage& requestMessage, const CallContextType& callContext) {
-        auto ongoingRequest = std::make_shared<OngoingRequest<ReturnType>>();
+        auto ongoingRequest =
+            std::make_shared<OngoingRequest<ReturnType>>(callContext);
         {
             std::lock_guard lock(mOngoingRequestsMutex);
             this->mOngoingRequests.emplace(
-                requestMessage.requestid(), ongoingRequest);
+                RequestId{requestMessage.requestid()}, ongoingRequest);
         }
         if (mOutgoingMessageCallback) {
             try {
                 mOutgoingMessageCallback(
-                    requestMessage,
-                    requestMessage.requestid(),
-                    [this, &requestMessage](const std::exception_ptr& eptr) {
-                        try {
-                            if (eptr) {
-                                std::rethrow_exception(eptr);
-                            }
-                        } catch (const std::exception& e) {
-                            RpcClientError error(
-                                "Error callback was called with exception",
-                                e.what());
-                            this->handleClientError(
-                                requestMessage.requestid(), error);
-                        }
-                    },
-                    callContext);
+                    requestMessage, requestMessage.requestid(), callContext);
             } catch (const std::exception& clientSideException) {
                 std::lock_guard lock(mOngoingRequestsMutex);
-                if (mOngoingRequests.find(requestMessage.requestid()) !=
+                if (mOngoingRequests.find(
+                        RequestId{requestMessage.requestid()}) !=
                     mOngoingRequests.end()) {
                     SLogger::debug(
                         "Error when calling outgoing message callback from client",
@@ -314,7 +327,8 @@ private:
 
                     SLogger::debug("Old exception:", error.originalErrorInfo);
 
-                    this->handleClientError(requestMessage.requestid(), error);
+                    this->handleClientError(
+                        RequestId{requestMessage.requestid()}, error);
                 }
             }
         }
@@ -346,16 +360,18 @@ private:
 
     void resolveOngoingRequest(const RpcMessage& response) {
         std::lock_guard lock(mOngoingRequestsMutex);
-        auto& ongoingRequest = mOngoingRequests.at(response.requestid());
+        auto& ongoingRequest =
+            mOngoingRequests.at(RequestId{response.requestid()});
         ongoingRequest->resolveRequest(response);
-        mOngoingRequests.erase(response.requestid());
+        mOngoingRequests.erase(RequestId{response.requestid()});
     }
 
     void rejectOngoingRequest(const RpcMessage& response) {
         SLogger::trace("rejectOngoingRequest()", response.DebugString());
         std::lock_guard lock(mOngoingRequestsMutex);
 
-        const auto& ongoingRequest = mOngoingRequests.at(response.requestid());
+        const auto& ongoingRequest =
+            mOngoingRequests.at(RequestId{response.requestid()});
 
         const auto& header = response.header();
 
@@ -373,7 +389,7 @@ private:
         } else {
             ongoingRequest->rejectRequest(RpcRequestError("Unknown RPC Error"));
         }
-        mOngoingRequests.erase(response.requestid());
+        mOngoingRequests.erase(RequestId{response.requestid()});
     }
 };
 
