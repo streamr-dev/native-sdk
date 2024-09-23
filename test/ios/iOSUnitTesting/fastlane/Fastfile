@@ -18,7 +18,6 @@
     scan(
       scheme: 'iOSUnitTesting', # Project scheme name
       clean: true, # Clean project folder before test execution
-      destination: 'platform=macOS',
-      allowProvisioningUpdates: true
+      destination: 'platform=macOS'
     )
     end
