@@ -42,18 +42,12 @@ public:
 
         auto options = this->formDhtRpcOptions();
 
-        try {
-            auto result = co_await this->getClient().requestConnection(
-                std::move(request),
-                std::move(options),
-                RpcRemote::existingConnectionTimeout);
-            co_return result.accepted();
-        } catch (const std::exception& e) {
-            SLogger::debug(
-                "ProxyConnectionRequest failed with error " +
-                std::string(e.what()));
-            co_return false;
-        }
+        auto result = co_await this->getClient().requestConnection(
+            std::move(request),
+            std::move(options),
+            RpcRemote::existingConnectionTimeout);
+        
+        co_return result.accepted();
     }
 };
 
