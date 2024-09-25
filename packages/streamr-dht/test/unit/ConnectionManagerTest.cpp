@@ -1,6 +1,8 @@
 #include "streamr-dht/connection/ConnectionManager.hpp"
 #include <memory>
 #include <string>
+#include <cpptrace/cpptrace.hpp>
+#include <cpptrace/from_current.hpp>
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
 #include <folly/coro/Collect.h>
@@ -12,6 +14,7 @@
 #include "streamr-dht/transport/Transport.hpp"
 #include "streamr-dht/types/PortRange.hpp"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-dht/helpers/Errors.hpp"
 
 using ::dht::ConnectivityResponse;
 using ::dht::Message;
@@ -27,6 +30,7 @@ using streamr::dht::transport::FakeTransport;
 using streamr::dht::transport::SendOptions;
 using streamr::dht::types::PortRange;
 using streamr::logger::SLogger;
+using streamr::dht::helpers::SendFailed;
 
 namespace transportevents = streamr::dht::transport::transportevents;
 
@@ -165,4 +169,32 @@ TEST_F(
 
     connectionManager1->stop();
     connectionManager2->stop();
+}
+
+TEST_F(
+    ConnectionManagerTest, ReportsCorrectErrorIfConnectingToNonExistentPort) {
+    auto connectionManager1 =
+        createConnectionManager(DefaultConnectorFacadeOptions{
+            .transport = *mockConnectorTransport1,
+            .websocketHost = "127.0.0.1",
+            .websocketPortRange =
+                PortRange{
+                    .min = mockWebsocketPort1,
+                    .max = mockWebsocketPort1}, // NOLINT
+            .createLocalPeerDescriptor =
+                [this](const ConnectivityResponse& /* response */)
+                -> PeerDescriptor { return mockPeerDescriptor1; }});
+    SLogger::info("Starting connection manager 1");
+    connectionManager1->start();
+
+    Message msg;
+    msg.set_serviceid(SERVICE_ID);
+    msg.set_messageid("1");
+    msg.mutable_rpcmessage()->CopyFrom(RpcMessage());
+    msg.mutable_targetdescriptor()->CopyFrom(createMockPeerDescriptor(0));
+
+    EXPECT_THROW(connectionManager1->send(msg, SendOptions{.connect = true}), SendFailed);
+
+    connectionManager1->stop();
+    SLogger::info("Connection manager 1 stopped");
 }

@@ -52,16 +52,16 @@ public:
         return this->localPeerDescriptor;
     }
 
-    [[nodiscard]] std::vector<PeerDescriptor> getConnections() const override {
+    [[nodiscard]] std::vector<PeerDescriptor> getConnections() override {
         return this->connections | std::views::values |
             std::ranges::to<std::vector>();
     }
 
-    [[nodiscard]] size_t getConnectionCount() const override {
+    [[nodiscard]] size_t getConnectionCount() override {
         return this->connections.size();
     }
 
-    [[nodiscard]] bool hasConnection(const DhtAddress& nodeId) const override {
+    [[nodiscard]] bool hasConnection(const DhtAddress& nodeId) override {
         return this->connections.contains(nodeId);
     }
 

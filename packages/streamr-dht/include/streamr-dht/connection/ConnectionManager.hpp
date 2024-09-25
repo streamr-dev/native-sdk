@@ -3,6 +3,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 #include <utility>
 #include <folly/coro/Task.h>
 #include <folly/coro/blockingWait.h>
@@ -13,7 +14,7 @@
 #include "streamr-dht/connection/ConnectionLocker.hpp"
 #include "streamr-dht/connection/ConnectionsView.hpp"
 #include "streamr-dht/connection/ConnectorFacade.hpp"
-#include "streamr-dht/connection/Endpoint.hpp"
+#include "streamr-dht/connection/endpoint/Endpoint.hpp"
 #include "streamr-dht/dht/routing/DuplicateDetector.hpp"
 #include "streamr-dht/helpers/Errors.hpp"
 #include "streamr-dht/helpers/Offerer.hpp"
@@ -31,7 +32,7 @@ using ::dht::UnlockRequest;
 using streamr::dht::connection::ConnectionLocker;
 using streamr::dht::connection::ConnectionLockRpcLocal;
 using streamr::dht::connection::ConnectionsView;
-using streamr::dht::connection::Endpoint;
+using streamr::dht::connection::endpoint::Endpoint;
 using streamr::dht::connection::PendingConnection;
 using streamr::dht::helpers::CannotConnectToSelf;
 using streamr::dht::helpers::CouldNotStart;
@@ -45,6 +46,8 @@ using streamr::dht::transport::Transport;
 using streamr::dht::transport::transportevents::Disconnected;
 using streamr::logger::SLogger;
 using streamr::utils::waitForEvent;
+
+namespace endpointevents = streamr::dht::connection::endpoint::endpointevents;
 
 using namespace std::chrono_literals;
 
@@ -65,27 +68,29 @@ private:
     RoutingRpcCommunicator rpcCommunicator;
     ConnectionLockStates locks;
     ConnectionLockRpcLocal connectionLockRpcLocal;
-    std::map<DhtAddress, std::shared_ptr<Endpoint>> endpoints;
-    ConnectionManagerState state = ConnectionManagerState::IDLE;
     DuplicateDetector duplicateMessageDetector;
 
-    std::recursive_mutex mutex;
+    std::atomic<ConnectionManagerState> state = ConnectionManagerState::IDLE;
+    std::map<DhtAddress, std::shared_ptr<Endpoint>> endpoints;
+    std::recursive_mutex endpointsMutex;
 
-    void addEndpoint(std::shared_ptr<PendingConnection> pendingConnection) {
+    void addEndpoint(const std::shared_ptr<PendingConnection>& pendingConnection) {
         SLogger::debug("ConnectionManager::addEndpoint start");
-        SLogger::debug("Trying to acquire mutex lock in addEndpoint");
-        std::scoped_lock lock(this->mutex);
-        SLogger::debug("Acquired mutex lock in addEndpoint");
+
         auto peerDescriptor = pendingConnection->getPeerDescriptor();
         auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
+
         auto endpoint = Endpoint::newInstance(
-            std::move(pendingConnection), [this, peerDescriptor, nodeId]() {
-                SLogger::debug(
-                    "Trying to acquire mutex lock in endpoint callback");
-                std::scoped_lock lock(this->mutex);
-                SLogger::debug("Acquired mutex lock in endpoint callback");
-                if (this->endpoints.find(nodeId) != this->endpoints.end()) {
-                    this->endpoints.erase(nodeId);
+            peerDescriptor,
+            [this, peerDescriptor, nodeId]() {
+                {
+                    SLogger::debug(
+                        "Trying to acquire mutex lock in endpoint callback");
+                    std::scoped_lock lock(this->endpointsMutex);
+                    SLogger::debug("Acquired mutex lock in endpoint callback");
+                    if (this->endpoints.find(nodeId) != this->endpoints.end()) {
+                        this->endpoints.erase(nodeId);
+                    }
                 }
                 this->emit<Disconnected>(peerDescriptor, true);
             });
@@ -99,7 +104,13 @@ private:
             this->emit<transport::transportevents::Connected>(peerDescriptor);
         });
 
-        this->endpoints[nodeId] = std::move(endpoint);
+        {
+            SLogger::debug("Trying to acquire mutex lock in addEndpoint");
+            std::scoped_lock lock(this->endpointsMutex);
+            SLogger::debug("Acquired mutex lock in addEndpoint");
+            this->endpoints[nodeId] = endpoint;
+        }
+        endpoint->changeToConnectingState(pendingConnection);
         SLogger::debug("ConnectionManager::addEndpoint end");
     }
 
@@ -142,7 +153,7 @@ public:
                   [this]() { return this->getLocalPeerDescriptor(); }}) {
         SLogger::debug("ConnectionManager constructor start");
         SLogger::info("ConnectionManager constructor");
-        this->connectorFacade = options.createConnectorFacade();
+        this->connectorFacade = this->options.createConnectorFacade();
 
         this->rpcCommunicator.registerRpcMethod<LockRequest, LockResponse>(
             "lockRequest",
@@ -198,9 +209,6 @@ public:
         SLogger::debug("ConnectionManager::stop() start");
         std::map<DhtAddress, std::shared_ptr<Endpoint>> endpointsCopy;
         {
-            SLogger::debug("Trying to acquire mutex lock in stop");
-            std::scoped_lock lock(this->mutex);
-            SLogger::debug("Acquired mutex lock in stop");
             if (this->state == ConnectionManagerState::STOPPED ||
                 this->state == ConnectionManagerState::STOPPING) {
                 SLogger::debug("ConnectionManager::stop() end (early return)");
@@ -209,8 +217,14 @@ public:
             this->state = ConnectionManagerState::STOPPING;
             SLogger::trace("Stopping ConnectionManager");
 
-            // make temporary copy of endpoints to avoid iterator invalidation
-            endpointsCopy = this->endpoints;
+            {
+                SLogger::debug("Trying to acquire mutex lock in stop");
+                std::scoped_lock lock(this->endpointsMutex);
+                SLogger::debug("Acquired mutex lock in stop");
+                // make temporary copy of endpoints to avoid iterator
+                // invalidation
+                endpointsCopy = this->endpoints;
+            }
         }
         // pop one by one from copy to avoid iterator invalidation
 
@@ -233,9 +247,7 @@ public:
 
     void send(const Message& message, const SendOptions& sendOptions) override {
         SLogger::debug("ConnectionManager::send() start");
-        SLogger::debug("Trying to acquire mutex lock in send");
-        std::scoped_lock lock(this->mutex);
-        SLogger::debug("Acquired mutex lock in send");
+
         SLogger::trace("send()");
         SLogger::debug("Traced send() function entry");
         if ((this->state == ConnectionManagerState::STOPPED ||
@@ -271,30 +283,42 @@ public:
         SLogger::trace("Sending message: " + debugMessage);
         SLogger::debug("Traced sending message details");
 
-        if (this->endpoints.find(nodeId) == this->endpoints.end()) {
-            SLogger::debug("Node ID not found in endpoints");
-            if (sendOptions.connect) {
-                SLogger::debug("Creating new connection");
-                std::shared_ptr<PendingConnection> connection =
-                    this->connectorFacade->createConnection(peerDescriptor);
+        std::shared_ptr<Endpoint> endpoint;
+        {
+            SLogger::debug("Trying to acquire mutex lock in send");
+            std::scoped_lock lock(this->endpointsMutex);
+            SLogger::debug("Acquired mutex lock in send");
 
-                SLogger::debug("Created new connection");
-                this->onNewConnection(connection);
-                SLogger::debug("Handled new connection");
-            } else {
-                SLogger::debug("Throwing SendFailed exception");
+            if (this->endpoints.find(nodeId) == this->endpoints.end()) {
+                SLogger::debug("Node ID not found in endpoints");
+                if (sendOptions.connect) {
+                    SLogger::debug("Creating new connection");
+                    std::shared_ptr<PendingConnection> connection =
+                        this->connectorFacade->createConnection(peerDescriptor);
+
+                    SLogger::debug("Created new connection");
+                    this->onNewConnection(connection);
+                    SLogger::debug("Handled new connection");
+                    if (this->endpoints.find(nodeId) == this->endpoints.end()) {
+                        SLogger::debug("Node ID not found in endpoints after creating new connection, this means that the connection failed");
+                        throw SendFailed("No connection to target, connection failed");
+                    }
+                } else {
+                    SLogger::debug("Throwing SendFailed exception");
+                    throw SendFailed(
+                        "No connection to target, connect flag is false");
+                }
+            } else if (
+                !this->endpoints.at(nodeId)->isConnected() &&
+                !sendOptions.connect) {
+                SLogger::debug(
+                    "Throwing SendFailed exception due to disconnected endpoint");
                 throw SendFailed(
                     "No connection to target, connect flag is false");
             }
-        } else if (
-            !this->endpoints.at(nodeId)->isConnected() &&
-            !sendOptions.connect) {
-            SLogger::debug(
-                "Throwing SendFailed exception due to disconnected endpoint");
-            throw SendFailed("No connection to target, connect flag is false");
+            endpoint = this->endpoints.at(nodeId);
+            SLogger::debug("Passed connection checks");
         }
-        SLogger::debug("Passed connection checks");
-
         size_t nBytes = messageWithSource.ByteSizeLong();
         SLogger::debug("Calculated message size");
         if (nBytes == 0) {
@@ -308,7 +332,7 @@ public:
         messageWithSource.SerializeToArray(
             byteVec.data(), static_cast<int>(nBytes));
         SLogger::debug("Serialized message to byte vector");
-        this->endpoints.at(nodeId)->send(byteVec);
+        endpoint->send(byteVec);
         SLogger::debug("Sent message through endpoint");
         SLogger::debug("ConnectionManager::send() end");
     }
@@ -320,7 +344,7 @@ public:
         return result;
     }
 
-    [[nodiscard]] bool hasConnection(const DhtAddress& nodeId) const override {
+    [[nodiscard]] bool hasConnection(const DhtAddress& nodeId) override {
         SLogger::debug("ConnectionManager::hasConnection() start");
         auto result = std::ranges::any_of(
             this->getConnections(), [&nodeId](const auto& c) {
@@ -330,23 +354,21 @@ public:
         return result;
     }
 
-    [[nodiscard]] size_t getConnectionCount() const override {
+    [[nodiscard]] size_t getConnectionCount() override {
         SLogger::debug("ConnectionManager::getConnectionCount() start");
         auto result = this->getConnections().size();
         SLogger::debug("ConnectionManager::getConnectionCount() end");
         return result;
     }
 
-    [[nodiscard]] bool hasLocalLockedConnection(
-        const DhtAddress& nodeId) const {
+    [[nodiscard]] bool hasLocalLockedConnection(const DhtAddress& nodeId) {
         SLogger::debug("ConnectionManager::hasLocalLockedConnection() start");
         auto result = this->locks.isLocalLocked(nodeId);
         SLogger::debug("ConnectionManager::hasLocalLockedConnection() end");
         return result;
     }
 
-    [[nodiscard]] bool hasRemoteLockedConnection(
-        const DhtAddress& nodeId) const {
+    [[nodiscard]] bool hasRemoteLockedConnection(const DhtAddress& nodeId) {
         return this->locks.isRemoteLocked(nodeId);
     }
 
@@ -383,8 +405,6 @@ public:
 
     void unlockConnection(
         PeerDescriptor targetDescriptor, LockID lockId) override {
-        SLogger::debug("Trying to acquire mutex lock in unlockConnection");
-        std::scoped_lock lock(this->mutex);
         if (this->state == ConnectionManagerState::STOPPED ||
             Identifiers::areEqualPeerDescriptors(
                 targetDescriptor, this->getLocalPeerDescriptor())) {
@@ -395,14 +415,21 @@ public:
             Identifiers::getNodeIdFromPeerDescriptor(targetDescriptor);
         this->locks.removeLocalLocked(nodeId, lockId);
 
-        if (this->endpoints.find(nodeId) != this->endpoints.end()) {
-            ConnectionLockRpcClient client{this->rpcCommunicator};
-            ConnectionLockRpcRemote rpcRemote(
-                this->getLocalPeerDescriptor(), targetDescriptor, client);
-
-            folly::coro::blockingWait(
-                rpcRemote.unlockRequest(std::move(lockId)));
+        {
+            SLogger::debug("Trying to acquire mutex lock in unlockConnection");
+            std::scoped_lock lock(this->endpointsMutex);
+            SLogger::debug("Acquired mutex lock in unlockConnection");
+            if (this->endpoints.find(nodeId) == this->endpoints.end()) {
+                SLogger::debug("Node ID not found in endpoints");
+                return;
+            }
         }
+
+        ConnectionLockRpcClient client{this->rpcCommunicator};
+        ConnectionLockRpcRemote rpcRemote(
+            this->getLocalPeerDescriptor(), targetDescriptor, client);
+
+        folly::coro::blockingWait(rpcRemote.unlockRequest(std::move(lockId)));
     }
 
     void weakLockConnection(
@@ -427,20 +454,21 @@ public:
         this->locks.removeWeakLocked(nodeId, lockId);
     }
 
-    [[nodiscard]] size_t getLocalLockedConnectionCount() const override {
+    [[nodiscard]] size_t getLocalLockedConnectionCount() override {
         return this->locks.getLocalLockedConnectionCount();
     }
 
-    [[nodiscard]] size_t getRemoteLockedConnectionCount() const override {
+    [[nodiscard]] size_t getRemoteLockedConnectionCount() override {
         return this->locks.getRemoteLockedConnectionCount();
     }
 
-    [[nodiscard]] size_t getWeakLockedConnectionCount() const override {
+    [[nodiscard]] size_t getWeakLockedConnectionCount() override {
         return this->locks.getWeakLockedConnectionCount();
     }
 
-    [[nodiscard]] std::vector<PeerDescriptor> getConnections() const override {
-        return endpoints | std::views::values |
+    [[nodiscard]] std::vector<PeerDescriptor> getConnections() override {
+        std::scoped_lock lock(this->endpointsMutex);
+        return this->endpoints | std::views::values |
             std::views::filter([](const auto& endpoint) {
                    return endpoint->isConnected();
                }) |
@@ -469,22 +497,27 @@ private:
 
     bool acceptNewConnection(
         const std::shared_ptr<PendingConnection>& newConnection) {
-        std::scoped_lock lock(this->mutex);
         const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
             newConnection->getPeerDescriptor());
-        SLogger::trace(nodeId + " acceptNewConnection()");
+        SLogger::debug("ConnectionManager::acceptNewConnection()");
 
-        if (this->endpoints.find(nodeId) != this->endpoints.end()) {
-            if (OffererHelper::getOfferer(
-                    Identifiers::getNodeIdFromPeerDescriptor(
-                        this->getLocalPeerDescriptor()),
-                    nodeId) == Offerer::REMOTE) {
-                this->endpoints.at(nodeId)->setConnecting(newConnection);
-                return true;
+        {
+            SLogger::debug("ConnectionManager::acceptNewConnection() start");
+            std::scoped_lock lock(this->endpointsMutex);
+            SLogger::debug("Acquired mutex lock in acceptNewConnection");
+
+            if (this->endpoints.find(nodeId) != this->endpoints.end()) {
+                if (OffererHelper::getOfferer(
+                        Identifiers::getNodeIdFromPeerDescriptor(
+                            this->getLocalPeerDescriptor()),
+                        nodeId) == Offerer::REMOTE) {
+                    this->endpoints.at(nodeId)->setConnecting(newConnection);
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
-
+        SLogger::debug("Calling addEndpoint() in acceptNewConnection()");
         this->addEndpoint(newConnection);
         SLogger::trace(nodeId + " added to connections at acceptNewConnection");
         return true;
@@ -494,14 +527,24 @@ private:
         const PeerDescriptor& peerDescriptor,
         bool gracefulLeave,
         const std::optional<std::string>& reason) {
-        std::scoped_lock lock(this->mutex);
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
         SLogger::trace(nodeId + " closeConnection() " + reason.value_or(""));
         this->locks.clearAllLocks(nodeId);
 
-        if (this->endpoints.find(nodeId) != this->endpoints.end()) {
-            this->endpoints.at(nodeId)->close(gracefulLeave);
+        std::shared_ptr<Endpoint> endpoint;
+        {
+            SLogger::debug("ConnectionManager::closeConnection() start");
+            std::scoped_lock lock(this->endpointsMutex);
+            SLogger::debug("Acquired mutex lock in closeConnection");
+            auto it = this->endpoints.find(nodeId);
+            if (it != this->endpoints.end()) {
+                endpoint = it->second;
+            }
+        }
+
+        if (endpoint) {
+            endpoint->close(gracefulLeave);
         } else {
             SLogger::trace(
                 nodeId +
@@ -512,20 +555,29 @@ private:
 
     void gracefullyDisconnect(
         PeerDescriptor&& targetDescriptor, DisconnectMode&& disconnectMode) {
-        std::unique_lock lock(this->mutex);
-        if (this->endpoints.find(Identifiers::getNodeIdFromPeerDescriptor(
-                targetDescriptor)) == this->endpoints.end()) {
+        SLogger::debug("ConnectionManager::gracefullyDisconnect() start");
+
+        std::shared_ptr<Endpoint> endpoint;
+        {
+            SLogger::debug(
+                "Trying to acquire mutex lock in gracefullyDisconnect");
+            std::unique_lock lock(this->endpointsMutex);
+            SLogger::debug("Acquired mutex lock in gracefullyDisconnect");
+            auto it = this->endpoints.find(
+                Identifiers::getNodeIdFromPeerDescriptor(targetDescriptor));
+            if (it != this->endpoints.end()) {
+                endpoint = it->second;
+            }
+        }
+        if (endpoint == nullptr) {
             SLogger::debug(
                 "gracefullyDisconnected() tried on a non-existing connection");
             return;
         }
         auto debugString = targetDescriptor.DebugString();
-        const auto endpoint = this->endpoints.at(
-            Identifiers::getNodeIdFromPeerDescriptor(targetDescriptor));
 
         if (endpoint->isConnected()) {
             try {
-                lock.unlock();
                 folly::coro::blockingWait(folly::coro::co_invoke(
                     [this,
                      endpoint,

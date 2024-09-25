@@ -74,7 +74,10 @@ public:
                     .maxMessageSize = this->options.maxMessageSize}));
         }
     }
-
+    ~WebsocketServerConnector() {
+        SLogger::info("WebsocketServerConnector::~WebsocketServerConnector");
+    }
+    
     static std::string getActionFromUrl(const Url& resourceUrl) {
         std::string action;
         size_t queryPos = resourceUrl.find("?");
