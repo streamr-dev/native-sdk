@@ -64,6 +64,7 @@ public:
                     bool gracefulLeave,
                     uint64_t /*code*/,
                     const std::string& /*reason*/) {
+                    auto self = this->sharedFromThis<OutgoingHandshaker>();
                     this->pendingConnection->close(gracefulLeave);
                     stopHandshaker();
                 });
@@ -72,6 +73,7 @@ public:
             this->connection->once<connectionevents::Error>(
                 [this](const std::string& name) {
                     SLogger::error("OutgoingHandshaker got error: " + name);
+                    auto self = this->sharedFromThis<OutgoingHandshaker>();
                     this->pendingConnection->onError(
                         std::make_exception_ptr(std::runtime_error(name)));
                 });
@@ -80,6 +82,7 @@ public:
             this->pendingConnection
                 ->once<pendingconnectionevents::Disconnected>(
                     [this](bool /*gracefulLeave*/) {
+                        auto self = this->sharedFromThis<OutgoingHandshaker>();
                         this->connection->close(false);
                         stopHandshaker();
                     });

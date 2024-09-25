@@ -10,7 +10,9 @@ namespace streamr::dht::routing {
 class DuplicateDetector {
 private:
     std::unordered_set<std::string> values;
+    std::recursive_mutex valuesMutex;
     std::vector<std::string> queue;
+    std::recursive_mutex queueMutex;
     size_t maxItemCount;
 
 public:
@@ -19,6 +21,7 @@ public:
     virtual ~DuplicateDetector() = default;
 
     void add(const std::string& value) {
+        std::scoped_lock lock(this->valuesMutex, this->queueMutex);
         this->values.insert(value);
         this->queue.push_back(value);
         if (this->queue.size() > this->maxItemCount) {
@@ -28,13 +31,18 @@ public:
         }
     }
 
-    [[nodiscard]] bool isMostLikelyDuplicate(const std::string& value) const {
+    [[nodiscard]] bool isMostLikelyDuplicate(const std::string& value) {
+        std::scoped_lock lock(this->valuesMutex);
         return this->values.find(value) != this->values.end();
     }
 
-    [[nodiscard]] size_t size() const { return this->values.size(); }
+    [[nodiscard]] size_t size() {
+        std::scoped_lock lock(this->valuesMutex);
+        return this->values.size();
+    }
 
     void clear() {
+        std::scoped_lock lock(this->valuesMutex, this->queueMutex);
         this->values.clear();
         this->queue.clear();
     }

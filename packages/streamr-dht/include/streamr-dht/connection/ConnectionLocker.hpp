@@ -25,9 +25,9 @@ public:
         const DhtAddress& targetDescriptor, const LockID& lockId) = 0;
     virtual void weakUnlockConnection(
         const DhtAddress& targetDescriptor, const LockID& lockId) = 0;
-    [[nodiscard]] virtual size_t getLocalLockedConnectionCount() const = 0;
-    [[nodiscard]] virtual size_t getRemoteLockedConnectionCount() const = 0;
-    [[nodiscard]] virtual size_t getWeakLockedConnectionCount() const = 0;
+    [[nodiscard]] virtual size_t getLocalLockedConnectionCount() = 0;
+    [[nodiscard]] virtual size_t getRemoteLockedConnectionCount() = 0;
+    [[nodiscard]] virtual size_t getWeakLockedConnectionCount() = 0;
 };
 
 } // namespace streamr::dht::connection

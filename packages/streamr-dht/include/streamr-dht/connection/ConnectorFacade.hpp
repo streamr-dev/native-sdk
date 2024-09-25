@@ -89,12 +89,17 @@ public:
               options.transport,
               RpcCommunicatorOptions{.rpcRequestTimeout = 15000ms}) {} // NOLINT
 
+    ~DefaultConnectorFacade() {
+        SLogger::info("DefaultConnectorFacade::~DefaultConnectorFacade");
+    }
+
     void start(
         std::function<bool(const std::shared_ptr<PendingConnection>&)>
             onNewConnection,
         std::function<bool(const DhtAddress& nodeId)> hasConnection /*,
         Transport& autoCertifierTransport */
         ) override {
+        SLogger::info("DefaultConnectorFacade::start() start");
         WebsocketClientConnectorOptions webSocketClientConnectorOptions{
             .onNewConnection = onNewConnection,
             .hasConnection = hasConnection,
@@ -129,6 +134,13 @@ public:
         const auto localPeerDescriptor =
             options.createLocalPeerDescriptor(connectivityResponse);
         this->setLocalPeerDescriptor(localPeerDescriptor);
+
+        if (this->websocketServerConnector) {
+            SLogger::debug("DefaultConnectorFacade::start() websocketServerConnector is not null");
+        } else {
+            SLogger::debug("DefaultConnectorFacade::start() websocketServerConnector is null");
+        }
+        SLogger::info("DefaultConnectorFacade::start() end");
     }
 
     std::shared_ptr<PendingConnection> createConnection(
@@ -158,9 +170,11 @@ public:
     }
 
     void stop() override {
+        SLogger::info("DefaultConnectorFacade::stop start");
         this->websocketConnectorRpcCommunicator.destroy();
         this->websocketClientConnector->destroy();
         this->websocketServerConnector->destroy();
+        SLogger::info("DefaultConnectorFacade::stop end");
     }
 };
 
