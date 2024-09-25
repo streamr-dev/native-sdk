@@ -1,8 +1,10 @@
 #ifndef STREAMR_TRACKERLESS_NETWORK_PROXY_PROXY_CLIENT_HPP
 #define STREAMR_TRACKERLESS_NETWORK_PROXY_PROXY_CLIENT_HPP
 
+#include <exception>
 #include <map>
 #include <optional>
+#include <string>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
@@ -76,7 +78,7 @@ private:
         PeerDescriptor peerDescriptor;
         ProxyDirection direction;
     };
-    
+
     ListeningRpcCommunicator rpcCommunicator;
     ContentDeliveryRpcLocal contentDeliveryRpcLocal;
     ProxyClientOptions options;
@@ -163,7 +165,10 @@ private:
     }
 
 public:
-    void setProxies(
+    std::pair<
+        size_t /* number of connections */,
+        std::vector<std::exception_ptr> /* connection errors */>
+    setProxies(
         const std::vector<PeerDescriptor>& nodes,
         ProxyDirection direction,
         const EthereumAddress& userId,
@@ -192,21 +197,26 @@ public:
             .userId = userId,
         };
 
-        this->updateConnections();
+        auto errors = this->updateConnections();
+        return {this->connections.size(), errors};
     }
 
-    void updateConnections() {
+    std::vector<std::exception_ptr /* connection errors */>
+    updateConnections() {
         auto invalidConnections = this->getInvalidConnections();
         for (const auto& id : invalidConnections) {
             this->closeConnection(id);
         }
+        std::vector<std::exception_ptr> errors;
         auto connectionCountDiff =
             this->definition->connectionCount - this->connections.size();
         if (connectionCountDiff > 0) {
-            this->openRandomConnections(connectionCountDiff);
+            errors = this->openRandomConnections(connectionCountDiff);
         } else if (connectionCountDiff < 0) {
             this->closeRandomConnections(-connectionCountDiff);
         }
+
+        return errors;
     }
 
     std::vector<DhtAddress> getInvalidConnections() {
@@ -219,18 +229,24 @@ public:
             std::ranges::to<std::vector>();
     }
 
-    void openRandomConnections(size_t connectionCount) {
+    std::vector<std::exception_ptr> openRandomConnections(
+        size_t connectionCount) {
         const auto proxiesToAttempt =
             this->definition->nodes | std::views::keys |
             std::views::filter([this](const auto& id) {
                 return !this->connections.contains(id);
             }) |
             std::views::take(connectionCount) | std::ranges::to<std::vector>();
-
+        std::vector<std::exception_ptr> errors;
         for (const auto& id : proxiesToAttempt) {
-            this->attemptConnection(
-                id, this->definition->direction, this->definition->userId);
+            try {
+                this->attemptConnection(
+                    id, this->definition->direction, this->definition->userId);
+            } catch (const std::exception& e) {
+                errors.push_back(std::current_exception());
+            }
         }
+        return errors;
     }
 
     void attemptConnection(
@@ -242,9 +258,21 @@ public:
         ProxyConnectionRpcRemote rpcRemote(
             this->options.localPeerDescriptor, peerDescriptor, client);
 
-        const auto accepted = folly::coro::blockingWait(
-            rpcRemote.requestConnection(direction, userId));
-
+        auto accepted = false;
+        try {
+            accepted = folly::coro::blockingWait(
+                rpcRemote.requestConnection(direction, userId));
+        } catch (const std::exception& e) {
+            SLogger::warn(
+                "Unable to open proxy connection",
+                {{"nodeId", nodeId},
+                 {"streamPartId", this->options.streamPartId}});
+            throw std::runtime_error(
+                "Failed to open proxy connection, exception: " +
+                std::string(e.what()) +
+                " was thrown when trying to lock connection to " +
+                peerDescriptor.DebugString());
+        }
         if (accepted) {
             this->options.connectionLocker.lockConnection(
                 peerDescriptor, LockID{SERVICE_ID});
@@ -267,6 +295,9 @@ public:
                 "Unable to open proxy connection",
                 {{"nodeId", nodeId},
                  {"streamPartId", this->options.streamPartId}});
+            throw std::runtime_error(
+                "Failed to open proxy connection, connection lock rejected at: " +
+                peerDescriptor.DebugString());
         }
     }
 
@@ -310,7 +341,7 @@ public:
 
     /**
      * @brief Broadcast a message to all connected nodes.
-     * 
+     *
      * @param msg The message to broadcast.
      * @param previousNode The node that sent the message.
      * @return The number of proxy nodes that received the message immediately.
@@ -338,6 +369,10 @@ public:
 
     [[nodiscard]] ProxyDirection getDirection() const {
         return this->definition->direction;
+    }
+
+    [[nodiscard]] EthereumAddress getLocalEthereumAddress() const {
+        return EthereumAddress{this->options.localPeerDescriptor.nodeid()};
     }
 
     void onNodeDisconnected(const PeerDescriptor& peerDescriptor) {

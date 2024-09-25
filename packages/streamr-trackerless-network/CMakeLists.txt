@@ -113,8 +113,15 @@ if(NOT IOS)
      )
      
      if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
-         include(GoogleTest)
+         #include(GoogleTest)
          # gtest_discover_tests(streamr-trackerless-network-test-unit)
-         gtest_discover_tests(streamr-trackerless-network-test-integration)
-     endif()
+         #gtest_discover_tests(streamr-trackerless-network-test-integration)
+     
+         add_test(
+            NAME ts-integration-test
+            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-integration-tests.sh"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            )
+
+    endif()
 endif()

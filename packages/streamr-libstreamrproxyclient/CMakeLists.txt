@@ -25,6 +25,7 @@ find_package(streamr-dht CONFIG REQUIRED)
 find_package(streamr-logger CONFIG REQUIRED)
 find_package(streamr-utils CONFIG REQUIRED)
 find_package(ada CONFIG REQUIRED)
+find_package(cpptrace CONFIG REQUIRED)
 
 target_include_directories(streamrproxyclient PUBLIC include)
 target_link_libraries(streamrproxyclient 
@@ -60,13 +61,32 @@ if (NOT IOS)
     target_include_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
     target_link_libraries(streamr-streamrproxyclient-test-integration 
         PUBLIC streamrproxyclient
+        PRIVATE streamr::streamr-logger
         PUBLIC GTest::gtest 
         PUBLIC GTest::gtest_main 
+        PUBLIC cpptrace::cpptrace
+    )
+
+    add_executable(streamr-streamrproxyclient-test-end-to-end test/end-to-end/PublishToTsServerTest.cpp)
+    target_link_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
+    target_include_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
+    target_link_libraries(streamr-streamrproxyclient-test-end-to-end 
+        PUBLIC streamrproxyclient
+        PRIVATE streamr::streamr-logger
+        PUBLIC GTest::gtest 
+        PUBLIC GTest::gtest_main 
+        PUBLIC cpptrace::cpptrace
     )
 
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
         include(GoogleTest)
         gtest_discover_tests(streamr-streamrproxyclient-test-integration)
+
+        add_test(
+            NAME ts-end-to-end-test
+            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-tests.sh"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            )
     endif()
 endif()
 
