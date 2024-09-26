@@ -89,7 +89,9 @@ private:
     std::shared_ptr<DisconnectedEndpointState> disconnectedState;
     PeerDescriptor peerDescriptor;
 
-    explicit Endpoint(PeerDescriptor peerDescriptor, std::function<void()>&& removeSelfFromContainer)
+    explicit Endpoint(
+        PeerDescriptor peerDescriptor,
+        std::function<void()>&& removeSelfFromContainer)
         : stateInterface(*this),
           connectedState(
               ConnectedEndpointState::newInstance(this->stateInterface)),
@@ -113,16 +115,17 @@ public:
             explicit MakeSharedEnabler(
                 PeerDescriptor peerDescriptor,
                 std::function<void()>&& removeSelfFromContainer)
-                : Endpoint(std::move(peerDescriptor), std::move(removeSelfFromContainer)) {}
+                : Endpoint(
+                      std::move(peerDescriptor),
+                      std::move(removeSelfFromContainer)) {}
         };
         return std::make_shared<MakeSharedEnabler>(
-            std::move(peerDescriptor),
-            std::move(removeSelfFromContainer));
+            std::move(peerDescriptor), std::move(removeSelfFromContainer));
     }
 
     ~Endpoint() override { SLogger::debug("Endpoint destructor"); }
 
-     void changeToConnectingState(
+    void changeToConnectingState(
         const std::shared_ptr<PendingConnection>& pendingConnection) {
         SLogger::debug("Endpoint::changeToConnectingState start");
         auto self = sharedFromThis<Endpoint>();

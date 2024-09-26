@@ -13,8 +13,8 @@
 #include "streamr-dht/helpers/Errors.hpp"
 #include "streamr-dht/types/PortRange.hpp"
 #include "streamr-dht/types/TlsCertificateFiles.hpp"
-#include "streamr-utils/Uuid.hpp"
 #include "streamr-logger/SLogger.hpp"
+#include "streamr-utils/Uuid.hpp"
 
 namespace streamr::dht::connection::websocket {
 

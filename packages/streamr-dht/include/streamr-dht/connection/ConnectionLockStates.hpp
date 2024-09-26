@@ -68,7 +68,10 @@ public:
     }
 
     [[nodiscard]] bool isLocked(const DhtAddress& id) {
-        std::scoped_lock lock(this->localLocksMutex, this->remoteLocksMutex, this->weakLocksMutex);
+        std::scoped_lock lock(
+            this->localLocksMutex,
+            this->remoteLocksMutex,
+            this->weakLocksMutex);
         return this->isLocalLocked(id) || this->isRemoteLocked(id) ||
             this->isWeakLocked(id);
     }
@@ -128,14 +131,20 @@ public:
     }
 
     void clearAllLocks(const DhtAddress& id) {
-        std::scoped_lock lock(this->localLocksMutex, this->remoteLocksMutex, this->weakLocksMutex);
+        std::scoped_lock lock(
+            this->localLocksMutex,
+            this->remoteLocksMutex,
+            this->weakLocksMutex);
         this->localLocks.erase(id);
         this->remoteLocks.erase(id);
         this->weakLocks.erase(id);
     }
 
     void clear() {
-        std::scoped_lock lock(this->localLocksMutex, this->remoteLocksMutex, this->weakLocksMutex);
+        std::scoped_lock lock(
+            this->localLocksMutex,
+            this->remoteLocksMutex,
+            this->weakLocksMutex);
         this->localLocks.clear();
         this->remoteLocks.clear();
         this->weakLocks.clear();

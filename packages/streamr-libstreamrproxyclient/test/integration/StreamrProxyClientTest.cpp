@@ -220,4 +220,3 @@ TEST(StreamrProxyClientTest, ThreeProxyConnectionsFailed) {
     }
     proxyClientDelete(&errors, &numErrors, clientHandle);
 }
-

@@ -136,9 +136,11 @@ public:
         this->setLocalPeerDescriptor(localPeerDescriptor);
 
         if (this->websocketServerConnector) {
-            SLogger::debug("DefaultConnectorFacade::start() websocketServerConnector is not null");
+            SLogger::debug(
+                "DefaultConnectorFacade::start() websocketServerConnector is not null");
         } else {
-            SLogger::debug("DefaultConnectorFacade::start() websocketServerConnector is null");
+            SLogger::debug(
+                "DefaultConnectorFacade::start() websocketServerConnector is null");
         }
         SLogger::info("DefaultConnectorFacade::start() end");
     }

@@ -94,7 +94,7 @@ TEST(ProxyClientTsIntegrationTest, ItCanPublishAMessage) {
 
     StreamMessage message;
     message.mutable_contentmessage()->set_content("Hello, world!");
-    
+
     MessageID messageId;
     messageId.set_sequencenumber(1);
     message.mutable_messageid()->CopyFrom(messageId);

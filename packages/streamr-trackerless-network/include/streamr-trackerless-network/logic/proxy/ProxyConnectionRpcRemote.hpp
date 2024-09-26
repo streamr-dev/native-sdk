@@ -46,7 +46,7 @@ public:
             std::move(request),
             std::move(options),
             RpcRemote::existingConnectionTimeout);
-        
+
         co_return result.accepted();
     }
 };

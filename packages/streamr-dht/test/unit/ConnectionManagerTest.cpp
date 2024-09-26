@@ -10,11 +10,11 @@
 #include <folly/coro/blockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
+#include "streamr-dht/helpers/Errors.hpp"
 #include "streamr-dht/transport/FakeTransport.hpp"
 #include "streamr-dht/transport/Transport.hpp"
 #include "streamr-dht/types/PortRange.hpp"
 #include "streamr-logger/SLogger.hpp"
-#include "streamr-dht/helpers/Errors.hpp"
 
 using ::dht::ConnectivityResponse;
 using ::dht::Message;
@@ -25,12 +25,12 @@ using streamr::dht::connection::ConnectionManager;
 using streamr::dht::connection::ConnectionManagerOptions;
 using streamr::dht::connection::DefaultConnectorFacade;
 using streamr::dht::connection::DefaultConnectorFacadeOptions;
+using streamr::dht::helpers::SendFailed;
 using streamr::dht::transport::FakeEnvironment;
 using streamr::dht::transport::FakeTransport;
 using streamr::dht::transport::SendOptions;
 using streamr::dht::types::PortRange;
 using streamr::logger::SLogger;
-using streamr::dht::helpers::SendFailed;
 
 namespace transportevents = streamr::dht::transport::transportevents;
 
@@ -193,7 +193,9 @@ TEST_F(
     msg.mutable_rpcmessage()->CopyFrom(RpcMessage());
     msg.mutable_targetdescriptor()->CopyFrom(createMockPeerDescriptor(0));
 
-    EXPECT_THROW(connectionManager1->send(msg, SendOptions{.connect = true}), SendFailed);
+    EXPECT_THROW(
+        connectionManager1->send(msg, SendOptions{.connect = true}),
+        SendFailed);
 
     connectionManager1->stop();
     SLogger::info("Connection manager 1 stopped");

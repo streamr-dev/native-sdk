@@ -32,8 +32,8 @@ using ::dht::UnlockRequest;
 using streamr::dht::connection::ConnectionLocker;
 using streamr::dht::connection::ConnectionLockRpcLocal;
 using streamr::dht::connection::ConnectionsView;
-using streamr::dht::connection::endpoint::Endpoint;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::endpoint::Endpoint;
 using streamr::dht::helpers::CannotConnectToSelf;
 using streamr::dht::helpers::CouldNotStart;
 using streamr::dht::helpers::Offerer;
@@ -74,15 +74,15 @@ private:
     std::map<DhtAddress, std::shared_ptr<Endpoint>> endpoints;
     std::recursive_mutex endpointsMutex;
 
-    void addEndpoint(const std::shared_ptr<PendingConnection>& pendingConnection) {
+    void addEndpoint(
+        const std::shared_ptr<PendingConnection>& pendingConnection) {
         SLogger::debug("ConnectionManager::addEndpoint start");
 
         auto peerDescriptor = pendingConnection->getPeerDescriptor();
         auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
 
         auto endpoint = Endpoint::newInstance(
-            peerDescriptor,
-            [this, peerDescriptor, nodeId]() {
+            peerDescriptor, [this, peerDescriptor, nodeId]() {
                 {
                     SLogger::debug(
                         "Trying to acquire mutex lock in endpoint callback");
@@ -300,8 +300,10 @@ public:
                     this->onNewConnection(connection);
                     SLogger::debug("Handled new connection");
                     if (this->endpoints.find(nodeId) == this->endpoints.end()) {
-                        SLogger::debug("Node ID not found in endpoints after creating new connection, this means that the connection failed");
-                        throw SendFailed("No connection to target, connection failed");
+                        SLogger::debug(
+                            "Node ID not found in endpoints after creating new connection, this means that the connection failed");
+                        throw SendFailed(
+                            "No connection to target, connection failed");
                     }
                 } else {
                     SLogger::debug("Throwing SendFailed exception");
