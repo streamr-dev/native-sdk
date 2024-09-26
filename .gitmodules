@@ -6,6 +6,3 @@
 	path = clangd-tidy
 	url = https://github.com/lljbash/clangd-tidy.git
 	ignore = dirty
-[submodule "packages/streamr-trackerless-network/test/integration/ts-integration"]
-	path = packages/streamr-trackerless-network/test/integration/ts-integration
-	url = git@github.com:streamr-dev/native-ts-integration.git
