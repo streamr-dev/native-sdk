@@ -1,14 +1,14 @@
 #ifndef STREAMR_DHT_CONNECTION_ENDPOINT_ENDPOINTSTATEINTERFACE_HPP
 #define STREAMR_DHT_CONNECTION_ENDPOINT_ENDPOINTSTATEINTERFACE_HPP
 
-#include "streamr-dht/connection/endpoint/EndpointState.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp" 
 #include "streamr-dht/connection/Connection.hpp"
+#include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/endpoint/EndpointState.hpp"
 
 namespace streamr::dht::connection::endpoint {
 
-using streamr::dht::connection::PendingConnection;
 using streamr::dht::connection::Connection;
+using streamr::dht::connection::PendingConnection;
 
 class Endpoint;
 class EndpointState;

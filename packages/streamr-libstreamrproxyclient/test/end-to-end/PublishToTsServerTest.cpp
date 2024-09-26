@@ -12,7 +12,6 @@ static constexpr const char* tsStreamPartId =
     "0xa000000000000000000000000000000000000000#01";
 
 TEST(PublishToTsServerTest, ProxyPublish) {
-    
     Error* errors = nullptr;
     uint64_t numErrors = 0;
 
@@ -21,7 +20,7 @@ TEST(PublishToTsServerTest, ProxyPublish) {
 
     EXPECT_EQ(numErrors, 0);
     EXPECT_EQ(errors, nullptr);
-    
+
     Proxy proxy{
         .websocketUrl = tsProxyUrl, .ethereumAddress = tsEthereumAddress};
 

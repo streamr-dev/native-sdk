@@ -47,6 +47,7 @@ private:
         std::shared_ptr<FakeTransport> fakeTransport;
         std::shared_ptr<ConnectionManager> connectionManager;
         std::atomic<int32_t> sequenceNumber = 1;
+
     public:
         ProxyClientWrapper(
             uint64_t handle,
@@ -83,10 +84,7 @@ private:
     std::vector<Error> errors;
     std::vector<std::string> errorMessages;
     std::recursive_mutex mutex;
-    std::map<
-        uint64_t,
-        std::shared_ptr<ProxyClientWrapper>>
-        proxyClients;
+    std::map<uint64_t, std::shared_ptr<ProxyClientWrapper>> proxyClients;
 
     class InvalidUrlException : public std::runtime_error {
     public:
@@ -151,8 +149,9 @@ private:
 
         proxyPeerDescriptor.mutable_websocket()->CopyFrom(connectivityMethod);
 
-        SLogger::info("Proxy peer descriptor created: " +
-                      proxyPeerDescriptor.DebugString());
+        SLogger::info(
+            "Proxy peer descriptor created: " +
+            proxyPeerDescriptor.DebugString());
         return proxyPeerDescriptor;
     }
 
@@ -347,13 +346,14 @@ public:
 
         this->errors.clear();
         this->errorMessages.clear();
-        
+
         StreamMessage message;
         std::string contentString(content, contentLength);
         message.mutable_contentmessage()->set_content(contentString);
-        
+
         MessageID messageId;
-        messageId.set_sequencenumber(proxyClient->second->getNextSequenceNumber());
+        messageId.set_sequencenumber(
+            proxyClient->second->getNextSequenceNumber());
         message.mutable_messageid()->CopyFrom(messageId);
 
         try {

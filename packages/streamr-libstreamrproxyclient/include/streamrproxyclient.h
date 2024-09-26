@@ -50,8 +50,8 @@ EXTERN_C uint64_t SHARED_EXPORT proxyClientConnect(
     const Proxy* proxies,
     size_t numProxies);
 
-EXTERN_C void SHARED_EXPORT
-proxyClientDisconnect(Error** errors, uint64_t* numErrors, uint64_t clientHandle);
+EXTERN_C void SHARED_EXPORT proxyClientDisconnect(
+    Error** errors, uint64_t* numErrors, uint64_t clientHandle);
 
 EXTERN_C void SHARED_EXPORT proxyClientPublish(
     Error** errors,

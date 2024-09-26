@@ -33,7 +33,7 @@ public:
         };
         return std::make_shared<MakeSharedEnabler>(stateInterface);
     }
-    
+
     ~InitialEndpointState() override {
         SLogger::debug("InitialEndpointState destructor");
     }
