@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
 #include <folly/coro/Promise.h>
-#include <folly/coro/blockingWait.h>
+#include <folly/coro/BlockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/ConnectionManager.hpp"
