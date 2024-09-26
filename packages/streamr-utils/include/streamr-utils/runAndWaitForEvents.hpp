@@ -2,8 +2,8 @@
 #define STREAMR_UTILS_RUN_AND_WAIT_FOR_EVENTS_HPP
 
 #include <folly/coro/Timeout.h>
-#include <folly/coro/blockingWait.h>
-#include <folly/coro/collect.h>
+#include <folly/coro/BlockingWait.h>
+#include <folly/coro/Collect.h>
 #include "streamr-utils/ReplayEventEmitterWrapper.hpp"
 #include "streamr-utils/waitForEvent.hpp"
 
