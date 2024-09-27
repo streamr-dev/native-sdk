@@ -7,12 +7,9 @@
 #include <folly/coro/Collect.h>
 #include <folly/coro/DetachOnCancel.h>
 #include <folly/coro/Timeout.h>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/DetachOnCancel.h>
-#include <folly/experimental/coro/Promise.h>
-#include <folly/experimental/coro/Sleep.h>
-#include <folly/experimental/coro/Task.h>
-#include <folly/experimental/coro/Timeout.h>
+#include <folly/coro/Promise.h>
+#include <folly/coro/Sleep.h>
+#include <folly/coro/Task.h>
 
 #include <magic_enum.hpp>
 #include "RpcCommunicatorClientApi.hpp"
