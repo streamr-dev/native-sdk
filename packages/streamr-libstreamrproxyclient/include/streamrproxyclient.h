@@ -3,7 +3,7 @@
 
 #include <stdint.h> // NOLINT
 
-#if defined(__clang__)
+#if defined(__clang__) || defined(__GNUC__)
 #define SHARED_EXPORT __attribute__((visibility("default")))
 #define SHARED_LOCAL __attribute__((visibility("hidden")))
 #endif
