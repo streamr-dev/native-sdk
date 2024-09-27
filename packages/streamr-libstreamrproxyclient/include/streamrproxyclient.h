@@ -48,7 +48,7 @@ EXTERN_C uint64_t SHARED_EXPORT proxyClientConnect(
     uint64_t* numErrors,
     uint64_t clientHandle,
     const Proxy* proxies,
-    size_t numProxies);
+    uint64_t numProxies);
 
 EXTERN_C void SHARED_EXPORT proxyClientDisconnect(
     Error** errors, uint64_t* numErrors, uint64_t clientHandle);
