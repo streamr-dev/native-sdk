@@ -4,9 +4,9 @@
 #include <chrono>
 #include <functional>
 #include <tuple>
-#include <folly/coro/Promise.h>
-#include <folly/coro/Task.h>
-#include <folly/coro/Timeout.h>
+#include <folly/experimental/coro/Promise.h>
+#include <folly/experimental/coro/Task.h>
+#include <folly/experimental/coro/Timeout.h>
 #include "streamr-utils/AbortController.hpp"
 namespace streamr::utils {
 

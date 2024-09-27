@@ -3,7 +3,7 @@
 #include <thread>
 #include <tuple>
 #include <gtest/gtest.h>
-#include <folly/coro/Timeout.h>
+#include <folly/experimental/coro/Timeout.h>
 #include "streamr-eventemitter/EventEmitter.hpp"
 
 using streamr::eventemitter::Event;

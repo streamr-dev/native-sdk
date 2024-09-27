@@ -5,8 +5,8 @@
 #include <memory>
 #include <mutex>
 #include <utility>
-#include <folly/coro/Task.h>
-#include <folly/coro/BlockingWait.h>
+#include <folly/experimental/coro/Task.h>
+#include <folly/experimental/coro/BlockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/ConnectionLockRpcLocal.hpp"

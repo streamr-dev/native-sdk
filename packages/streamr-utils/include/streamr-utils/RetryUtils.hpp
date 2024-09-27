@@ -2,9 +2,9 @@
 #define STREAMR_UTILS_RETRY_UTILS_HPP
 
 #include <string>
-#include <folly/coro/Promise.h>
-#include <folly/coro/Sleep.h>
-#include <folly/coro/Task.h>
+#include <folly/experimental/coro/Promise.h>
+#include <folly/experimental/coro/Sleep.h>
+#include <folly/experimental/coro/Task.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/Promise.h>
 #include "streamr-logger/SLogger.hpp"

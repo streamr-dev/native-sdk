@@ -3,11 +3,11 @@
 #include <streamr-eventemitter/EventEmitter.hpp>
 #include <streamr-utils/AbortController.hpp>
 #include <streamr-utils/waitForEvent.hpp>
-#include <folly/coro/BlockingWait.h>
-#include <folly/coro/Collect.h>
-#include <folly/coro/Invoke.h>
-#include <folly/coro/Sleep.h>
-#include <folly/coro/Timeout.h>
+#include <folly/experimental/coro/BlockingWait.h>
+#include <folly/experimental/coro/Collect.h>
+#include <folly/experimental/coro/Invoke.h>
+#include <folly/experimental/coro/Sleep.h>
+#include <folly/experimental/coro/Timeout.h>
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;

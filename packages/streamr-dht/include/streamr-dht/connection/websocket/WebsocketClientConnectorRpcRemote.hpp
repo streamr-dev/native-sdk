@@ -1,7 +1,7 @@
 #ifndef STREAMR_DHT_CONNECTION_WEBSOCKET_WEBSOCKETCLIENTCONNECTORRPCREMOTE_HPP
 #define STREAMR_DHT_CONNECTION_WEBSOCKET_WEBSOCKETCLIENTCONNECTORRPCREMOTE_HPP
 
-#include <folly/coro/Task.h>
+#include <folly/experimental/coro/Task.h>
 #include "packages/dht/protos/DhtRpc.client.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/dht/contact/RpcRemote.hpp"

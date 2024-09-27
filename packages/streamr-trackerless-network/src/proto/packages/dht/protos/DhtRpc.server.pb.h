@@ -5,7 +5,7 @@
 #define STREAMR_PROTORPC_DHTRPC_SERVER_PB_H
 
 #include "DhtRpc.pb.h" // NOLINT
-#include <folly/coro/Task.h>
+#include <folly/experimental/coro/Task.h>
 
 namespace dht {
 template <typename CallContextType>

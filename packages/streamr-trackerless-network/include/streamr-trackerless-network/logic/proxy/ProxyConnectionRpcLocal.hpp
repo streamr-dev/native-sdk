@@ -1,7 +1,7 @@
 #ifndef STREAMR_TRACKERLESS_NETWORK_PROXY_PROXYCONNECTIONRPCCLIENT_HPP
 #define STREAMR_TRACKERLESS_NETWORK_PROXY_PROXYCONNECTIONRPCCLIENT_HPP
 
-#include <folly/coro/BlockingWait.h>
+#include <folly/experimental/coro/BlockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.server.pb.h"

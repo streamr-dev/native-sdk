@@ -3,7 +3,7 @@
 
 #include <chrono>
 #include <optional>
-#include <folly/coro/Task.h>
+#include <folly/experimental/coro/Task.h>
 #include "packages/dht/protos/DhtRpc.client.pb.h"
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
