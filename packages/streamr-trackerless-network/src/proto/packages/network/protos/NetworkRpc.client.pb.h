@@ -4,7 +4,7 @@
 #ifndef STREAMR_PROTORPC_NETWORKRPC_CLIENT_PB_H
 #define STREAMR_PROTORPC_NETWORKRPC_CLIENT_PB_H
 
-#include <folly/coro/Task.h>
+#include <folly/experimental/coro/Task.h>
 #include <chrono>
 #include <optional>
 #include "NetworkRpc.pb.h" // NOLINT

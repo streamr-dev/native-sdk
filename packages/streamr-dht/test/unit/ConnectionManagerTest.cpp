@@ -5,9 +5,9 @@
 #include <cpptrace/from_current.hpp>
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
-#include <folly/coro/Collect.h>
-#include <folly/coro/Promise.h>
-#include <folly/coro/BlockingWait.h>
+#include <folly/experimental/coro/Collect.h>
+#include <folly/experimental/coro/Promise.h>
+#include <folly/experimental/coro/BlockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 #include "streamr-dht/helpers/Errors.hpp"

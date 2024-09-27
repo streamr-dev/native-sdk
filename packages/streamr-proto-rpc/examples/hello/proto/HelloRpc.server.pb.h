@@ -5,7 +5,7 @@
 #define STREAMR_PROTORPC_HELLORPC_SERVER_PB_H
 
 #include "HelloRpc.pb.h" // NOLINT
-#include <folly/coro/Task.h>
+#include <folly/experimental/coro/Task.h>
 
 namespace streamr::protorpc {
 template <typename CallContextType>

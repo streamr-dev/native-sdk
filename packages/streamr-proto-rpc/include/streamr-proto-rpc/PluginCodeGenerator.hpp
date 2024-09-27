@@ -79,7 +79,7 @@ private:
         headerSs << "#ifndef " << headerGuard << "\n";
         headerSs << "#define " << headerGuard << "\n\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
-        headerSs << "#include <folly/coro/Task.h>\n";
+        headerSs << "#include <folly/experimental/coro/Task.h>\n";
 
         std::stringstream sourceSs;
 
@@ -190,7 +190,7 @@ private:
         headerSs << "\n";
         headerSs << "#ifndef " << headerGuard << "\n";
         headerSs << "#define " << headerGuard << "\n\n";
-        headerSs << "#include <folly/coro/Task.h>\n";
+        headerSs << "#include <folly/experimental/coro/Task.h>\n";
         headerSs << "#include <chrono>\n";
         headerSs << "#include <optional>\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";

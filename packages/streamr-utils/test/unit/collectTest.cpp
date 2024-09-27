@@ -1,8 +1,8 @@
 #include "streamr-utils/collect.hpp"
 #include <gtest/gtest.h>
-#include <folly/coro/BlockingWait.h>
-#include <folly/coro/Promise.h>
-#include <folly/coro/Task.h>
+#include <folly/experimental/coro/BlockingWait.h>
+#include <folly/experimental/coro/Promise.h>
+#include <folly/experimental/coro/Task.h>
 
 using streamr::utils::collect;
 using streamr::utils::toCoroTask;

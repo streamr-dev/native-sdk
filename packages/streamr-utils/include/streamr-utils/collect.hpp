@@ -2,9 +2,9 @@
 #define STREAMR_UTILS_COLLECT_HPP
 
 #include <type_traits>
-#include <folly/coro/Collect.h>
-#include <folly/coro/Task.h>
-#include <folly/coro/ViaIfAsync.h>
+#include <folly/experimental/coro/Collect.h>
+#include <folly/experimental/coro/Task.h>
+#include <folly/experimental/coro/ViaIfAsync.h>
 #include "streamr-utils/toCoroTask.hpp"
 
 namespace streamr::utils {

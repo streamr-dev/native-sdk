@@ -2,7 +2,7 @@
 #define STREAMR_DHT_CONNECTION_WEBSOCKET_CLIENTWEBSOCKET_HPP
 
 #include <rtc/rtc.hpp>
-#include <folly/coro/Collect.h>
+#include <folly/experimental/coro/Collect.h>
 #include "streamr-dht/connection/websocket/WebsocketConnection.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-utils/waitForEvent.hpp"
