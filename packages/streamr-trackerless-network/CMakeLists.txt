@@ -43,6 +43,8 @@ target_sources(streamr-trackerless-network
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/dht/protos/DhtRpc.pb.cc
     )
+
+target_compile_options(streamr-trackerless-network PUBLIC -fPIC)
     
 target_link_libraries(streamr-trackerless-network 
     INTERFACE streamr::streamr-logger
