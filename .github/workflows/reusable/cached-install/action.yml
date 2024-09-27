@@ -8,14 +8,14 @@ runs:
       id: cache-homedir
       uses: actions/cache/restore@v4
       with:
-        key: cache-homedir-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.os }}-cache-homedir-${{ hashFiles('./vcpkg.json') }}
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed
       id: cache-vcpkg-installed
       uses: actions/cache/restore@v4
       with:
-        key: cache-vcpkg-installed-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.os }}-cache-vcpkg-installed-${{ hashFiles('./vcpkg.json') }}
         path: |
           ./build/vcpkg_installed
     - name: install-prerequisities
