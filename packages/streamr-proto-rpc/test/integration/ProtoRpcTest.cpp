@@ -4,7 +4,7 @@
 //#include <folly/executors/CPUThreadPoolExecutor.h>
 //#include <folly/executors/ManualExecutor.h>
 //#include <folly/coro/Baton.h>
-#include <folly/coro/BlockingWait.h>
+#include <folly/experimental/coro/BlockingWait.h>
 //#include <folly/coro/Collect.h>
 //#include <folly/coro/CurrentExecutor.h>
 //#include <folly/coro/Generator.h>
