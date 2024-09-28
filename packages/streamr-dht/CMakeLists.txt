@@ -89,6 +89,15 @@ if(NOT IOS)
     enable_testing()
     find_package(GTest CONFIG REQUIRED)
 
+    add_library(streamr-dht-test-main
+    src/CustomGtestMain.cpp
+    )
+
+  target_link_libraries(streamr-dht-test-main
+    PUBLIC Folly::folly
+        PUBLIC GTest::gtest
+    )
+
     add_executable(streamr-dht-test-unit
         test/unit/WebsocketClientConnectionTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
@@ -107,7 +116,7 @@ if(NOT IOS)
         PUBLIC streamr-dht
         INTERFACE streamr::streamr-logger
         PUBLIC GTest::gtest
-        PUBLIC GTest::gtest_main
+        PUBLIC streamr-dht-test-main
         PUBLIC Folly::folly
         PRIVATE cpptrace::cpptrace
     )
@@ -125,7 +134,7 @@ if(NOT IOS)
         PUBLIC streamr-dht
         INTERFACE streamr::streamr-logger
         PUBLIC GTest::gtest
-        PUBLIC GTest::gtest_main
+        PUBLIC streamr-dht-test-main
     )
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
         include(GoogleTest)
