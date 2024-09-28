@@ -66,6 +66,15 @@ if(NOT IOS)
   enable_testing()
   find_package(GTest CONFIG REQUIRED)
 
+  add_library(streamr-utils-test-main
+    src/CustomGtestMain.cpp
+    )
+
+  target_link_libraries(streamr-utils-test-main
+    PUBLIC Folly::folly
+    PUBLIC GTest::gtest
+  )
+
   add_executable(streamr-utils-test-unit 
     test/unit/BrandedTest.cpp
     test/unit/AbortableTimersTest.cpp
@@ -78,8 +87,9 @@ if(NOT IOS)
   target_link_libraries(streamr-utils-test-unit 
     PUBLIC streamr-utils
     PUBLIC GTest::gtest 
-    PUBLIC GTest::gtest_main 
+    PUBLIC streamr-utils-test-main 
   )
+  
   if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
     include(GoogleTest)
     gtest_discover_tests(streamr-utils-test-unit)
