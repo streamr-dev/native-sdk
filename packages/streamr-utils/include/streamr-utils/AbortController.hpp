@@ -20,7 +20,7 @@ class AbortSignal : public EventEmitter<AbortSignalEvents> {
     friend class AbortController;
 
 public:
-    bool aborted; // NOLINT
+    bool aborted = false; // NOLINT
     std::string reason; // NOLINT
     [[nodiscard]] folly::CancellationToken getCancellationToken() const {
         return cancelSource.getToken();
