@@ -244,7 +244,7 @@ TEST_F(ToJsonTest, TestSpecialCharactersToJson) {
 
 TEST_F(ToJsonTest, TestNullPointerToJson) {
     int* nullPointer = nullptr;
-    json j(nullptr);
+    json j{nullptr};
     EXPECT_EQ(toJson(nullPointer), j);
 }
 
