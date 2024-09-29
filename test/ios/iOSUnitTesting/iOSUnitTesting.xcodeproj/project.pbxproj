@@ -50,8 +50,8 @@
 		410E67C02C819BCC00347AF3 /* iOSUnitTestingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSUnitTestingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		410E67C42C819BCC00347AF3 /* StreamrTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamrTests.swift; sourceTree = "<group>"; };
 		410E69B92C819CF100347AF3 /* iOSUnitTestingTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "iOSUnitTestingTests-Bridging-Header.h"; sourceTree = "<group>"; };
-		410E69C62C81A4A100347AF3 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = extern/googletest/googletest/src/gtest_main.cc; sourceTree = SOURCE_ROOT; };
-		410E69C72C81A4A100347AF3 /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-all.cc"; path = "extern/googletest/googletest/src/gtest-all.cc"; sourceTree = SOURCE_ROOT; };
+		410E69C62C81A4A100347AF3 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = ../../../vcpkg/packages/gtest_arm64-ios/src/gtest_main.cc; sourceTree = SOURCE_ROOT; };
+		410E69C72C81A4A100347AF3 /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-all.cc"; path = "../../../vcpkg/packages/gtest_arm64-ios/src/gtest-all.cc"; sourceTree = SOURCE_ROOT; };
 		410E69CA2C81B9E900347AF3 /* GoogleTestRunner.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GoogleTestRunner.cpp; sourceTree = "<group>"; };
 		410E69CB2C81B9E900347AF3 /* GoogleTestRunner.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GoogleTestRunner.hpp; sourceTree = "<group>"; };
 		410E6A582C81F0C500347AF3 /* streamr.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = streamr.xcframework; path = ../../../../dist/ios/streamr.xcframework; sourceTree = "<group>"; };
@@ -380,8 +380,8 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/extern/googletest/googletest/include",
-					"$(SRCROOT)/extern/googletest/googletest",
+					"$(SRCROOT)/../../../vcpkg/packages/gtest_arm64-ios/include",
+					"$(SRCROOT)/../../../vcpkg/packages/gtest_arm64-ios",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
@@ -442,8 +442,8 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/extern/googletest/googletest/include",
-					"$(SRCROOT)/extern/googletest/googletest",
+					"$(SRCROOT)/../../../vcpkg/packages/gtest_arm64-ios/include",
+					"$(SRCROOT)/../../../vcpkg/packages/gtest_arm64-ios",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
@@ -578,7 +578,7 @@
 				410E67D32C819BCC00347AF3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		410E67D42C819BCC00347AF3 /* Build configuration list for PBXNativeTarget "iOSUnitTesting" */ = {
 			isa = XCConfigurationList;
@@ -587,7 +587,7 @@
 				410E67D62C819BCC00347AF3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		410E67D72C819BCC00347AF3 /* Build configuration list for PBXNativeTarget "iOSUnitTestingTests" */ = {
 			isa = XCConfigurationList;
@@ -596,7 +596,7 @@
 				410E67D92C819BCC00347AF3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
