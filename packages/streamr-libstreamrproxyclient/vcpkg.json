@@ -3,8 +3,7 @@
     "version": "1.0.0",
     "dependencies": [
         "gtest",
-        "ada-url",
-        "cpptrace"
+        "ada-url"
     ],
     "features": {
         "monorepo": {

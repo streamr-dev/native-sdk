@@ -25,7 +25,6 @@ find_package(streamr-dht CONFIG REQUIRED)
 find_package(streamr-logger CONFIG REQUIRED)
 find_package(streamr-utils CONFIG REQUIRED)
 find_package(ada CONFIG REQUIRED)
-find_package(cpptrace CONFIG REQUIRED)
 
 target_include_directories(streamrproxyclient PUBLIC include)
 target_link_libraries(streamrproxyclient 
@@ -64,7 +63,6 @@ if (NOT IOS)
         PRIVATE streamr::streamr-logger
         PUBLIC GTest::gtest 
         PUBLIC GTest::gtest_main 
-        PUBLIC cpptrace::cpptrace
     )
 
     add_executable(streamr-streamrproxyclient-test-end-to-end test/end-to-end/PublishToTsServerTest.cpp)
@@ -75,7 +73,6 @@ if (NOT IOS)
         PRIVATE streamr::streamr-logger
         PUBLIC GTest::gtest 
         PUBLIC GTest::gtest_main 
-        PUBLIC cpptrace::cpptrace
     )
 
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))

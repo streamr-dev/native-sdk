@@ -1,8 +1,6 @@
 #include "streamr-dht/connection/ConnectionManager.hpp"
 #include <memory>
 #include <string>
-#include <cpptrace/cpptrace.hpp>
-#include <cpptrace/from_current.hpp>
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
 #include <folly/experimental/coro/Collect.h>

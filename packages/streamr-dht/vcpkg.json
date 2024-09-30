@@ -10,8 +10,7 @@
         "libdatachannel",
         "openssl",
         "boost-algorithm",
-        "vladimirshaleev-ipaddress",
-        "cpptrace"
+        "vladimirshaleev-ipaddress"
     ],
     "features": {
         "monorepo": {
