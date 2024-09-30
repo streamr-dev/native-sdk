@@ -83,3 +83,6 @@ else
     cd build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && cmake --build . && cd ..
 fi
 
+if [ "$CREATE_XCFRAMEWORK" = true ]; then
+    ./create-streamr-xcframework.pl
+fi
