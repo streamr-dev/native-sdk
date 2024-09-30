@@ -1,3 +1,5 @@
+#define GLOG_USE_GLOG_EXPORT
+
 #include <gtest/gtest.h>
 
 #include <google/protobuf/any.pb.h>

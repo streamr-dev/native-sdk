@@ -1,3 +1,5 @@
+#define GLOG_USE_GLOG_EXPORT
+
 #include <chrono>
 #include <cstddef>
 #include <future>

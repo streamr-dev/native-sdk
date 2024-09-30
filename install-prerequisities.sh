@@ -19,7 +19,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     TEMP_PROFILE_CONTENTS+="export HOMEBREW_PREFIX=$(brew --prefix)\n"
 
     brew install jq
-    brew uninstall llvm
+    brew uninstall llvm || true
     brew install llvm@17
     brew install cmake
     brew install pkg-config
@@ -99,7 +99,7 @@ echo $TEMP_PROFILE_CONTENTS
 
 touch $PROFILE_FILE
 # Remove old version of the block
-# sed -i '/# streamr-native-sdk added start/,/# streamr-native-sdk added end/d' $PROFILE_FILE
+sed -i '/# streamr-native-sdk added start/,/# streamr-native-sdk added end/d' $PROFILE_FILE
 # Add new block to profile file
 echo -e "# streamr-native-sdk added start\n$TEMP_PROFILE_CONTENTS# streamr-native-sdk added end" > $PROFILE_FILE
 

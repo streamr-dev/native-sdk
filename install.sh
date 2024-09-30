@@ -26,7 +26,8 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --prod) PROD_BUILD=true ;;
         --ios) TARGET_TRIPLET="arm64-ios"; CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/overlaytriplets/arm64-ios.cmake"; PLATFORM="OS64" ;;
-        --android) TARGET_TRIPLET="arm64-android"; CHAINLOAD_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake";;
+        --android) TARGET_TRIPLET="arm64-android"; CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/overlaytriplets/arm64-android.cmake"; PLATFORM="android" ;;
+        --xcframework) CREATE_XCFRAMEWORK=true ;;
         *) echo "Unknown parameter passed: $1. Usage: ./install.sh [--prod] [--ios] [--android]"; exit 1 ;;
     esac
     shift
@@ -81,3 +82,4 @@ if [ -n "$TARGET_TRIPLET" ]; then
 else
     cd build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && cmake --build . && cd ..
 fi
+
