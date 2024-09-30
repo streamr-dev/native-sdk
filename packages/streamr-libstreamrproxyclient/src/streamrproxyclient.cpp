@@ -31,7 +31,7 @@ uint64_t proxyClientConnect(
     uint64_t* numErrors,
     uint64_t clientHandle,
     const Proxy* proxies,
-    size_t numProxies) {
+    uint64_t numProxies) {
     return getProxyClientApi().proxyClientConnect(
         errors, numErrors, clientHandle, proxies, numProxies);
 }
