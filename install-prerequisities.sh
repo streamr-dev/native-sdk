@@ -99,7 +99,7 @@ echo $TEMP_PROFILE_CONTENTS
 
 touch $PROFILE_FILE
 # Remove old version of the block
-sed -i '/# streamr-native-sdk added start/,/# streamr-native-sdk added end/d' $PROFILE_FILE
+# sed -i '/# streamr-native-sdk added start/,/# streamr-native-sdk added end/d' $PROFILE_FILE
 # Add new block to profile file
 echo -e "# streamr-native-sdk added start\n$TEMP_PROFILE_CONTENTS# streamr-native-sdk added end" > $PROFILE_FILE
 
