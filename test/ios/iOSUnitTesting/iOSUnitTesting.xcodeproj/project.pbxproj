@@ -28,7 +28,7 @@
 		410E6ADB2C82255D00347AF3 /* HelloRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E6ACF2C82255C00347AF3 /* HelloRpc.pb.cc */; };
 		410E6ADC2C82255D00347AF3 /* WakeUpRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E6AD12C82255C00347AF3 /* WakeUpRpc.pb.cc */; };
 		410E6ADD2C82255D00347AF3 /* TestProtos.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E6AD62C82255D00347AF3 /* TestProtos.pb.cc */; };
-		410E6AE02C82258900347AF3 /* ProtoRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E6ADF2C82258900347AF3 /* ProtoRpc.pb.cc */; };
+		41E437832CAB92F800686240 /* ProtoRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 41E437822CAB92F800686240 /* ProtoRpc.pb.cc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,7 +50,7 @@
 		410E67C02C819BCC00347AF3 /* iOSUnitTestingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSUnitTestingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		410E67C42C819BCC00347AF3 /* StreamrTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamrTests.swift; sourceTree = "<group>"; };
 		410E69B92C819CF100347AF3 /* iOSUnitTestingTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "iOSUnitTestingTests-Bridging-Header.h"; sourceTree = "<group>"; };
-		410E69C62C81A4A100347AF3 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = ../../../vcpkg/packages/gtest_arm64-ios/src/gtest_main.cc; sourceTree = SOURCE_ROOT; };
+		410E69C62C81A4A100347AF3 /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = "../../../vcpkg/packages/gtest_arm64-ios/src/gtest_main.cc"; sourceTree = SOURCE_ROOT; };
 		410E69C72C81A4A100347AF3 /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-all.cc"; path = "../../../vcpkg/packages/gtest_arm64-ios/src/gtest-all.cc"; sourceTree = SOURCE_ROOT; };
 		410E69CA2C81B9E900347AF3 /* GoogleTestRunner.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GoogleTestRunner.cpp; sourceTree = "<group>"; };
 		410E69CB2C81B9E900347AF3 /* GoogleTestRunner.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GoogleTestRunner.hpp; sourceTree = "<group>"; };
@@ -78,8 +78,8 @@
 		410E6AD82C82255D00347AF3 /* HelloRpc.client.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HelloRpc.client.pb.h; path = "../../../../packages/streamr-proto-rpc/test/proto/HelloRpc.client.pb.h"; sourceTree = "<group>"; };
 		410E6AD92C82255D00347AF3 /* TestProtos.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestProtos.pb.h; path = "../../../../packages/streamr-proto-rpc/test/proto/TestProtos.pb.h"; sourceTree = "<group>"; };
 		410E6ADA2C82255D00347AF3 /* HelloRpc.server.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HelloRpc.server.pb.h; path = "../../../../packages/streamr-proto-rpc/test/proto/HelloRpc.server.pb.h"; sourceTree = "<group>"; };
-		410E6ADE2C82258900347AF3 /* ProtoRpc.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProtoRpc.pb.h; path = "../../../../packages/streamr-proto-rpc/src/proto/ProtoRpc.pb.h"; sourceTree = "<group>"; };
-		410E6ADF2C82258900347AF3 /* ProtoRpc.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProtoRpc.pb.cc; path = "../../../../packages/streamr-proto-rpc/src/proto/ProtoRpc.pb.cc"; sourceTree = "<group>"; };
+		41E437822CAB92F800686240 /* ProtoRpc.pb.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ProtoRpc.pb.cc; sourceTree = "<group>"; };
+		41E437842CAB931200686240 /* ProtoRpc.pb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProtoRpc.pb.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,8 +144,8 @@
 		410E67C32C819BCC00347AF3 /* iOSUnitTestingTests */ = {
 			isa = PBXGroup;
 			children = (
-				410E6ADF2C82258900347AF3 /* ProtoRpc.pb.cc */,
-				410E6ADE2C82258900347AF3 /* ProtoRpc.pb.h */,
+				41E437822CAB92F800686240 /* ProtoRpc.pb.cc */,
+				41E437842CAB931200686240 /* ProtoRpc.pb.h */,
 				410E6AD82C82255D00347AF3 /* HelloRpc.client.pb.h */,
 				410E6ACF2C82255C00347AF3 /* HelloRpc.pb.cc */,
 				410E6AD52C82255D00347AF3 /* HelloRpc.pb.h */,
@@ -298,6 +298,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41E437832CAB92F800686240 /* ProtoRpc.pb.cc in Sources */,
 				410E6ACD2C8224F500347AF3 /* RpcCommunicatorTest.cpp in Sources */,
 				410E6AC92C8224D300347AF3 /* StreamrLogFormatterTest.cpp in Sources */,
 				410E6ADC2C82255D00347AF3 /* WakeUpRpc.pb.cc in Sources */,
@@ -308,7 +309,6 @@
 				410E6ADD2C82255D00347AF3 /* TestProtos.pb.cc in Sources */,
 				410E6ADB2C82255D00347AF3 /* HelloRpc.pb.cc in Sources */,
 				410E6ACE2C8224F500347AF3 /* ServerRegistryTest.cpp in Sources */,
-				410E6AE02C82258900347AF3 /* ProtoRpc.pb.cc in Sources */,
 				410E6AC02C82248400347AF3 /* EventEmitterTest.cpp in Sources */,
 				410E6ACA2C8224D300347AF3 /* LoggerTest.cpp in Sources */,
 				410E69CC2C81B9E900347AF3 /* GoogleTestRunner.cpp in Sources */,
@@ -382,6 +382,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../../../vcpkg/packages/gtest_arm64-ios/include",
 					"$(SRCROOT)/../../../vcpkg/packages/gtest_arm64-ios",
+					"$(SRCROOT)/../../../packages/streamr-proto-rpc/src/proto/packages/proto-rpc/protos",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
@@ -444,6 +445,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../../../vcpkg/packages/gtest_arm64-ios/include",
 					"$(SRCROOT)/../../../vcpkg/packages/gtest_arm64-ios",
+					"$(SRCROOT)/../../../packages/streamr-proto-rpc/src/proto/packages/proto-rpc/protos",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;

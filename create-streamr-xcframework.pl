@@ -27,7 +27,8 @@ dircopy("$abs_path/packages/streamr-proto-rpc/include", $build_include);
 dircopy("$abs_path/packages/streamr-logger/include", $build_include);
 dircopy("$abs_path/packages/streamr-json/include", $build_include);
 dircopy("$abs_path/packages/streamr-eventemitter/include", $build_include);
-
+dircopy("$abs_path/packages/streamr-utils/include", $build_include);
+dircopy("$abs_path/packages/streamr-proto-rpc/src/proto", $build_include);
 # Find all include and lib directories and process them 
 find(\&process_dir, "./build/vcpkg_installed/arm64-ios");
 dircopy("$abs_path/build/vcpkg_installed/arm64-ios/lib", $build_lib);
