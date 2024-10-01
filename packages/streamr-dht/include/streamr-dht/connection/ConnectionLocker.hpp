@@ -13,21 +13,19 @@ using streamr::dht::connection::LockID;
 class ConnectionLocker {
 protected:
     ConnectionLocker() = default;
-
-public:
     virtual ~ConnectionLocker() = default;
 
     virtual void lockConnection(
-        PeerDescriptor targetDescriptor, LockID lockId) = 0;
+        const PeerDescriptor& targetDescriptor, LockID&& lockId) = 0;
     virtual void unlockConnection(
-        PeerDescriptor targetDescriptor, LockID lockId) = 0;
+        const PeerDescriptor& targetDescriptor, LockID&& lockId) = 0;
     virtual void weakLockConnection(
-        const DhtAddress& targetDescriptor, const LockID& lockId) = 0;
+        const DhtAddress& targetDescriptor, LockID&& lockId) = 0;
     virtual void weakUnlockConnection(
-        const DhtAddress& targetDescriptor, const LockID& lockId) = 0;
-    [[nodiscard]] virtual size_t getLocalLockedConnectionCount() = 0;
-    [[nodiscard]] virtual size_t getRemoteLockedConnectionCount() = 0;
-    [[nodiscard]] virtual size_t getWeakLockedConnectionCount() = 0;
+        const DhtAddress& targetDescriptor, LockID&& lockId) = 0;
+    [[nodiscard]] virtual size_t getLocalLockedConnectionCount() const = 0;
+    [[nodiscard]] virtual size_t getRemoteLockedConnectionCount() const = 0;
+    [[nodiscard]] virtual size_t getWeakLockedConnectionCount() const = 0;
 };
 
 } // namespace streamr::dht::connection

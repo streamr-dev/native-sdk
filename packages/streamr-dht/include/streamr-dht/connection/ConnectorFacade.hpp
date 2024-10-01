@@ -30,14 +30,11 @@ protected:
     ConnectorFacade() = default;
 
 public:
-    virtual std::shared_ptr<PendingConnection> createConnection(
+    virtual std::shared_ptr<IPendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor) = 0;
-    virtual std::shared_ptr<PendingConnection> createConnection(
-        const PeerDescriptor& peerDescriptor,
-        std::function<void(std::exception_ptr)> errorCallback) = 0;
     [[nodiscard]] virtual PeerDescriptor getLocalPeerDescriptor() const = 0;
     virtual void start(
-        std::function<bool(const std::shared_ptr<PendingConnection>&)> onNewConnection,
+        std::function<bool(const std::shared_ptr<IPendingConnection>&)> onNewConnection,
         std::function<bool(const DhtAddress& nodeId)> hasConnection /*,
         Transport& autoCertifierTransport*/ ) = 0;
     virtual void stop() = 0;
@@ -45,8 +42,8 @@ public:
 
 struct DefaultConnectorFacadeOptions {
     Transport& transport;
-    std::optional<std::string> websocketHost = std::nullopt;
-    std::optional<PortRange> websocketPortRange = std::nullopt;
+    std::optional<std::string> websocketHost;
+    PortRange websocketPortRange;
     // std::vector<PeerDescriptor> entryPoints;
     // std::vector<IceServer> iceServers;
     // bool webrtcAllowPrivateAddresses;
@@ -89,17 +86,12 @@ public:
               options.transport,
               RpcCommunicatorOptions{.rpcRequestTimeout = 15000ms}) {} // NOLINT
 
-    ~DefaultConnectorFacade() {
-        SLogger::info("DefaultConnectorFacade::~DefaultConnectorFacade");
-    }
-
     void start(
-        std::function<bool(const std::shared_ptr<PendingConnection>&)>
+        std::function<bool(const std::shared_ptr<IPendingConnection>&)>
             onNewConnection,
         std::function<bool(const DhtAddress& nodeId)> hasConnection /*,
         Transport& autoCertifierTransport */
         ) override {
-        SLogger::info("DefaultConnectorFacade::start() start");
         WebsocketClientConnectorOptions webSocketClientConnectorOptions{
             .onNewConnection = onNewConnection,
             .hasConnection = hasConnection,
@@ -112,9 +104,9 @@ public:
             .onNewConnection = onNewConnection,
             .rpcCommunicator = websocketConnectorRpcCommunicator,
             .hasConnection = hasConnection,
-            .portRange = this->options.websocketPortRange,
-            .maxMessageSize = this->options.maxMessageSize,
-            .host = this->options.websocketHost,
+            .portRange = options.websocketPortRange,
+            .maxMessageSize = options.maxMessageSize,
+            .host = options.websocketHost,
             //.entrypoints = options.entryPoints,
             //.tlsCertificate = options.tlsCertificate,
             .serverEnableTls = false,
@@ -134,34 +126,13 @@ public:
         const auto localPeerDescriptor =
             options.createLocalPeerDescriptor(connectivityResponse);
         this->setLocalPeerDescriptor(localPeerDescriptor);
-
-        if (this->websocketServerConnector) {
-            SLogger::debug(
-                "DefaultConnectorFacade::start() websocketServerConnector is not null");
-        } else {
-            SLogger::debug(
-                "DefaultConnectorFacade::start() websocketServerConnector is null");
-        }
-        SLogger::info("DefaultConnectorFacade::start() end");
     }
 
-    std::shared_ptr<PendingConnection> createConnection(
+    std::shared_ptr<IPendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor) override {
         if (this->websocketClientConnector->isPossibleToFormConnection(
                 peerDescriptor)) {
             return this->websocketClientConnector->connect(peerDescriptor);
-        }
-
-        return nullptr;
-    }
-
-    std::shared_ptr<PendingConnection> createConnection(
-        const PeerDescriptor& peerDescriptor,
-        std::function<void(std::exception_ptr)> errorCallback) override {
-        if (this->websocketClientConnector->isPossibleToFormConnection(
-                peerDescriptor)) {
-            return this->websocketClientConnector->connect(
-                peerDescriptor, std::move(errorCallback));
         }
 
         return nullptr;
@@ -172,11 +143,9 @@ public:
     }
 
     void stop() override {
-        SLogger::info("DefaultConnectorFacade::stop start");
         this->websocketConnectorRpcCommunicator.destroy();
         this->websocketClientConnector->destroy();
         this->websocketServerConnector->destroy();
-        SLogger::info("DefaultConnectorFacade::stop end");
     }
 };
 

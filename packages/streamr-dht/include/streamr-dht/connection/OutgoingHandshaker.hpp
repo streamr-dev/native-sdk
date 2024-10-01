@@ -19,19 +19,17 @@ private:
         explicit Private() = default;
     };
     PeerDescriptor targetPeerDescriptor;
-    std::shared_ptr<PendingConnection> pendingConnection;
+    std::shared_ptr<IPendingConnection> pendingConnection;
 
     HandlerToken connectedHandlerToken;
     HandlerToken disconnectedHandlerToken;
     HandlerToken pendingDisconnectedHandlerToken;
-    HandlerToken errorHandlerToken;
 
     void stopHandshaker() {
         this->connection->off<connectionevents::Connected>(
             this->connectedHandlerToken);
         this->connection->off<connectionevents::Disconnected>(
             this->disconnectedHandlerToken);
-        this->connection->off<connectionevents::Error>(this->errorHandlerToken);
         this->pendingConnection->off<pendingconnectionevents::Disconnected>(
             this->pendingDisconnectedHandlerToken);
 
@@ -44,7 +42,7 @@ public:
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
         PeerDescriptor targetPeerDescriptor,
-        const std::shared_ptr<PendingConnection>& pendingConnection)
+        const std::shared_ptr<IPendingConnection>& pendingConnection)
         : Handshaker(localPeerDescriptor, connection),
           targetPeerDescriptor(std::move(targetPeerDescriptor)),
           pendingConnection(pendingConnection) {
@@ -64,25 +62,14 @@ public:
                     bool gracefulLeave,
                     uint64_t /*code*/,
                     const std::string& /*reason*/) {
-                    auto self = this->sharedFromThis<OutgoingHandshaker>();
                     this->pendingConnection->close(gracefulLeave);
                     stopHandshaker();
-                });
-
-        this->errorHandlerToken =
-            this->connection->once<connectionevents::Error>(
-                [this](const std::string& name) {
-                    SLogger::error("OutgoingHandshaker got error: " + name);
-                    auto self = this->sharedFromThis<OutgoingHandshaker>();
-                    this->pendingConnection->onError(
-                        std::make_exception_ptr(std::runtime_error(name)));
                 });
         // disconnecting pending connection will close the connection
         this->pendingDisconnectedHandlerToken =
             this->pendingConnection
                 ->once<pendingconnectionevents::Disconnected>(
                     [this](bool /*gracefulLeave*/) {
-                        auto self = this->sharedFromThis<OutgoingHandshaker>();
                         this->connection->close(false);
                         stopHandshaker();
                     });
@@ -92,7 +79,7 @@ public:
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection,
         const PeerDescriptor& targetPeerDescriptor,
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         return std::make_shared<OutgoingHandshaker>(
             Private{},
             localPeerDescriptor,
@@ -101,7 +88,7 @@ public:
             pendingConnection);
     }
 
-    [[nodiscard]] std::shared_ptr<PendingConnection> getPendingConnection()
+    [[nodiscard]] std::shared_ptr<IPendingConnection> getPendingConnection()
         const {
         return this->pendingConnection;
     }

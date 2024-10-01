@@ -16,32 +16,25 @@ using LockID = streamr::utils::Branded<std::string, struct LockIDBrand>;
 class ConnectionLockStates {
 private:
     std::map<DhtAddress, std::set<LockID>> localLocks;
-    std::recursive_mutex localLocksMutex;
     std::map<DhtAddress, std::set<LockID>> remoteLocks;
-    std::recursive_mutex remoteLocksMutex;
     std::map<DhtAddress, std::set<LockID>> weakLocks;
-    std::recursive_mutex weakLocksMutex;
 
 public:
-    [[nodiscard]] size_t getLocalLockedConnectionCount() {
-        std::scoped_lock lock(this->localLocksMutex);
+    [[nodiscard]] size_t getLocalLockedConnectionCount() const {
         return this->localLocks.size();
     }
 
-    [[nodiscard]] size_t getRemoteLockedConnectionCount() {
-        std::scoped_lock lock(this->remoteLocksMutex);
+    [[nodiscard]] size_t getRemoteLockedConnectionCount() const {
         return this->remoteLocks.size();
     }
 
-    [[nodiscard]] size_t getWeakLockedConnectionCount() {
-        std::scoped_lock lock(this->weakLocksMutex);
+    [[nodiscard]] size_t getWeakLockedConnectionCount() const {
         return this->weakLocks.size();
     }
 
     [[nodiscard]] bool isLocalLocked(
         const DhtAddress& id,
-        const std::optional<LockID>& lockId = std::nullopt) {
-        std::scoped_lock lock(this->localLocksMutex);
+        const std::optional<LockID>& lockId = std::nullopt) const {
         if (!lockId.has_value()) {
             return this->localLocks.find(id) != this->localLocks.end();
         }
@@ -52,8 +45,7 @@ public:
 
     [[nodiscard]] bool isRemoteLocked(
         const DhtAddress& id,
-        const std::optional<LockID>& lockId = std::nullopt) {
-        std::scoped_lock lock(this->remoteLocksMutex);
+        const std::optional<LockID>& lockId = std::nullopt) const {
         if (!lockId.has_value()) {
             return this->remoteLocks.find(id) != this->remoteLocks.end();
         }
@@ -62,22 +54,16 @@ public:
             this->remoteLocks.at(id).end();
     }
 
-    [[nodiscard]] bool isWeakLocked(const DhtAddress& id) {
-        std::scoped_lock lock(this->weakLocksMutex);
+    [[nodiscard]] bool isWeakLocked(const DhtAddress& id) const {
         return this->weakLocks.find(id) != this->weakLocks.end();
     }
 
-    [[nodiscard]] bool isLocked(const DhtAddress& id) {
-        std::scoped_lock lock(
-            this->localLocksMutex,
-            this->remoteLocksMutex,
-            this->weakLocksMutex);
+    [[nodiscard]] bool isLocked(const DhtAddress& id) const {
         return this->isLocalLocked(id) || this->isRemoteLocked(id) ||
             this->isWeakLocked(id);
     }
 
     void addLocalLocked(const DhtAddress& id, const LockID& lockId) {
-        std::scoped_lock lock(this->localLocksMutex);
         if (this->localLocks.find(id) == this->localLocks.end()) {
             this->localLocks[id] = std::set<LockID>();
         }
@@ -85,7 +71,6 @@ public:
     }
 
     void addRemoteLocked(const DhtAddress& id, const LockID& lockId) {
-        std::scoped_lock lock(this->remoteLocksMutex);
         if (this->remoteLocks.find(id) == this->remoteLocks.end()) {
             this->remoteLocks[id] = std::set<LockID>();
         }
@@ -93,7 +78,6 @@ public:
     }
 
     void addWeakLocked(const DhtAddress& id, const LockID& lockId) {
-        std::scoped_lock lock(this->weakLocksMutex);
         if (this->weakLocks.find(id) == this->weakLocks.end()) {
             this->weakLocks[id] = std::set<LockID>();
         }
@@ -101,7 +85,6 @@ public:
     }
 
     void removeLocalLocked(const DhtAddress& id, const LockID& lockId) {
-        std::scoped_lock lock(this->localLocksMutex);
         if (this->localLocks.find(id) != this->localLocks.end()) {
             this->localLocks[id].erase(lockId);
             if (this->localLocks[id].empty()) {
@@ -111,7 +94,6 @@ public:
     }
 
     void removeRemoteLocked(const DhtAddress& id, const LockID& lockId) {
-        std::scoped_lock lock(this->remoteLocksMutex);
         if (this->remoteLocks.find(id) != this->remoteLocks.end()) {
             this->remoteLocks[id].erase(lockId);
             if (this->remoteLocks[id].empty()) {
@@ -121,7 +103,6 @@ public:
     }
 
     void removeWeakLocked(const DhtAddress& id, const LockID& lockId) {
-        std::scoped_lock lock(this->weakLocksMutex);
         if (this->weakLocks.find(id) != this->weakLocks.end()) {
             this->weakLocks[id].erase(lockId);
             if (this->weakLocks[id].empty()) {
@@ -131,20 +112,12 @@ public:
     }
 
     void clearAllLocks(const DhtAddress& id) {
-        std::scoped_lock lock(
-            this->localLocksMutex,
-            this->remoteLocksMutex,
-            this->weakLocksMutex);
         this->localLocks.erase(id);
         this->remoteLocks.erase(id);
         this->weakLocks.erase(id);
     }
 
     void clear() {
-        std::scoped_lock lock(
-            this->localLocksMutex,
-            this->remoteLocksMutex,
-            this->weakLocksMutex);
         this->localLocks.clear();
         this->remoteLocks.clear();
         this->weakLocks.clear();
