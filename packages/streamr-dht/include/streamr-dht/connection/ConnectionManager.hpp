@@ -559,7 +559,7 @@ private:
         PeerDescriptor&& targetDescriptor, DisconnectMode&& disconnectMode) {
         SLogger::debug("ConnectionManager::gracefullyDisconnect() start");
 
-        std::shared_ptr<Endpoint> endpoint;
+        std::shared_ptr<Endpoint> endpoint = nullptr;
         {
             SLogger::debug(
                 "Trying to acquire mutex lock in gracefullyDisconnect");
@@ -580,6 +580,7 @@ private:
 
         if (endpoint->isConnected()) {
             try {
+                SLogger::debug("gracefullyDisconnect() calling blockingWait()");
                 folly::coro::blockingWait(folly::coro::co_invoke(
                     [this,
                      endpoint,
@@ -607,11 +608,13 @@ private:
                     std::string(err.what()) + "\n");
                 endpoint->close(true);
             }
+            SLogger::debug("gracefullyDisconnect() blockingWait() returned");
         } else {
             SLogger::debug(
                 "gracefullyDisconnected() failed, force-closing endpoint");
             endpoint->close(true);
         }
+     SLogger::debug("ConnectionManager::gracefullyDisconnect() end");
     }
 
     folly::coro::Task<void> doGracefullyDisconnectAsync(
