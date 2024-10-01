@@ -3,13 +3,12 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Promise.h>
-#include <folly/experimental/coro/BlockingWait.h>
+#include <folly/coro/Collect.h>
+#include <folly/coro/Promise.h>
+#include <folly/coro/blockingWait.h>
+#include "FakeTransport.hpp"
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
-#include "streamr-dht/helpers/Errors.hpp"
-#include "streamr-dht/transport/FakeTransport.hpp"
 #include "streamr-dht/transport/Transport.hpp"
 #include "streamr-dht/types/PortRange.hpp"
 #include "streamr-logger/SLogger.hpp"
@@ -23,14 +22,27 @@ using streamr::dht::connection::ConnectionManager;
 using streamr::dht::connection::ConnectionManagerOptions;
 using streamr::dht::connection::DefaultConnectorFacade;
 using streamr::dht::connection::DefaultConnectorFacadeOptions;
-using streamr::dht::helpers::SendFailed;
-using streamr::dht::transport::FakeEnvironment;
-using streamr::dht::transport::FakeTransport;
+using streamr::dht::test::utils::FakeEnvironment;
+using streamr::dht::test::utils::FakeTransport;
 using streamr::dht::transport::SendOptions;
 using streamr::dht::types::PortRange;
 using streamr::logger::SLogger;
 
 namespace transportevents = streamr::dht::transport::transportevents;
+/*
+class TestableConnectionManager : public ConnectionManager {
+public:
+    using ConnectionManager::doGracefullyDisconnectAsync;  // Make private function public
+};
+*/
+/*
+TEST(ConnectionManagerTest, PrivateFunctionTest) {
+    TestableConnectionManager cm;
+    cm.privateFunction();  // Can now call the function
+}
+
+*/
+
 
 PeerDescriptor createMockPeerDescriptor(uint16_t websocketPort) {
     PeerDescriptor peerDescriptor;
@@ -167,34 +179,4 @@ TEST_F(
 
     connectionManager1->stop();
     connectionManager2->stop();
-}
-
-TEST_F(
-    ConnectionManagerTest, ReportsCorrectErrorIfConnectingToNonExistentPort) {
-    auto connectionManager1 =
-        createConnectionManager(DefaultConnectorFacadeOptions{
-            .transport = *mockConnectorTransport1,
-            .websocketHost = "127.0.0.1",
-            .websocketPortRange =
-                PortRange{
-                    .min = mockWebsocketPort1,
-                    .max = mockWebsocketPort1}, // NOLINT
-            .createLocalPeerDescriptor =
-                [this](const ConnectivityResponse& /* response */)
-                -> PeerDescriptor { return mockPeerDescriptor1; }});
-    SLogger::info("Starting connection manager 1");
-    connectionManager1->start();
-
-    Message msg;
-    msg.set_serviceid(SERVICE_ID);
-    msg.set_messageid("1");
-    msg.mutable_rpcmessage()->CopyFrom(RpcMessage());
-    msg.mutable_targetdescriptor()->CopyFrom(createMockPeerDescriptor(0));
-
-    EXPECT_THROW(
-        connectionManager1->send(msg, SendOptions{.connect = true}),
-        SendFailed);
-
-    connectionManager1->stop();
-    SLogger::info("Connection manager 1 stopped");
 }

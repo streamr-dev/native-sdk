@@ -99,10 +99,19 @@ if(NOT IOS)
 
     add_executable(streamr-dht-test-unit
         test/unit/WebsocketClientConnectionTest.cpp
+        test/unit/WebsocketClientConnectorTest.cpp
+        test/unit/HandshakerTest.cpp
+        test/unit/AddressToolsTest.cpp
+        test/unit/ConnectivityTest.cpp
+        test/unit/DuplicateDetectorTest.cpp
+        test/unit/PendingConnectionTest.cpp
+        test/unit/VersionTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
         test/unit/CertificateHelperTest.cpp
         test/unit/ConnectionManagerTest.cpp
         test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
+        test/unit/WebsocketServerTest.cpp
+
     )
 
     target_include_directories(streamr-dht-test-unit
@@ -117,6 +126,8 @@ if(NOT IOS)
         PUBLIC GTest::gtest
         PUBLIC streamr-dht-test-main
         PUBLIC Folly::folly
+        PUBLIC GTest::gmock 
+        PUBLIC GTest::gmock_main
     )
 
     add_executable(streamr-dht-test-integration
