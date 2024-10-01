@@ -27,25 +27,29 @@ TEST(WebsocketClientServerTest, TestServerCanAcceptConnection) {
 
     WebsocketServer server(std::move(config));
 
-    std::promise<std::string_view> connectionEstablishedPromise;
+    std::promise<std::string> connectionEstablishedPromise;
     server.on<websocketserverevents::Connected>(
         [&](const std::shared_ptr<WebsocketServerConnection>& /*connection*/) {
-            SLogger::trace("in onConnected() event handler");
+            SLogger::info("in onConnected() event handler");
             connectionEstablishedPromise.set_value("Hello, world!");
         });
-
+    SLogger::info("before start()");
     server.start();
+    SLogger::info("after start()");
 
     auto client = WebsocketClientConnection::newInstance();
+    SLogger::info("before connect()");
     client->connect("ws://127.0.0.1:10001", false); // NOLINT
-
-    const std::string_view message =
-        connectionEstablishedPromise.get_future().get();
-    SLogger::trace("message: {}", message);
+    SLogger::info("after connect()");
+    auto message = connectionEstablishedPromise.get_future().get();
+    SLogger::info("message:", message);
     ASSERT_EQ(message, "Hello, world!");
-
+    SLogger::info("before close()");
     client->close(false);
+    SLogger::info("after close()");
+    SLogger::info("before stop()");
     server.stop();
+    SLogger::info("after stop()");
 }
 
 TEST(WebsocketClientServerTest, TestServerCanTrasmitMessageToServer) {

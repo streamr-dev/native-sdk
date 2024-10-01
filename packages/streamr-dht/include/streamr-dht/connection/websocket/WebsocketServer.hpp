@@ -56,6 +56,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<WebsocketServerConnection>>
         mHalfReadyConnections;
     std::recursive_mutex mHalfReadyConnectionsMutex;
+    std::atomic<bool> mStopped = false;
 
 public:
     explicit WebsocketServer(WebsocketServerConfig&& config)
@@ -94,11 +95,16 @@ public:
     }
 
     void stop() {
-        SLogger::trace("stop() start");
+        SLogger::info("stop() start");
+        if (mStopped) {
+            SLogger::info("stop() already stopped, returning");
+            return;
+        }
+        mStopped = true;
         removeAllListeners();
-        SLogger::trace("stop() removeAllListeners() end");
+        SLogger::info("stop() removeAllListeners() end, calling mServer->stop()");
         mServer->stop();
-        SLogger::trace("stop() mServer->stop() end");
+        SLogger::info("stop() mServer->stop() end");
     }
 
     void updateCertificate(const std::string& cert, const std::string& key) {

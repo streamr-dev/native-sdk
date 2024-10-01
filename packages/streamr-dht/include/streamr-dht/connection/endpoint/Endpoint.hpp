@@ -143,7 +143,9 @@ public:
 
     [[nodiscard]] PeerDescriptor getPeerDescriptor() {
         SLogger::debug("Endpoint::getPeerDescriptor");
+        SLogger::debug("Endpoint::getPeerDescriptor acquiring scoped lock");
         std::scoped_lock lock(this->mutex);
+        SLogger::debug("Endpoint::getPeerDescriptor got scoped lock");
         return this->peerDescriptor;
     }
 
