@@ -197,6 +197,7 @@ TEST_F(
         connectionManager1->send(msg, SendOptions{.connect = true}),
         SendFailed);
 
+    SLogger::info("Stopping connection manager 1");
     connectionManager1->stop();
     SLogger::info("Connection manager 1 stopped");
 }

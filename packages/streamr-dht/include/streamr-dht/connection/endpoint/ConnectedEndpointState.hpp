@@ -37,7 +37,9 @@ public:
     }
 
     ~ConnectedEndpointState() override {
-        SLogger::debug("ConnectedEndpointState destructor");
+        if (this->connection) {
+            SLogger::debug("ConnectedEndpointState destructor " + this->connection->getConnectionTypeString());
+        }
     }
 
     void enterState(const std::shared_ptr<Connection>& connection) {
@@ -84,12 +86,12 @@ public:
     }
 
     void close(bool graceful) override {
-        SLogger::debug("ConnectedEndpointState::close start");
+        SLogger::debug("ConnectedEndpointState::close start " + this->connection->getConnectionTypeString());
         auto self = sharedFromThis<ConnectedEndpointState>();
         std::scoped_lock lock(this->connectedEndpointStateMutex);
         this->removeEventHandlers();
         this->connection->close(graceful);
-        SLogger::debug("ConnectedEndpointState::close end");
+        SLogger::debug("ConnectedEndpointState::close end " + this->connection->getConnectionTypeString());
     }
 
     void send(const std::vector<std::byte>& data) override {

@@ -24,6 +24,9 @@
 EXTERN_C const char* SHARED_EXPORT testRpc();
 
 // this file should be in C, not C++
+
+static void __attribute__((constructor)) initialize();
+
 EXTERN_C struct SHARED_EXPORT Proxy {
     const char* websocketUrl;
     const char* ethereumAddress;

@@ -102,6 +102,14 @@ if(NOT IOS)
     #     PUBLIC GTest::gtest_main
     #     PUBLIC Folly::folly
     # )
+    add_library(streamr-trackerless-network-test-main
+        src/CustomGtestMain.cpp
+    )
+
+    target_link_libraries(streamr-trackerless-network-test-main
+        PUBLIC Folly::folly
+        PUBLIC GTest::gtest
+    )
 
      add_executable(streamr-trackerless-network-test-integration
          test/integration/ProxyClientTsIntegrationTest.cpp
@@ -111,7 +119,7 @@ if(NOT IOS)
          PUBLIC streamr-trackerless-network
          INTERFACE streamr::streamr-logger
          PUBLIC GTest::gtest
-         PUBLIC GTest::gtest_main
+         PUBLIC streamr-trackerless-network-test-main
      )
      
      if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))

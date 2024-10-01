@@ -57,30 +57,26 @@ if (NOT IOS)
     enable_testing()
     find_package(GTest CONFIG REQUIRED)
     find_package(folly CONFIG REQUIRED)
-     
     add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp)
     target_link_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
-    
     target_include_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
-    
     target_link_libraries(streamr-streamrproxyclient-test-integration 
-        PRIVATE streamrproxyclient
+        PUBLIC streamrproxyclient
         PRIVATE streamr::streamr-logger
-        PRIVATE GTest::gtest 
-        PRIVATE cpptrace::cpptrace
-        PRIVATE GTest::gtest_main
+        PUBLIC GTest::gtest 
+        PUBLIC GTest::gtest_main 
+        PUBLIC cpptrace::cpptrace
     )
 
     add_executable(streamr-streamrproxyclient-test-end-to-end test/end-to-end/PublishToTsServerTest.cpp)
     target_link_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
-    
     target_include_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
-    
     target_link_libraries(streamr-streamrproxyclient-test-end-to-end 
-        PRIVATE streamrproxyclient
-        PRIVATE GTest::gtest 
-        PRIVATE cpptrace::cpptrace
-        PRIVATE GTest::gtest_main
+        PUBLIC streamrproxyclient
+        PRIVATE streamr::streamr-logger
+        PUBLIC GTest::gtest 
+        PUBLIC GTest::gtest_main 
+        PUBLIC cpptrace::cpptrace
     )
 
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
