@@ -85,30 +85,41 @@ if(NOT IOS)
      enable_testing()
     find_package(GTest CONFIG REQUIRED)
 
-    # add_executable(streamr-trackerless-network-test-unit
-    #     test/unit/NodeListTest.cpp
-    # )
-
-    # target_include_directories(streamr-trackerless-network-test-unit
-    #     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
-    #     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    #     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
-    #     )
-
-    # target_link_libraries(streamr-trackerless-network-test-unit 
-    #     PUBLIC streamr-trackerless-network
-    #     INTERFACE streamr::streamr-logger
-    #     PUBLIC GTest::gtest
-    #     PUBLIC GTest::gtest_main
-    #     PUBLIC Folly::folly
-    # )
     add_library(streamr-trackerless-network-test-main
-        src/CustomGtestMain.cpp
+    src/CustomGtestMain.cpp
     )
 
     target_link_libraries(streamr-trackerless-network-test-main
         PUBLIC Folly::folly
         PUBLIC GTest::gtest
+    )
+
+    add_executable(streamr-trackerless-network-test-unit
+        test/unit/ProxyClientTest.cpp
+        test/unit/ProxyConnectionRpcLocalTest.cpp
+        test/unit/ProxyConnectionRpcRemoteTest.cpp
+        test/unit/PropagationTest.cpp
+        test/unit/PropagationTaskStoreTest.cpp
+        test/unit/UtilsTest.cpp
+        test/unit/NodeListTest.cpp
+        test/unit/FifoMapWithTTLTest.cpp
+        test/unit/formStreamPartDeliveryServiceIdTest.cpp
+        test/unit/ContentDeliveryRpcRemoteTest.cpp
+        test/unit/ContentDeliveryRpcLocalTest.cpp
+    )
+
+    target_include_directories(streamr-trackerless-network-test-unit
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
+        )
+
+    target_link_libraries(streamr-trackerless-network-test-unit 
+        PUBLIC streamr-trackerless-network
+        INTERFACE streamr::streamr-logger
+        PUBLIC GTest::gtest
+        streamr-trackerless-network-test-main
+        PUBLIC Folly::folly
     )
 
      add_executable(streamr-trackerless-network-test-integration
