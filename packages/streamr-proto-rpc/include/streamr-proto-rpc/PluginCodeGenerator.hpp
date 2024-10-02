@@ -215,8 +215,7 @@ private:
             const std::string serviceFullname = service->full_name();
             const std::string& serviceName = service->name();
             sourceSs << "template <typename CallContextType>\n";
-            sourceSs << "class " << serviceName << "Client"
-                     << " {\n";
+            sourceSs << "class " << serviceName << "Client" << " {\n";
             sourceSs << "private:\n";
             sourceSs << "RpcCommunicator<CallContextType>& communicator;\n";
             sourceSs << "public:\n";
@@ -306,8 +305,7 @@ private:
         const std::string& parameter,
         google::protobuf::compiler::GeneratorContext* generatorContext,
         std::string* error) const {
-        std::cerr << "GenerateHeader()"
-                  << "\n";
+        std::cerr << "GenerateHeader()" << "\n";
         return GenerateServerHeader(file, parameter, generatorContext, error) &&
             GenerateClientHeader(file, parameter, generatorContext, error);
     }
@@ -317,8 +315,7 @@ private:
         const std::string& /* parameter */,
         google::protobuf::compiler::GeneratorContext* /* generatorContext */,
         std::string* /* error */) const {
-        std::cerr << "GenerateSource()"
-                  << "\n";
+        std::cerr << "GenerateSource()" << "\n";
         return true;
     }
 };
