@@ -14,6 +14,12 @@ if [ "$VCPKG_ROOT" != "$EXPECTED_VCPKG_ROOT" ]; then
     exit 1
 fi
 
+# Check if VCPKG_OVERLAY_TRIPLETS is set
+if [ -z "$VCPKG_OVERLAY_TRIPLETS" ]; then
+    echo "Error: VCPKG_OVERLAY_TRIPLETS is not set. Please set it to the path of the triplets directory."
+    exit 1
+fi
+
 # Parse command-line options
 PROD_BUILD=false
 TARGET_TRIPLET=""
