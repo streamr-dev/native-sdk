@@ -1,6 +1,7 @@
 #ifndef STREAMR_DHT_DUPLICATE_DETECTOR_HPP
 #define STREAMR_DHT_DUPLICATE_DETECTOR_HPP
 
+#include <mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
