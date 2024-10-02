@@ -3,6 +3,7 @@
 
 #include <map>
 #include <set>
+#include <mutex>
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-utils/Branded.hpp"
 

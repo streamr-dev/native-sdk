@@ -4,14 +4,16 @@
     "dependencies": [
         "gtest",
         "ada-url",
-        "cpptrace",
         "folly"
     ],
     "features": {
         "monorepo": {
             "description": "Monorepo dependencies",
             "dependencies": [
-                "streamr-trackerless-network"
+                "streamr-trackerless-network",
+                "streamr-dht",
+                "streamr-logger",
+                "streamr-utils"
             ]
         }
     }
