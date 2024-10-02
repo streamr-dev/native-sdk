@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <stdexcept>
 #include <string>
 
 namespace streamr::utils {
