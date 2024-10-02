@@ -1,10 +1,10 @@
 #ifndef STREAMR_UTILS_REPLAY_EVENT_EMITTER_WRAPPER_HPP
 #define STREAMR_UTILS_REPLAY_EVENT_EMITTER_WRAPPER_HPP
 
+#include <memory>
 #include <optional>
 #include <tuple>
 #include <vector>
-#include <memory>
 
 #include "streamr-eventemitter/EventEmitter.hpp"
 
