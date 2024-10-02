@@ -102,7 +102,8 @@ public:
         }
         mStopped = true;
         removeAllListeners();
-        SLogger::info("stop() removeAllListeners() end, calling mServer->stop()");
+        SLogger::info(
+            "stop() removeAllListeners() end, calling mServer->stop()");
         mServer->stop();
         SLogger::info("stop() mServer->stop() end");
     }

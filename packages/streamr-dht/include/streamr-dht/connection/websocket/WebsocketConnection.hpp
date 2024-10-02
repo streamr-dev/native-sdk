@@ -38,7 +38,7 @@ protected:
 
         mSocket->onMessage(
             [this](rtc::binary data) {
-                //std::scoped_lock lock(this->mMutex);
+                // std::scoped_lock lock(this->mMutex);
                 SLogger::trace(
                     "onMessage()",
                     {
@@ -85,21 +85,20 @@ protected:
                 });
 
             if (!this->mDestroyed) {
-                //SLogger::debug("Trying to acquire mutex lock in onClosed " + getConnectionTypeString());
-                //std::scoped_lock lock(mMutex);
+                // SLogger::debug("Trying to acquire mutex lock in onClosed " +
+                // getConnectionTypeString()); std::scoped_lock lock(mMutex);
                 SLogger::debug("Getting shared pointer in onClosed");
                 auto self = this->sharedFromThis<Connection>();
                 SLogger::debug("Got shared pointer in onClosed");
                 SLogger::debug("Setting mDestroyed to true in onClosed");
                 this->mDestroyed = true;
-                
-                
-                
-                //SLogger::debug("Acquired mutex lock in onClosed " + getConnectionTypeString());
-                //SLogger::debug("Resetting callbacks in onClosed " + getConnectionTypeString());
-                //self->mSocket->resetCallbacks();
+
+                // SLogger::debug("Acquired mutex lock in onClosed " +
+                // getConnectionTypeString()); SLogger::debug("Resetting
+                // callbacks in onClosed " + getConnectionTypeString());
+                // self->mSocket->resetCallbacks();
                 /*
-                if (this->mSocket) { 
+                if (this->mSocket) {
                     SLogger::debug("Resetting socket in onClosed");
                     this->mSocket.reset();
                 } else {
@@ -107,11 +106,15 @@ protected:
                 }
                 */
                 this->mSocket->close();
-                
-                SLogger::debug("Emitting Disconnected in onClosed " + getConnectionTypeString());
-                //const auto gracefulLeave = false;
+
+                SLogger::debug(
+                    "Emitting Disconnected in onClosed " +
+                    getConnectionTypeString());
+                // const auto gracefulLeave = false;
                 this->emit<Disconnected>(false, 0, "");
-                SLogger::debug("Removing all listeners in onClosed" + getConnectionTypeString());
+                SLogger::debug(
+                    "Removing all listeners in onClosed" +
+                    getConnectionTypeString());
                 this->removeAllListeners();
             }
         });
@@ -125,7 +128,8 @@ protected:
                  {"mDestroyed", mDestroyed.load()}});
             if (!self->mDestroyed) {
                 if (self->mSocket &&
-                    self->mSocket->readyState() == rtc::WebSocket::State::Open) {
+                    self->mSocket->readyState() ==
+                        rtc::WebSocket::State::Open) {
                     SLogger::trace(
                         "onOpen() emitting Connected " +
                             getConnectionTypeString(),
@@ -180,14 +184,17 @@ public:
             "close()",
             {{"connectionType", getConnectionTypeString()},
              {"mDestroyed", mDestroyed.load()}});
-        SLogger::debug("close() trying to acquire mutex lock in close()" + getConnectionTypeString());
+        SLogger::debug(
+            "close() trying to acquire mutex lock in close()" +
+            getConnectionTypeString());
         std::scoped_lock lock(mMutex);
-        SLogger::debug("close() got mutex lock in close()" + getConnectionTypeString());   
+        SLogger::debug(
+            "close() got mutex lock in close()" + getConnectionTypeString());
         if (!mDestroyed) {
-            //SLogger::debug("close() resetting callbacks");
-            //mSocket->resetCallbacks();
+            // SLogger::debug("close() resetting callbacks");
+            // mSocket->resetCallbacks();
             mSocket->close();
-            //mSocket = nullptr;
+            // mSocket = nullptr;
         } else {
             SLogger::debug("close() on destroyed connection");
         }
@@ -208,12 +215,12 @@ public:
 
         mDestroyed = true;
         if (mSocket) {
-              SLogger::debug("destroy() trying to get mutex lock");
-               std::lock_guard<std::recursive_mutex> lock(mMutex);
-               SLogger::debug("destroy() got mutex lock");
-            //mSocket->resetCallbacks();
+            SLogger::debug("destroy() trying to get mutex lock");
+            std::lock_guard<std::recursive_mutex> lock(mMutex);
+            SLogger::debug("destroy() got mutex lock");
+            // mSocket->resetCallbacks();
             mSocket->close();
-            //mSocket = nullptr;
+            // mSocket = nullptr;
         }
     }
 };

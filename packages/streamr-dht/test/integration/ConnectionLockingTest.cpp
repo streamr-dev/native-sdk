@@ -2,8 +2,8 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
-#include <folly/experimental/coro/Promise.h>
 #include <folly/experimental/coro/BlockingWait.h>
+#include <folly/experimental/coro/Promise.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/ConnectionManager.hpp"
