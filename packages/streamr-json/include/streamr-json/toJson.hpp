@@ -182,8 +182,10 @@ public:
     }
 
     JsonBuilder(std::initializer_list<JsonBuilder> init) {
-        bool isObject = std::all_of(
-            init.begin(), init.end(), [](const JsonBuilder& element) -> bool {
+        bool isObject = std::all_of( // NOLINT
+            init.begin(),
+            init.end(),
+            [](const JsonBuilder& element) -> bool {
                 // the use of cast exists to avoid a warning on Windows
                 // (according to nlohmann)
                 return element.isArray() && element.getSize() == 2 &&

@@ -47,7 +47,7 @@ public:
 };
 
 int main() {
-    MyStruct s{1, "hello"};
+    MyStruct s{.x = 1, .y = "hello"};
 
     // Converting a struct to a json object
     nlohmann::json json = toJson(s);
