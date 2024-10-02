@@ -2,8 +2,8 @@
 #define STREAMR_DHT_CONNECTION_CONNECTIONLOCKSTATES_HPP
 
 #include <map>
-#include <set>
 #include <mutex>
+#include <set>
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-utils/Branded.hpp"
 
