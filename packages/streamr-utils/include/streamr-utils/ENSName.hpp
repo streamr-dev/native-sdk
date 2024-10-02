@@ -2,7 +2,9 @@
 #define STREAMR_UTILS_ENS_NAME_HPP
 
 #include <algorithm>
+#include <stdexcept>
 #include <string>
+
 #include "streamr-utils/Branded.hpp"
 namespace streamr::utils {
 

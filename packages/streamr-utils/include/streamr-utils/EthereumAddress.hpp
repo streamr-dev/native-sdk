@@ -2,8 +2,10 @@
 #define STREAMR_UTILS_ETHEREUM_ADDRESS_HPP
 
 #include <algorithm>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+
 #include "streamr-utils/Branded.hpp"
 
 namespace streamr::utils {

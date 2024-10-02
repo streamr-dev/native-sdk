@@ -2,6 +2,7 @@
 #define STREAMR_UTILS_STREAM_ID_HPP
 
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <variant>
 #include "streamr-utils/Branded.hpp"
