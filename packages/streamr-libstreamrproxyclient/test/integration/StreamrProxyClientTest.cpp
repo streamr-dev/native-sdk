@@ -1,7 +1,6 @@
 #include "streamrproxyclient.h"
 #include <iostream>
 
-#include <cpptrace/from_current.hpp>
 #include <gtest/gtest.h>
 #include "streamr-logger/SLogger.hpp"
 

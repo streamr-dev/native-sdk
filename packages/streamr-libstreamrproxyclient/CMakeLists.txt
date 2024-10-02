@@ -25,7 +25,6 @@ find_package(streamr-dht CONFIG REQUIRED)
 find_package(streamr-logger CONFIG REQUIRED)
 find_package(streamr-utils CONFIG REQUIRED)
 find_package(ada CONFIG REQUIRED)
-find_package(cpptrace CONFIG REQUIRED)
 
 target_include_directories(streamrproxyclient PUBLIC include)
 target_link_libraries(streamrproxyclient 
@@ -67,7 +66,6 @@ if (NOT IOS)
         PRIVATE streamrproxyclient
         PRIVATE streamr::streamr-logger
         PRIVATE GTest::gtest 
-        PRIVATE cpptrace::cpptrace
         PRIVATE GTest::gtest_main
     )
 
@@ -79,7 +77,6 @@ if (NOT IOS)
     target_link_libraries(streamr-streamrproxyclient-test-end-to-end 
         PRIVATE streamrproxyclient
         PRIVATE GTest::gtest 
-        PRIVATE cpptrace::cpptrace
         PRIVATE GTest::gtest_main
     )
 

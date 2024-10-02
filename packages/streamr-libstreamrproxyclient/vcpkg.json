@@ -4,7 +4,6 @@
     "dependencies": [
         "gtest",
         "ada-url",
-        "cpptrace",
         "folly"
     ],
     "features": {

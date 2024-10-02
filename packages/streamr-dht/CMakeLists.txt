@@ -25,7 +25,6 @@ find_package(folly REQUIRED)
 find_package(LibDataChannel CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(ipaddress CONFIG REQUIRED)
-find_package(cpptrace CONFIG REQUIRED)
 
 if(NOT TARGET Boost::uuid)
   add_library(Boost::uuid INTERFACE IMPORTED)
@@ -118,7 +117,6 @@ if(NOT IOS)
         PUBLIC GTest::gtest
         PUBLIC streamr-dht-test-main
         PUBLIC Folly::folly
-        PRIVATE cpptrace::cpptrace
     )
 
     add_executable(streamr-dht-test-integration
