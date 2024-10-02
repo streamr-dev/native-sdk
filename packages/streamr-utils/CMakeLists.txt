@@ -83,7 +83,11 @@ if(NOT IOS)
     test/unit/runAndWaitForEventsTest.cpp
     test/unit/toCoroTaskTest.cpp
     test/unit/collectTest.cpp
+    test/unit/toEthereumAddressOrENSNameTest.cpp
+    test/unit/StreamPartIDTest.cpp
+    test/unit/RetryUtilsTest.cpp
   )
+
   target_link_libraries(streamr-utils-test-unit 
     PUBLIC streamr-utils
     PUBLIC GTest::gtest 
