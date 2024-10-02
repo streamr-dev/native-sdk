@@ -1,6 +1,6 @@
 #include "streamrproxyclient.h"
-#include "LibProxyClientApi.hpp"
 #include <folly/Singleton.h>
+#include "LibProxyClientApi.hpp"
 
 using streamr::libstreamrproxyclient::LibProxyClientApi;
 
@@ -8,37 +8,13 @@ const char* testRpc() {
     return "Hajotkaa siihen";
 }
 
-static void initFolly() {
-    /*
-    static std::vector<std::string> arguments = {"streamrproxyclient", "something", "somethingelse"};
+static void initFolly() { // NOLINT
 
-    static std::vector<char*> argv;
-    for (const auto& arg : arguments) {
-        argv.push_back((char*)arg.data());
-    }
-    argv.push_back(nullptr);
-
-    static auto argvpointer = argv.data();
-    static int argcsize = static_cast<int>(argv.size() - 1);
-    
-    
-    //gflags::ParseCommandLineFlags(&argcsize, &argvpointer, false);
-    
-    int argc = 1;
-    const auto arg0 = "dummy";
-    char* argv0 = const_cast<char*>(arg0);
-    char** argv = &argv0;
-    
-    folly::InitOptions options;
-    options.use_gflags = false;
-    static folly::Init init(&argc, &argv, options);
-    return init;
-    */
     folly::SingletonVault::singleton()->registrationComplete();
 }
 
 void initialize() {
-    //getFollyInit();
+    // getFollyInit();
 }
 
 static LibProxyClientApi& getProxyClientApi() { // NOLINT
