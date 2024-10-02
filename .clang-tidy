@@ -11,6 +11,8 @@ Checks: >
   -modernize-use-trailing-return-type,
   -modernize-return-braced-init-list
   -misc-non-private-member-variables-in-classes
+  -typecheck-expression-not-modifiable-lvalue
+  -misc-use-internal-linkage
 
 # Turn all the warnings from the checks above into errors.
 WarningsAsErrors: "*"
