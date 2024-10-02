@@ -1,6 +1,11 @@
 #ifndef STREAMR_UTILS_REPLAY_EVENT_EMITTER_WRAPPER_HPP
 #define STREAMR_UTILS_REPLAY_EVENT_EMITTER_WRAPPER_HPP
 
+#include <optional>
+#include <tuple>
+#include <vector>
+#include <memory>
+
 #include "streamr-eventemitter/EventEmitter.hpp"
 
 namespace streamr::utils {
