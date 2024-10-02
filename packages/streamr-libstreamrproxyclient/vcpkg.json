@@ -13,7 +13,9 @@
                 "streamr-trackerless-network",
                 "streamr-dht",
                 "streamr-logger",
-                "streamr-utils"
+                "streamr-utils",
+                "streamr-proto-rpc",
+                "streamr-eventemitter"
             ]
         }
     }
