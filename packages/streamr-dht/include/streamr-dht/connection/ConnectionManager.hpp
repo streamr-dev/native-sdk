@@ -5,8 +5,8 @@
 #include <memory>
 #include <mutex>
 #include <utility>
-#include <folly/experimental/coro/Task.h>
 #include <folly/experimental/coro/BlockingWait.h>
+#include <folly/experimental/coro/Task.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/ConnectionLockRpcLocal.hpp"
@@ -614,7 +614,7 @@ private:
                 "gracefullyDisconnected() failed, force-closing endpoint");
             endpoint->close(true);
         }
-     SLogger::debug("ConnectionManager::gracefullyDisconnect() end");
+        SLogger::debug("ConnectionManager::gracefullyDisconnect() end");
     }
 
     folly::coro::Task<void> doGracefullyDisconnectAsync(
