@@ -34,7 +34,9 @@ else
     wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     sudo apt-add-repository 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble main'
     sudo apt-get update
-    sudo apt-get install -y build-essential cmake ninja-build jq clang-format clangd
+    sudo apt-get install -y build-essential cmake ninja-build jq clang-format-18 clangd-18
+    sudo ln -s /usr/bin/clang-format-18 /usr/bin/clang-format
+    sudo ln -s /usr/bin/clangd-18 /usr/bin/clangd
     if [[ -n "$GITHUB_ENV" ]]; then
         echo "CC=gcc-14" >> $GITHUB_ENV
         echo "CXX=g++-14" >> $GITHUB_ENV
