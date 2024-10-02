@@ -24,6 +24,7 @@ using ::dht::UnlockRequest;
 using streamr::dht::connection::LockID;
 using streamr::dht::contact::RpcRemote;
 using streamr::dht::rpcprotocol::DhtCallContext;
+using streamr::logger::SLogger;
 
 class ConnectionLockRpcRemote : public RpcRemote<ConnectionLockRpcClient> {
 public:

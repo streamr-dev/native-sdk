@@ -9,6 +9,7 @@
 
 namespace streamr::dht::connection {
 
+using streamr::dht::Identifiers;
 using streamr::dht::connection::Connection;
 using streamr::dht::connection::PendingConnection;
 using streamr::eventemitter::HandlerToken;

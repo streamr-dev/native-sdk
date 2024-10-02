@@ -23,12 +23,14 @@ using streamr::dht::connection::IncomingHandshaker;
 using streamr::dht::connection::PendingConnection;
 using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketServerConnection;
+using streamr::dht::helpers::Version;
 using streamr::dht::transport::ListeningRpcCommunicator;
 using streamr::dht::transport::Transport;
 using streamr::dht::types::PortRange;
 using streamr::dht::types::TlsCertificateFiles;
 using streamr::utils::AbortController;
 using streamr::utils::Ipv4Helper;
+
 namespace NatType = streamr::dht::types::NatType;
 
 struct WebsocketServerConnectorOptions {
