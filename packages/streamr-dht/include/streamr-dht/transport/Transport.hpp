@@ -1,6 +1,8 @@
 #ifndef STREAMR_DHT_TRANSPORT_CONNECTION_HPP
 #define STREAMR_DHT_TRANSPORT_CONNECTION_HPP
 
+#include <tuple>
+
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/helpers/Errors.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
