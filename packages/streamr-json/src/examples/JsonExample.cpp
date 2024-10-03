@@ -20,7 +20,7 @@ struct MyStruct {
 // infer initializer list types.
 
 template <typename T = StreamrJsonInitializerList>
-void printMyData(T data) {
+void printMyData(T data) { // NOLINT
     std::cout << toJson(data) << std::endl;
 }
 
