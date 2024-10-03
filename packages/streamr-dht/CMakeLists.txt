@@ -110,6 +110,15 @@ if(NOT IOS)
         test/unit/WebsocketServerConnectorTest.cpp
         test/unit/OffererTest.cpp
         test/unit/DhtCallContextTest.cpp
+        test/unit/PendingConnectionTest.cpp
+        test/unit/ConnectionLockRpcLocalTest.cpp
+        test/unit/EndpointTest.cpp
+        test/unit/ConnectingEndpointStateTest.cpp
+        test/unit/ConnectedEndpointStateTest.cpp
+        test/unit/DisconnectedEndpointStateTest.cpp
+        test/unit/InitialEndpointStateTest.cpp
+        test/unit/FakeTransportTest.cpp
+        test/unit/EndpointStateTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
