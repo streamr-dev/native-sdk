@@ -1,6 +1,7 @@
 #ifndef STREAMR_DHT_CONNECTION_CONNECTIONLOCKER_HPP
 #define STREAMR_DHT_CONNECTION_CONNECTIONLOCKER_HPP
 
+#include <cstddef>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/ConnectionLockStates.hpp"

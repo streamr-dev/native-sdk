@@ -124,6 +124,7 @@ if(NOT IOS)
         test/unit/EndpointStateInterfaceTest.cpp
         test/unit/WebsocketConnectionTest.cpp
         test/unit/RoutingRpcCommunicatorTest.cpp
+        test/unit/ConnectionLockerTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
