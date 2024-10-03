@@ -1,6 +1,10 @@
 #ifndef STREAMR_DHT_CONNECTION_WEBSOCKET_WEBSOCKETSERVERCONNECTOR_HPP
 #define STREAMR_DHT_CONNECTION_WEBSOCKET_WEBSOCKETSERVERCONNECTOR_HPP
 
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/Handshaker.hpp"

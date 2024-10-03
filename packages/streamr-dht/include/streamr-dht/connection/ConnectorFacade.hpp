@@ -1,6 +1,7 @@
 #ifndef STREAMR_DHT_CONNECTION_CONNECTORFACADE_HPP
 #define STREAMR_DHT_CONNECTION_CONNECTORFACADE_HPP
 
+#include <chrono>
 #include <memory>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/connection/PendingConnection.hpp"
@@ -15,6 +16,7 @@ namespace streamr::dht::connection {
 
 using namespace std::chrono_literals;
 using ::dht::ConnectivityResponse;
+using std::chrono::milliseconds;
 using streamr::dht::connection::PendingConnection;
 using streamr::dht::connection::websocket::WebsocketClientConnector;
 using streamr::dht::connection::websocket::WebsocketClientConnectorOptions;
