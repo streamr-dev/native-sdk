@@ -103,6 +103,13 @@ if(NOT IOS)
         test/unit/CertificateHelperTest.cpp
         test/unit/ConnectionManagerTest.cpp
         test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
+        test/unit/IdentifiersTest.cpp
+        test/unit/ConnectionLockRpcRemoteTest.cpp
+        test/unit/ConnectorFacadeTest.cpp
+        test/unit/ConnectionsViewTest.cpp
+        test/unit/WebsocketServerConnectorTest.cpp
+        test/unit/OffererTest.cpp
+        test/unit/DhtCallContextTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
