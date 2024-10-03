@@ -89,6 +89,8 @@ if(NOT IOS)
     test/unit/StreamIDTest.cpp
     test/unit/ReplayEventEmitterWrapperTest.cpp
     test/unit/EthereumAddressTest.cpp
+    test/unit/ENSNameTest.cpp
+    test/unit/AbortControllerTest.cpp
   )
 
   target_link_libraries(streamr-utils-test-unit 
