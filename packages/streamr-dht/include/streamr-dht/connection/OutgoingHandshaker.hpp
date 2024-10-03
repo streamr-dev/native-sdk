@@ -1,6 +1,10 @@
 #ifndef STREAMR_DHT_CONNECTION_OUTGOING_HANDSHAKER_HPP
 #define STREAMR_DHT_CONNECTION_OUTGOING_HANDSHAKER_HPP
 
+#include <memory>
+#include <optional>
+#include <string>
+
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/connection/Handshaker.hpp"
