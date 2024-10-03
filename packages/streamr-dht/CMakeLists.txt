@@ -119,6 +119,11 @@ if(NOT IOS)
         test/unit/InitialEndpointStateTest.cpp
         test/unit/FakeTransportTest.cpp
         test/unit/EndpointStateTest.cpp
+        test/unit/OutgoingHandshakerTest.cpp
+        test/unit/IncomingHandshakerTest.cpp
+        test/unit/EndpointStateInterfaceTest.cpp
+        test/unit/WebsocketConnectionTest.cpp
+        test/unit/RoutingRpcCommunicatorTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
