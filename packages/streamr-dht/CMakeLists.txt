@@ -123,6 +123,8 @@ if(NOT IOS)
         test/unit/IncomingHandshakerTest.cpp
         test/unit/EndpointStateInterfaceTest.cpp
         test/unit/WebsocketConnectionTest.cpp
+        test/unit/TransportTest.cpp
+        test/unit/HandshakerTest.cpp
         test/unit/RoutingRpcCommunicatorTest.cpp
         test/unit/ConnectionLockerTest.cpp
     )
