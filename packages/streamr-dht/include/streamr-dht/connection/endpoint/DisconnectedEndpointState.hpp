@@ -1,6 +1,10 @@
 #ifndef STREAMR_DHT_CONNECTION_ENDPOINT_DISCONNECTEDENDPOINTSTATE_HPP
 #define STREAMR_DHT_CONNECTION_ENDPOINT_DISCONNECTEDENDPOINTSTATE_HPP
 
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-dht/connection/endpoint/EndpointState.hpp"

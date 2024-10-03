@@ -1,6 +1,11 @@
 #ifndef STREAMR_DHT_CONNECTION_ENDPOINT_CONNECTEDENDPOINTSTATE_HPP
 #define STREAMR_DHT_CONNECTION_ENDPOINT_CONNECTEDENDPOINTSTATE_HPP
 
+#include <cstddef>
+#include <memory>
+#include <mutex>
+#include <vector>
+
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/connection/endpoint/EndpointState.hpp"
 #include "streamr-dht/connection/endpoint/EndpointStateInterface.hpp"

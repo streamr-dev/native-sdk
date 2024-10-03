@@ -1,9 +1,11 @@
 #ifndef STREAMR_DHT_ENDPOINTS_HPP
 #define STREAMR_DHT_ENDPOINTS_HPP
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <tuple>
 #include <vector>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/connection/endpoint/ConnectedEndpointState.hpp"

@@ -1,6 +1,9 @@
 #ifndef STREAMR_DHT_CONNECTION_ENDPOINT_ENDPOINTSTATE_HPP
 #define STREAMR_DHT_CONNECTION_ENDPOINT_ENDPOINTSTATE_HPP
 
+#include <cstddef>
+#include <memory>
+#include <vector>
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-logger/SLogger.hpp"

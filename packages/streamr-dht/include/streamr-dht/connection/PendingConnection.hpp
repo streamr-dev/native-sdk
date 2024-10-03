@@ -2,6 +2,14 @@
 #ifndef STREAMR_DHT_CONNECTION_PENDINGCONNECTION_HPP
 #define STREAMR_DHT_CONNECTION_PENDINGCONNECTION_HPP
 
+#include <atomic>
+#include <chrono>
+#include <exception>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <string>
+#include <tuple>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/Connection.hpp"
