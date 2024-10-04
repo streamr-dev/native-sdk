@@ -89,6 +89,13 @@ if (NOT IOS)
             COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-tests.sh"
             WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
             )
+
+        add_test(
+            NAME ts-multiple-messages-test
+            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-multiple-messages-test.sh"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            )
+
     endif()
 endif()
 

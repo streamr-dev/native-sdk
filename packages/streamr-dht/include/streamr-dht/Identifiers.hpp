@@ -2,15 +2,14 @@
 #define STREAMR_DHT_IDENTIFIERS_HPP
 
 #include <cstdint>
-#include <iomanip>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <boost/algorithm/hex.hpp>
 #include "packages/dht/protos/DhtRpc.pb.h"
+#include "streamr-utils/BinaryUtils.hpp"
 #include "streamr-utils/Branded.hpp"
-
 namespace streamr::dht {
+
+using streamr::utils::BinaryUtils;
 
 using DhtAddress = streamr::utils::Branded<std::string, struct DhtAddressBrand>;
 using DhtAddressRaw =
@@ -24,18 +23,11 @@ struct Identifiers {
     using PeerDescriptor = ::dht::PeerDescriptor;
 
     static DhtAddress getDhtAddressFromRaw(const DhtAddressRaw& raw) {
-        std::stringstream res;
-        for (const auto& byte : raw) {
-            res << std::hex << std::setw(2) << std::setfill('0')
-                << static_cast<int>(byte);
-        }
-        return DhtAddress{res.str()};
+        return DhtAddress{BinaryUtils::binaryStringToHex(raw)};
     }
 
     static DhtAddressRaw getRawFromDhtAddress(const DhtAddress& address) {
-        std::string array;
-        boost::algorithm::unhex(address, std::back_inserter(array));
-        return DhtAddressRaw{array};
+        return DhtAddressRaw{BinaryUtils::hexToBinaryString(address)};
     }
 
     static DhtAddress getNodeIdFromPeerDescriptor(

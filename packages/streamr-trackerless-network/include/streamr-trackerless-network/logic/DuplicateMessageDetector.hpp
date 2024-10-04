@@ -6,7 +6,10 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "streamr-logger/SLogger.hpp"
 namespace streamr::trackerlessnetwork {
+
+using streamr::logger::SLogger;
 
 /**
  * Represent a pair of numbers (a,b). Ordering between two pairs is defined as
@@ -116,7 +119,7 @@ public:
     // NOLINTNEXTLINE(readability-function-cognitive-complexity)
     bool markAndCheck(
         std::optional<NumberPair> previousNumber, NumberPair number) {
-        if (previousNumber && previousNumber->greaterThanOrEqual(number)) {
+        if (previousNumber.has_value() && previousNumber.value().greaterThanOrEqual(number)) {
             throw InvalidNumberingError();
         }
 

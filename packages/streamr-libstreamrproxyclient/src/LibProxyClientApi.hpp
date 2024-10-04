@@ -3,6 +3,7 @@
 
 #include <ada.h>
 #include <stdint.h> // NOLINT
+#include <chrono>
 #include <cstdlib>
 #include <map>
 #include <string>
@@ -16,7 +17,6 @@
 #include "streamr-utils/EthereumAddress.hpp"
 #include "streamr-utils/StreamPartID.hpp"
 #include "streamrproxyclient.h"
-
 namespace streamr::libstreamrproxyclient {
 
 using ::dht::ConnectivityMethod;
@@ -95,9 +95,10 @@ private:
     static uint64_t createRandomHandle() { return rand(); }
 
     static PeerDescriptor createLocalPeerDescriptor(
-        std::string_view ownEthereumAddress) {
+        const std::string& ownEthereumAddress) {
         PeerDescriptor peerDescriptor;
-        peerDescriptor.set_nodeid(ownEthereumAddress);
+        peerDescriptor.set_nodeid(
+            BinaryUtils::hexToBinaryString(ownEthereumAddress));
         peerDescriptor.set_type(NodeType::NODEJS);
         peerDescriptor.set_publickey("");
         peerDescriptor.set_signature("");
@@ -246,7 +247,6 @@ public:
         SLogger::info("Proxy client started");
 
         this->proxyClients[handle] = proxyClient;
-
         *errors = nullptr;
         *numErrors = 0;
         return handle;
@@ -352,13 +352,18 @@ public:
         message.mutable_contentmessage()->set_content(contentString);
 
         MessageID messageId;
+        messageId.set_publisherid(BinaryUtils::hexToBinaryString(
+            proxyClient->second->getProxyClient()->getLocalEthereumAddress()));
+        messageId.set_messagechainid("1");
+        messageId.set_timestamp(
+            std::chrono::system_clock::now().time_since_epoch().count());
         messageId.set_sequencenumber(
             proxyClient->second->getNextSequenceNumber());
         message.mutable_messageid()->CopyFrom(messageId);
-
         try {
             proxyClient->second->getProxyClient()->broadcast(message);
         } catch (const std::exception& e) {
+            SLogger::error("Error in proxyClientPublish: " + std::string(e.what()));
             this->addError(e.what(), ERROR_PROXY_BROADCAST_FAILED);
             *errors = this->errors.data();
             *numErrors = this->errors.size();
