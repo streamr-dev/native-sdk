@@ -56,11 +56,11 @@ public:
         this->connection = connection;
         this->dataHandlerToken = this->connection->on<connectionevents::Data>(
             [this](const std::vector<std::byte>& data) {
-                SLogger::debug("ConnectedEndpointState::enterState data");
+                SLogger::debug("ConnectedEndpointState::onData()");
                 std::scoped_lock lock(this->connectedEndpointStateMutex);
                 auto self = sharedFromThis<ConnectedEndpointState>();
                 self->stateInterface.emitData(data);
-                SLogger::debug("ConnectedEndpointState::enterState data end");
+                SLogger::debug("ConnectedEndpointState::onData() end");
             });
         this->disconnectHandlerToken =
             this->connection->on<connectionevents::Disconnected>(

@@ -177,7 +177,6 @@ public:
             "Setting proxies",
             {{"streamPartId", this->options.streamPartId},
              {"direction", direction},
-             {"userId", userId},
              {"connectionCount", connectionCount}});
         if (connectionCount.has_value() &&
             connectionCount.value() > nodes.size()) {
@@ -350,13 +349,18 @@ public:
     size_t broadcast(
         const StreamMessage& msg,
         const std::optional<DhtAddress>& previousNode = std::nullopt) {
+        SLogger::debug("ProxyClient::broadcast()");
         if (!previousNode.has_value()) {
+            SLogger::debug(
+                "ProxyClient::broadcast() calling Utils::markAndCheckDuplicate() on message: " +
+                msg.DebugString());
             Utils::markAndCheckDuplicate(
-                this->duplicateDetectors,
-                msg.messageid(),
-                msg.previousmessageref());
+                this->duplicateDetectors, msg.messageid(), std::nullopt);
         }
+        SLogger::debug("ProxyClient::broadcast() emitting Message event");
         this->emit<Message>(msg);
+        SLogger::debug(
+            "ProxyClient::broadcast() calling propagation.feedUnseenMessage()");
         return this->propagation.feedUnseenMessage(
             msg, this->neighbors.getIds(), previousNode);
     }
@@ -372,7 +376,8 @@ public:
     }
 
     [[nodiscard]] EthereumAddress getLocalEthereumAddress() const {
-        return EthereumAddress{this->options.localPeerDescriptor.nodeid()};
+        return EthereumAddress{Identifiers::getNodeIdFromPeerDescriptor(
+            this->options.localPeerDescriptor)};
     }
 
     void onNodeDisconnected(const PeerDescriptor& peerDescriptor) {
