@@ -109,11 +109,7 @@ public:
 
         const auto url =
             connectivityMethodToWebsocketUrl(targetPeerDescriptor.websocket());
-        if (errorCallback.has_value()) {
-            SLogger::error("errorCallback has value");
-        } else {
-            SLogger::error("errorCallback has no value");
-        }
+
         auto pendingConnection = std::make_shared<PendingConnection>(
             targetPeerDescriptor, std::move(errorCallback));
 

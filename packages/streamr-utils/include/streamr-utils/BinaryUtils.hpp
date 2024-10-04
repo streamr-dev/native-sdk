@@ -1,7 +1,6 @@
 #ifndef STREAMR_UTILS_BINARYUTILS_HPP
 #define STREAMR_UTILS_BINARYUTILS_HPP
 
-#include <sstream>
 #include <string>
 #include <boost/algorithm/hex.hpp>
 
@@ -11,15 +10,15 @@ class BinaryUtils {
 public:
     static std::string binaryStringToHex(
         const std::string& binaryString, bool addPrefix = false) {
-        std::stringstream res;
-        for (const auto& byte : binaryString) {
-            res << std::hex << std::setw(2) << std::setfill('0')
-                << static_cast<int>(byte);
-        }
+        std::string result;
+        boost::algorithm::hex(
+            binaryString.begin(),
+            binaryString.end(),
+            std::back_inserter(result));
         if (addPrefix) {
-            return "0x" + res.str();
+            return "0x" + result;
         }
-        return res.str();
+        return result;
     }
 
     static std::string hexToBinaryString(const std::string& hex) {

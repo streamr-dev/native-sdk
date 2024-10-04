@@ -37,4 +37,39 @@ TEST(PublishToTsServerTest, ProxyPublish) {
     EXPECT_EQ(errors, nullptr);
 
     proxyClientDelete(&errors, &numErrors, clientHandle);
+
+    EXPECT_EQ(numErrors, 0);
+    EXPECT_EQ(errors, nullptr);
+}
+
+TEST(PublishToTsServerTest, ProxyPublishMultipleMessages) {
+    Error* errors = nullptr;
+    uint64_t numErrors = 0;
+
+    uint64_t clientHandle =
+        proxyClientNew(&errors, &numErrors, ownEthereumAddress, tsStreamPartId);
+
+    Proxy proxy{
+        .websocketUrl = tsProxyUrl, .ethereumAddress = tsEthereumAddress};
+
+    proxyClientConnect(&errors, &numErrors, clientHandle, &proxy, 1);
+
+    std::string message1 = "Hello from libstreamrproxyclient! m1";
+    std::string message2 = "Hello from libstreamrproxyclient! m2";
+    std::string message3 = "Hello from libstreamrproxyclient! m3";
+
+    proxyClientPublish(
+        &errors, &numErrors, clientHandle, message1.c_str(), message1.length());
+    proxyClientPublish(
+        &errors, &numErrors, clientHandle, message2.c_str(), message2.length());
+    proxyClientPublish(
+        &errors, &numErrors, clientHandle, message3.c_str(), message3.length());
+
+    EXPECT_EQ(numErrors, 0);
+    EXPECT_EQ(errors, nullptr);
+
+    proxyClientDelete(&errors, &numErrors, clientHandle);
+
+    EXPECT_EQ(numErrors, 0);
+    EXPECT_EQ(errors, nullptr);
 }

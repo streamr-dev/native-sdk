@@ -70,6 +70,7 @@ public:
     }
 
     void onHandshakeCompleted(const std::shared_ptr<Connection>& connection) {
+        this->connectingAbortController.abort();
         if (!this->replacedAsDuplicate) {
             this->emit<pendingconnectionevents::Connected>(
                 this->remotePeerDescriptor, connection);
