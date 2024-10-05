@@ -6,6 +6,7 @@
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/OutgoingHandshaker.hpp"
 #include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/websocket/WebsocketClientConnection.hpp"
 #include "streamr-dht/connection/websocket/WebsocketClientConnectorRpcLocal.hpp"
 #include "streamr-dht/helpers/Connectivity.hpp"
@@ -18,12 +19,13 @@ using ::dht::PeerDescriptor;
 using ::dht::WebsocketConnectionRequest;
 using streamr::dht::Identifiers;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::websocket::WebsocketClientConnection;
 using streamr::dht::helpers::Connectivity;
 using streamr::dht::transport::ListeningRpcCommunicator;
 
 struct WebsocketClientConnectorOptions {
-    std::function<bool(const std::shared_ptr<PendingConnection>&)>
+    std::function<bool(const std::shared_ptr<IPendingConnection>&)>
         onNewConnection;
     std::function<bool(DhtAddress)> hasConnection;
     ListeningRpcCommunicator& rpcCommunicator;
@@ -47,7 +49,7 @@ public:
         : options(std::move(options)),
           rpcLocal(WebsocketClientConnectorRpcLocalOptions{
               .connect =
-                  [this](const PeerDescriptor& targetPeerDescriptor) {
+                  [this](const PeerDescriptor& targetPeerDescriptor) -> std::shared_ptr<IPendingConnection> {
                       return this->connect(targetPeerDescriptor, std::nullopt);
                   },
               .hasConnection = [this](const DhtAddress& nodeId) -> bool {
@@ -57,7 +59,7 @@ public:
                       this->options.hasConnection(nodeId);
               },
               .onNewConnection =
-                  [this](const std::shared_ptr<PendingConnection>& connection) {
+                  [this](const std::shared_ptr<IPendingConnection>& connection) {
                       return this->options.onNewConnection(connection);
                   },
               .abortSignal = this->abortController.getSignal()}) {
@@ -91,7 +93,7 @@ public:
         return connectionType == ConnectionType::WEBSOCKET_CLIENT;
     }
 
-    std::shared_ptr<PendingConnection> connect(
+    std::shared_ptr<IPendingConnection> connect(
         const PeerDescriptor& targetPeerDescriptor,
         std::optional<std::function<void(std::exception_ptr)>> errorCallback =
             std::nullopt) {

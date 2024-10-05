@@ -11,14 +11,14 @@
 namespace streamr::dht::connection::endpoint {
 
 using streamr::dht::connection::Connection;
-using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::eventemitter::HandlerToken;
 
 class ConnectingEndpointState : public EndpointState {
 private:
     EndpointStateInterface& stateInterface;
     std::vector<std::byte> buffer;
-    std::shared_ptr<PendingConnection> pendingConnection;
+    std::shared_ptr<IPendingConnection> pendingConnection;
     HandlerToken connectedHandlerToken;
     HandlerToken disconnectedHandlerToken;
     std::recursive_mutex connectingEndpointStateMutex;
@@ -43,7 +43,7 @@ public:
     }
 
     void enterState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         auto self = sharedFromThis<ConnectingEndpointState>();
         std::scoped_lock lock(this->connectingEndpointStateMutex);
         this->pendingConnection = pendingConnection;
@@ -110,7 +110,7 @@ public:
     }
 
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) override {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) override {
         SLogger::debug(
             "ConnectingEndpointState::changeToConnectingState start");
         auto self = sharedFromThis<ConnectingEndpointState>();

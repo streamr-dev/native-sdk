@@ -116,7 +116,7 @@ public:
     }
 
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) override {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) override {
         SLogger::debug("ConnectedEndpointState::changeToConnectingState start");
         auto self = sharedFromThis<ConnectedEndpointState>();
         std::scoped_lock lock(this->connectedEndpointStateMutex);

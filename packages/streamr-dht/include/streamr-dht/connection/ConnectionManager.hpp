@@ -33,6 +33,7 @@ using streamr::dht::connection::ConnectionLocker;
 using streamr::dht::connection::ConnectionLockRpcLocal;
 using streamr::dht::connection::ConnectionsView;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::endpoint::Endpoint;
 using streamr::dht::helpers::CannotConnectToSelf;
 using streamr::dht::helpers::CouldNotStart;
@@ -75,7 +76,7 @@ private:
     std::recursive_mutex endpointsMutex;
 
     void addEndpoint(
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         SLogger::debug("ConnectionManager::addEndpoint start");
 
         auto peerDescriptor = pendingConnection->getPeerDescriptor();
@@ -194,7 +195,7 @@ public:
 
         SLogger::trace("Starting ConnectionManager...");
         this->connectorFacade->start(
-            [this](const std::shared_ptr<PendingConnection>& connection) {
+            [this](const std::shared_ptr<IPendingConnection>& connection) {
                 return this->onNewConnection(connection);
             },
             [this](const DhtAddress& nodeId) {
@@ -293,7 +294,7 @@ public:
                 SLogger::debug("Node ID not found in endpoints");
                 if (sendOptions.connect) {
                     SLogger::debug("Creating new connection");
-                    std::shared_ptr<PendingConnection> connection =
+                    std::shared_ptr<IPendingConnection> connection =
                         this->connectorFacade->createConnection(peerDescriptor);
 
                     SLogger::debug("Created new connection");
@@ -481,7 +482,7 @@ public:
     }
 
 private:
-    bool onNewConnection(const std::shared_ptr<PendingConnection>& connection) {
+    bool onNewConnection(const std::shared_ptr<IPendingConnection>& connection) {
         if (this->state == ConnectionManagerState::STOPPED) {
             return false;
         }
@@ -498,7 +499,7 @@ private:
     }
 
     bool acceptNewConnection(
-        const std::shared_ptr<PendingConnection>& newConnection) {
+        const std::shared_ptr<IPendingConnection>& newConnection) {
         const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
             newConnection->getPeerDescriptor());
         SLogger::debug("ConnectionManager::acceptNewConnection()");

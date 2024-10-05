@@ -5,13 +5,13 @@
 #include <memory>
 #include <vector>
 #include "streamr-dht/connection/Connection.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/endpoint/EndpointState.hpp"
 
 namespace streamr::dht::connection::endpoint {
 
 using streamr::dht::connection::Connection;
-using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 
 class Endpoint;
 class EndpointState;
@@ -23,7 +23,7 @@ private:
 public:
     explicit EndpointStateInterface(Endpoint& ep);
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection);
+        const std::shared_ptr<IPendingConnection>& pendingConnection);
     void changeToConnectedState(const std::shared_ptr<Connection>& connection);
     void emitData(const std::vector<std::byte>& data);
     void handleDisconnect(bool gracefulLeave);

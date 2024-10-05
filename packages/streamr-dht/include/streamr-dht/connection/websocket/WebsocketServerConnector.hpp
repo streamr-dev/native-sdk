@@ -10,6 +10,7 @@
 #include "streamr-dht/connection/Handshaker.hpp"
 #include "streamr-dht/connection/IncomingHandshaker.hpp"
 #include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/websocket/WebsocketServer.hpp"
 #include "streamr-dht/helpers/Version.hpp"
 #include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
@@ -25,6 +26,7 @@ namespace streamr::dht::connection::websocket {
 using ::dht::ConnectivityResponse;
 using streamr::dht::connection::IncomingHandshaker;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketServerConnection;
 using streamr::dht::helpers::Version;
@@ -38,7 +40,7 @@ using streamr::utils::Ipv4Helper;
 namespace NatType = streamr::dht::types::NatType;
 
 struct WebsocketServerConnectorOptions {
-    std::function<bool(const std::shared_ptr<PendingConnection>&)>
+    std::function<bool(const std::shared_ptr<IPendingConnection>&)>
         onNewConnection;
     ListeningRpcCommunicator& rpcCommunicator;
     std::function<bool(DhtAddress)> hasConnection;
@@ -64,7 +66,7 @@ private:
     std::optional<uint16_t> selectedPort;
     std::map<std::string, std::shared_ptr<IncomingHandshaker>>
         connectingHandshakers;
-    std::map<DhtAddress, std::shared_ptr<PendingConnection>>
+    std::map<DhtAddress, std::shared_ptr<IPendingConnection>>
         ongoingConnectRequests;
     std::recursive_mutex mMutex;
 
@@ -214,7 +216,7 @@ private:
             this->localPeerDescriptor.value(),
             serverSocket,
             [this, handshakerId](const DhtAddress& nodeId)
-                -> std::shared_ptr<PendingConnection> {
+                -> std::shared_ptr<IPendingConnection> {
                 std::scoped_lock lock(this->mMutex);
 
                 if (this->ongoingConnectRequests.contains(nodeId)) {
