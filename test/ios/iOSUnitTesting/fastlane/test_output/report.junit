@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites name='iOSUnitTestingTests.xctest' tests='1' failures='0'>
+  <testsuite name='iOSUnitTestingTests.StreamrTests' tests='1' failures='0'>
+    <testcase classname='iOSUnitTestingTests.StreamrTests' name='testGoogleTests' time='6.092'/>
+  </testsuite>
+</testsuites>
