@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "streamr-dht/connection/Connection.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/endpoint/EndpointState.hpp"
 #include "streamr-dht/connection/endpoint/EndpointStateInterface.hpp"
 #include "streamr-dht/helpers/Errors.hpp"
@@ -15,7 +15,7 @@
 namespace streamr::dht::connection::endpoint {
 
 using streamr::dht::connection::Connection;
-using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::helpers::SendFailed;
 using streamr::logger::SLogger;
 
@@ -54,7 +54,7 @@ public:
     }
 
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& /*pendingConnection*/)
+        const std::shared_ptr<IPendingConnection>& /*pendingConnection*/)
         override {
         SLogger::debug(
             "DisconnectedEndpointState::changeToConnectingState start");

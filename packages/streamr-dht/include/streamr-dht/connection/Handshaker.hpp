@@ -53,6 +53,23 @@ public:
         self->removeAllListeners();
     }
 
+    Message createHandshakeResponse(std::optional<HandshakeError> error) {
+        HandshakeResponse outgoingHandshakeResponse;
+        outgoingHandshakeResponse.mutable_sourcepeerdescriptor()->CopyFrom(
+            localPeerDescriptor);
+        if (error.has_value()) {
+            outgoingHandshakeResponse.set_error(error.value());
+        }
+        outgoingHandshakeResponse.set_version(Version::localProtocolVersion);
+
+        Message message;
+        message.set_serviceid(handshakerServiceId);
+        message.set_messageid(Uuid::v4());
+        message.mutable_handshakeresponse()->CopyFrom(
+            outgoingHandshakeResponse);
+        return message;
+    }
+
 private:
     eventemitter::HandlerToken onDataHandlerToken;
 
@@ -79,23 +96,6 @@ protected:
         message.set_serviceid(handshakerServiceId);
         message.set_messageid(Uuid::v4());
         message.mutable_handshakerequest()->CopyFrom(outgoingHandshake);
-        return message;
-    }
-
-    Message createHandshakeResponse(std::optional<HandshakeError> error) {
-        HandshakeResponse outgoingHandshakeResponse;
-        outgoingHandshakeResponse.mutable_sourcepeerdescriptor()->CopyFrom(
-            localPeerDescriptor);
-        if (error.has_value()) {
-            outgoingHandshakeResponse.set_error(error.value());
-        }
-        outgoingHandshakeResponse.set_version(Version::localProtocolVersion);
-
-        Message message;
-        message.set_serviceid(handshakerServiceId);
-        message.set_messageid(Uuid::v4());
-        message.mutable_handshakeresponse()->CopyFrom(
-            outgoingHandshakeResponse);
         return message;
     }
 

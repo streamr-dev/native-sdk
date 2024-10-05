@@ -141,6 +141,8 @@ if(NOT IOS)
         PUBLIC GTest::gtest
         PUBLIC streamr-dht-test-main
         PUBLIC Folly::folly
+        PUBLIC GTest::gmock 
+        PUBLIC GTest::gmock_main
     )
 
     add_executable(streamr-dht-test-integration
