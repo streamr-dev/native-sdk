@@ -128,6 +128,7 @@ The Streamr Native SDK monorepo has two GIT submodules at its root:
 | `test.sh` | npm run test           | Run the tests of the whole monorepo. |
 | `clean.sh`   | npm run clean         | Clean the build folders of all the packages in the monorepo. |
 | `merge-dependencies.sh` | N/A       | A helper script called by install.sh to merge the VCPKG dependencies of the monorepo packages to the root vcpkg.json **must not be invoked by the user** |
+| `iostest.sh`| N/A                   | Run selected unit tests in iOS Device (In MacOS by default). Unit tests can be selected by adding tests (Drag and drop) to the App iOSUnitTesting. |
 
 
 #### Configuration files
