@@ -34,6 +34,7 @@ dircopy("$abs_path/packages/streamr-proto-rpc/src/proto", $build_include);
 dircopy("$abs_path/packages/streamr-dht/src/proto", $build_include);
 dircopy("$abs_path/packages/streamr-trackerless-network/src/proto", $build_include);
 `cp packages/streamr-libstreamrproxyclient/include/streamrproxyclient.h $build_include`;
+`cp packages/streamr-libstreamrproxyclient/src/LibProxyClientApi.hpp $build_include`;
  
 # Find all include and lib directories and process them 
 find(\&process_dir, "./build/vcpkg_installed/arm64-ios");
