@@ -8,10 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		412FDA702CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 412FDA6F2CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework */; };
-		412FDA722CAF8869008DC50E /* streamrproxyclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412FDA712CAF8869008DC50E /* streamrproxyclient.cpp */; };
-		412FDA742CAF8BED008DC50E /* ../../../../../streamr-dht/src/proto/packages/dht/protos/DhtRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 412FDA732CAF8BED008DC50E /* ../../../../../streamr-dht/src/proto/packages/dht/protos/DhtRpc.pb.cc */; };
-		412FDA762CAF8CBF008DC50E /* ProtoRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 412FDA752CAF8CBF008DC50E /* ProtoRpc.pb.cc */; };
-		412FDA782CAF8CFD008DC50E /* NetworkRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 412FDA772CAF8CFD008DC50E /* NetworkRpc.pb.cc */; };
 		412FDA7B2CAF8DC3008DC50E /* libc++abi.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 412FDA7A2CAF8DC3008DC50E /* libc++abi.tbd */; };
 		413E46C32C7867670030132D /* LocationShareApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46C22C7867670030132D /* LocationShareApp.swift */; };
 		413E46C52C7867670030132D /* LocationShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46C42C7867670030132D /* LocationShareView.swift */; };
@@ -45,12 +41,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		412FDA662CAF6D4E008DC50E /* LibProxyClientApi.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = "../../../../src/LibProxyClientApi.hpp"; sourceTree = "<group>"; };
+		412FDA662CAF6D4E008DC50E /* ../../../../src/LibProxyClientApi.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ../../../../src/LibProxyClientApi.hpp; sourceTree = "<group>"; };
 		412FDA6F2CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = ../../../../../../dist/ios/streamr.xcframework; sourceTree = "<group>"; };
-		412FDA712CAF8869008DC50E /* streamrproxyclient.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "../../../../src/streamrproxyclient.cpp"; sourceTree = "<group>"; };
-		412FDA732CAF8BED008DC50E /* ../../../../../streamr-dht/src/proto/packages/dht/protos/DhtRpc.pb.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "../../../../../streamr-dht/src/proto/packages/dht/protos/DhtRpc.pb.cc"; sourceTree = "<group>"; };
-		412FDA752CAF8CBF008DC50E /* ProtoRpc.pb.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "../../../../../streamr-proto-rpc/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc"; sourceTree = "<group>"; };
-		412FDA772CAF8CFD008DC50E /* NetworkRpc.pb.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "../../../../../streamr-trackerless-network/src/proto/packages/network/protos/NetworkRpc.pb.cc"; sourceTree = "<group>"; };
 		412FDA7A2CAF8DC3008DC50E /* libc++abi.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++abi.tbd"; path = "usr/lib/libc++abi.tbd"; sourceTree = SDKROOT; };
 		413E46BF2C7867670030132D /* LocationShare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LocationShare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		413E46C22C7867670030132D /* LocationShareApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareApp.swift; sourceTree = "<group>"; };
@@ -132,7 +124,6 @@
 		413E46C12C7867670030132D /* LocationShare */ = {
 			isa = PBXGroup;
 			children = (
-				412FDA712CAF8869008DC50E /* streamrproxyclient.cpp */,
 				413E46F02C787E820030132D /* Info.plist */,
 				412FDA6F2CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework */,
 				413E46C22C7867670030132D /* LocationShareApp.swift */,
@@ -143,14 +134,11 @@
 				413E46EE2C78773C0030132D /* LocationManager.swift */,
 				413E46F12C7895900030132D /* StreamrProxyClient.swift */,
 				413E46F52C7898D40030132D /* PeerDesc.swift */,
-				412FDA662CAF6D4E008DC50E /* LibProxyClientApi.hpp */,
+				412FDA662CAF6D4E008DC50E /* ../../../../src/LibProxyClientApi.hpp */,
 				4176FEBE2C7B9078004F8A48 /* ProxyClient.cpp */,
 				4176FEBF2C7B9078004F8A48 /* ProxyClient.hpp */,
 				4176FEBD2C7B9077004F8A48 /* LocationShare-Bridging-Header.h */,
 				4176FEC12C7B9204004F8A48 /* Result.hpp */,
-				412FDA752CAF8CBF008DC50E /* ProtoRpc.pb.cc */,
-				412FDA732CAF8BED008DC50E /* ../../../../../streamr-dht/src/proto/packages/dht/protos/DhtRpc.pb.cc */,
-				412FDA772CAF8CFD008DC50E /* NetworkRpc.pb.cc */,
 			);
 			path = LocationShare;
 			sourceTree = "<group>";
@@ -314,13 +302,9 @@
 				413E46F62C7898D40030132D /* PeerDesc.swift in Sources */,
 				413E46EF2C78773C0030132D /* LocationManager.swift in Sources */,
 				413E46C52C7867670030132D /* LocationShareView.swift in Sources */,
-				412FDA742CAF8BED008DC50E /* ../../../../../streamr-dht/src/proto/packages/dht/protos/DhtRpc.pb.cc in Sources */,
 				413E46F22C7895900030132D /* StreamrProxyClient.swift in Sources */,
-				412FDA762CAF8CBF008DC50E /* ProtoRpc.pb.cc in Sources */,
 				413E46ED2C7875CE0030132D /* LocationShareViewModel.swift in Sources */,
 				4176FEC02C7B9078004F8A48 /* ProxyClient.cpp in Sources */,
-				412FDA722CAF8869008DC50E /* streamrproxyclient.cpp in Sources */,
-				412FDA782CAF8CFD008DC50E /* NetworkRpc.pb.cc in Sources */,
 				413E46C32C7867670030132D /* LocationShareApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
