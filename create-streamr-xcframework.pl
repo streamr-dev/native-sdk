@@ -38,7 +38,7 @@ dircopy("$abs_path/packages/streamr-trackerless-network/src/proto", $build_inclu
 # Find all include and lib directories and process them 
 find(\&process_dir, "./build/vcpkg_installed/arm64-ios");
 dircopy("$abs_path/build/vcpkg_installed/arm64-ios/lib", $build_lib);
-`libtool -static -o $build_lib/libstreamr.a $build_lib/*.a`;
+`libtool -static -o $build_lib/libstreamr.a $build_lib/*.a packages/streamr-trackerless-network/build/CMakeFiles/streamr-trackerless-network.dir/src/proto/packages/network/protos/NetworkRpc.pb.cc.o packages/streamr-dht/build/CMakeFiles/streamr-dht.dir/src/proto/packages/dht/protos/DhtRpc.pb.cc.o packages/streamr-libstreamrproxyclient/build/CMakeFiles/streamrproxyclient.dir/src/streamrproxyclient.cpp.o packages/streamr-proto-rpc/build/CMakeFiles/streamr-proto-rpc.dir/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc.o`;
 `xcodebuild -create-xcframework -library $build_lib/libstreamr.a -headers $build_include -output $dist_path/streamr.xcframework`; 
 print "\nstreamr.xcframework was created in the directory: dist/ios.\n";
 
