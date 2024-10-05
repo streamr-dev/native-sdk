@@ -1,6 +1,6 @@
 #ifndef LIBSTREAMRPROXYCLIENT_HPP
 #define LIBSTREAMRPROXYCLIENT_HPP
-
+#define GLOG_USE_GLOG_EXPORT
 #include <stdint.h> // NOLINT
 
 #if defined(__clang__) || defined(__GNUC__)
