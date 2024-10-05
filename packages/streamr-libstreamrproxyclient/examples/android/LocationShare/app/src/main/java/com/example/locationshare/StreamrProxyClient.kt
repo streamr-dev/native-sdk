@@ -18,7 +18,7 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
     private var publishingJob: Job? = null
     private val validEthereumAddress = "0x1234567890123456789012345678901234567890";
     private val validStreamPartId = "0xa000000000000000000000000000000000000000#01";
-    var proxyClientHandle: Long = 0 // = ProxyClientJNI.proxyClientNew(validEthereumAddress, validStreamPartId)
+    val proxyClientHandle = ProxyClientJNI.proxyClientNew(validEthereumAddress, validStreamPartId)
     companion object {
         var defaultPublishingIntervalInSeconds = "5"
     }
@@ -48,27 +48,18 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
 
     fun publish() {
         println("Publish start")
-
         status = Status.publishing
         val locationState = state.value
-        //var data = "Hello from libstreamrproxyclient!"
-        var data = "${locationState.latitude}, ${locationState.longitude},"
+        var data = "${locationState.latitude}, ${locationState.longitude}"
         scope.launch {
             println("proxyClientHandle: ${proxyClientHandle}")
             println("Publish: $data")
-
-            // Trying temporary fix to create a new client and delete it for each publish
-            proxyClientHandle = streamrProxyClientCoro.newClient(validEthereumAddress, validStreamPartId)
-            val proxyList = listOf(ProxyClientJNI.Proxy(proxyId, proxyAddress))
-            streamrProxyClientCoro.connect(proxyClientHandle, proxyList)
             streamrProxyClientCoro.publish(proxyClientHandle, data)
-            streamrProxyClientCoro.deleteClient(proxyClientHandle)
             println("Publish End")
         }
     }
 
     fun setProxy() {
-      //  val proxyList = listOf(ProxyClientJNI.Proxy(proxyId, proxyAddress))
         val proxyList = listOf(ProxyClientJNI.Proxy(proxyId, proxyAddress))
         status = Status.setProxy
         scope.launch {
@@ -78,8 +69,8 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
 
     fun startPublishing() {
         println("startPublishing start")
-     //   status = Status.setProxy
-     //   setProxy()
+        status = Status.setProxy
+        setProxy()
         publishingJob = scope.launch {
             println("startPublishing launch")
             while (isActive) {
