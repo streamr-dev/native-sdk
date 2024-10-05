@@ -35,7 +35,7 @@ source install-prerequisities.sh
 
 This script will recognize the operating system type and install the prerequisities for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal.
 
-### Install all the dependencies and build the SDK
+### Install all the dependencies and build the SDK for MacOS and Linux
 
 ```bash
 ./install.sh
@@ -47,6 +47,18 @@ The `install.sh` script supports an optional `--prod` parameter. When this param
 
 1. Loops through packages listed in `MonorepoPackages.cmake`, and builds each using `cmake` and `make`. This will trigger the fetching of dependencies using `vcpkg` and the building of each package in its own `build` directory.
 2. Builds the SDK in the root directory using `cmake` and `make`. This will trigger the building of the SDK in the `build` folder of the root directory. This is needed for VSCode and its extensions to work correctly.
+
+### Install all the dependencies and build the SDK for iOS
+
+```bash
+./install.sh --ios
+```
+
+This command installs the Streamr XCFramework and an example iOS app, LocationShare, which uses the XCFramework. The Streamr XCFramework includes the static library of the Streamr native-sdk. When it comes to using C++ libraries in iOS apps, static libraries are generally recommended over dynamic libraries.
+
+The Streamr XCFramework is located in `dist/ios/streamr.xcframework` and can be used in an iOS app by simply dragging and dropping it into the Xcode project.
+
+The example iOS app can be found in `packages/streamr-libstreamrproxyclient/examples/ios/LocationShare`.
 
 ### Cleaning the build folders
 
