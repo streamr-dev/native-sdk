@@ -41,7 +41,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		412FDA662CAF6D4E008DC50E /* ../../../../src/LibProxyClientApi.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ../../../../src/LibProxyClientApi.hpp; sourceTree = "<group>"; };
 		412FDA6F2CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = ../../../../../../dist/ios/streamr.xcframework; sourceTree = "<group>"; };
 		412FDA7A2CAF8DC3008DC50E /* libc++abi.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++abi.tbd"; path = "usr/lib/libc++abi.tbd"; sourceTree = SDKROOT; };
 		413E46BF2C7867670030132D /* LocationShare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LocationShare.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -134,7 +133,6 @@
 				413E46EE2C78773C0030132D /* LocationManager.swift */,
 				413E46F12C7895900030132D /* StreamrProxyClient.swift */,
 				413E46F52C7898D40030132D /* PeerDesc.swift */,
-				412FDA662CAF6D4E008DC50E /* ../../../../src/LibProxyClientApi.hpp */,
 				4176FEBE2C7B9078004F8A48 /* ProxyClient.cpp */,
 				4176FEBF2C7B9078004F8A48 /* ProxyClient.hpp */,
 				4176FEBD2C7B9077004F8A48 /* LocationShare-Bridging-Header.h */,
