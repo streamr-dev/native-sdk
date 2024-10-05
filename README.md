@@ -60,6 +60,16 @@ The Streamr XCFramework is located in `dist/ios/streamr.xcframework` and can be 
 
 The example iOS app can be found in `packages/streamr-libstreamrproxyclient/examples/ios/LocationShare`.
 
+### Install all the dependencies and build the SDK for Android 
+
+```bash
+./install.sh --android
+```
+
+This command installs the shared library libstreamrproxyclient.so and an example Android app, LocationShare, which uses the shared library.
+
+The example Android app can be found in `packages/streamr-libstreamrproxyclient/examples/android/LocationShare`.
+
 ### Cleaning the build folders
 
 ```bash
