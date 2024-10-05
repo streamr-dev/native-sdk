@@ -128,7 +128,7 @@ public:
     ~Endpoint() override { SLogger::debug("Endpoint destructor"); }
 
     void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         SLogger::debug("Endpoint::changeToConnectingState start");
         auto self = sharedFromThis<Endpoint>();
         std::scoped_lock lock(this->mutex);
@@ -173,7 +173,7 @@ public:
     }
 
     void setConnecting(
-        const std::shared_ptr<PendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) {
         auto self = sharedFromThis<Endpoint>();
         std::scoped_lock lock(this->mutex);
         SLogger::debug("Endpoint::setConnecting start");
@@ -192,7 +192,7 @@ public:
 
 /*
 inline void ConnectedEndpointState::changeToConnectingState(
-    const std::shared_ptr<PendingConnection>& pendingConnection) {
+    const std::shared_ptr<IPendingConnection>& pendingConnection) {
     SLogger::debug("ConnectedEndpointState::changeToConnectingState start");
     std::scoped_lock lock(this->connectedEndpointStateMutex);
     this->connection->close(true);
@@ -208,7 +208,7 @@ inline EndpointStateInterface::EndpointStateInterface(Endpoint& ep)
 }
 
 inline void EndpointStateInterface::changeToConnectingState(
-    const std::shared_ptr<PendingConnection>& pendingConnection) {
+    const std::shared_ptr<IPendingConnection>& pendingConnection) {
     SLogger::debug("EndpointStateInterface::changeToConnectingState start");
     this->endpoint.changeToConnectingState(pendingConnection);
     SLogger::debug("EndpointStateInterface::changeToConnectingState end");

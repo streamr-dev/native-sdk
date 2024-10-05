@@ -12,6 +12,7 @@
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/Connection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-utils/AbortController.hpp"
 #include "streamr-utils/AbortableTimers.hpp"
@@ -21,23 +22,10 @@ namespace streamr::dht::connection {
 using ::dht::PeerDescriptor;
 using streamr::dht::Identifiers;
 using streamr::dht::connection::Connection;
-using streamr::eventemitter::Event;
-using streamr::eventemitter::ReplayEventEmitter;
 using streamr::utils::AbortableTimers;
 using streamr::utils::AbortController;
 
-namespace pendingconnectionevents {
-
-struct Connected : Event<PeerDescriptor, std::shared_ptr<Connection>> {};
-struct Disconnected : Event<bool /*gracefulLeave*/> {};
-
-} // namespace pendingconnectionevents
-
-using PendingConnectionEvents = std::tuple<
-    pendingconnectionevents::Connected,
-    pendingconnectionevents::Disconnected>;
-
-class PendingConnection : public ReplayEventEmitter<PendingConnectionEvents> {
+class PendingConnection : public IPendingConnection {
 private:
     AbortController connectingAbortController;
     PeerDescriptor remotePeerDescriptor;
@@ -69,7 +57,7 @@ public:
         this->replacedAsDuplicate = true;
     }
 
-    void onHandshakeCompleted(const std::shared_ptr<Connection>& connection) {
+    void onHandshakeCompleted(const std::shared_ptr<Connection>& connection) override {
         this->connectingAbortController.abort();
         if (!this->replacedAsDuplicate) {
             this->emit<pendingconnectionevents::Connected>(
@@ -77,7 +65,7 @@ public:
         }
     }
 
-    void onError(const std::exception_ptr& error) {
+    void onError(const std::exception_ptr& error) override {
         SLogger::error(
             Identifiers::getNodeIdFromPeerDescriptor(
                 this->remotePeerDescriptor) +
@@ -92,7 +80,7 @@ public:
         }
     }
 
-    void close(bool graceful) {
+    void close(bool graceful) override {
         if (this->stopped) {
             return;
         }
@@ -114,7 +102,7 @@ public:
         }
     }
 
-    void destroy() {
+    void destroy() override {
         if (this->stopped) {
             return;
         }
@@ -123,7 +111,7 @@ public:
         this->removeAllListeners();
     }
 
-    [[nodiscard]] const PeerDescriptor& getPeerDescriptor() const {
+    [[nodiscard]] const PeerDescriptor& getPeerDescriptor() const override {
         return this->remotePeerDescriptor;
     }
 };

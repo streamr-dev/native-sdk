@@ -5,14 +5,14 @@
 #include <memory>
 #include <vector>
 #include "streamr-dht/connection/Connection.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-utils/EnableSharedFromThis.hpp"
 
 namespace streamr::dht::connection::endpoint {
 
 using streamr::dht::connection::Connection;
-using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::logger::SLogger;
 using streamr::utils::EnableSharedFromThis;
 
@@ -33,7 +33,7 @@ public:
     };
 
     virtual void changeToConnectingState(
-        const std::shared_ptr<PendingConnection>& pendingConnection) = 0;
+        const std::shared_ptr<IPendingConnection>& pendingConnection) = 0;
 
     virtual void changeToConnectedState(
         const std::shared_ptr<Connection>& connection) = 0;

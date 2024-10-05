@@ -5,6 +5,7 @@
 #include <memory>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/connection/PendingConnection.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/websocket/WebsocketClientConnector.hpp"
 #include "streamr-dht/connection/websocket/WebsocketServerConnector.hpp"
 #include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
@@ -18,6 +19,7 @@ using namespace std::chrono_literals;
 using ::dht::ConnectivityResponse;
 using std::chrono::milliseconds;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::websocket::WebsocketClientConnector;
 using streamr::dht::connection::websocket::WebsocketClientConnectorOptions;
 using streamr::dht::connection::websocket::WebsocketServerConnector;
@@ -32,14 +34,14 @@ protected:
     ConnectorFacade() = default;
 
 public:
-    virtual std::shared_ptr<PendingConnection> createConnection(
+    virtual std::shared_ptr<IPendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor) = 0;
-    virtual std::shared_ptr<PendingConnection> createConnection(
+    virtual std::shared_ptr<IPendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor,
         std::function<void(std::exception_ptr)> errorCallback) = 0;
     [[nodiscard]] virtual PeerDescriptor getLocalPeerDescriptor() const = 0;
     virtual void start(
-        std::function<bool(const std::shared_ptr<PendingConnection>&)> onNewConnection,
+        std::function<bool(const std::shared_ptr<IPendingConnection>&)> onNewConnection,
         std::function<bool(const DhtAddress& nodeId)> hasConnection /*,
         Transport& autoCertifierTransport*/ ) = 0;
     virtual void stop() = 0;
@@ -96,7 +98,7 @@ public:
     }
 
     void start(
-        std::function<bool(const std::shared_ptr<PendingConnection>&)>
+        std::function<bool(const std::shared_ptr<IPendingConnection>&)>
             onNewConnection,
         std::function<bool(const DhtAddress& nodeId)> hasConnection /*,
         Transport& autoCertifierTransport */
@@ -147,7 +149,7 @@ public:
         SLogger::info("DefaultConnectorFacade::start() end");
     }
 
-    std::shared_ptr<PendingConnection> createConnection(
+    std::shared_ptr<IPendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor) override {
         if (this->websocketClientConnector->isPossibleToFormConnection(
                 peerDescriptor)) {
@@ -157,7 +159,7 @@ public:
         return nullptr;
     }
 
-    std::shared_ptr<PendingConnection> createConnection(
+    std::shared_ptr<IPendingConnection> createConnection(
         const PeerDescriptor& peerDescriptor,
         std::function<void(std::exception_ptr)> errorCallback) override {
         if (this->websocketClientConnector->isPossibleToFormConnection(
