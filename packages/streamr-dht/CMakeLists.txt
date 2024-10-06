@@ -127,6 +127,8 @@ if(NOT IOS)
         test/unit/HandshakerTest.cpp
         test/unit/RoutingRpcCommunicatorTest.cpp
         test/unit/ConnectionLockerTest.cpp
+        test/unit/AddressToolsTest.cpp
+        test/unit/DuplicateDetectorTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
