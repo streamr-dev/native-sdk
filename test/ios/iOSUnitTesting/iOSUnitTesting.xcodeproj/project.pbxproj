@@ -28,6 +28,25 @@
 		410E6ADB2C82255D00347AF3 /* HelloRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E6ACF2C82255C00347AF3 /* HelloRpc.pb.cc */; };
 		410E6ADC2C82255D00347AF3 /* WakeUpRpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E6AD12C82255C00347AF3 /* WakeUpRpc.pb.cc */; };
 		410E6ADD2C82255D00347AF3 /* TestProtos.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E6AD62C82255D00347AF3 /* TestProtos.pb.cc */; };
+		412674B72CB22D2800DBB595 /* AddressToolsTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412674B62CB22D2700DBB595 /* AddressToolsTest.cpp */; };
+		412674B92CB22FA100DBB595 /* CertificateHelperTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412674B82CB22FA100DBB595 /* CertificateHelperTest.cpp */; };
+		412674BB2CB22FB700DBB595 /* example.crt in Resources */ = {isa = PBXBuildFile; fileRef = 412674BA2CB22FB700DBB595 /* example.crt */; };
+		412674BD2CB22FC900DBB595 /* example.key in Resources */ = {isa = PBXBuildFile; fileRef = 412674BC2CB22FC900DBB595 /* example.key */; };
+		412674BF2CB2310F00DBB595 /* ConnectionManagerTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412674BE2CB2310F00DBB595 /* ConnectionManagerTest.cpp */; };
+		412674C12CB232E300DBB595 /* ConnectivityTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412674C02CB232E300DBB595 /* ConnectivityTest.cpp */; };
+		412674C32CB2337600DBB595 /* DuplicateDetectorTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412674C22CB2337600DBB595 /* DuplicateDetectorTest.cpp */; };
+		412674C52CB2340900DBB595 /* HandshakerTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412674C42CB2340900DBB595 /* HandshakerTest.cpp */; };
+		412674C72CB2348800DBB595 /* PendingConnectionTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412674C62CB2348800DBB595 /* PendingConnectionTest.cpp */; };
+		412674C92CB2350600DBB595 /* VersionTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 412674C82CB2350600DBB595 /* VersionTest.cpp */; };
+		4198B2CE2CB242D000D9D09A /* BinaryUtilsTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2CD2CB242D000D9D09A /* BinaryUtilsTest.cpp */; };
+		4198B2D02CB2436A00D9D09A /* BrandedTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2CF2CB2436A00D9D09A /* BrandedTest.cpp */; };
+		4198B2D22CB2445100D9D09A /* collectTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2D12CB2445100D9D09A /* collectTest.cpp */; };
+		4198B2D62CB245C000D9D09A /* runAndWaitForEventsTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2D52CB245C000D9D09A /* runAndWaitForEventsTest.cpp */; };
+		4198B2D82CB2469000D9D09A /* StreamPartIDTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2D72CB2469000D9D09A /* StreamPartIDTest.cpp */; };
+		4198B2DA2CB2476200D9D09A /* toCoroTaskTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2D92CB2476200D9D09A /* toCoroTaskTest.cpp */; };
+		4198B2DC2CB2481800D9D09A /* toEthereumAddressOrENSNameTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2DB2CB2481800D9D09A /* toEthereumAddressOrENSNameTest.cpp */; };
+		4198B2DE2CB248AD00D9D09A /* waitForConditionTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2DD2CB248AD00D9D09A /* waitForConditionTest.cpp */; };
+		4198B2E02CB2497000D9D09A /* waitForEventTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4198B2DF2CB2497000D9D09A /* waitForEventTest.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +96,25 @@
 		410E6AD82C82255D00347AF3 /* HelloRpc.client.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HelloRpc.client.pb.h; path = "../../../../packages/streamr-proto-rpc/test/proto/HelloRpc.client.pb.h"; sourceTree = "<group>"; };
 		410E6AD92C82255D00347AF3 /* TestProtos.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestProtos.pb.h; path = "../../../../packages/streamr-proto-rpc/test/proto/TestProtos.pb.h"; sourceTree = "<group>"; };
 		410E6ADA2C82255D00347AF3 /* HelloRpc.server.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HelloRpc.server.pb.h; path = "../../../../packages/streamr-proto-rpc/test/proto/HelloRpc.server.pb.h"; sourceTree = "<group>"; };
+		412674B62CB22D2700DBB595 /* AddressToolsTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AddressToolsTest.cpp; path = "../../../packages/streamr-dht/test/unit/AddressToolsTest.cpp"; sourceTree = "<absolute>"; };
+		412674B82CB22FA100DBB595 /* CertificateHelperTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CertificateHelperTest.cpp; path = "../../../packages/streamr-dht/test/unit/CertificateHelperTest.cpp"; sourceTree = "<absolute>"; };
+		412674BA2CB22FB700DBB595 /* example.crt */ = {isa = PBXFileReference; lastKnownFileType = text; name = example.crt; path = "../../../packages/streamr-dht/test/unit/example.crt"; sourceTree = "<absolute>"; };
+		412674BC2CB22FC900DBB595 /* example.key */ = {isa = PBXFileReference; lastKnownFileType = text; name = example.key; path = "../../../packages/streamr-dht/test/unit/example.key"; sourceTree = "<absolute>"; };
+		412674BE2CB2310F00DBB595 /* ConnectionManagerTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ConnectionManagerTest.cpp; path = "../../../packages/streamr-dht/test/unit/ConnectionManagerTest.cpp"; sourceTree = "<absolute>"; };
+		412674C02CB232E300DBB595 /* ConnectivityTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ConnectivityTest.cpp; path = "../../../packages/streamr-dht/test/unit/ConnectivityTest.cpp"; sourceTree = "<absolute>"; };
+		412674C22CB2337600DBB595 /* DuplicateDetectorTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DuplicateDetectorTest.cpp; path = "../../../packages/streamr-dht/test/unit/DuplicateDetectorTest.cpp"; sourceTree = "<absolute>"; };
+		412674C42CB2340900DBB595 /* HandshakerTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HandshakerTest.cpp; path = "../../../packages/streamr-dht/test/unit/HandshakerTest.cpp"; sourceTree = "<absolute>"; };
+		412674C62CB2348800DBB595 /* PendingConnectionTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PendingConnectionTest.cpp; path = "../../../packages/streamr-dht/test/unit/PendingConnectionTest.cpp"; sourceTree = "<absolute>"; };
+		412674C82CB2350600DBB595 /* VersionTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VersionTest.cpp; path = "../../../packages/streamr-dht/test/unit/VersionTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2CD2CB242D000D9D09A /* BinaryUtilsTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryUtilsTest.cpp; path = "../../../packages/streamr-utils/test/unit/BinaryUtilsTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2CF2CB2436A00D9D09A /* BrandedTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BrandedTest.cpp; path = "../../../packages/streamr-utils/test/unit/BrandedTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2D12CB2445100D9D09A /* collectTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = collectTest.cpp; path = "../../../packages/streamr-utils/test/unit/collectTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2D52CB245C000D9D09A /* runAndWaitForEventsTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = runAndWaitForEventsTest.cpp; path = "../../../packages/streamr-utils/test/unit/runAndWaitForEventsTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2D72CB2469000D9D09A /* StreamPartIDTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StreamPartIDTest.cpp; path = "../../../packages/streamr-utils/test/unit/StreamPartIDTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2D92CB2476200D9D09A /* toCoroTaskTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = toCoroTaskTest.cpp; path = "../../../packages/streamr-utils/test/unit/toCoroTaskTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2DB2CB2481800D9D09A /* toEthereumAddressOrENSNameTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = toEthereumAddressOrENSNameTest.cpp; path = "../../../packages/streamr-utils/test/unit/toEthereumAddressOrENSNameTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2DD2CB248AD00D9D09A /* waitForConditionTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = waitForConditionTest.cpp; path = "../../../packages/streamr-utils/test/unit/waitForConditionTest.cpp"; sourceTree = "<absolute>"; };
+		4198B2DF2CB2497000D9D09A /* waitForEventTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = waitForEventTest.cpp; path = "../../../packages/streamr-utils/test/unit/waitForEventTest.cpp"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +195,25 @@
 				410E6ACC2C8224F500347AF3 /* ServerRegistryTest.cpp */,
 				410E6AC82C8224D300347AF3 /* LoggerTest.cpp */,
 				410E6AC72C8224D300347AF3 /* StreamrLogFormatterTest.cpp */,
+				412674B62CB22D2700DBB595 /* AddressToolsTest.cpp */,
+				412674B82CB22FA100DBB595 /* CertificateHelperTest.cpp */,
+				412674BE2CB2310F00DBB595 /* ConnectionManagerTest.cpp */,
+				412674C02CB232E300DBB595 /* ConnectivityTest.cpp */,
+				412674C22CB2337600DBB595 /* DuplicateDetectorTest.cpp */,
+				412674C62CB2348800DBB595 /* PendingConnectionTest.cpp */,
+				412674C42CB2340900DBB595 /* HandshakerTest.cpp */,
+				412674C82CB2350600DBB595 /* VersionTest.cpp */,
+				4198B2CD2CB242D000D9D09A /* BinaryUtilsTest.cpp */,
+				4198B2CF2CB2436A00D9D09A /* BrandedTest.cpp */,
+				4198B2D12CB2445100D9D09A /* collectTest.cpp */,
+				4198B2D52CB245C000D9D09A /* runAndWaitForEventsTest.cpp */,
+				4198B2D72CB2469000D9D09A /* StreamPartIDTest.cpp */,
+				4198B2D92CB2476200D9D09A /* toCoroTaskTest.cpp */,
+				4198B2DB2CB2481800D9D09A /* toEthereumAddressOrENSNameTest.cpp */,
+				4198B2DD2CB248AD00D9D09A /* waitForConditionTest.cpp */,
+				4198B2DF2CB2497000D9D09A /* waitForEventTest.cpp */,
+				412674BA2CB22FB700DBB595 /* example.crt */,
+				412674BC2CB22FC900DBB595 /* example.key */,
 				410E6AC42C8224B200347AF3 /* TestClass.hpp */,
 				410E6AC32C8224B200347AF3 /* toJsonTest.cpp */,
 				410E6AC12C8224B100347AF3 /* toStringTest.cpp */,
@@ -274,6 +331,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				412674BD2CB22FC900DBB595 /* example.key in Resources */,
+				412674BB2CB22FB700DBB595 /* example.crt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -293,19 +352,36 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4198B2E02CB2497000D9D09A /* waitForEventTest.cpp in Sources */,
+				4198B2D02CB2436A00D9D09A /* BrandedTest.cpp in Sources */,
+				412674C92CB2350600DBB595 /* VersionTest.cpp in Sources */,
+				4198B2D82CB2469000D9D09A /* StreamPartIDTest.cpp in Sources */,
 				410E6ACD2C8224F500347AF3 /* RpcCommunicatorTest.cpp in Sources */,
+				4198B2DE2CB248AD00D9D09A /* waitForConditionTest.cpp in Sources */,
 				410E6AC92C8224D300347AF3 /* StreamrLogFormatterTest.cpp in Sources */,
 				410E6ADC2C82255D00347AF3 /* WakeUpRpc.pb.cc in Sources */,
+				4198B2DC2CB2481800D9D09A /* toEthereumAddressOrENSNameTest.cpp in Sources */,
+				412674BF2CB2310F00DBB595 /* ConnectionManagerTest.cpp in Sources */,
+				4198B2D22CB2445100D9D09A /* collectTest.cpp in Sources */,
 				410E69C82C81A4A100347AF3 /* gtest_main.cc in Sources */,
 				410E6AC52C8224B200347AF3 /* toStringTest.cpp in Sources */,
 				410E67C52C819BCC00347AF3 /* StreamrTests.swift in Sources */,
+				412674C32CB2337600DBB595 /* DuplicateDetectorTest.cpp in Sources */,
+				412674C52CB2340900DBB595 /* HandshakerTest.cpp in Sources */,
 				410E6AC62C8224B200347AF3 /* toJsonTest.cpp in Sources */,
 				410E6ADD2C82255D00347AF3 /* TestProtos.pb.cc in Sources */,
 				410E6ADB2C82255D00347AF3 /* HelloRpc.pb.cc in Sources */,
+				4198B2DA2CB2476200D9D09A /* toCoroTaskTest.cpp in Sources */,
 				410E6ACE2C8224F500347AF3 /* ServerRegistryTest.cpp in Sources */,
+				412674B72CB22D2800DBB595 /* AddressToolsTest.cpp in Sources */,
 				410E6AC02C82248400347AF3 /* EventEmitterTest.cpp in Sources */,
+				412674C72CB2348800DBB595 /* PendingConnectionTest.cpp in Sources */,
 				410E6ACA2C8224D300347AF3 /* LoggerTest.cpp in Sources */,
+				412674B92CB22FA100DBB595 /* CertificateHelperTest.cpp in Sources */,
+				4198B2D62CB245C000D9D09A /* runAndWaitForEventsTest.cpp in Sources */,
 				410E69CC2C81B9E900347AF3 /* GoogleTestRunner.cpp in Sources */,
+				412674C12CB232E300DBB595 /* ConnectivityTest.cpp in Sources */,
+				4198B2CE2CB242D000D9D09A /* BinaryUtilsTest.cpp in Sources */,
 				410E69C92C81A4A100347AF3 /* gtest-all.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -328,7 +404,7 @@
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++23";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -398,7 +474,7 @@
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++23";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
