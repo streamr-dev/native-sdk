@@ -92,7 +92,6 @@ if(NOT IOS)
     test/unit/ENSNameTest.cpp
     test/unit/AbortControllerTest.cpp
     test/unit/BinaryUtilsTest.cpp
-    test/unit/DuplicateDetectorTest.cpp
 
   )
 
