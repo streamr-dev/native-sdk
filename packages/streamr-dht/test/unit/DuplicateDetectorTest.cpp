@@ -35,6 +35,6 @@ TEST_F(DuplicateDetectorTest, RemovesFromTailWhenFull) {
     }
     detector.add("test10");
     EXPECT_EQ(detector.size(), 10);
-    EXPECT_TRUE(detector.isMostLikelyDuplicate("test0"));
+    EXPECT_FALSE(detector.isMostLikelyDuplicate("test0"));
     EXPECT_TRUE(detector.isMostLikelyDuplicate("test10"));
 }
