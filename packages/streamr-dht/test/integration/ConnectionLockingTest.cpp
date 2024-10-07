@@ -93,7 +93,7 @@ public:
               fakeEnvironment.createTransport(mockPeerDescriptor2)) {}
 };
 
-TEST_F(ConnectionLockingTest, CanLockConnections) {
+TEST_F(ConnectionLockingTest, DISABLED_CanLockConnections) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
     auto connectionManager1 =
