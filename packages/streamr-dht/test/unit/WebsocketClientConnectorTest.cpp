@@ -70,14 +70,15 @@ protected:
         const std::string& id,
         bool hasWebsocket,
         bool isTls = false,
-        NodeType nodeType = NodeType::NODEJS) {
+        NodeType nodeType = NodeType::NODEJS,
+        const std::string& host = "localhost") {
         PeerDescriptor pd;
 
         pd.set_nodeid(id);
         pd.set_type(nodeType);
         if (hasWebsocket) {
             auto* ws = pd.mutable_websocket();
-            ws->set_host("localhost");
+            ws->set_host(host);
             ws->set_port(8080); // NOLINT
             ws->set_tls(isTls);
         }
@@ -131,7 +132,7 @@ TEST_F(
     WebsocketClientConnectorTest,
     IsPossibleToFormConnection_NodeWithNonTLSServerInLocalNetwork) { // NOLINT
     connector->setLocalPeerDescriptor(createMockPeerDescriptor(
-        "local", true, false, NodeType::NODEJS));
+        "local", true, false, NodeType::NODEJS, "192.168.11.11"));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
         createMockPeerDescriptor("remote", true)));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
