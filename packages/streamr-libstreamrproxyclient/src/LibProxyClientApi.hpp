@@ -329,7 +329,7 @@ public:
         return result.first;
     }
 
-    void proxyClientPublish(
+    uint64_t proxyClientPublish(
         Error** errors,
         uint64_t* numErrors,
         uint64_t clientHandle,
@@ -341,7 +341,7 @@ public:
                 "Proxy client not found", ERROR_PROXY_CLIENT_NOT_FOUND);
             *errors = this->errors.data();
             *numErrors = 1;
-            return;
+            return 0;
         }
 
         this->errors.clear();
@@ -361,16 +361,19 @@ public:
             proxyClient->second->getNextSequenceNumber());
         message.mutable_messageid()->CopyFrom(messageId);
         try {
-            proxyClient->second->getProxyClient()->broadcast(message);
+            auto result =
+                proxyClient->second->getProxyClient()->broadcast(message);
+            *errors = nullptr;
+            *numErrors = 0;
+            return result;
         } catch (const std::exception& e) {
-            SLogger::error("Error in proxyClientPublish: " + std::string(e.what()));
+            SLogger::error(
+                "Error in proxyClientPublish: " + std::string(e.what()));
             this->addError(e.what(), ERROR_PROXY_BROADCAST_FAILED);
             *errors = this->errors.data();
             *numErrors = this->errors.size();
+            return 0;
         }
-
-        *errors = nullptr;
-        *numErrors = 0;
     }
 };
 

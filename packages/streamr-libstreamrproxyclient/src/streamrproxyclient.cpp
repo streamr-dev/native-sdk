@@ -47,12 +47,12 @@ uint64_t proxyClientConnect(
         errors, numErrors, clientHandle, proxies, numProxies);
 }
 
-void proxyClientPublish(
+uint64_t proxyClientPublish(
     Error** errors,
     uint64_t* numErrors,
     uint64_t clientHandle,
     const char* content,
     uint64_t contentLength) {
-    getProxyClientApi().proxyClientPublish(
+    return getProxyClientApi().proxyClientPublish(
         errors, numErrors, clientHandle, content, contentLength);
 }

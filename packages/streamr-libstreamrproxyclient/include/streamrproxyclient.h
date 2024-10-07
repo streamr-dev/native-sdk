@@ -43,14 +43,45 @@ typedef struct Error {
     const char* code;
 } Error;
 
+/**
+ * @brief Create a new proxy client.
+ *
+ * @param errors The array of errors or NULL.
+ * @param numErrors The number of errors.
+ * @param ownEthereumAddress The Ethereum address of the client in format
+ * 0x1234567890123456789012345678901234567890.
+ * @param streamPartId The stream part id in format
+ * 0xa000000000000000000000000000000000000000#01.
+ * @return The handle of the created client.
+ */
+
 EXTERN_C SHARED_EXPORT uint64_t proxyClientNew(
-    Error** error,
+    Error** errors,
     uint64_t* numErrors,
     const char* ownEthereumAddress,
     const char* streamPartId);
 
+/**
+ * @brief Delete a proxy client.
+ *
+ * @param errors The array of errors or NULL.
+ * @param numErrors The number of errors.
+ * @param clientHandle The client handle of the client to delete.
+ */
+
 EXTERN_C SHARED_EXPORT void proxyClientDelete(
     Error** errors, uint64_t* numErrors, uint64_t clientHandle);
+
+/**
+ * @brief Connect a proxy client to a list of proxies.
+ *
+ * @param errors The array of errors or NULL.
+ * @param numErrors The number of errors.
+ * @param clientHandle The client handle of the client to connect.
+ * @param proxies The array of proxies.
+ * @param numProxies The number of proxies.
+ * @return The number of proxies connected to.
+ */
 
 EXTERN_C SHARED_EXPORT uint64_t proxyClientConnect(
     Error** errors,
@@ -59,8 +90,27 @@ EXTERN_C SHARED_EXPORT uint64_t proxyClientConnect(
     const Proxy* proxies,
     uint64_t numProxies);
 
+/**
+ * @brief Disconnect a proxy client from all proxies.
+ *
+ * @param errors The array of errors or NULL.
+ * @param numErrors The number of errors.
+ * @param clientHandle The client handle of the client to disconnect.
+ */
+
 EXTERN_C SHARED_EXPORT void proxyClientDisconnect(
     Error** errors, uint64_t* numErrors, uint64_t clientHandle);
+
+/**
+ * @brief Publish a message to the stream.
+ *
+ * @param errors The array of errors or NULL.
+ * @param numErrors The number of errors.
+ * @param clientHandle The client handle of the client to publish.
+ * @param content The content to publish.
+ * @param contentLength The length of the content.
+ * @return The number of proxies to which the message was published to.
+ */
 
 EXTERN_C SHARED_EXPORT uint64_t proxyClientPublish(
     Error** errors,
