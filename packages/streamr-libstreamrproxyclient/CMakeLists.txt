@@ -54,6 +54,13 @@ if (IOS)
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Petri Savolainen"
     )
     install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/createiosframework.sh)")
+    # Pack dist/target-triplet using tgz
+    install(CODE "
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E tar cvzf streamrproxyclient-${VCPKG_TARGET_TRIPLET}-${SHAREDLIB_VERSION}.tgz ${VCPKG_TARGET_TRIPLET}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist
+        )
+    ")
 endif()
 
 if (NOT IOS)
