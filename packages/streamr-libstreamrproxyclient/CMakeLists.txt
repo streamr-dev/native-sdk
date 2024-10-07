@@ -14,12 +14,16 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
+set (SHAREDLIB_VERSION 1.0.0)
+set (SHAREDLIB_SOVERSION 1)
+
 project(streamr-streamrproxyclient CXX)
 add_library(streamrproxyclient SHARED
             src/streamrproxyclient.cpp
             include/streamrproxyclient.h
 )
 
+set_target_properties(streamrproxyclient PROPERTIES VERSION ${SHAREDLIB_VERSION} SOVERSION ${SHAREDLIB_SOVERSION})
 find_package(streamr-trackerless-network CONFIG REQUIRED)
 find_package(streamr-dht CONFIG REQUIRED)
 find_package(streamr-logger CONFIG REQUIRED)
@@ -44,8 +48,8 @@ if (IOS)
         FRAMEWORK TRUE
         FRAMEWORK_VERSION A
         MACOSX_FRAMEWORK_IDENTIFIER network.streamr.streamrproxyclient
-        VERSION 1.0.0
-        SOVERSION 1.0.0
+        VERSION ${SHAREDLIB_VERSION}
+        SOVERSION ${SHAREDLIB_SOVERSION}
         PUBLIC_HEADER include/streamrproxyclient.h
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Petri Savolainen"
     )
@@ -58,7 +62,7 @@ if (NOT IOS)
     find_package(folly CONFIG REQUIRED)
      
     add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp)
-    target_link_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
+    target_link_directories(streamr-streamrproxyclient-test-integration PUBLIC ${SHAREDLIB_OUTPUT_DIRECTORY})
     
     target_include_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
     
@@ -97,5 +101,20 @@ if (NOT IOS)
             )
 
     endif()
+    # Install header to dist/target-triplet
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
+            DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/include)
+
+    # Install library to dist/target-triplet
+    install(TARGETS streamrproxyclient
+            DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE})
+
+    # Pack dist/target-triplet using tgz
+    install(CODE "
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E tar cvzf streamrproxyclient-${VCPKG_TARGET_TRIPLET}-${SHAREDLIB_VERSION}.tgz ${VCPKG_TARGET_TRIPLET}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist
+        )
+    ")
 endif()
 
