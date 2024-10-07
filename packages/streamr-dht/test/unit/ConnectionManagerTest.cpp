@@ -191,9 +191,9 @@ TEST_F(
     msg.mutable_rpcmessage()->CopyFrom(RpcMessage());
     msg.mutable_targetdescriptor()->CopyFrom(createMockPeerDescriptor(0));
 
-    EXPECT_THROW(
-        connectionManager1->send(msg, SendOptions{.connect = true}),
-        SendFailed);
+    EXPECT_THROW( // NOLINT
+        connectionManager1->send(msg, SendOptions{.connect = true}), // NOLINT
+        SendFailed); // NOLINT
 
     SLogger::info("Stopping connection manager 1");
     connectionManager1->stop();

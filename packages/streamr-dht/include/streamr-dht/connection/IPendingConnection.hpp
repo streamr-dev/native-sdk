@@ -24,7 +24,7 @@ using PendingConnectionEvents = std::tuple<
 class IPendingConnection
     : public streamr::eventemitter::EventEmitter<PendingConnectionEvents> {
 public:
-    virtual ~IPendingConnection() = default;
+    ~IPendingConnection() override = default;
     virtual void onHandshakeCompleted(
         const std::shared_ptr<Connection>& connection) = 0;
     virtual void close(bool gracefulLeave) = 0;
