@@ -25,7 +25,7 @@ protected:
     }
 
       // Helper function to create a PeerDescriptor
-    PeerDescriptor createPeerDescriptor(NodeType type, bool hasWebsocket, bool isTls) {
+    static PeerDescriptor createPeerDescriptor(NodeType type, bool hasWebsocket, bool isTls) {
         PeerDescriptor descriptor;
         descriptor.set_type(type);
         if (hasWebsocket) {
@@ -36,34 +36,34 @@ protected:
     }
 };
 
-TEST_F(ConnectivityTest, ExpectedConnectionType_TwoServerPeers) { 
+TEST_F(ConnectivityTest, ExpectedConnectionType_TwoServerPeers) { // NOLINT
     EXPECT_EQ(Connectivity::expectedConnectionType(tlsServerPeerDescriptor, tlsServerPeerDescriptor), ConnectionType::WEBSOCKET_CLIENT);
 }
 
-TEST_F(ConnectivityTest, ExpectedConnectionType_ServerToNoServer) { 
+TEST_F(ConnectivityTest, ExpectedConnectionType_ServerToNoServer) { // NOLINT
     EXPECT_EQ(Connectivity::expectedConnectionType(tlsServerPeerDescriptor, noServerPeerDescriptor), ConnectionType::WEBSOCKET_SERVER);
 }
 
-TEST_F(ConnectivityTest, ExpectedConnectionType_NoServerToServer) { 
+TEST_F(ConnectivityTest, ExpectedConnectionType_NoServerToServer) { // NOLINT
     EXPECT_EQ(Connectivity::expectedConnectionType(noServerPeerDescriptor, tlsServerPeerDescriptor), ConnectionType::WEBSOCKET_CLIENT);
 }
 
-TEST_F(ConnectivityTest, ExpectedConnectionType_NoServerToNoServer) { 
+TEST_F(ConnectivityTest, ExpectedConnectionType_NoServerToNoServer) { // NOLINT
     EXPECT_EQ(Connectivity::expectedConnectionType(noServerPeerDescriptor, noServerPeerDescriptor), ConnectionType::WEBRTC);
 }
 
-TEST_F(ConnectivityTest, ExpectedConnectionType_BrowserToTlsServer) { 
+TEST_F(ConnectivityTest, ExpectedConnectionType_BrowserToTlsServer) { // NOLINT
     EXPECT_EQ(Connectivity::expectedConnectionType(browserPeerDescriptor, tlsServerPeerDescriptor), ConnectionType::WEBSOCKET_CLIENT);
 }
 
-TEST_F(ConnectivityTest, ExpectedConnectionType_TlsServerToBrowser) { 
+TEST_F(ConnectivityTest, ExpectedConnectionType_TlsServerToBrowser) { // NOLINT
     EXPECT_EQ(Connectivity::expectedConnectionType(tlsServerPeerDescriptor, browserPeerDescriptor), ConnectionType::WEBSOCKET_SERVER);
 }
 
-TEST_F(ConnectivityTest, ExpectedConnectionType_BrowserToNoTlsserver) { 
+TEST_F(ConnectivityTest, ExpectedConnectionType_BrowserToNoTlsserver) { // NOLINT
     EXPECT_EQ(Connectivity::expectedConnectionType(browserPeerDescriptor, noTlsServerPeerDescriptor), ConnectionType::WEBRTC);
 }
 
-TEST_F(ConnectivityTest, ExpectedConnectionType_NoTlsServerToBrowser) { 
+TEST_F(ConnectivityTest, ExpectedConnectionType_NoTlsServerToBrowser) { // NOLINT
     EXPECT_EQ(Connectivity::expectedConnectionType(noTlsServerPeerDescriptor, browserPeerDescriptor), ConnectionType::WEBRTC);
 }

@@ -5,8 +5,6 @@
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
 #include "streamr-dht/transport/Transport.hpp"
-#include "streamr-eventemitter/EventEmitter.hpp"
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
 #include "streamr-dht/connection/IPendingConnection.hpp"
 
 using ::dht::NodeType;
@@ -18,7 +16,6 @@ using streamr::dht::connection::websocket::WebsocketClientConnector;
 using streamr::dht::connection::websocket::WebsocketClientConnectorOptions;
 using streamr::dht::transport::ListeningRpcCommunicator;
 using streamr::dht::transport::SendOptions;
-using streamr::eventemitter::HandlerToken;
 
 class DummyTransport : public streamr::dht::transport::Transport {
 public:
@@ -36,17 +33,11 @@ class DummyConnection : public streamr::dht::connection::Connection {
 public:
     DummyConnection() : Connection(streamr::dht::connection::ConnectionType::WEBSOCKET_CLIENT) {}
 
-    void send(const std::vector<std::byte>& data) override {
-        std::cout << "DummyConnection: Sending " << data.size() << " bytes" << std::endl;
-    }
+    void send(const std::vector<std::byte>& data) override {}
 
-    void close(bool gracefulLeave) override {
-        std::cout << "DummyConnection: Closing (graceful: " << (gracefulLeave ? "true" : "false") << ")" << std::endl;
-    }
+    void close(bool gracefulLeave) override {}
 
-    void destroy() override {
-        std::cout << "DummyConnection: Destroying" << std::endl;
-    }
+    void destroy() override {}
 };
 
 class WebsocketClientConnectorTest : public ::testing::Test {
@@ -67,7 +58,7 @@ protected:
                 [](const std::shared_ptr<IPendingConnection>& /*connection*/) {
                     return true;
                 },
-            .hasConnection = [](DhtAddress) { return false; },
+            .hasConnection = [](DhtAddress) { return false; }, // NOLINT
             .rpcCommunicator = *dummyCommunicator};
 
         // Create the connector
@@ -79,8 +70,7 @@ protected:
         const std::string& id,
         bool hasWebsocket,
         bool isTls = false,
-        NodeType nodeType = NodeType::NODEJS,
-        std::string hostAddress = "localhost") {
+        NodeType nodeType = NodeType::NODEJS) {
         PeerDescriptor pd;
 
         pd.set_nodeid(id);
@@ -88,7 +78,7 @@ protected:
         if (hasWebsocket) {
             auto* ws = pd.mutable_websocket();
             ws->set_host("localhost");
-            ws->set_port(8080);
+            ws->set_port(8080); // NOLINT
             ws->set_tls(isTls);
         }
         return pd;
@@ -96,7 +86,7 @@ protected:
 };
 
 TEST_F(
-    WebsocketClientConnectorTest, IsPossibleToFormConnection_NodeWithoutServer) {
+    WebsocketClientConnectorTest, IsPossibleToFormConnection_NodeWithoutServer) { // NOLINT
     connector->setLocalPeerDescriptor(createMockPeerDescriptor("local", false));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
         createMockPeerDescriptor("remote", true)));
@@ -109,7 +99,7 @@ TEST_F(
 }
 
 TEST_F(
-    WebsocketClientConnectorTest, IsPossibleToFormConnection_NodeWithTLSServer) {
+    WebsocketClientConnectorTest, IsPossibleToFormConnection_NodeWithTLSServer) { // NOLINT
     connector->setLocalPeerDescriptor(
         createMockPeerDescriptor("local", true, true));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
@@ -124,7 +114,7 @@ TEST_F(
 
 TEST_F(
     WebsocketClientConnectorTest,
-    IsPossibleToFormConnection_NodeWithNonTLSServer) {
+    IsPossibleToFormConnection_NodeWithNonTLSServer) { // NOLINT
     connector->setLocalPeerDescriptor(
         createMockPeerDescriptor("local", true, false));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
@@ -139,9 +129,9 @@ TEST_F(
 
 TEST_F(
     WebsocketClientConnectorTest,
-    IsPossibleToFormConnection_NodeWithNonTLSServerInLocalNetwork) {
+    IsPossibleToFormConnection_NodeWithNonTLSServerInLocalNetwork) { // NOLINT
     connector->setLocalPeerDescriptor(createMockPeerDescriptor(
-        "local", true, false, NodeType::NODEJS, "192.168.11.11"));
+        "local", true, false, NodeType::NODEJS));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
         createMockPeerDescriptor("remote", true)));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
@@ -152,7 +142,7 @@ TEST_F(
         createMockPeerDescriptor("remote", false, false, NodeType::BROWSER)));
 }
 
-TEST_F(WebsocketClientConnectorTest, IsPossibleToFormConnection_Browser) {
+TEST_F(WebsocketClientConnectorTest, IsPossibleToFormConnection_Browser) { // NOLINT
     connector->setLocalPeerDescriptor(
         createMockPeerDescriptor("local", false, false, NodeType::BROWSER));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
@@ -165,7 +155,7 @@ TEST_F(WebsocketClientConnectorTest, IsPossibleToFormConnection_Browser) {
         createMockPeerDescriptor("remote", false, false, NodeType::BROWSER)));
 }
 
-TEST_F(WebsocketClientConnectorTest, Connect_ReturnsExistingConnectingConnection) {
+TEST_F(WebsocketClientConnectorTest, Connect_ReturnsExistingConnectingConnection) { // NOLINT
     connector->setLocalPeerDescriptor(
         createMockPeerDescriptor("local", false));
     auto remotePeerDescriptor = createMockPeerDescriptor("remote", true);
@@ -175,7 +165,7 @@ TEST_F(WebsocketClientConnectorTest, Connect_ReturnsExistingConnectingConnection
     firstConnection->close(false);
 }
 
-TEST_F(WebsocketClientConnectorTest, Connect_DisconnectedEventRemovesConnectingConnection) {
+TEST_F(WebsocketClientConnectorTest, Connect_DisconnectedEventRemovesConnectingConnection) { // NOLINT
     connector->setLocalPeerDescriptor(
         createMockPeerDescriptor("local", false));
     auto remotePeerDescriptor = createMockPeerDescriptor("remote", true);
@@ -187,7 +177,7 @@ TEST_F(WebsocketClientConnectorTest, Connect_DisconnectedEventRemovesConnectingC
     secondConnection->close(false);
 }
 
-TEST_F(WebsocketClientConnectorTest, Connect_ConnectedEventRemovesConnectingConnection) {
+TEST_F(WebsocketClientConnectorTest, Connect_ConnectedEventRemovesConnectingConnection) { // NOLINT
     connector->setLocalPeerDescriptor(
         createMockPeerDescriptor("local", false));
     auto remotePeerDescriptor = createMockPeerDescriptor("remote", true);

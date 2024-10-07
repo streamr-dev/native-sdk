@@ -32,7 +32,7 @@ TEST(WebsocketServerTest, TestServerThrowsIfPortIsInUse) {
     server.start();
 
     WebsocketServer server2(std::move(config2));
-    EXPECT_THROW(server2.start(), WebsocketServerStartError);
+    EXPECT_THROW(server2.start(), WebsocketServerStartError); // NOLINT
 
     server.stop();
 }
@@ -45,7 +45,7 @@ TEST(WebsocketServerTest, TestCanThrowIfCertificateNotFound) {
             std::optional<TlsCertificateFiles>{TlsCertificateFiles{"", ""}},
         .maxMessageSize = std::nullopt};
     WebsocketServer server(std::move(config));
-    EXPECT_THROW(server.start(), WebsocketServerStartError);
+    EXPECT_THROW(server.start(), WebsocketServerStartError); // NOLINT
     server.stop();
 }
 
@@ -175,9 +175,9 @@ HdxDqpEPa/uGsv+EPnapodKuXO5a2rUCRMEJBcqRIWNZE4Gsey0s61hGCz5O9PpG
 noOPvyLe52Hc2twPb9+w8g==
 -----END PRIVATE KEY-----)";
 
-    EXPECT_THROW(
-        server.updateCertificate(certContent, keyContent),
-        WebsocketServerStartError);
+    EXPECT_THROW(  // NOLINT
+        server.updateCertificate(certContent, keyContent),  // NOLINT
+        WebsocketServerStartError); // NOLINT
 
     server.stop();
 }
