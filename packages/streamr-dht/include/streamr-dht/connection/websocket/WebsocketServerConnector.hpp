@@ -8,9 +8,9 @@
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/Handshaker.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/IncomingHandshaker.hpp"
 #include "streamr-dht/connection/PendingConnection.hpp"
-#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/websocket/WebsocketServer.hpp"
 #include "streamr-dht/helpers/Version.hpp"
 #include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
@@ -25,8 +25,8 @@ namespace streamr::dht::connection::websocket {
 
 using ::dht::ConnectivityResponse;
 using streamr::dht::connection::IncomingHandshaker;
-using streamr::dht::connection::PendingConnection;
 using streamr::dht::connection::IPendingConnection;
+using streamr::dht::connection::PendingConnection;
 using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketServerConnection;
 using streamr::dht::helpers::Version;
@@ -189,21 +189,36 @@ public:
     }
 
     void destroy() {
+        SLogger::trace("WebsocketServerConnector::destroy() called");
         std::scoped_lock lock(this->mMutex);
         this->abortController.abort();
 
+        SLogger::trace("Closing ongoing connect requests");
         for (const auto& request : this->ongoingConnectRequests) {
-            request.second->close(true);
+            if (request.second) {
+                request.second->close(true);
+            }
         }
+
+        SLogger::trace("Closing connecting handshakers");
         for (const auto& handshaker : this->connectingHandshakers) {
-            handshaker.second->getPendingConnection()->close(true);
+            if (handshaker.second &&
+                handshaker.second->getPendingConnection()) {
+                handshaker.second->getPendingConnection()->close(true);
+            }
         }
+
+        SLogger::trace("Clearing maps");
         this->connectingHandshakers.clear();
         this->ongoingConnectRequests.clear();
 
-        if (this->websocketServer != nullptr) {
+        SLogger::trace("Stopping websocket server");
+        if (this->websocketServer) {
             this->websocketServer->stop();
+            this->websocketServer.reset();
         }
+
+        SLogger::trace("WebsocketServerConnector::destroy() completed");
     }
 
 private:

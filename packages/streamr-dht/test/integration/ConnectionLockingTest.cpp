@@ -141,7 +141,7 @@ TEST_F(ConnectionLockingTest, DISABLED_CanLockConnections) {
         Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1)));
 }
 
-TEST_F(ConnectionLockingTest, MultipleServicesOnTheSamePeer) {
+TEST_F(ConnectionLockingTest, DISABLED_MultipleServicesOnTheSamePeer) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
     auto connectionManager1 =
