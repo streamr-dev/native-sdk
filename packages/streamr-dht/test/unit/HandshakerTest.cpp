@@ -7,7 +7,6 @@
 #include "streamr-dht/connection/OutgoingHandshaker.hpp"
 
 using ::dht::HandshakeError;
-using ::dht::Message;
 using ::dht::PeerDescriptor;
 using streamr::dht::connection::Connection;
 using streamr::dht::connection::ConnectionType;
@@ -23,20 +22,20 @@ using streamr::dht::connection::handshakerevents::HandshakeFailed;
 class MockPendingConnection : public IPendingConnection {
 public:
     MockPendingConnection() = default;
-    MOCK_METHOD(void, onHandshakeCompleted, (const std::shared_ptr<Connection>&), (override));
-    MOCK_METHOD(void, close, (bool), (override));
-    MOCK_METHOD(void, destroy, (), (override));
-    MOCK_METHOD(const PeerDescriptor&, getPeerDescriptor, (), (const, override));
-    MOCK_METHOD(void, onError, (const std::exception_ptr&), (override));
+    MOCK_METHOD(void, onHandshakeCompleted, (const std::shared_ptr<Connection>&), (override)); // NOLINT
+    MOCK_METHOD(void, close, (bool), (override)); // NOLINT
+    MOCK_METHOD(void, destroy, (), (override)); // NOLINT
+    MOCK_METHOD(const PeerDescriptor&, getPeerDescriptor, (), (const, override)); // NOLINT
+    MOCK_METHOD(void, onError, (const std::exception_ptr&), (override)); // NOLINT
 };
 
 class MockConnection : public Connection {
 public:
     MockConnection()
         : Connection(ConnectionType::WEBSOCKET_CLIENT) {} // Add this line
-    MOCK_METHOD(void, send, (const std::vector<std::byte>&), (override));
-    MOCK_METHOD(void, close, (bool), (override));
-    MOCK_METHOD(void, destroy, (), (override));
+    MOCK_METHOD(void, send, (const std::vector<std::byte>&), (override)); // NOLINT
+    MOCK_METHOD(void, close, (bool), (override)); // NOLINT
+    MOCK_METHOD(void, destroy, (), (override)); // NOLINT
 };
 
 class HandshakerTest : public ::testing::Test {
@@ -59,7 +58,7 @@ protected:
             pendingConnection);
     }
 
-    PeerDescriptor createMockPeerDescriptor() {
+    static PeerDescriptor createMockPeerDescriptor() {
         PeerDescriptor descriptor;
         descriptor.set_nodeid("test_node_id");
         return descriptor;

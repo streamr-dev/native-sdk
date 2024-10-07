@@ -8,12 +8,10 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <tuple>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/connection/IPendingConnection.hpp"
-#include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-utils/AbortController.hpp"
 #include "streamr-utils/AbortableTimers.hpp"
 

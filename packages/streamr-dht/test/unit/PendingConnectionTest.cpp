@@ -2,7 +2,6 @@
 #include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-dht/connection/Connection.hpp"
 #include <chrono>
-#include <thread>
 #include <streamr-utils/waitForEvent.hpp>
 #include <streamr-utils/waitForCondition.hpp>
 #include <folly/coro/BlockingWait.h>
@@ -12,7 +11,6 @@ using streamr::dht::connection::PendingConnection;
 using streamr::dht::connection::Connection;
 using streamr::dht::connection::pendingconnectionevents::Disconnected;
 using streamr::dht::connection::pendingconnectionevents::Connected;
-using streamr::utils::waitForEvent;
 using streamr::utils::waitForCondition;
 using namespace std::chrono_literals;
 
@@ -20,34 +18,30 @@ class DummyConnection : public streamr::dht::connection::Connection {
 public:
     DummyConnection() : Connection(streamr::dht::connection::ConnectionType::WEBSOCKET_CLIENT) {}
 
-    void send(const std::vector<std::byte>& data) override {
-        std::cout << "DummyConnection: Sending " << data.size() << " bytes" << std::endl;
-    }
+    void send(const std::vector<std::byte>& data) override {}
 
-    void close(bool gracefulLeave) override {
-        std::cout << "DummyConnection: Closing (graceful: " << (gracefulLeave ? "true" : "false") << ")" << std::endl;
-    }
+    void close(bool gracefulLeave) override {}
 
-    void destroy() override {
-        std::cout << "DummyConnection: Destroying" << std::endl;
-    }
+    void destroy() override {}
 };
 
 class PendingConnectionTest : public ::testing::Test {
 protected:
     PeerDescriptor mockPeerDescriptor;
     std::unique_ptr<PendingConnection> pendingConnection;
+    static constexpr auto timeout = std::chrono::seconds(5);
+    static constexpr auto retryInternal = std::chrono::milliseconds(100);
 
     void SetUp() override {
         mockPeerDescriptor = createMockPeerDescriptor();
-        pendingConnection = std::make_unique<PendingConnection>(mockPeerDescriptor, std::nullopt, std::chrono::milliseconds(500));
+        pendingConnection = std::make_unique<PendingConnection>(mockPeerDescriptor, std::nullopt, std::chrono::milliseconds(500)); // NOLINT
     }
 
     void TearDown() override {
         pendingConnection->close(false);
     }
 
-    PeerDescriptor createMockPeerDescriptor() {
+    static PeerDescriptor createMockPeerDescriptor() {
         PeerDescriptor descriptor;
         descriptor.set_nodeid("test_nodeid");
         return descriptor;
@@ -56,7 +50,7 @@ protected:
 
 TEST_F(PendingConnectionTest, DoesNotEmitDisconnectedAfterReplacedAsDuplicate) {
     bool isEmitted = false;
-    pendingConnection->once<Disconnected>([&](bool gracefulLeave) {
+    pendingConnection->once<Disconnected>([&]( bool /* gracefulLeave */) {
         isEmitted = true;
     });
     pendingConnection->replaceAsDuplicate();
@@ -69,18 +63,18 @@ TEST_F(PendingConnectionTest, EmitsDisconnectedAfterTimedOut) {
     std::function<bool()> condition = [&isEmitted]() {
         return isEmitted;
     };
-    pendingConnection->once<Disconnected>([&](bool gracefulLeave) {
+    pendingConnection->once<Disconnected>([&](bool /* gracefulLeave */) {
         isEmitted = true;
     });
 
-    auto task = waitForCondition(condition, 5s, 100ms);
+    auto task = waitForCondition(condition, timeout, retryInternal);
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
     EXPECT_TRUE(isEmitted);
 }
 
 TEST_F(PendingConnectionTest, DoesNotEmitDisconnectedIfDestroyed) {
     bool isEmitted = false;
-    pendingConnection->once<Disconnected>([&](bool gracefulLeave) {
+    pendingConnection->once<Disconnected>([&](bool /* gracefulLeave */) {
         isEmitted = true;
     });
     pendingConnection->replaceAsDuplicate();
@@ -90,7 +84,7 @@ TEST_F(PendingConnectionTest, DoesNotEmitDisconnectedIfDestroyed) {
 
 TEST_F(PendingConnectionTest, EmitsConnected) {
     auto dummyConnection = std::make_shared<DummyConnection>();
-    pendingConnection->once<Connected>([&](PeerDescriptor peerDescriptor, std::shared_ptr<Connection> connection) {
+    pendingConnection->once<Connected>([&](PeerDescriptor /* peerDescriptor */, std::shared_ptr<Connection> connection) { // NOLINT
          EXPECT_EQ(dummyConnection, connection);
     });
     pendingConnection->onHandshakeCompleted(dummyConnection);
@@ -98,7 +92,7 @@ TEST_F(PendingConnectionTest, EmitsConnected) {
 
 TEST_F(PendingConnectionTest, DoesNotEmitConnectedIfReplaced) {
     bool isEmitted = false;
-    pendingConnection->once<Connected>([&](PeerDescriptor peerDescriptor, std::shared_ptr<Connection> connection) {
+    pendingConnection->once<Connected>([&](PeerDescriptor /* peerDescriptor */, std::shared_ptr<Connection> /*connection */) { // NOLINT
         isEmitted = true;
     });
     pendingConnection->replaceAsDuplicate();
