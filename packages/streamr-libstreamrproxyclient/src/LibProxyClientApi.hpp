@@ -356,7 +356,9 @@ public:
             proxyClient->second->getProxyClient()->getLocalEthereumAddress()));
         messageId.set_messagechainid("1");
         messageId.set_timestamp(
-            std::chrono::system_clock::now().time_since_epoch().count());
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch())
+                .count());
         messageId.set_sequencenumber(
             proxyClient->second->getNextSequenceNumber());
         message.mutable_messageid()->CopyFrom(messageId);
