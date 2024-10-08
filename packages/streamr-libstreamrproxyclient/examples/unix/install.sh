@@ -2,4 +2,4 @@
 
 set -e
 
-cd build && cmake .. && cmake --build . && cd ..
+cd build && cmake .. && cmake --build . && cmake --install . && cd ..
