@@ -31,7 +31,11 @@ The library is built as a part of the Streamr Native SDK monorepo. To build the 
 
 The best way to get is started by studying and trying out the example apps in the examples folder. The folder [examples/unix](examples/unix) contains an example app written in C++ that works on macOS and Linux, [examples/ios](examples/ios) an example app for iOS written in Swift, and [examples/android](examples/android) an example app for Android written in Kotlin.
 
-# API
+# Limitations of the current release
+
+* The messages are not singned nor encrypted, so they cannot be seen by network-monorepo based standard Streamr clients.
+
+# API Documentation
 
 ### `uint64_t proxyClientNew(Error** errors, uint64_t* numErrors, const char* ownEthereumAddress, const char* streamPartId)`
 

@@ -2,6 +2,10 @@
 
 This is the ongoing development repository for the Streamr Native SDK, a native counterpart of the [streamr-dev/network](https://github.com/your-github-username/streamr-dev/network).
 
+## Libstreamrproxyclient
+
+[Libstreamrproxyclient](packages/streamr-libstreamrproxyclient) is a multi-platform native library for publishing messages to the Streamr network implemented as a part of the Streamr Native SDK. The library can be used to publish messages to the Streamr network on all platforms supported by the Streamr Native SDK, including Linux, macOS, iOS, and Android.
+
 ## Getting started
 
 ### Recommended development environment
