@@ -19,6 +19,18 @@ You can download pre-compiled binaries of the library from the following links:
 - [arm64-ios] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-ios-1.0.0.tgz)
 - [arm64-android] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-android-1.0.0.tgz)
 
+# Installation
+
+Download the pre-compiled binary for your target platform, unpack the .tgz file, and add the include folder to the include search path of your project, and add the lib/Debug or lib/Release folder to the shared library search path of your project.
+
+# Building from source
+
+The library is built as a part of the Streamr Native SDK monorepo. To build the library, follow the instructions in the [README](https://github.com/streamr-dev/native-sdk/blob/main/README.md) of the Streamr Native SDK.
+
+# Getting started
+
+The best way to get is started by studying and trying out the example apps in the examples folder. The folder [examples/unix](examples/unix) contains an example app written in C++ that works on macOS and Linux, [examples/ios](examples/ios) an example app for iOS written in Swift, and [examples/android](examples/android) an example app for Android written in Kotlin.
+
 # API
 
 ### `uint64_t proxyClientNew(Error** errors, uint64_t* numErrors, const char* ownEthereumAddress, const char* streamPartId)`
