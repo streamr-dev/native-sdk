@@ -9,7 +9,7 @@ cd ../streamr-trackerless-network/test/integration/ts-integration
 
 #Run the server
 
-./run-server.sh
+./run-server-for-tests.sh
 
 cd -
 
