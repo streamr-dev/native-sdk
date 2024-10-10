@@ -2,8 +2,6 @@
 // Created by Santtu Rantanen on 28.8.2024.
 //
 
-//#include "ProxyClient.h"
-//#include "PeerDescriptor.h"
 #include "streamrproxyclient.h"
 #include <iostream>
 #include <thread>

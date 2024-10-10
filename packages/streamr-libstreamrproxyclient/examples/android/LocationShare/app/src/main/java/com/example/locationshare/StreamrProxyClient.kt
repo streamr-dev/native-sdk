@@ -12,12 +12,12 @@ enum class Status {
 }
 
 class StreamrProxyClient(val state: StateFlow<LocationState>) {
-    private val streamrProxyClientCoro = StreamrProxyClientCoroutines()
+    //private val streamrProxyClientCoro = StreamrProxyClientCoroutines()
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.Default + job)
     private var publishingJob: Job? = null
     private val validEthereumAddress = "0x1234567890123456789012345678901234567890";
-    private val validStreamPartId = "0xa000000000000000000000000000000000000000#01";
+    private val validStreamPartId = "0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01";
     val proxyClientHandle = ProxyClientJNI.proxyClientNew(validEthereumAddress, validStreamPartId)
     companion object {
         var defaultPublishingIntervalInSeconds = "5"
@@ -25,7 +25,7 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
     var status: Status by mutableStateOf(Status.stopped)
         private set
 
-    var proxyAddress by mutableStateOf("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    var proxyAddress by mutableStateOf("0xfccf49c5a714cab640e329464c6f81d72df6e307")
         private set
 
     var proxyId by mutableStateOf("ws://10.0.2.2:44211")
@@ -52,18 +52,22 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
         val locationState = state.value
         var data = "${locationState.latitude}, ${locationState.longitude}"
         scope.launch {
-            println("proxyClientHandle: ${proxyClientHandle}")
-            println("Publish: $data")
-            streamrProxyClientCoro.publish(proxyClientHandle, data)
-            println("Publish End")
+            withContext(Dispatchers.IO) {
+                println("proxyClientHandle: ${proxyClientHandle}")
+                println("Publish: $data")
+                ProxyClientJNI.proxyClientPublish(proxyClientHandle, data)
+                println("Publish End")
+            }
         }
     }
 
     fun setProxy() {
-        val proxyList = listOf(ProxyClientJNI.Proxy(proxyId, proxyAddress))
+        val proxyList = arrayOf(ProxyClientJNI.Proxy(proxyId, proxyAddress))
         status = Status.setProxy
         scope.launch {
-            streamrProxyClientCoro.connect(proxyClientHandle, proxyList)
+            withContext(Dispatchers.IO) {
+                ProxyClientJNI.proxyClientConnect(proxyClientHandle, proxyList)
+            }
         }
     }
 
