@@ -2,7 +2,7 @@
 #define STREAMR_LOGGER_LOGGERIMPL_HPP
 
 #include <source_location>
-#include <string>
+#include <string_view>
 
 #include "StreamrLogLevel.hpp"
 
@@ -18,8 +18,8 @@ public:
 
     virtual void sendLogMessage(
         StreamrLogLevel logLevel,
-        const std::string& msg,
-        const std::string& metadata,
+        std::string_view msg,
+        std::string_view metadata,
         const std::source_location& location) = 0;
 };
 

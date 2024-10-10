@@ -2,10 +2,18 @@
   "name": "streamr-native-sdk",
   "version": "1.0.0",
   "dependencies": [
-    "boost-config",
+    "ada-url",
+    "boost-algorithm",
+    "boost-endian",
     "boost-pfr",
+    "boost-uuid",
     "folly",
     "gtest",
-    "nlohmann-json"
+    "libdatachannel",
+    "magic-enum",
+    "nlohmann-json",
+    "openssl",
+    "protobuf",
+    "vladimirshaleev-ipaddress"
   ]
 }
