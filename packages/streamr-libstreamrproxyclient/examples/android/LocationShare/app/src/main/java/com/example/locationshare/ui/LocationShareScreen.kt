@@ -48,6 +48,7 @@ fun LocationShareScreen(
         ProxyFieldsLayout(
             proxyAddress = locationShareViewModel.streamrProxyClient.proxyAddress,
             proxyId = locationShareViewModel.streamrProxyClient.proxyId,
+            ethereumPrivateKey = locationShareViewModel.streamrProxyClient.ethereumPrivateKey,
             status = locationShareViewModel.streamrProxyClient.status,
             onProxyAddressChanged = {
                 locationShareViewModel.streamrProxyClient.updateProxyAddress(
@@ -55,6 +56,7 @@ fun LocationShareScreen(
                 )
             },
             onProxyIdChanged = { locationShareViewModel.streamrProxyClient.updateProxyId(it) },
+            onEthereumPrivateKeyChanged = { locationShareViewModel.streamrProxyClient.updateEthereumPrivateKey(it) },
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -139,9 +141,11 @@ fun LocationShareScreen(
 fun ProxyFieldsLayout(
     proxyAddress: String,
     proxyId: String,
+    ethereumPrivateKey: String,
     status: Status,
     onProxyAddressChanged: (String) -> Unit,
     onProxyIdChanged: (String) -> Unit,
+    onEthereumPrivateKeyChanged: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
@@ -177,6 +181,22 @@ fun ProxyFieldsLayout(
                 onValueChange = onProxyIdChanged,
                 label = {
                     Text("Proxy Id")
+                },
+                singleLine = true,
+                shape = shapes.large,
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = colorScheme.surface,
+                    unfocusedContainerColor = colorScheme.surface,
+                    disabledContainerColor = colorScheme.surface,
+                )
+            )
+
+            OutlinedTextField(
+                value = ethereumPrivateKey,
+                onValueChange = onEthereumPrivateKeyChanged,
+                label = {
+                    Text("Ethereum Private Key")
                 },
                 singleLine = true,
                 shape = shapes.large,

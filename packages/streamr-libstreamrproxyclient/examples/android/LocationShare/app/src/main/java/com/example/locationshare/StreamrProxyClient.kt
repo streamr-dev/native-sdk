@@ -16,7 +16,7 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.Default + job)
     private var publishingJob: Job? = null
-    private val validEthereumAddress = "0x1234567890123456789012345678901234567890";
+    private val validEthereumAddress = "0xa5374e3c19f15e1847881979dd0c6c9ffe846bd5";
     private val validStreamPartId = "0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01";
     val proxyClientHandle = ProxyClientJNI.proxyClientNew(validEthereumAddress, validStreamPartId)
     companion object {
@@ -25,10 +25,13 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
     var status: Status by mutableStateOf(Status.stopped)
         private set
 
-    var proxyAddress by mutableStateOf("0xfccf49c5a714cab640e329464c6f81d72df6e307")
+    var proxyAddress by mutableStateOf("0x2ee615edd5d13310f83d8125ff4f0960a7475e33")
         private set
 
     var proxyId by mutableStateOf("ws://10.0.2.2:44211")
+        private set
+
+    var ethereumPrivateKey by mutableStateOf("23bead9b499af21c4c16e4511b3b6b08c3e22e76e0591f5ab5ba8d4c3a5b1820")
         private set
 
     var intervalSeconds by mutableStateOf(defaultPublishingIntervalInSeconds)
@@ -40,6 +43,10 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
 
     fun updateProxyId(proxyId: String){
         this.proxyId = proxyId
+    }
+
+    fun updateEthereumPrivateKey(ethereumPrivateKey: String){
+        this.ethereumPrivateKey = ethereumPrivateKey
     }
 
     fun updateIntervalSeconds(intervalSeconds: String){
@@ -55,7 +62,7 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
             withContext(Dispatchers.IO) {
                 println("proxyClientHandle: ${proxyClientHandle}")
                 println("Publish: $data")
-                ProxyClientJNI.proxyClientPublish(proxyClientHandle, data)
+                ProxyClientJNI.proxyClientPublish(proxyClientHandle, data, ethereumPrivateKey)
                 println("Publish End")
             }
         }
