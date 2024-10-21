@@ -106,6 +106,7 @@ if(NOT IOS)
         test/unit/formStreamPartDeliveryServiceIdTest.cpp
         test/unit/ContentDeliveryRpcRemoteTest.cpp
         test/unit/ContentDeliveryRpcLocalTest.cpp
+        test/unit/DuplicateMessageDetectorTest.cpp
     )
 
     target_include_directories(streamr-trackerless-network-test-unit

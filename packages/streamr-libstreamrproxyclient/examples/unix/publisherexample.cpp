@@ -32,9 +32,12 @@ int main(int argc, char* argv[]) {
     const char* proxyServerEthereumAddress = argv[2];
     const char* streamPartId = argv[3];
 
-    const std::string ownEthereumAddressString =
-        generateRandomEthereumAddress();
-    const char* ownEthereumAddress = ownEthereumAddressString.c_str();
+    // This is a widely-used test account
+
+    const char* ownEthereumAddress =
+        "0xa5374e3c19f15e1847881979dd0c6c9ffe846bd5";
+    const char* ehereumPrivateKey =
+        "23bead9b499af21c4c16e4511b3b6b08c3e22e76e0591f5ab5ba8d4c3a5b1820";
 
     Error* errors = nullptr;
     uint64_t numErrors = 0;
@@ -64,11 +67,12 @@ int main(int argc, char* argv[]) {
             &numErrors,
             clientHandle,
             message.c_str(),
-            message.length());
+            message.length(),
+            ehereumPrivateKey);
 
         assert(numErrors == 0);
         assert(errors == nullptr);
-        
+
         std::cout << ownEthereumAddress << " published message "
                   << "\"" << message << "\""
                   << " to " << numProxiesPublishedTo << " proxies"

@@ -31,7 +31,12 @@ TEST(PublishToTsServerTest, ProxyPublish) {
 
     std::string message = "Hello from libstreamrproxyclient!";
     proxyClientPublish(
-        &errors, &numErrors, clientHandle, message.c_str(), message.length());
+        &errors,
+        &numErrors,
+        clientHandle,
+        message.c_str(),
+        message.length(),
+        nullptr);
 
     EXPECT_EQ(numErrors, 0);
     EXPECT_EQ(errors, nullptr);
@@ -59,11 +64,26 @@ TEST(PublishToTsServerTest, ProxyPublishMultipleMessages) {
     std::string message3 = "Hello from libstreamrproxyclient! m3";
 
     proxyClientPublish(
-        &errors, &numErrors, clientHandle, message1.c_str(), message1.length());
+        &errors,
+        &numErrors,
+        clientHandle,
+        message1.c_str(),
+        message1.length(),
+        nullptr);
     proxyClientPublish(
-        &errors, &numErrors, clientHandle, message2.c_str(), message2.length());
+        &errors,
+        &numErrors,
+        clientHandle,
+        message2.c_str(),
+        message2.length(),
+        nullptr);
     proxyClientPublish(
-        &errors, &numErrors, clientHandle, message3.c_str(), message3.length());
+        &errors,
+        &numErrors,
+        clientHandle,
+        message3.c_str(),
+        message3.length(),
+        nullptr);
 
     EXPECT_EQ(numErrors, 0);
     EXPECT_EQ(errors, nullptr);

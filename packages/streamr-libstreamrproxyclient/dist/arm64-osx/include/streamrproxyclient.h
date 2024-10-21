@@ -109,6 +109,7 @@ EXTERN_C SHARED_EXPORT void proxyClientDisconnect(
  * @param clientHandle The client handle of the client to publish.
  * @param content The content to publish.
  * @param contentLength The length of the content.
+ * @param ethereumPrivateKey as hex without 0x prefix (64 characters) or NULL if message should not be signed.
  * @return The number of proxies to which the message was published to.
  */
 
@@ -117,6 +118,7 @@ EXTERN_C SHARED_EXPORT uint64_t proxyClientPublish(
     uint64_t* numErrors,
     uint64_t clientHandle,
     const char* content,
-    uint64_t contentLength);
+    uint64_t contentLength,
+    const char* ethereumPrivateKey);
 
 #endif /* LIBSTREAMRPROXYCLIENT_H */

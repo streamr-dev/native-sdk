@@ -380,6 +380,10 @@ public:
             this->options.localPeerDescriptor)};
     }
 
+    [[nodiscard]] StreamPartID getStreamPartID() const {
+        return this->options.streamPartId;
+    }
+
     void onNodeDisconnected(const PeerDescriptor& peerDescriptor) {
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
