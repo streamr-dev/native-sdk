@@ -49,10 +49,16 @@ uint64_t proxyClientConnect(
 
 uint64_t proxyClientPublish(
     Error** errors,
-    uint64_t* numErrors,
+    uint64_t* numErrors, // NOLINT
     uint64_t clientHandle,
     const char* content,
-    uint64_t contentLength) {
+    uint64_t contentLength,
+    const char* ethereumPrivateKey) {
     return getProxyClientApi().proxyClientPublish(
-        errors, numErrors, clientHandle, content, contentLength);
+        errors,
+        numErrors,
+        clientHandle,
+        content,
+        contentLength,
+        ethereumPrivateKey);
 }
