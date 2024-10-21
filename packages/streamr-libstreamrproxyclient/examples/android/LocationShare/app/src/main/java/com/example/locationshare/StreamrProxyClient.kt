@@ -16,8 +16,8 @@ class StreamrProxyClient(val state: StateFlow<LocationState>) {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.Default + job)
     private var publishingJob: Job? = null
-    private val validEthereumAddress = "0xa5374e3c19f15e1847881979dd0c6c9ffe846bd5";
-    private val validStreamPartId = "0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01";
+    private val validEthereumAddress = "0xa5374e3c19f15e1847881979dd0c6c9ffe846bd5"
+    private val validStreamPartId = "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
     val proxyClientHandle = ProxyClientJNI.proxyClientNew(validEthereumAddress, validStreamPartId)
     companion object {
         var defaultPublishingIntervalInSeconds = "5"
