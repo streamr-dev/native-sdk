@@ -10,7 +10,8 @@ import Combine
 
 @Observable
 class StreamrProxyClient {
-    @MainActor var proxyInfo: PeerDesc = PeerDesc(peerId: "ws://127.0.0.1:44211", peerAddress: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    @MainActor var proxyInfo: PeerDesc = PeerDesc(peerId: "ws://127.0.0.1:44211", peerAddress: "0x2ee615edd5d13310f83d8125ff4f0960a7475e33")
+    @MainActor var ethereumPrivateKey = "23bead9b499af21c4c16e4511b3b6b08c3e22e76e0591f5ab5ba8d4c3a5b1820"
     @MainActor var publishingIntervalInSeconds: TimeInterval = defaultPublishingIntervalInSeconds
     var status: Status = .stopped
     private let locationManager: LocationManager
@@ -31,7 +32,7 @@ class StreamrProxyClient {
     
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
-        proxyClientHandle = self.proxyClient.newClient("0x1234567890123456789012345678901234567890", "0xa000000000000000000000000000000000000000#01")
+        proxyClientHandle = self.proxyClient.newClient("0xa5374e3c19f15e1847881979dd0c6c9ffe846bd5", "0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01")
     }
     
     @MainActor
@@ -52,9 +53,10 @@ class StreamrProxyClient {
         print("Publish start")
         let latitude = locationManager.location?.latitude ?? 0
         let longitude = locationManager.location?.longitude ?? 0
+        let stdPrivateKey = std.string(ethereumPrivateKey)
         self.status = .publishing
         let result = await Task.detached {
-            self.proxyClient.publish(self.proxyClientHandle, std.string("\(latitude) \(longitude)"))
+            self.proxyClient.publish(self.proxyClientHandle, std.string("\(latitude) \(longitude)"), stdPrivateKey)
         }.value
         print("Publish end")
         return result

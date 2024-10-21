@@ -35,10 +35,10 @@ Result ProxyClient::deleteClient(uint64_t proxyClientHandle) const {
     return Result{Result::ResultCode::Ok, ""};
 }
 
-Result ProxyClient::publish(uint64_t proxyClientHandle, std::string data) const {
+Result ProxyClient::publish(uint64_t proxyClientHandle, std::string data, std::string ethereumPrivateKey) const {
     Error* errors = nullptr;
     uint64_t numErrors = 0;
-    proxyClientPublish(&errors, &numErrors, proxyClientHandle, data.c_str(), data.length());
+    proxyClientPublish(&errors, &numErrors, proxyClientHandle, data.c_str(), data.length(), ethereumPrivateKey.c_str());
     std::this_thread::sleep_for(1s);
     return Result{Result::ResultCode::Ok, ""};
 }
