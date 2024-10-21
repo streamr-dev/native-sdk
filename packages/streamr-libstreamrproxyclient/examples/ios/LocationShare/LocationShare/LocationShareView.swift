@@ -22,6 +22,10 @@ struct LocationShareView: View {
                         "Enter proxy ID",
                         text: $viewModel.proxyId
                     )
+                    SecureField(
+                        "Enter Ethereum Private Key",
+                        text: $viewModel.ethereumPrivateKey
+                    )
                     Text(viewModel.status)
                 }
                 Section(header: Text("Publishing Interval")) {

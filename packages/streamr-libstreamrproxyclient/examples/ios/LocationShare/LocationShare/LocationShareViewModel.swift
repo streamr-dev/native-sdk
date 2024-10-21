@@ -37,6 +37,16 @@ struct LocationShareViewModel {
     }
     
     @MainActor
+    var ethereumPrivateKey: String {
+        get {
+            streamrProxyClient.ethereumPrivateKey
+        }
+        set(newEthereumPrivateKey) {
+            streamrProxyClient.ethereumPrivateKey = newEthereumPrivateKey
+        }
+    }
+    
+    @MainActor
     var proxyId: String {
         get {
             streamrProxyClient.proxyInfo.peerId
