@@ -117,18 +117,20 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientDisconnect(JNIEnv *env,
 }
 */
 JNIEXPORT void JNICALL
-Java_com_example_locationshare_ProxyClientJNI_proxyClientPublish(JNIEnv *env, jclass, jlong clientHandle, jstring jContent) {
+Java_com_example_locationshare_ProxyClientJNI_proxyClientPublish(JNIEnv *env, jclass, jlong clientHandle, jstring jContent, jstring jEthereumPrivateKey) {
 
     const char* content = env->GetStringUTFChars(jContent, 0);
     uint64_t contentLength = strlen(content);
+    const char* ethereumPrivateKey = env->GetStringUTFChars(jEthereumPrivateKey, 0);
     LOGI("proxyClientPublish clientHandle: %d", clientHandle);
 
-    LOGI("proxyClientPublish string: %s", content);
+    LOGI("proxyClientPublish content: %s", content);
+    LOGI("proxyClientPublish ethereumPrivateKey: %s", ethereumPrivateKey);
 
     Error* errors = nullptr;
     uint64_t numErrors = 0;
 
-    proxyClientPublish(&errors, &numErrors, static_cast<uint64_t>(clientHandle), content, contentLength);
+    proxyClientPublish(&errors, &numErrors, static_cast<uint64_t>(clientHandle), content, contentLength, ethereumPrivateKey);
 
     env->ReleaseStringUTFChars(jContent, content);
 
