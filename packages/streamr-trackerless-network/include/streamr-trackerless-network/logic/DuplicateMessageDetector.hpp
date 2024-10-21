@@ -119,7 +119,8 @@ public:
     // NOLINTNEXTLINE(readability-function-cognitive-complexity)
     bool markAndCheck(
         std::optional<NumberPair> previousNumber, NumberPair number) {
-        if (previousNumber.has_value() && previousNumber.value().greaterThanOrEqual(number)) {
+        if (previousNumber.has_value() &&
+            previousNumber.value().greaterThanOrEqual(number)) {
             throw InvalidNumberingError();
         }
 
