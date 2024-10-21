@@ -11,7 +11,7 @@ public:
     static std::string binaryStringToHex(
         const std::string& binaryString, bool addPrefix = false) {
         std::string result;
-        boost::algorithm::hex(
+        boost::algorithm::hex_lower(
             binaryString.begin(),
             binaryString.end(),
             std::back_inserter(result));

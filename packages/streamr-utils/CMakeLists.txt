@@ -14,6 +14,7 @@ project(streamr-utils CXX)
 
 find_package(folly CONFIG REQUIRED)
 find_package(Boost CONFIG REQUIRED)
+find_package(cryptopp CONFIG REQUIRED)
 find_package(streamr-eventemitter CONFIG REQUIRED)
 find_package(streamr-logger CONFIG REQUIRED)
 
@@ -35,6 +36,10 @@ target_include_directories(
   streamr-utils INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
+find_library(SECP256K1_LIBRARY secp256k1)
+find_library(SECP256K1_LIBRARY_PRECOMPUTED secp256k1_precomputed)
+
+message(STATUS "SECP256K1_LIBRARY_PRECOMPUTED: ${SECP256K1_LIBRARY_PRECOMPUTED}")
 target_link_libraries(streamr-utils
     INTERFACE Folly::folly
     INTERFACE streamr::streamr-eventemitter
@@ -42,6 +47,9 @@ target_link_libraries(streamr-utils
     INTERFACE Boost::uuid
     INTERFACE Boost::endian
     INTERFACE Boost::algorithm
+    INTERFACE cryptopp::cryptopp
+    INTERFACE ${SECP256K1_LIBRARY}
+    INTERFACE ${SECP256K1_LIBRARY_PRECOMPUTED}
 )
 
 export(TARGETS streamr-utils
@@ -52,6 +60,9 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-utils-config.cmake"
     "list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH})\n"
     "find_package(Boost CONFIG REQUIRED)\n"
     "find_package(folly CONFIG REQUIRED)\n"
+    "find_package(cryptopp CONFIG REQUIRED)\n"
+    "find_library(SECP256K1_LIBRARY secp256k1)\n"
+    "find_library(SECP256K1_LIBRARY_PRECOMPUTED secp256k1_precomputed)\n"
     "if(NOT TARGET Boost::uuid)\n"
     "    add_library(Boost::uuid INTERFACE IMPORTED)\n"
     "    set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
@@ -92,7 +103,7 @@ if(NOT IOS)
     test/unit/ENSNameTest.cpp
     test/unit/AbortControllerTest.cpp
     test/unit/BinaryUtilsTest.cpp
-
+    test/unit/SigninUtilsTest.cpp
   )
 
   target_link_libraries(streamr-utils-test-unit 
