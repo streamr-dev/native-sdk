@@ -15,6 +15,7 @@
 #include "streamr-trackerless-network/logic/proxy/ProxyClient.hpp"
 #include "streamr-utils/BinaryUtils.hpp"
 #include "streamr-utils/EthereumAddress.hpp"
+#include "streamr-utils/SigningUtils.hpp"
 #include "streamr-utils/StreamPartID.hpp"
 #include "streamrproxyclient.h"
 namespace streamr::libstreamrproxyclient {
@@ -34,9 +35,11 @@ using streamr::trackerlessnetwork::proxy::ProxyClient;
 using streamr::trackerlessnetwork::proxy::ProxyClientOptions;
 using streamr::utils::BinaryUtils;
 using streamr::utils::EthereumAddress;
+using streamr::utils::SigningUtils;
 using streamr::utils::StreamPartID;
 using streamr::utils::StreamPartIDUtils;
 using streamr::utils::toEthereumAddress;
+
 class LibProxyClientApi {
 private:
     class ProxyClientWrapper {
@@ -150,7 +153,7 @@ private:
 
         proxyPeerDescriptor.mutable_websocket()->CopyFrom(connectivityMethod);
 
-        SLogger::info(
+        SLogger::trace(
             "Proxy peer descriptor created: " +
             proxyPeerDescriptor.DebugString());
         return proxyPeerDescriptor;
@@ -158,7 +161,7 @@ private:
 
     static std::shared_ptr<ConnectionManager> createConnectionManager(
         const DefaultConnectorFacadeOptions& opts) {
-        SLogger::info("Calling connection manager constructor");
+        SLogger::trace("Calling connection manager constructor");
 
         ConnectionManagerOptions connectionManagerOptions{
             .createConnectorFacade =
@@ -228,10 +231,10 @@ public:
                     [localPeerDescriptor](
                         const ConnectivityResponse& /* response */)
                     -> PeerDescriptor { return localPeerDescriptor; }});
-        SLogger::info("Connection manager created, starting it");
+        SLogger::trace("Connection manager created, starting it");
         connectionManager->start();
         uint64_t handle = createRandomHandle();
-        SLogger::info("Creating proxy client");
+        SLogger::trace("Creating proxy client");
         auto proxyClient = std::make_shared<ProxyClientWrapper>(
             handle,
             std::make_shared<ProxyClient>(ProxyClientOptions{
@@ -242,9 +245,9 @@ public:
                 .connectionLocker = *connectionManager}),
             fakeTransport,
             connectionManager);
-        SLogger::info("Proxy client created, starting it");
+        SLogger::trace("Proxy client created, starting it");
         proxyClient->getProxyClient()->start();
-        SLogger::info("Proxy client started");
+        SLogger::trace("Proxy client started");
 
         this->proxyClients[handle] = proxyClient;
         *errors = nullptr;
@@ -257,7 +260,7 @@ public:
         this->errors.clear();
         this->errorMessages.clear();
         this->proxyClients.erase(clientHandle);
-        SLogger::info("Proxy client erased");
+        SLogger::trace("Proxy client erased");
         *errors = nullptr;
         *numErrors = 0;
     }
@@ -334,7 +337,8 @@ public:
         uint64_t* numErrors,
         uint64_t clientHandle,
         const char* content,
-        uint64_t contentLength) {
+        uint64_t contentLength,
+        const char* ethereumPrivateKey) {
         auto proxyClient = this->proxyClients.find(clientHandle);
         if (proxyClient == this->proxyClients.end()) {
             this->addError(
@@ -349,11 +353,19 @@ public:
 
         StreamMessage message;
         std::string contentString(content, contentLength);
-        message.mutable_contentmessage()->set_content(contentString);
+        auto* contentMessage = message.mutable_contentmessage();
+        contentMessage->set_content(contentString);
+        contentMessage->set_contenttype(ContentType::BINARY);
+        contentMessage->set_encryptiontype(EncryptionType::NONE);
 
         MessageID messageId;
-        messageId.set_publisherid(BinaryUtils::hexToBinaryString(
-            proxyClient->second->getProxyClient()->getLocalEthereumAddress()));
+        std::string publisherIdHex =
+            proxyClient->second->getProxyClient()->getLocalEthereumAddress();
+        if (!publisherIdHex.starts_with("0x")) {
+            publisherIdHex = "0x" + publisherIdHex;
+        }
+        messageId.set_publisherid(
+            BinaryUtils::hexToBinaryString(publisherIdHex));
         messageId.set_messagechainid("1");
         messageId.set_timestamp(
             std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -361,7 +373,55 @@ public:
                 .count());
         messageId.set_sequencenumber(
             proxyClient->second->getNextSequenceNumber());
+
+        auto streamPartID =
+            proxyClient->second->getProxyClient()->getStreamPartID();
+        messageId.set_streampartition(static_cast<int32_t>(
+            StreamPartIDUtils::getStreamPartition(streamPartID).value()));
+        messageId.set_streamid(StreamPartIDUtils::getStreamID(streamPartID));
+
         message.mutable_messageid()->CopyFrom(messageId);
+
+        if (ethereumPrivateKey) {
+            std::string signaturePayload = messageId.streamid() +
+                std::to_string(messageId.streampartition()) +
+                std::to_string(messageId.timestamp()) +
+                std::to_string(messageId.sequencenumber()) + publisherIdHex +
+                messageId.messagechainid() + contentString;
+
+            SLogger::trace("Signature payload: ");
+            SLogger::trace("");
+            SLogger::trace(
+                "messageId.streamid(): \"" + messageId.streamid() + "\"");
+            SLogger::trace(
+                "messageId.streampartition(): \"" +
+                std::to_string(messageId.streampartition()) + "\"");
+            SLogger::trace(
+                "messageId.timestamp(): \"" +
+                std::to_string(messageId.timestamp()) + "\"");
+            SLogger::trace(
+                "messageId.sequencenumber(): \"" +
+                std::to_string(messageId.sequencenumber()) + "\"");
+            SLogger::trace("publisheridHex(): \"" + publisherIdHex + "\"");
+            SLogger::trace(
+                "messageId.messagechainid(): \"" + messageId.messagechainid() +
+                "\"");
+            SLogger::trace("contentString: \"" + contentString + "\"");
+            SLogger::trace("");
+
+            SLogger::trace(
+                "Signing payload as hex string: \"" +
+                BinaryUtils::binaryStringToHex(signaturePayload) + "\"");
+            auto signature = SigningUtils::createSignature(
+                signaturePayload, ethereumPrivateKey);
+
+            message.set_signature(signature);
+            message.set_signaturetype(SignatureType::SECP256K1);
+            SLogger::trace(
+                "Signature in hex: \"" +
+                BinaryUtils::binaryStringToHex(signature) + "\"");
+        }
+
         try {
             auto result =
                 proxyClient->second->getProxyClient()->broadcast(message);
