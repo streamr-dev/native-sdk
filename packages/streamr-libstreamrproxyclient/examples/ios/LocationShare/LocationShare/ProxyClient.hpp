@@ -8,7 +8,7 @@
 #ifndef ProxyClient_hpp
 #define ProxyClient_hpp
 
-#define GLOG_USE_GLOG_EXPORT
+//#define GLOG_USE_GLOG_EXPORT
 
 #include <string>
 #include "Result.hpp"
@@ -21,7 +21,7 @@ public:
     ProxyClient() { }
     uint64_t newClient(std::string ownEthereumAddress, std::string streamPartId) const;
     Result deleteClient(uint64_t proxyClientHandle) const;
-    Result publish(uint64_t proxyClientHandle, std::string data) const;
+    Result publish(uint64_t proxyClientHandle, std::string data, std::string ethereumPrivateKey) const;
     uint64_t connect(uint64_t proxyClientHandle, std::string websocketUrl,
                      std::string ethereumAddress) const;
 };
