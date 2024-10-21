@@ -34,7 +34,7 @@ object ProxyClientJNI {
     external fun proxyClientDisconnect(clientHandle: Long)
 */
     @Throws(StreamrProxyException::class)
-    external fun proxyClientPublish(clientHandle: Long, content: String)
+    external fun proxyClientPublish(clientHandle: Long, content: String, ethereumPrivateKey: String)
 
     data class Proxy(
         val websocketUrl: String,
