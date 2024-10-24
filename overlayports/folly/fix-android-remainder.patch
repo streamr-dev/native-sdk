@@ -1,0 +1,13 @@
+diff --git a/folly/portability/Math.h b/folly/portability/Math.h
+index 594bab8..53b8e9e 100644
+--- a/folly/portability/Math.h
++++ b/folly/portability/Math.h
+@@ -20,7 +20,7 @@
+ 
+ namespace folly {
+ 
+-#if !defined(__ANDROID__) && !defined(__UCLIBC__)
++#if !(defined(__ANDROID__) && defined(__UCLIBC__))
+ 
+ /**
+  * Most platforms hopefully provide std::nextafter, std::remainder.

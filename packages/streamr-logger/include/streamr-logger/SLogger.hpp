@@ -2,6 +2,7 @@
 #define STREAMER_LOGGER_SLOGGER_HPP
 
 #include <source_location>
+#include <string_view>
 #include <nlohmann/json.hpp>
 #include "streamr-logger/Logger.hpp"
 
@@ -19,7 +20,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     static void trace(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -35,7 +36,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     static void debug(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -51,7 +52,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     static void info(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -67,7 +68,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     static void warn(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -83,7 +84,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     static void error(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -99,7 +100,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     static void fatal(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {

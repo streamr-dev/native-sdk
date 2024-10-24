@@ -20,7 +20,7 @@ struct MyStruct {
 // infer initializer list types.
 
 template <typename T = StreamrJsonInitializerList>
-void printMyData(T data) {
+void printMyData(T data) { // NOLINT
     std::cout << toJson(data) << std::endl;
 }
 
@@ -47,26 +47,26 @@ public:
 };
 
 int main() {
-    MyStruct s{1, "hello"};
+    MyStruct s{.x = 1, .y = "hello"};
 
     // Converting a struct to a json object
     nlohmann::json json = toJson(s);
 
     // outputs: {"x":1,"y":"hello"}
-    std::cout << json << std::endl;
+    std::cout << json << '\n';
 
     // Converting an initializer list containing a struct to a json object
 
     nlohmann::json json2 = toJson({{"data", s}});
 
     // outputs: {"data":{"x":1,"y":"hello"}}
-    std::cout << json2 << std::endl;
+    std::cout << json2 << '\n';
 
     // Converting struct to a string
     std::string str = toString(s);
 
     // outputs: {"x":1,"y":"hello"}
-    std::cout << str << std::endl;
+    std::cout << str << '\n';
 
     // Calling a template function that forwards parameters to toJson()
     // Only works if the template function has the right default type parameter
@@ -77,12 +77,12 @@ int main() {
     ClassWithPrivateSection c{1, "hello"};
     nlohmann::json json3 = toJson(c);
     // outputs: {"data":1,"name":"hello"}
-    std::cout << json3 << std::endl;
+    std::cout << json3 << '\n';
 
     // Converting a class with a private section to a string
     std::string str2 = toString(c);
     // outputs: {"data":1,"name":"hello"}
-    std::cout << str2 << std::endl;
+    std::cout << str2 << '\n';
 
     return 0;
 }

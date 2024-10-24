@@ -1,0 +1,23 @@
+{
+    "name": "streamr-trackerless-network",
+    "version": "1.0.0",
+    "dependencies": [
+        "gtest",
+        "protobuf",
+        "folly",
+        "magic-enum",
+        "boost-algorithm"
+    ],
+    "features": {
+        "monorepo": {
+            "description": "Monorepo dependencies",
+            "dependencies": [
+                "streamr-utils",
+                "streamr-eventemitter",
+                "streamr-logger",
+                "streamr-proto-rpc",
+                "streamr-dht"
+            ]
+        }
+    }
+}
