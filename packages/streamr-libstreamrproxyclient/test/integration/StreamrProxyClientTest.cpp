@@ -1,38 +1,45 @@
 #include "streamrproxyclient.h"
 #include <iostream>
+#include <string>
 #include <gtest/gtest.h>
 #include "streamr-logger/SLogger.hpp"
 
 using streamr::logger::SLogger;
 
-static constexpr const char* invalidEthereumAddress =
-    "INVALID_ETHEREUM_ADDRESS";
-static constexpr const char* goodEthereumAddress =
-    "0x123456789012345678901234567890123456789a";
-static constexpr const char* validEthereumAddress =
-    "0x1234567890123456789012345678901234567890";
-static constexpr const char* validEthereumAddress2 =
-    "0x1234567890123456789012345678901234567892";
-static constexpr const char* validEthereumAddress3 =
-    "0x1234567890123456789012345678901234567893";
-static constexpr const char* invalidStreamPartId = "INVALID_STREAM_PART_ID";
-static constexpr const char* validStreamPartId =
-    "0xa000000000000000000000000000000000000000#01";
+class StreamrProxyClientTest : public ::testing::Test {
+protected:
+    static constexpr const char* invalidEthereumAddress =
+        "INVALID_ETHEREUM_ADDRESS";
+    static constexpr const char* goodEthereumAddress =
+        "0x123456789012345678901234567890123456789a";
+    static constexpr const char* validEthereumAddress =
+        "0x1234567890123456789012345678901234567890";
+    static constexpr const char* validEthereumAddress2 =
+        "0x1234567890123456789012345678901234567892";
+    static constexpr const char* validEthereumAddress3 =
+        "0x1234567890123456789012345678901234567893";
+    static constexpr const char* invalidStreamPartId = "INVALID_STREAM_PART_ID";
+    static constexpr const char* validStreamPartId =
+        "0xa000000000000000000000000000000000000000#01";
 
-static constexpr const char* invalidProxyUrl = "poiejrg039utg240";
-static constexpr const char* validProxyUrl = "ws://valid.com";
+    static constexpr const char* invalidProxyUrl = "poiejrg039utg240";
+    static constexpr const char* validProxyUrl = "ws://valid.com";
 
-static constexpr const char* nonExistentProxyUrl0 = "ws://localhost:0";
-static constexpr const char* nonExistentProxyUrl1 = "ws://localhost:1";
-static constexpr const char* nonExistentProxyUrl2 = "ws://localhost:2";
+    static constexpr const char* nonExistentProxyUrl0 = "ws://localhost:0";
+    static constexpr const char* nonExistentProxyUrl1 = "ws://localhost:1";
+    static constexpr const char* nonExistentProxyUrl2 = "ws://localhost:2";
 
-static constexpr uint64_t invalidClientHandle = 0;
+    static constexpr uint64_t invalidClientHandle = 0;
 
-TEST(StreamrProxyClientTest, CanCallApi) {
+public:
+    ~StreamrProxyClientTest() override { proxyClientCleanupLibrary(); }
+};
+
+TEST_F(StreamrProxyClientTest, CanCallApi) {
     std::cout << "RPC returned: " << testRpc() << "\n";
 }
 
-TEST(StreamrProxyClientTest, CanCreateAndDeleteProxyClient) {
+TEST_F(StreamrProxyClientTest, CanCreateAndDeleteProxyClient) {
     const ProxyResult* result = nullptr;
 
     const char* ownEthereumAddress = validEthereumAddress;
@@ -54,7 +61,7 @@ TEST(StreamrProxyClientTest, CanCreateAndDeleteProxyClient) {
     SLogger::info("test finished");
 }
 
-TEST(StreamrProxyClientTest, InvalidEthereumAddress) {
+TEST_F(StreamrProxyClientTest, InvalidEthereumAddress) {
     const ProxyResult* result = nullptr;
 
     const char* ownEthereumAddress = invalidEthereumAddress;
@@ -72,7 +79,7 @@ TEST(StreamrProxyClientTest, InvalidEthereumAddress) {
     proxyClientResultDelete(result);
 }
 
-TEST(StreamrProxyClientTest, InvalidStreamPartId) {
+TEST_F(StreamrProxyClientTest, InvalidStreamPartId) {
     const ProxyResult* result = nullptr;
 
     const char* ownEthereumAddress = validEthereumAddress;
@@ -90,7 +97,7 @@ TEST(StreamrProxyClientTest, InvalidStreamPartId) {
     proxyClientResultDelete(result);
 }
 
-TEST(StreamrProxyClientTest, ProxyClientNotFound) {
+TEST_F(StreamrProxyClientTest, ProxyClientNotFound) {
     const ProxyResult* result = nullptr;
 
     Proxy proxy{
@@ -104,7 +111,7 @@ TEST(StreamrProxyClientTest, ProxyClientNotFound) {
     proxyClientResultDelete(result);
 }
 
-TEST(StreamrProxyClientTest, NoProxiesDefined) {
+TEST_F(StreamrProxyClientTest, NoProxiesDefined) {
     const ProxyResult* result = nullptr;
 
     const char* ownEthereumAddress = validEthereumAddress;
@@ -120,7 +127,7 @@ TEST(StreamrProxyClientTest, NoProxiesDefined) {
     proxyClientResultDelete(result);
 }
 
-TEST(StreamrProxyClientTest, InvalidProxyUrl) {
+TEST_F(StreamrProxyClientTest, InvalidProxyUrl) {
     const ProxyResult* result = nullptr;
 
     const char* ownEthereumAddress = validEthereumAddress;
@@ -146,7 +153,7 @@ TEST(StreamrProxyClientTest, InvalidProxyUrl) {
     proxyClientResultDelete(result3);
 }
 
-TEST(StreamrProxyClientTest, InvalidProxyEthereumAddress) {
+TEST_F(StreamrProxyClientTest, InvalidProxyEthereumAddress) {
     const ProxyResult* result = nullptr;
 
     const char* ownEthereumAddress = validEthereumAddress;
@@ -170,7 +177,7 @@ TEST(StreamrProxyClientTest, InvalidProxyEthereumAddress) {
     proxyClientResultDelete(result3);
 }
 
-TEST(StreamrProxyClientTest, ProxyConnectionFailed) {
+TEST_F(StreamrProxyClientTest, ProxyConnectionFailed) {
     const ProxyResult* result = nullptr;
 
     const char* ownEthereumAddress = validEthereumAddress;
@@ -199,7 +206,7 @@ TEST(StreamrProxyClientTest, ProxyConnectionFailed) {
     proxyClientResultDelete(result3);
 }
 
-TEST(StreamrProxyClientTest, ThreeProxyConnectionsFailed) {
+TEST_F(StreamrProxyClientTest, ThreeProxyConnectionsFailed) {
     const ProxyResult* result = nullptr;
 
     const char* ownEthereumAddress = goodEthereumAddress;
@@ -224,9 +231,15 @@ TEST(StreamrProxyClientTest, ThreeProxyConnectionsFailed) {
 
     EXPECT_EQ(numConnections, 0);
     EXPECT_EQ(result2->numErrors, 3);
-    EXPECT_EQ(result2->errors[0].proxy->websocketUrl, proxies[0].websocketUrl);
-    EXPECT_EQ(result2->errors[1].proxy->websocketUrl, proxies[1].websocketUrl);
-    EXPECT_EQ(result2->errors[2].proxy->websocketUrl, proxies[2].websocketUrl);
+    EXPECT_EQ(
+        std::string(result2->errors[0].proxy->websocketUrl),
+        std::string(proxies[0].websocketUrl));
+    EXPECT_EQ(
+        std::string(result2->errors[1].proxy->websocketUrl),
+        std::string(proxies[1].websocketUrl));
+    EXPECT_EQ(
+        std::string(result2->errors[2].proxy->websocketUrl),
+        std::string(proxies[2].websocketUrl));
 
     for (uint64_t i = 0; i < result2->numErrors; ++i) {
         SLogger::info("errors: " + std::string(result2->errors[i].message));

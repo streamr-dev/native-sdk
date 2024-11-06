@@ -1,25 +1,40 @@
 #include "streamrproxyclient.h"
 #include <folly/Singleton.h>
 #include "LibProxyClientApi.hpp"
+#include <iostream>
+#include "streamr-logger/SLogger.hpp"
 
 using streamr::libstreamrproxyclient::LibProxyClientApi;
-
+using streamr::logger::SLogger;
 const char* testRpc() {
     return "Hajotkaa siihen";
 }
-
 
 static void initFolly() { // NOLINT
     folly::SingletonVault::singleton()->registrationComplete();
 }
 
-void initialize() {
-    // getFollyInit();
+static LibProxyClientApi* libProxyClientApi = nullptr; // NOLINT
+static bool cleanupCalled = false; // NOLINT
+
+static void initialize() { // NOLINT
+    std::cout << "initialize()" << "\n";
+    libProxyClientApi = new LibProxyClientApi();
+}
+
+void proxyClientCleanupLibrary() { // NOLINT
+    if (cleanupCalled) {
+        return;
+    }
+    SLogger::info("cleanup()");
+    //delete libProxyClientApi;
+    SLogger::info("cleanup() done");
+
+    cleanupCalled = true;
 }
 
 static LibProxyClientApi& getProxyClientApi() { // NOLINT
-    static LibProxyClientApi proxyClientApi; // NOLINT
-    return proxyClientApi;
+    return *libProxyClientApi;
 }
 
 void proxyClientResultDelete(const ProxyResult* proxyResult) {
