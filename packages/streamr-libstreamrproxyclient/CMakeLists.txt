@@ -91,10 +91,21 @@ if (NOT IOS)
         PRIVATE GTest::gtest_main
     )
 
+    add_executable(streamrproxyclient-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrProxyClientTest.cpp)
+    target_link_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
+    
+    target_include_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/include)
+    
+    target_link_libraries(streamrproxyclient-cpp-wrapper-test 
+        PRIVATE streamrproxyclient
+        PRIVATE GTest::gtest 
+        PRIVATE GTest::gtest_main
+    )
+
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
         include(GoogleTest)
         gtest_discover_tests(streamr-streamrproxyclient-test-integration)
-
+        gtest_discover_tests(streamrproxyclient-cpp-wrapper-test)
         add_test(
             NAME ts-end-to-end-test
             COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-tests.sh"
