@@ -59,6 +59,41 @@ public:
         this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
         this->proxy.websocketUrl = this->websocketUrlString.c_str();
     }
+    ProxyCpp(const ProxyCpp& other) {
+        this->ethereumAddressString = other.ethereumAddressString;
+        this->websocketUrlString = other.websocketUrlString;
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+    }
+
+    ProxyCpp(ProxyCpp&& other) noexcept {
+        this->ethereumAddressString = std::move(other.ethereumAddressString);
+        this->websocketUrlString = std::move(other.websocketUrlString);
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+    }
+
+    ProxyCpp& operator=(const ProxyCpp& other) {
+        if (this == &other) {
+            return *this;
+        }
+        this->ethereumAddressString = other.ethereumAddressString;
+        this->websocketUrlString = other.websocketUrlString;
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+        return *this;
+    }
+
+    ProxyCpp& operator=(ProxyCpp&& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+        this->ethereumAddressString = std::move(other.ethereumAddressString);
+        this->websocketUrlString = std::move(other.websocketUrlString);
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+        return *this;
+    }
     [[nodiscard]] const Proxy* getProxy() const { return &this->proxy; }
 };
 
@@ -72,17 +107,58 @@ private:
 
 public:
     ErrorCpp(
-        const std::string& message,
+        const std::string& message, // NOLINT
         const std::string& code,
         const std::optional<ProxyCpp>& proxyCpp) {
         this->proxyCpp = proxyCpp;
 
-        this->messageString = message;
-        this->codeString = code;
+        this->messageString = std::string(message);
+        this->codeString = std::string(code);
         this->error.message = this->messageString.c_str();
         this->error.code = this->codeString.c_str();
         this->error.proxy =
             this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+    }
+    ErrorCpp(const ErrorCpp& other) {
+        this->messageString = other.messageString;
+        this->codeString = other.codeString;
+        this->proxyCpp = other.proxyCpp;
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy = this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+    }
+    ErrorCpp(ErrorCpp&& other) noexcept {
+        this->messageString = std::move(other.messageString);
+        this->codeString = std::move(other.codeString);
+        this->proxyCpp = std::move(other.proxyCpp);
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy = this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+    }
+    ErrorCpp& operator=(const ErrorCpp& other) {
+        if (this == &other) {
+            return *this;
+        }
+        this->messageString = other.messageString;
+        this->codeString = other.codeString;
+        this->proxyCpp = other.proxyCpp;
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy = this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+        return *this;
+    }
+
+    ErrorCpp& operator=(ErrorCpp&& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+        this->messageString = std::move(other.messageString);
+        this->codeString = std::move(other.codeString);
+        this->proxyCpp = std::move(other.proxyCpp);
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy = this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+        return *this;
     }
     [[nodiscard]] const Error* getError() const { return &this->error; }
 };
