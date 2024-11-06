@@ -20,7 +20,7 @@ set (SHAREDLIB_SOVERSION 1)
 project(streamr-streamrproxyclient CXX)
 add_library(streamrproxyclient SHARED
             src/streamrproxyclient.cpp
-            include/streamrproxyclient.h
+            include/streamrproxyclient.h include/StreamrProxyClient.hpp
 )
 
 set_target_properties(streamrproxyclient PROPERTIES VERSION ${SHAREDLIB_VERSION} SOVERSION ${SHAREDLIB_SOVERSION})
@@ -68,7 +68,7 @@ if (NOT IOS)
     find_package(GTest CONFIG REQUIRED)
     find_package(folly CONFIG REQUIRED)
      
-    add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp)
+    add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp test/integration/StreamrProxyClientCppTest.cpp)
     target_link_directories(streamr-streamrproxyclient-test-integration PUBLIC ${SHAREDLIB_OUTPUT_DIRECTORY})
     
     target_include_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
