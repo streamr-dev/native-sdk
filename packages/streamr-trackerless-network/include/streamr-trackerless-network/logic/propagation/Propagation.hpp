@@ -1,13 +1,17 @@
 #ifndef STREAMR_TRACKERLESS_NETWORK_PROPAGATION_HPP
 #define STREAMR_TRACKERLESS_NETWORK_PROPAGATION_HPP
 
+#include <vector>
 #include "PropagationTaskStore.hpp"
+#include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
 
 namespace streamr::trackerlessnetwork::propagation {
 
+using ::dht::PeerDescriptor;
 using streamr::dht::DhtAddress;
+using streamr::dht::Identifiers;
 using SendToNeighborFn =
     std::function<void(const DhtAddress&, const StreamMessage&)>;
 
@@ -51,9 +55,12 @@ public:
      * Node should invoke this when it learns about a new message
      * @return number of neighbors the message was sent to immediately
      */
-    size_t feedUnseenMessage(
+    std::pair<
+        std::vector<PeerDescriptor> /* failed to send to */,
+        std::vector<PeerDescriptor> /* successfully sent to */>
+    feedUnseenMessage(
         const StreamMessage& message,
-        const std::vector<DhtAddress>& targets,
+        const std::vector<PeerDescriptor>& targets,
         const std::optional<DhtAddress>& source) {
         PropagationTask task{
             .message = message,
@@ -61,13 +68,18 @@ public:
             .handledNeighbors = std::set<DhtAddress>()};
 
         this->activeTaskStore.add(task);
-        size_t sentTo = 0;
+        std::vector<PeerDescriptor> succesfulSends;
+        std::vector<PeerDescriptor> failedSends;
         for (const auto& target : targets) {
-            if (this->sendAndAwaitThenMark(task, target)) {
-                sentTo++;
+            const auto neighborId =
+                Identifiers::getNodeIdFromPeerDescriptor(target);
+            if (this->sendAndAwaitThenMark(task, neighborId)) {
+                succesfulSends.push_back(target);
+            } else {
+                failedSends.push_back(target);
             }
         }
-        return sentTo;
+        return {failedSends, succesfulSends};
     }
 
     /**

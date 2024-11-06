@@ -41,13 +41,32 @@ typedef struct Proxy {
 typedef struct Error {
     const char* message;
     const char* code;
+    const struct Proxy* proxy;
 } Error;
+
+// NOLINTNEXTLINE
+typedef struct ProxyResult {
+    Error* errors;
+    uint64_t numErrors;
+    Proxy* successful;
+    uint64_t numSuccessful;
+} ProxyResult;
+
+/**
+ * @brief Delete a ProxyResult. This method must be called after every call that
+ * returns a ProxyResult.
+ * @param proxyResult The ProxyResult to delete.
+ */
+
+EXTERN_C SHARED_EXPORT void proxyClientResultDelete(const ProxyResult* proxyResult);
 
 /**
  * @brief Create a new proxy client.
  *
- * @param errors The array of errors or NULL.
- * @param numErrors The number of errors.
+ * @param proxyResult Pointer in which ProxyResult will be stored. You MUST call
+ * proxyClientResultDelete() on this after the call returns. The resulting ProxyResult
+ * may only contain  "errors" - the "successful" and "numSuccessful" fields are
+ * unused.
  * @param ownEthereumAddress The Ethereum address of the client in format
  * 0x1234567890123456789012345678901234567890.
  * @param streamPartId The stream part id in format
@@ -56,27 +75,28 @@ typedef struct Error {
  */
 
 EXTERN_C SHARED_EXPORT uint64_t proxyClientNew(
-    Error** errors,
-    uint64_t* numErrors,
+    const ProxyResult** proxyResult,
     const char* ownEthereumAddress,
     const char* streamPartId);
 
 /**
  * @brief Delete a proxy client.
  *
- * @param errors The array of errors or NULL.
- * @param numErrors The number of errors.
+ * @param proxyResult Pointer in which ProxyResult will be stored. You MUST call
+ * proxyClientResultDelete() on this after the call returns. The resulting ProxyResult
+ * may only contain  "errors" - the "successful" and "numSuccessful" fields are
+ * unused.
  * @param clientHandle The client handle of the client to delete.
  */
 
 EXTERN_C SHARED_EXPORT void proxyClientDelete(
-    Error** errors, uint64_t* numErrors, uint64_t clientHandle);
+    const ProxyResult** proxyResult, uint64_t clientHandle);
 
 /**
  * @brief Connect a proxy client to a list of proxies.
  *
- * @param errors The array of errors or NULL.
- * @param numErrors The number of errors.
+ * @param proxyResult Pointer in which ProxyResult will be stored. You MUST call
+ * proxyClientResultDelete() on this after the call returns.
  * @param clientHandle The client handle of the client to connect.
  * @param proxies The array of proxies.
  * @param numProxies The number of proxies.
@@ -84,8 +104,7 @@ EXTERN_C SHARED_EXPORT void proxyClientDelete(
  */
 
 EXTERN_C SHARED_EXPORT uint64_t proxyClientConnect(
-    Error** errors,
-    uint64_t* numErrors,
+    const ProxyResult** proxyResult,
     uint64_t clientHandle,
     const Proxy* proxies,
     uint64_t numProxies);
@@ -93,19 +112,21 @@ EXTERN_C SHARED_EXPORT uint64_t proxyClientConnect(
 /**
  * @brief Disconnect a proxy client from all proxies.
  *
- * @param errors The array of errors or NULL.
- * @param numErrors The number of errors.
+ * @param proxyResult Pointer in which ProxyResult will be stored. You MUST call
+ * proxyClientResultDelete() on this after the call returns. The resulting ProxyResult
+ * may only contain  "errors" - the "successful" and "numSuccessful" fields are
+ * unused.
  * @param clientHandle The client handle of the client to disconnect.
  */
 
 EXTERN_C SHARED_EXPORT void proxyClientDisconnect(
-    Error** errors, uint64_t* numErrors, uint64_t clientHandle);
+    const ProxyResult** proxyResult, uint64_t clientHandle);
 
 /**
  * @brief Publish a message to the stream.
  *
- * @param errors The array of errors or NULL.
- * @param numErrors The number of errors.
+ * @param proxyResult Pointer in which ProxyResult will be stored. You MUST call
+ * proxyClientResultDelete() on this after the call returns.
  * @param clientHandle The client handle of the client to publish.
  * @param content The content to publish.
  * @param contentLength The length of the content.
@@ -115,8 +136,7 @@ EXTERN_C SHARED_EXPORT void proxyClientDisconnect(
  */
 
 EXTERN_C SHARED_EXPORT uint64_t proxyClientPublish(
-    Error** errors,
-    uint64_t* numErrors,
+    const ProxyResult** proxyResult,
     uint64_t clientHandle,
     const char* content,
     uint64_t contentLength,
