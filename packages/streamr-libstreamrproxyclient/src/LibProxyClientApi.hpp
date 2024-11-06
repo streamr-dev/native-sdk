@@ -14,6 +14,7 @@
 #include <vector>
 #include "streamr-dht/connection/ConnectionManager.hpp"
 #include "streamr-dht/connection/ConnectorFacade.hpp"
+#include "streamr-dht/helpers/Connectivity.hpp"
 #include "streamr-dht/transport/FakeTransport.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-trackerless-network/logic/proxy/ProxyClient.hpp"
@@ -33,6 +34,7 @@ using streamr::dht::connection::ConnectionManager;
 using streamr::dht::connection::ConnectionManagerOptions;
 using streamr::dht::connection::DefaultConnectorFacade;
 using streamr::dht::connection::DefaultConnectorFacadeOptions;
+using streamr::dht::helpers::Connectivity;
 using streamr::dht::transport::FakeEnvironment;
 using streamr::dht::transport::FakeTransport;
 using streamr::logger::SLogger;
@@ -53,7 +55,8 @@ private:
     Proxy proxy;
 
 public:
-    ProxyCpp(const std::string& ethereumAddress, const std::string& websocketUrl) {
+    ProxyCpp(
+        const std::string& ethereumAddress, const std::string& websocketUrl) {
         this->ethereumAddressString = ethereumAddress;
         this->websocketUrlString = websocketUrl;
         this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
@@ -125,7 +128,8 @@ public:
         this->proxyCpp = other.proxyCpp;
         this->error.message = this->messageString.c_str();
         this->error.code = this->codeString.c_str();
-        this->error.proxy = this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+        this->error.proxy =
+            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
     }
     ErrorCpp(ErrorCpp&& other) noexcept {
         this->messageString = std::move(other.messageString);
@@ -133,7 +137,8 @@ public:
         this->proxyCpp = std::move(other.proxyCpp);
         this->error.message = this->messageString.c_str();
         this->error.code = this->codeString.c_str();
-        this->error.proxy = this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+        this->error.proxy =
+            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
     }
     ErrorCpp& operator=(const ErrorCpp& other) {
         if (this == &other) {
@@ -144,7 +149,8 @@ public:
         this->proxyCpp = other.proxyCpp;
         this->error.message = this->messageString.c_str();
         this->error.code = this->codeString.c_str();
-        this->error.proxy = this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+        this->error.proxy =
+            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
         return *this;
     }
 
@@ -157,7 +163,8 @@ public:
         this->proxyCpp = std::move(other.proxyCpp);
         this->error.message = this->messageString.c_str();
         this->error.code = this->codeString.c_str();
-        this->error.proxy = this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+        this->error.proxy =
+            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
         return *this;
     }
     [[nodiscard]] const Error* getError() const { return &this->error; }
@@ -491,6 +498,8 @@ public:
             try {
                 if (error.getOriginalException()) {
                     std::rethrow_exception(error.getOriginalException());
+                } else {
+                    throw std::runtime_error("No original exception");
                 }
             } catch (const std::exception& e) {
                 errorsCpp.emplace_back(std::move(ErrorCpp(
@@ -498,13 +507,16 @@ public:
                     ERROR_PROXY_CONNECTION_FAILED,
                     ProxyCpp(
                         error.getPeerDescriptor().nodeid(),
-                        error.getPeerDescriptor().websocket().host()))));
+                        Connectivity::connectivityMethodToWebsocketUrl(
+                            error.getPeerDescriptor().websocket())))));
             }
         }
 
         for (const auto& proxy : successfullyConnected) {
-            successfullyConnectedCpp.emplace_back(
-                std::move(ProxyCpp(proxy.nodeid(), proxy.websocket().host())));
+            successfullyConnectedCpp.emplace_back(std::move(ProxyCpp(
+                proxy.nodeid(),
+                Connectivity::connectivityMethodToWebsocketUrl(
+                    proxy.websocket()))));
         }
 
         *proxyResult = addResult(errorsCpp, successfullyConnectedCpp);
@@ -617,11 +629,16 @@ public:
                 errorsCpp.emplace_back(std::move(ErrorCpp(
                     "Failed to send message to proxy",
                     ERROR_PROXY_BROADCAST_FAILED,
-                    ProxyCpp(error.nodeid(), error.websocket().host()))));
+                    ProxyCpp(
+                        error.nodeid(),
+                        Connectivity::connectivityMethodToWebsocketUrl(
+                            error.websocket())))));
             }
             for (const auto& proxy : result.second) {
-                successfullySentCpp.emplace_back(std::move(
-                    ProxyCpp(proxy.nodeid(), proxy.websocket().host())));
+                successfullySentCpp.emplace_back(std::move(ProxyCpp(
+                    proxy.nodeid(),
+                    Connectivity::connectivityMethodToWebsocketUrl(
+                        proxy.websocket()))));
             }
             *proxyResult = addResult(errorsCpp, successfullySentCpp);
             return successfullySentCpp.size();

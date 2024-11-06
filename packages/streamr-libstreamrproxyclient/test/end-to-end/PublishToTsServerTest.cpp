@@ -2,16 +2,22 @@
 #include <gtest/gtest.h>
 #include "streamrproxyclient.h"
 
-static constexpr const char* ownEthereumAddress =
-    "0x1234567890123456789012345678901234567890";
+class PublishToTsServerTest : public ::testing::Test {
+protected:
+    static constexpr const char* ownEthereumAddress =
+        "0x1234567890123456789012345678901234567890";
 
-static constexpr const char* tsEthereumAddress =
-    "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-static constexpr const char* tsProxyUrl = "ws://127.0.0.1:44211";
-static constexpr const char* tsStreamPartId =
-    "0xa000000000000000000000000000000000000000#01";
+    static constexpr const char* tsEthereumAddress =
+        "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    static constexpr const char* tsProxyUrl = "ws://127.0.0.1:44211";
+    static constexpr const char* tsStreamPartId =
+        "0xa000000000000000000000000000000000000000#01";
 
-TEST(PublishToTsServerTest, ProxyPublish) {
+public:
+    ~PublishToTsServerTest() override { proxyClientCleanupLibrary(); }
+};
+
+TEST_F(PublishToTsServerTest, ProxyPublish) {
     const ProxyResult* result = nullptr;
 
     uint64_t clientHandle =
@@ -43,7 +49,7 @@ TEST(PublishToTsServerTest, ProxyPublish) {
     proxyClientResultDelete(result4);
 }
 
-TEST(PublishToTsServerTest, ProxyPublishMultipleMessages) {
+TEST_F(PublishToTsServerTest, ProxyPublishMultipleMessages) {
     const ProxyResult* result = nullptr;
 
     uint64_t clientHandle =
