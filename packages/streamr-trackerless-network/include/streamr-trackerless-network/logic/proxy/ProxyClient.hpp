@@ -233,13 +233,11 @@ public:
         auto connectionCountDiff =
             this->definition->connectionCount - this->connections.size();
         if (connectionCountDiff > 0) {
-            auto [errors, successfullyConnected] =
+            auto [errs, success] =
                 this->openRandomConnections(connectionCountDiff);
-            errors.insert(errors.end(), errors.begin(), errors.end());
+            errors.insert(errors.end(), errs.begin(), errs.end());
             successfullyConnected.insert(
-                successfullyConnected.end(),
-                successfullyConnected.begin(),
-                successfullyConnected.end());
+                successfullyConnected.end(), success.begin(), success.end());
         } else if (connectionCountDiff < 0) {
             this->closeRandomConnections(-connectionCountDiff);
         }
@@ -277,7 +275,7 @@ public:
                     this->connections.at(id).peerDescriptor;
                 successfullyConnected.push_back(peerDescriptor);
             } catch (const ConnectingToProxyError& e) {
-                errors.push_back(e);
+                errors.push_back(std::move(ConnectingToProxyError(e)));
             }
         }
         return {errors, successfullyConnected};

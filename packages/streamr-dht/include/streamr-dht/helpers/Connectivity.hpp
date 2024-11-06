@@ -1,6 +1,8 @@
 #ifndef STREAMR_DHT_HELPERS_CONNECTIVITY_HPP
 #define STREAMR_DHT_HELPERS_CONNECTIVITY_HPP
 
+#include <optional>
+#include <string>
 #include <streamr-dht/connection/Connection.hpp>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/helpers/AddressTools.hpp"
@@ -37,6 +39,14 @@ public:
             return ConnectionType::WEBSOCKET_SERVER;
         }
         return ConnectionType::WEBRTC;
+    }
+
+    static std::string connectivityMethodToWebsocketUrl(
+        const ConnectivityMethod& ws,
+        const std::optional<std::string>& action = std::nullopt) {
+        return (ws.tls() ? "wss://" : "ws://") + ws.host() + ":" +
+            std::to_string(ws.port()) +
+            (action.has_value() ? "?action=" + action.value() : "");
     }
 };
 
