@@ -103,25 +103,92 @@ TEST_F(StreamrProxyClientCppTest, NoProxiesDefined) noexcept(false) {
     EXPECT_EQ(error.code, StreamrProxyErrorCode::NO_PROXIES_DEFINED);
     EXPECT_FALSE(error.message.empty());
 }
-/*
 
-    const ProxyResult* result = nullptr;
+TEST_F(StreamrProxyClientCppTest, InvalidProxyEthereumAddress) noexcept(false) {
+    // Create client with valid parameters
+    StreamrProxyClient client(validEthereumAddress, validStreamPartId);
 
-    const char* ownEthereumAddress = validEthereumAddress;
-    const char* streamPartId = validStreamPartId;
+    // Create a test proxy with invalid ethereum address
+    std::vector<StreamrProxyAddress> proxies = {
+        StreamrProxyAddress{
+            validProxyUrl,
+            invalidEthereumAddress
+        }
+    };
 
-    uint64_t clientHandle =
-        proxyClientNew(&result, ownEthereumAddress, streamPartId);
+    // Try to connect and expect error
+    StreamrProxyResult result = client.connect(proxies);
 
-    EXPECT_EQ(result->numErrors, 0);
-    EXPECT_NE(clientHandle, 0);
-    proxyClientResultDelete(result);
+    // Verify results
+    EXPECT_EQ(result.numConnected, 0);
+    EXPECT_TRUE(result.successful.empty());
+    EXPECT_EQ(result.failed.size(), 1);
 
-    const ProxyResult* result2 = nullptr;
-    proxyClientDelete(&result2, clientHandle);
-    SLogger::info("proxyClientDelete called");
-    EXPECT_EQ(result2->numErrors, 0);
-    proxyClientResultDelete(result2);
+    // Check the error details
+    const auto& error = result.failed[0];
+    EXPECT_EQ(error.code, StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS);
+    EXPECT_FALSE(error.message.empty());
+}
 
-    SLogger::info("test finished");
-    */
+TEST_F(StreamrProxyClientCppTest, ProxyConnectionFailed) noexcept(false) {
+    // Create client with valid parameters
+    StreamrProxyClient client(validEthereumAddress, validStreamPartId);
+
+    // Create a test proxy with non-existent URL
+    std::vector<StreamrProxyAddress> proxies = {
+        StreamrProxyAddress{
+            nonExistentProxyUrl0,
+            validEthereumAddress
+        }
+    };
+
+    // Try to connect and expect error
+    StreamrProxyResult result = client.connect(proxies);
+  // Log the error details
+    SLogger::info("numErrors: " + std::to_string(result.failed.size()));
+    if (!result.failed.empty()) {
+        SLogger::info("error message: " + result.failed[0].message);
+        SLogger::info("error code: " + std::to_string(static_cast<int>(result.failed[0].code)));
+    }
+
+    // Verify results
+    EXPECT_EQ(result.numConnected, 0);
+    EXPECT_TRUE(result.successful.empty());
+    EXPECT_EQ(result.failed.size(), 1);
+
+    // Check the error details
+    const auto& error = result.failed[0];
+    EXPECT_EQ(error.code, StreamrProxyErrorCode::PROXY_CONNECTION_FAILED);
+    EXPECT_FALSE(error.message.empty());
+}
+
+TEST_F(StreamrProxyClientCppTest, ThreeProxyConnectionsFailed) noexcept(false) {
+    // Create client with valid parameters
+    StreamrProxyClient client(goodEthereumAddress, validStreamPartId);
+
+    // Create test proxies
+    std::vector<StreamrProxyAddress> proxies = {
+        StreamrProxyAddress{nonExistentProxyUrl0, validEthereumAddress},
+        StreamrProxyAddress{nonExistentProxyUrl1, validEthereumAddress2},
+        StreamrProxyAddress{nonExistentProxyUrl2, validEthereumAddress3}
+    };
+
+    // Try to connect and expect errors
+    StreamrProxyResult result = client.connect(proxies);
+  // Verify results
+    EXPECT_EQ(result.numConnected, 0);
+    EXPECT_TRUE(result.successful.empty());
+    EXPECT_EQ(result.failed.size(), 3);
+
+    // Verify that errors match the original proxies
+    EXPECT_EQ(result.failed[0].proxy.websocketUrl, proxies[0].websocketUrl);
+    EXPECT_EQ(result.failed[1].proxy.websocketUrl, proxies[1].websocketUrl);
+    EXPECT_EQ(result.failed[2].proxy.websocketUrl, proxies[2].websocketUrl);
+
+    // Check each error
+    for (const auto& error : result.failed) {
+        SLogger::info("error: " + error.message);
+        EXPECT_EQ(error.code, StreamrProxyErrorCode::PROXY_CONNECTION_FAILED);
+    }
+}
+
