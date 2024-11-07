@@ -20,6 +20,7 @@
 		413E46F22C7895900030132D /* ProxyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F12C7895900030132D /* ProxyClient.swift */; };
 		413E46F62C7898D40030132D /* PeerDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F52C7898D40030132D /* PeerDesc.swift */; };
 		4154A2B22CDC93770057D042 /* StreamrProxyClient in Frameworks */ = {isa = PBXBuildFile; productRef = 4154A2B12CDC93770057D042 /* StreamrProxyClient */; };
+		4154A2B52CDCAFC70057D042 /* ProxyClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		413E46F02C787E820030132D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		413E46F12C7895900030132D /* ProxyClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyClient.swift; sourceTree = "<group>"; };
 		413E46F52C7898D40030132D /* PeerDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDesc.swift; sourceTree = "<group>"; };
+		4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyClientTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 		413E46D22C78676A0030132D /* LocationShareTests */ = {
 			isa = PBXGroup;
 			children = (
+				4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */,
 				413E46D32C78676A0030132D /* LocationShareTests.swift */,
 			);
 			path = LocationShareTests;
@@ -303,6 +306,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				413E46D42C78676A0030132D /* LocationShareTests.swift in Sources */,
+				4154A2B52CDCAFC70057D042 /* ProxyClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -530,7 +534,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S933S46DZS;
+				DEVELOPMENT_TEAM = 42FMY535TP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
@@ -550,7 +554,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S933S46DZS;
+				DEVELOPMENT_TEAM = 42FMY535TP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
@@ -569,7 +573,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S933S46DZS;
+				DEVELOPMENT_TEAM = 42FMY535TP;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShareUITests;
@@ -587,7 +591,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S933S46DZS;
+				DEVELOPMENT_TEAM = 42FMY535TP;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShareUITests;
