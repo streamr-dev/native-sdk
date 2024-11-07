@@ -36,6 +36,18 @@ dircopy("$abs_path/packages/streamr-trackerless-network/src/proto", $build_inclu
 `cp packages/streamr-libstreamrproxyclient/include/streamrproxyclient.h $build_include`;
 `cp packages/streamr-libstreamrproxyclient/include/StreamrProxyClient.hpp $build_include`;
 `cp packages/streamr-libstreamrproxyclient/src/LibProxyClientApi.hpp $build_include`;
+
+my $filename = "$build_include/module.modulemap";
+open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
+
+print $fh <<'END_MODULE';
+module streamr {
+    header "streamrproxyclient.h"    // Replace with your main header file name
+    export *
+}
+END_MODULE
+
+close $fh;
  
 # Find all include and lib directories and process them 
 find(\&process_dir, "./build/vcpkg_installed/arm64-ios");

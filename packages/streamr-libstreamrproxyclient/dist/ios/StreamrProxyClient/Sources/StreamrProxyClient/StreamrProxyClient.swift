@@ -4,7 +4,7 @@
 import streamr
 import Foundation
 
-public enum StreamrError: LocalizedError {
+public enum StreamrError: LocalizedError, Equatable {
     case initializationError(String)
     case connectionError(String)
     case publishError(String)
@@ -22,6 +22,21 @@ public enum StreamrError: LocalizedError {
             return "Conversion error: \(message)"
         }
     }
+    
+    public static func == (lhs: StreamrError, rhs: StreamrError) -> Bool {
+           switch (lhs, rhs) {
+           case (.initializationError(let lhsMessage), .initializationError(let rhsMessage)):
+               return lhsMessage == rhsMessage
+           case (.connectionError(let lhsMessage), .connectionError(let rhsMessage)):
+               return lhsMessage == rhsMessage
+           case (.publishError(let lhsMessage), .publishError(let rhsMessage)):
+               return lhsMessage == rhsMessage
+           case (.conversionError(let lhsMessage), .conversionError(let rhsMessage)):
+               return lhsMessage == rhsMessage
+           default:
+               return false
+           }
+       }
 }
 
 public enum StreamrProxyErrorCode {
