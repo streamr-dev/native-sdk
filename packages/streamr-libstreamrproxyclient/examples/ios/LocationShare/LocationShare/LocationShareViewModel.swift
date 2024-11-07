@@ -9,50 +9,50 @@ import Foundation
 
 struct LocationShareViewModel {
     private var locationManager: LocationManager
-    var streamrProxyClient: StreamrProxyClient
+    var proxyClient: ProxyClient
    
     init() {
         self.locationManager = LocationManager()
-        self.streamrProxyClient = StreamrProxyClient(locationManager: locationManager)
+        self.proxyClient = ProxyClient(locationManager: locationManager)
     }
        
     @MainActor
     var status: String {
-        "Status: \(streamrProxyClient.status)"
+        "Status: \(proxyClient.status)"
     }
     
     @MainActor
     var buttonText: String {
-        streamrProxyClient.status == .stopped ? "Start Sharing" : "Stop Sharing"
+        proxyClient.status == .stopped ? "Start Sharing" : "Stop Sharing"
     }
     
     @MainActor
     var proxyAddress: String {
         get {
-            streamrProxyClient.proxyInfo.peerAddress
+            proxyClient.proxyInfo.peerAddress
         }
         set(newProxyAddress) {
-            streamrProxyClient.proxyInfo.peerAddress = newProxyAddress
+            proxyClient.proxyInfo.peerAddress = newProxyAddress
         }
     }
     
     @MainActor
     var ethereumPrivateKey: String {
         get {
-            streamrProxyClient.ethereumPrivateKey
+            proxyClient.ethereumPrivateKey
         }
         set(newEthereumPrivateKey) {
-            streamrProxyClient.ethereumPrivateKey = newEthereumPrivateKey
+            proxyClient.ethereumPrivateKey = newEthereumPrivateKey
         }
     }
     
     @MainActor
     var proxyId: String {
         get {
-            streamrProxyClient.proxyInfo.peerId
+            proxyClient.proxyInfo.peerId
         }
         set(newProxyId) {
-            streamrProxyClient.proxyInfo.peerId = newProxyId
+            proxyClient.proxyInfo.peerId = newProxyId
         }
     }
     
@@ -61,11 +61,11 @@ struct LocationShareViewModel {
         get {
             print("Thread: publishingIntervalInSeconds: \(Thread.current)")
         
-            return String(streamrProxyClient.publishingIntervalInSeconds)
+            return String(proxyClient.publishingIntervalInSeconds)
         }
         set(newProxyId) {
-            streamrProxyClient.publishingIntervalInSeconds = 
-                TimeInterval(newProxyId) ?? StreamrProxyClient.defaultPublishingIntervalInSeconds
+            proxyClient.publishingIntervalInSeconds =
+                TimeInterval(newProxyId) ?? ProxyClient.defaultPublishingIntervalInSeconds
         }
     }
     
@@ -89,13 +89,13 @@ struct LocationShareViewModel {
     
     @MainActor
     func buttonClicked() {
-        switch(streamrProxyClient.status) {
+        switch(proxyClient.status) {
         case .stopped:
-            streamrProxyClient.startPublishing()
+            proxyClient.startPublishing()
         case .proxySet:
-            streamrProxyClient.startPublishing()
+            proxyClient.startPublishing()
         case .publishing:
-            streamrProxyClient.stopPublishing()
+            proxyClient.stopPublishing()
         }
     }
     
@@ -105,7 +105,7 @@ struct LocationShareViewModel {
     }
     
     func setProxyAndStartPublishing() {
-        streamrProxyClient.startPublishing()
+        proxyClient.startPublishing()
     }
     
    
