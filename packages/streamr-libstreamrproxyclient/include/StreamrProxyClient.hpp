@@ -2,7 +2,7 @@
 #define StreamrProxyClient_hpp
 
 #include <string>
-#include<vector>
+#include <vector>
 #include "streamrproxyclient.h"
 
 namespace streamr::libstreamrproxyclient {
@@ -14,7 +14,7 @@ enum class StreamrProxyErrorCode {
     PROXY_CLIENT_NOT_FOUND,
     NO_PROXIES_DEFINED,
     PROXY_CONNECTION_FAILED,
-    UNKNOWN_ERROR  // Always good to have an unknown error state
+    UNKNOWN_ERROR // Always good to have an unknown error state
 };
 
 struct StreamrProxyAddress {
@@ -36,42 +36,70 @@ struct StreamrProxyResult {
 
 // Helper function to convert C error codes (strings) to C++ enum
 inline StreamrProxyErrorCode convertErrorCode(const char* cErrorCode) {
-    static const std::unordered_map<std::string, StreamrProxyErrorCode> errorMap = {
-        {ERROR_INVALID_ETHEREUM_ADDRESS, StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS},
-        {ERROR_INVALID_STREAM_PART_ID, StreamrProxyErrorCode::INVALID_STREAM_PART_ID},
-        {ERROR_INVALID_PROXY_URL, StreamrProxyErrorCode::INVALID_PROXY_URL},
-        {ERROR_PROXY_CLIENT_NOT_FOUND, StreamrProxyErrorCode::PROXY_CLIENT_NOT_FOUND},
-        {ERROR_NO_PROXIES_DEFINED, StreamrProxyErrorCode::NO_PROXIES_DEFINED},
-        {ERROR_PROXY_CONNECTION_FAILED, StreamrProxyErrorCode::PROXY_CONNECTION_FAILED}
-    };
+    static const std::unordered_map<std::string, StreamrProxyErrorCode>
+        errorMap = {
+            {ERROR_INVALID_ETHEREUM_ADDRESS,
+             StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS},
+            {ERROR_INVALID_STREAM_PART_ID,
+             StreamrProxyErrorCode::INVALID_STREAM_PART_ID},
+            {ERROR_INVALID_PROXY_URL, StreamrProxyErrorCode::INVALID_PROXY_URL},
+            {ERROR_PROXY_CLIENT_NOT_FOUND,
+             StreamrProxyErrorCode::PROXY_CLIENT_NOT_FOUND},
+            {ERROR_NO_PROXIES_DEFINED,
+             StreamrProxyErrorCode::NO_PROXIES_DEFINED},
+            {ERROR_PROXY_CONNECTION_FAILED,
+             StreamrProxyErrorCode::PROXY_CONNECTION_FAILED}};
 
     if (cErrorCode == nullptr) {
         return StreamrProxyErrorCode::UNKNOWN_ERROR;
     }
 
     auto it = errorMap.find(cErrorCode);
-    return it != errorMap.end() ? it->second : StreamrProxyErrorCode::UNKNOWN_ERROR;
+    return it != errorMap.end() ? it->second
+                                : StreamrProxyErrorCode::UNKNOWN_ERROR;
 }
 
 // Convert from C Proxy to C++ StreamrProxyAddress
 inline StreamrProxyAddress convertProxyAddress(const Proxy& cProxy) {
     return StreamrProxyAddress{
-        std::string(cProxy.websocketUrl),
-        std::string(cProxy.ethereumAddress)
-    };
+        std::string(cProxy.websocketUrl), std::string(cProxy.ethereumAddress)};
 }
 
 inline StreamrProxyError convertError(const Error& cError) {
     return StreamrProxyError{
         std::string(cError.message),
         convertErrorCode(cError.code),
-        convertProxyAddress(*cError.proxy)
-    };
+        convertProxyAddress(*cError.proxy)};
 }
 
 class StreamrProxyClient {
 private:
     uint64_t clientHandle;
+
+    // Helper method to convert C ProxyResult to C++ StreamrProxyResult
+    StreamrProxyResult convertToStreamrResult(
+        const ProxyResult* proxyResult, uint64_t numSuccess) {
+        StreamrProxyResult streamrResult;
+        streamrResult.numConnected = numSuccess;
+
+        if (proxyResult != nullptr) {
+            // Handle successful operations
+            for (size_t i = 0; i < proxyResult->numSuccessful; i++) {
+                streamrResult.successful.push_back(
+                    convertProxyAddress(proxyResult->successful[i]));
+            }
+
+            // Handle errors
+            for (size_t i = 0; i < proxyResult->numErrors; i++) {
+                streamrResult.failed.push_back(
+                    convertError(proxyResult->errors[i]));
+            }
+
+            proxyClientResultDelete(proxyResult);
+        }
+
+        return streamrResult;
+    }
 
 public:
     StreamrProxyClient(
@@ -105,14 +133,14 @@ public:
         const std::vector<StreamrProxyAddress>& proxies) {
         const ProxyResult* proxyResult = nullptr;
         StreamrProxyResult streamrResult;
-        
+
         // Handle empty proxy list case first
         if (proxies.empty()) {
             streamrResult.numConnected = 0;
             streamrResult.failed.push_back(StreamrProxyError{
                 "No proxies defined",
                 StreamrProxyErrorCode::NO_PROXIES_DEFINED,
-                StreamrProxyAddress{}  // Empty proxy address
+                StreamrProxyAddress{} // Empty proxy address
             });
             return streamrResult;
         }
@@ -128,27 +156,22 @@ public:
         uint64_t numConnected = proxyClientConnect(
             &proxyResult, this->clientHandle, cProxies.data(), cProxies.size());
 
-        // Convert C result to C++ result
-        streamrResult.numConnected =
-            numConnected; // Store the number of connected proxies
-        if (proxyResult != nullptr) {
-            // Handle successful connections
-            for (size_t i = 0; i < proxyResult->numSuccessful; i++) {
-                streamrResult.successful.push_back(convertProxyAddress(proxyResult->successful[i]));
-            }
-
-            // Handle errors
-            for (size_t i = 0; i < proxyResult->numErrors; i++) {
-                streamrResult.failed.push_back(
-                    convertError(proxyResult->errors[i]));
-            }
-            proxyClientResultDelete(proxyResult);
-        }
-
-        return streamrResult;
+        return convertToStreamrResult(proxyResult, numConnected);
     }
 
+    StreamrProxyResult publish(
+        const std::string& content, const std::string& ethereumPrivateKey) {
+        const ProxyResult* proxyResult = nullptr;
 
+        uint64_t numPublished = proxyClientPublish(
+            &proxyResult,
+            this->clientHandle,
+            content.c_str(),
+            content.length(),
+            ethereumPrivateKey.c_str());
+
+        return convertToStreamrResult(proxyResult, numPublished);
+    }
 };
 
 } // namespace streamr::libstreamrproxyclient
