@@ -118,6 +118,19 @@ if (NOT IOS)
             WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
             )
 
+        add_test(
+            NAME ts-end-to-end-cpp-test
+            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-cpp-tests.sh"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            )
+
+        add_test(
+            NAME ts-multiple-messages-cpp-test
+            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-multiple-messages-cpp-test.sh"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            )
+
+
     endif()
     # Install header to dist/target-triplet
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
