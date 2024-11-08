@@ -31,6 +31,15 @@ EXTERN_C SHARED_EXPORT const char* testRpc(void);
 // NOLINTNEXTLINE
 SHARED_EXPORT static void __attribute__((constructor)) initialize(void);
 
+
+/**
+ * @brief Initialize the library. This function is called automatically when the library is loaded,
+ * but can be called explicitly to force a re-initialization (e.g. after proxyClientCleanupLibrary() has been called).
+ */
+
+// NOLINTNEXTLINE
+EXTERN_C SHARED_EXPORT void proxyClientInitLibrary(void);
+
 /**
  * @brief Cleanup the library. This function MUST be called before the program exits.
  * Can be safely called multiple times. This is needed because the standard dynamic library
@@ -125,10 +134,10 @@ EXTERN_C SHARED_EXPORT uint64_t proxyClientConnect(
  * may only contain  "errors" - the "successful" and "numSuccessful" fields are
  * unused.
  * @param clientHandle The client handle of the client to disconnect.
- */
-
+ 
 EXTERN_C SHARED_EXPORT void proxyClientDisconnect(
     const ProxyResult** proxyResult, uint64_t clientHandle);
+*/
 
 /**
  * @brief Publish a message to the stream.
