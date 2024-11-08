@@ -2,12 +2,11 @@
 #include <folly/Singleton.h>
 #include "LibProxyClientApi.hpp"
 #include <iostream>
-#include "streamr-logger/SLogger.hpp"
 
 using streamr::libstreamrproxyclient::LibProxyClientApi;
-using streamr::logger::SLogger;
+
 const char* testRpc() {
-    return "Hajotkaa siihen";
+    return "testRpc() called";
 }
 
 static void initFolly() { // NOLINT
@@ -15,22 +14,25 @@ static void initFolly() { // NOLINT
 }
 
 static LibProxyClientApi* libProxyClientApi = nullptr; // NOLINT
-static bool cleanupCalled = false; // NOLINT
 
 static void initialize() { // NOLINT
-    std::cout << "initialize()" << "\n";
+    //std::cout << "initialize()" << "\n";
+    proxyClientInitLibrary();
+}
+
+void proxyClientInitLibrary() { // NOLINT
+    if (libProxyClientApi != nullptr) {
+        return;
+    }
     libProxyClientApi = new LibProxyClientApi();
 }
 
 void proxyClientCleanupLibrary() { // NOLINT
-    if (cleanupCalled) {
+    if (libProxyClientApi == nullptr) {
         return;
     }
-    SLogger::info("cleanup()");
-    //delete libProxyClientApi;
-    SLogger::info("cleanup() done");
-
-    cleanupCalled = true;
+    delete libProxyClientApi;
+    libProxyClientApi = nullptr;
 }
 
 static LibProxyClientApi& getProxyClientApi() { // NOLINT
