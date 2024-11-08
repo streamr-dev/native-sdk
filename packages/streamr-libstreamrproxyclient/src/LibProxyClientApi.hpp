@@ -15,6 +15,7 @@
 #include "streamr-dht/connection/ConnectionManager.hpp"
 #include "streamr-dht/connection/ConnectorFacade.hpp"
 #include "streamr-dht/helpers/Connectivity.hpp"
+#include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/transport/FakeTransport.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-trackerless-network/logic/proxy/ProxyClient.hpp"
@@ -30,6 +31,7 @@ using ::dht::ConnectivityResponse;
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;
 using streamr::dht::DhtAddress;
+using streamr::dht::Identifiers;
 using streamr::dht::connection::ConnectionManager;
 using streamr::dht::connection::ConnectionManagerOptions;
 using streamr::dht::connection::DefaultConnectorFacade;
@@ -120,7 +122,7 @@ public:
         this->error.message = this->messageString.c_str();
         this->error.code = this->codeString.c_str();
         this->error.proxy =
-            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+            this->proxyCpp.has_value() ? this->proxyCpp.value().getProxy() : nullptr;
     }
     ErrorCpp(const ErrorCpp& other) {
         this->messageString = other.messageString;
@@ -506,7 +508,7 @@ public:
                     e.what(),
                     ERROR_PROXY_CONNECTION_FAILED,
                     ProxyCpp(
-                        error.getPeerDescriptor().nodeid(),
+                        "0x" + Identifiers::getNodeIdFromPeerDescriptor(error.getPeerDescriptor()),
                         Connectivity::connectivityMethodToWebsocketUrl(
                             error.getPeerDescriptor().websocket())))));
             }
@@ -514,7 +516,7 @@ public:
 
         for (const auto& proxy : successfullyConnected) {
             successfullyConnectedCpp.emplace_back(std::move(ProxyCpp(
-                proxy.nodeid(),
+                "0x" + Identifiers::getNodeIdFromPeerDescriptor(proxy),
                 Connectivity::connectivityMethodToWebsocketUrl(
                     proxy.websocket()))));
         }
@@ -625,18 +627,18 @@ public:
             auto message = createStreamMessage(
                 proxyClient, content, contentLength, ethereumPrivateKey);
             auto result = proxyClient->getProxyClient()->broadcast(message);
-            for (const auto& error : result.first) {
+            for (const auto& failedPeer : result.first) {
                 errorsCpp.emplace_back(std::move(ErrorCpp(
                     "Failed to send message to proxy",
                     ERROR_PROXY_BROADCAST_FAILED,
                     ProxyCpp(
-                        error.nodeid(),
+                        "0x" + Identifiers::getNodeIdFromPeerDescriptor(failedPeer),
                         Connectivity::connectivityMethodToWebsocketUrl(
-                            error.websocket())))));
+                            failedPeer.websocket())))));
             }
             for (const auto& proxy : result.second) {
                 successfullySentCpp.emplace_back(std::move(ProxyCpp(
-                    proxy.nodeid(),
+                    "0x" + Identifiers::getNodeIdFromPeerDescriptor(proxy),
                     Connectivity::connectivityMethodToWebsocketUrl(
                         proxy.websocket()))));
             }
