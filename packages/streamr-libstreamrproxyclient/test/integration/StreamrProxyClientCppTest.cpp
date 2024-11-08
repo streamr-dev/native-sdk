@@ -10,7 +10,8 @@ using streamr::libstreamrproxyclient::StreamrProxyResult;
 using streamr::libstreamrproxyclient::StreamrProxyError;
 using streamr::libstreamrproxyclient::StreamrProxyErrorCode;
 using streamr::logger::SLogger;
-
+using streamr::libstreamrproxyclient::InvalidEthereumAddress;
+using streamr::libstreamrproxyclient::InvalidStreamPartId;
 class StreamrProxyClientCppTest : public ::testing::Test {
 protected:
 
@@ -54,21 +55,25 @@ TEST_F(StreamrProxyClientCppTest, CanCreateAndDeleteProxyClient) {
 }
 
 TEST_F(StreamrProxyClientCppTest, InvalidEthereumAddress) {
-    EXPECT_THROW(
-        {
-            StreamrProxyClient client(
-                invalidEthereumAddress, validStreamPartId);
-        },
-        std::runtime_error);
+    try {
+        StreamrProxyClient client(invalidEthereumAddress, validStreamPartId);
+        FAIL() << "Expected InvalidEthereumAddress exception";
+    }
+    catch(const InvalidEthereumAddress& e) {
+        EXPECT_EQ(e.code, StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS);
+        EXPECT_FALSE(e.message.empty());
+    }
 }
 
 TEST_F(StreamrProxyClientCppTest, InvalidStreamPartId) {
-    EXPECT_THROW(
-        {
-            StreamrProxyClient client(
-                validEthereumAddress, invalidStreamPartId);
-        },
-        std::runtime_error);
+    try {
+        StreamrProxyClient client(validEthereumAddress, invalidStreamPartId);
+        FAIL() << "Expected InvalidStreamPartId exception";
+    }
+    catch(const InvalidStreamPartId& e) {
+        EXPECT_EQ(e.code, StreamrProxyErrorCode::INVALID_STREAM_PART_ID);
+        EXPECT_FALSE(e.message.empty());
+    }
 }
 
 TEST_F(StreamrProxyClientCppTest, InvalidProxyUrl) {
@@ -226,4 +231,16 @@ TEST_F(StreamrProxyClientCppTest, ConnectSuccessfully) noexcept(false) {
     const auto& successfulProxy = result.successful[0];
     EXPECT_EQ(successfulProxy.websocketUrl, proxyWebsocketUrl);
     EXPECT_EQ(successfulProxy.ethereumAddress, proxyEthereumAddress);
+}
+
+TEST_F(StreamrProxyClientCppTest, ProxyPublishWithoutConnection) noexcept(false) {
+    // Create client
+    StreamrProxyClient client(validEthereumAddress, validStreamPartId2);
+    std::cout << "Created client" << std::endl;
+   
+    auto publishResult = client.publish("abc", "");
+    std::cout << "Published message" << std::endl;
+    // Verify publish results
+    EXPECT_EQ(publishResult.failed.size(), 1);
+    EXPECT_EQ(publishResult.numConnected, 0);
 }

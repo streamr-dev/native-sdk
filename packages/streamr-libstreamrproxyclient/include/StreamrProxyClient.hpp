@@ -11,10 +11,28 @@ enum class StreamrProxyErrorCode {
     INVALID_ETHEREUM_ADDRESS,
     INVALID_STREAM_PART_ID,
     INVALID_PROXY_URL,
-    PROXY_CLIENT_NOT_FOUND,
     NO_PROXIES_DEFINED,
     PROXY_CONNECTION_FAILED,
     UNKNOWN_ERROR // Always good to have an unknown error state
+};
+
+class Err : public std::runtime_error {
+public:
+    StreamrProxyErrorCode code; // NOLINT
+    std::string message; // NOLINT
+
+    Err(StreamrProxyErrorCode code, const std::string& message)
+        : std::runtime_error(message), code(code), message(message) {}
+};
+
+struct InvalidEthereumAddress : public Err {
+    explicit InvalidEthereumAddress(const std::string& message)
+        : Err(StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS, message) {}
+};
+
+struct InvalidStreamPartId : public Err {
+    explicit InvalidStreamPartId(const std::string& message)
+        : Err(StreamrProxyErrorCode::INVALID_STREAM_PART_ID, message) {}
 };
 
 struct StreamrProxyAddress {
@@ -43,8 +61,6 @@ inline StreamrProxyErrorCode convertErrorCode(const char* cErrorCode) {
             {ERROR_INVALID_STREAM_PART_ID,
              StreamrProxyErrorCode::INVALID_STREAM_PART_ID},
             {ERROR_INVALID_PROXY_URL, StreamrProxyErrorCode::INVALID_PROXY_URL},
-            {ERROR_PROXY_CLIENT_NOT_FOUND,
-             StreamrProxyErrorCode::PROXY_CLIENT_NOT_FOUND},
             {ERROR_NO_PROXIES_DEFINED,
              StreamrProxyErrorCode::NO_PROXIES_DEFINED},
             {ERROR_PROXY_CONNECTION_FAILED,
@@ -102,6 +118,7 @@ private:
     }
 
 public:
+
     StreamrProxyClient(
         std::string ownEthereumAddress, std::string streamPartId) {
         const ProxyResult* proxyResult = nullptr;
@@ -109,17 +126,22 @@ public:
             &proxyResult, ownEthereumAddress.c_str(), streamPartId.c_str());
 
         if (proxyResult != nullptr && proxyResult->numErrors > 0) {
-            std::string errorMessage =
-                "Failed to initialize StreamrProxyClient:\n";
-            for (size_t i = 0; i < proxyResult->numErrors; i++) {
-                errorMessage.append("- ")
-                    .append(proxyResult->errors[i].message)
-                    .append(" (Error code: ")
-                    .append(proxyResult->errors[i].code)
-                    .append(")\n");
+            std::string errorMessage = proxyResult->errors[0].message;
+            StreamrProxyErrorCode errorCode =
+                convertErrorCode(proxyResult->errors[0].code);
+            proxyClientResultDelete(proxyResult);
+
+            // Throw appropriate exception based on error code
+            switch (errorCode) {
+                case StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS:
+                    throw InvalidEthereumAddress(errorMessage);
+                case StreamrProxyErrorCode::INVALID_STREAM_PART_ID:
+                    throw InvalidStreamPartId(errorMessage);
+                default:
+                    throw Err(errorCode, errorMessage);
             }
-            throw std::runtime_error(errorMessage);
         }
+
         proxyClientResultDelete(proxyResult);
     }
 
