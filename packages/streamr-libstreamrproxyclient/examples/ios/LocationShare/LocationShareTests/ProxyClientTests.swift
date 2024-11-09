@@ -28,6 +28,8 @@ final class ProxyClientTests: XCTestCase {
     let nonExistentProxyUrl2 = "ws://non.existent.proxy2.url"
     let validEthereumAddress2 = "0x2234567890123456789012345678901234567890"
     let validEthereumAddress3 = "0x3234567890123456789012345678901234567890"
+    let ethereumPrivateKey = "23bead9b499af21c4c16e4511b3b6b08c3e22e76e0591f5ab5ba8d4c3a5b1820"
+    var client: StreamrProxyClient?
     
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -68,7 +70,7 @@ final class ProxyClientTests: XCTestCase {
         ethereumAddress: String? = nil
     ) throws -> StreamrProxyResult {
         // Create client
-        let client = try StreamrProxyClient(
+        self.client = try StreamrProxyClient(
             ownEthereumAddress: validEthereumAddress,
             streamPartId: validStreamPartId
         )
@@ -79,9 +81,9 @@ final class ProxyClientTests: XCTestCase {
             ethereumAddress: ethereumAddress!
         )
         
-        return client.connect(proxies: proxies)
+        return self.client!.connect(proxies: proxies)
     }
-    
+        
     private func createClientConnectAndVerify(
         websocketUrl: String? = nil,
         ethereumAddress: String? = nil,
@@ -218,6 +220,51 @@ final class ProxyClientTests: XCTestCase {
         
         XCTAssertEqual(successfulProxy.websocketUrl, proxyWebsocketUrl)
         XCTAssertEqual(successfulProxy.ethereumAddress, proxyEthereumAddress)
+    }
+    
+    func testPublishSuccessfully() throws {
+        
+        let result = try createClientAndConnect(
+            websocketUrl: proxyWebsocketUrl,
+            ethereumAddress: proxyEthereumAddress
+        )
+        
+        // Verify results
+        XCTAssertEqual(result.numConnected, 1)
+        XCTAssertFalse(result.successful.isEmpty)
+        XCTAssertEqual(result.failed.count, 0)
+        
+        let testMessage = "test message"
+
+        // Add this to your test function after the connection test
+        let publishResult = client!.publish(
+            content: testMessage,
+            ethereumPrivateKey: ethereumPrivateKey
+        )
+
+        // Verify publish results
+        XCTAssertTrue(publishResult.failed.isEmpty)
+        XCTAssertTrue(publishResult.numConnected != 0)
+    }
+    
+    func testPublishWithoutConnection() throws {
+        
+        self.client = try StreamrProxyClient(
+            ownEthereumAddress: validEthereumAddress,
+            streamPartId: validStreamPartId
+        )
+        
+        let testMessage = "test message"
+
+        // Add this to your test function after the connection test
+        let publishResult = client!.publish(
+            content: testMessage,
+            ethereumPrivateKey: ethereumPrivateKey
+        )
+
+        // Verify publish results
+        XCTAssertFalse(publishResult.failed.isEmpty)
+        XCTAssertTrue(publishResult.numConnected == 0)
     }
 }
 
