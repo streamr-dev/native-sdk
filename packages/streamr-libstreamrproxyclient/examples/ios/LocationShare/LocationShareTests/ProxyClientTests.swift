@@ -9,13 +9,25 @@ import XCTest
 @testable import StreamrProxyClient
 
 final class ProxyClientTests: XCTestCase {
-    let validEthereumAddress =
-        "0x1234567890123456789012345678901234567890"
-    let invalidEthereumAddress =
-    "INVALID_ETHEREUM_ADDRESS"
+    let proxyWebsocketUrl =
+    "ws://95.216.15.80:44211";
+    let proxyEthereumAddress =
+    "0xd0d14b38d1f6b59d3772a63d84ece0a79e6e1c1f";
+    let validStreamPartId2 =
+    "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
+    let validEthereumAddress = "0x1234567890123456789012345678901234567890"
+    //  let validStreamPartId = "stream#0"
     let validStreamPartId =
-    "0xa000000000000000000000000000000000000000#01"
-    let invalidProxyUrl = "poiejrg039utg240"
+    "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
+    let invalidEthereumAddress = "invalid_address"
+    let invalidStreamPartId = "invalid_stream_id"
+    let invalidProxyUrl = "invalid_url"
+    let validProxyUrl = "ws://valid.proxy.url"
+    let nonExistentProxyUrl0 = "ws://non.existent.proxy0.url"
+    let nonExistentProxyUrl1 = "ws://non.existent.proxy1.url"
+    let nonExistentProxyUrl2 = "ws://non.existent.proxy2.url"
+    let validEthereumAddress2 = "0x2234567890123456789012345678901234567890"
+    let validEthereumAddress3 = "0x3234567890123456789012345678901234567890"
     
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -25,65 +37,187 @@ final class ProxyClientTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
-    func testInvalidEthereumAddress() throws {
-        
-        XCTAssertThrowsError(try StreamrProxyClient(ownEthereumAddress: invalidEthereumAddress, streamPartId: validStreamPartId)) { error in
-            guard let streamrError = error as? StreamrError else {
-                XCTFail("Expected StreamrError, got \(type(of: error))")
-                return
-            }
-            XCTAssertEqual(
-                streamrError,
-                StreamrError.initializationError("Failed to initialize StreamrProxyClient")
-            )
-        }
-    }
-    
-    func testInvalidProxyUrl() async throws {
-        // Create client with valid address
-        let client = try StreamrProxyClient(ownEthereumAddress: validEthereumAddress, streamPartId: validStreamPartId)
-        
-        // Create a test proxy with invalid URL
-        let proxies = [
-            
-            StreamrProxyAddress(websocketUrl: invalidProxyUrl, ethereumAddress: validEthereumAddress)
-        ]
-        
-        // Try to connect and expect error
-        let result = client.connect(proxies: proxies)
-        
-        // Verify results
+    private func verifyFailed(
+        result: StreamrProxyResult,
+        expectedError: StreamrError
+    ) {
+        // Basic result validation
         XCTAssertEqual(result.numConnected, 0)
         XCTAssertTrue(result.successful.isEmpty)
         XCTAssertEqual(result.failed.count, 1)
         
-        // Check the error details
-     //   let error = result.failed[0]
-       // XCTAssertEqual(error.code, .invalidProxyUrl)  // Assuming StreamrProxyErrorCode is an enum
-      //  XCTAssertFalse(error.message.isEmpty)
+        // Error validation
+        let actualError = result.failed[0]
+        XCTAssertEqual(actualError.error, expectedError)
     }
     
-    func testConnectSuccessfully() async throws {
-        // Create client with valid address
-        let client = try StreamrProxyClient(ownEthereumAddress: validEthereumAddress, streamPartId: "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0")
+    private func createProxyArrayFromProxy(
+        websocketUrl: String,
+        ethereumAddress: String
+    ) -> [StreamrProxyAddress] {
+        [
+            StreamrProxyAddress(
+                websocketUrl: websocketUrl,
+                ethereumAddress: ethereumAddress
+            )
+        ]
+    }
+    
+    private func createClientAndConnect(
+        websocketUrl: String? = nil,
+        ethereumAddress: String? = nil
+    ) throws -> StreamrProxyResult {
+        // Create client
+        let client = try StreamrProxyClient(
+            ownEthereumAddress: validEthereumAddress,
+            streamPartId: validStreamPartId
+        )
         
-        // Create a test proxy with invalid URL
+        // Create and connect proxies
+        let proxies = websocketUrl == nil ? [] : createProxyArrayFromProxy(
+            websocketUrl: websocketUrl!,
+            ethereumAddress: ethereumAddress!
+        )
+        
+        return client.connect(proxies: proxies)
+    }
+    
+    private func createClientConnectAndVerify(
+        websocketUrl: String? = nil,
+        ethereumAddress: String? = nil,
+        expectedError: StreamrError
+    ) throws {
+        let result = try createClientAndConnect(
+            websocketUrl: websocketUrl,
+            ethereumAddress: ethereumAddress
+        )
+        
+        verifyFailed(
+            result: result,
+            expectedError: expectedError
+        )
+    }
+    
+    private func tryToCreateClientWhichFails(
+        ownEthereumAddress: String,
+        streamPartId: String,
+        expectedError: StreamrError
+    ) {
+        XCTAssertThrowsError(
+            try StreamrProxyClient(
+                ownEthereumAddress: ownEthereumAddress,
+                streamPartId: streamPartId
+            )
+        ) { error in
+            guard let streamrError = error as? StreamrError else {
+                XCTFail("Expected StreamrError, got \(type(of: error))")
+                return
+            }
+            XCTAssertEqual(streamrError, expectedError)
+        }
+    }
+    
+    func testInvalidEthereumAddress() throws {
+        tryToCreateClientWhichFails(
+            ownEthereumAddress: invalidEthereumAddress,
+            streamPartId: validStreamPartId,
+            expectedError: .invalidEthereumAddress()
+        )
+    }
+    
+    func testInvalidStreamPartId() throws {
+        tryToCreateClientWhichFails(
+            ownEthereumAddress: validEthereumAddress,
+            streamPartId: invalidStreamPartId,
+            expectedError: .invalidStreamPartId()
+        )
+    }
+    
+    func testInvalidProxyUrl() throws {
+        try createClientConnectAndVerify(
+            websocketUrl: invalidProxyUrl,
+            ethereumAddress: validEthereumAddress,
+            expectedError: .invalidProxyUrl()
+        )
+    }
+    
+    func testNoProxiesDefined() throws {
+        try createClientConnectAndVerify(expectedError: .noProxiesDefined())
+    }
+    
+    func testInvalidProxyEthereumAddress() throws {
+        try createClientConnectAndVerify(
+            websocketUrl: validProxyUrl,
+            ethereumAddress: invalidEthereumAddress,
+            expectedError: .invalidEthereumAddress()
+        )
+    }
+    
+    func testProxyConnectionFailed() throws {
+        try createClientConnectAndVerify(
+            websocketUrl: nonExistentProxyUrl0,
+            ethereumAddress: validEthereumAddress,
+            expectedError: .proxyConnectionFailed()
+        )
+    }
+    
+    func testThreeProxyConnectionsFailed() throws {
+        
+        let client = try StreamrProxyClient(
+            ownEthereumAddress: validEthereumAddress,
+            streamPartId: validStreamPartId
+        )
+        
         let proxies = [
-            
-            StreamrProxyAddress(websocketUrl: "ws://95.216.15.80:44211", ethereumAddress: "0xd0d14b38d1f6b59d3772a63d84ece0a79e6e1c1f")
+            StreamrProxyAddress(
+                websocketUrl: nonExistentProxyUrl0,
+                ethereumAddress: validEthereumAddress
+            ),
+            StreamrProxyAddress(
+                websocketUrl: nonExistentProxyUrl1,
+                ethereumAddress: validEthereumAddress2
+            ),
+            StreamrProxyAddress(
+                websocketUrl: nonExistentProxyUrl2,
+                ethereumAddress: validEthereumAddress3
+            )
         ]
         
-        // Try to connect and expect error
         let result = client.connect(proxies: proxies)
+        
+        XCTAssertEqual(result.numConnected, 0)
+        XCTAssertTrue(result.successful.isEmpty)
+        XCTAssertEqual(result.failed.count, 3)
+        
+        // Verify that errors match the original proxies
+        XCTAssertEqual(result.failed[0].proxy.websocketUrl, proxies[0].websocketUrl + ":80")
+        XCTAssertEqual(result.failed[1].proxy.websocketUrl, proxies[1].websocketUrl + ":80")
+        XCTAssertEqual(result.failed[2].proxy.websocketUrl, proxies[2].websocketUrl + ":80")
+        
+        let actualError = result.failed[0]
+        XCTAssertEqual(actualError.error, .proxyConnectionFailed())
+    }
+    
+    func testConnectSuccessfully() throws {
+        
+        let result = try createClientAndConnect(
+            websocketUrl: proxyWebsocketUrl,
+            ethereumAddress: proxyEthereumAddress
+        )
         
         // Verify results
         XCTAssertEqual(result.numConnected, 1)
-        XCTAssertTrue(result.successful.isEmpty)
+        XCTAssertFalse(result.successful.isEmpty)
         XCTAssertEqual(result.failed.count, 0)
         
-        // Check the error details
-     //   let error = result.failed[0]
-       // XCTAssertEqual(error.code, .invalidProxyUrl)  // Assuming StreamrProxyErrorCode is an enum
-      //  XCTAssertFalse(error.message.isEmpty)
+        // Verify proxy details
+        guard let successfulProxy = result.successful.first else {
+            XCTFail("Expected successful proxy not found")
+            return
+        }
+        
+        XCTAssertEqual(successfulProxy.websocketUrl, proxyWebsocketUrl)
+        XCTAssertEqual(successfulProxy.ethereumAddress, proxyEthereumAddress)
     }
 }
+
