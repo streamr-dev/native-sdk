@@ -10,9 +10,19 @@ using streamr::libstreamrproxyclient::StreamrProxyResult;
 using streamr::libstreamrproxyclient::StreamrProxyError;
 using streamr::libstreamrproxyclient::StreamrProxyErrorCode;
 using streamr::logger::SLogger;
-
+using streamr::libstreamrproxyclient::InvalidEthereumAddress;
+using streamr::libstreamrproxyclient::InvalidStreamPartId;
 class StreamrProxyClientCppTest : public ::testing::Test {
 protected:
+
+
+    static constexpr const char* proxyWebsocketUrl = 
+        "ws://95.216.15.80:44211";
+    static constexpr const char* proxyEthereumAddress = 
+        "0xd0d14b38d1f6b59d3772a63d84ece0a79e6e1c1f";
+    static constexpr const char* validStreamPartId2 = 
+        "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0";
+
     static constexpr const char* invalidEthereumAddress =
         "INVALID_ETHEREUM_ADDRESS";
     static constexpr const char* goodEthereumAddress =
@@ -45,21 +55,25 @@ TEST_F(StreamrProxyClientCppTest, CanCreateAndDeleteProxyClient) {
 }
 
 TEST_F(StreamrProxyClientCppTest, InvalidEthereumAddress) {
-    EXPECT_THROW(
-        {
-            StreamrProxyClient client(
-                invalidEthereumAddress, validStreamPartId);
-        },
-        std::runtime_error);
+    try {
+        StreamrProxyClient client(invalidEthereumAddress, validStreamPartId);
+        FAIL() << "Expected InvalidEthereumAddress exception";
+    }
+    catch(const InvalidEthereumAddress& e) {
+        EXPECT_EQ(e.code, StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS);
+        EXPECT_FALSE(e.message.empty());
+    }
 }
 
 TEST_F(StreamrProxyClientCppTest, InvalidStreamPartId) {
-    EXPECT_THROW(
-        {
-            StreamrProxyClient client(
-                validEthereumAddress, invalidStreamPartId);
-        },
-        std::runtime_error);
+    try {
+        StreamrProxyClient client(validEthereumAddress, invalidStreamPartId);
+        FAIL() << "Expected InvalidStreamPartId exception";
+    }
+    catch(const InvalidStreamPartId& e) {
+        EXPECT_EQ(e.code, StreamrProxyErrorCode::INVALID_STREAM_PART_ID);
+        EXPECT_FALSE(e.message.empty());
+    }
 }
 
 TEST_F(StreamrProxyClientCppTest, InvalidProxyUrl) {
@@ -192,3 +206,40 @@ TEST_F(StreamrProxyClientCppTest, ThreeProxyConnectionsFailed) noexcept(false) {
     }
 }
 
+
+TEST_F(StreamrProxyClientCppTest, ConnectSuccessfully) noexcept(false) {
+    // Create client with valid address
+    StreamrProxyClient client(validEthereumAddress, validStreamPartId2);
+
+    // Create a test proxy
+    std::vector<StreamrProxyAddress> proxies = {
+        StreamrProxyAddress{
+            proxyWebsocketUrl,
+            proxyEthereumAddress
+        }
+    };
+
+    // Try to connect
+    StreamrProxyResult result = client.connect(proxies);
+
+    // Verify results
+    EXPECT_EQ(result.numConnected, 1);
+    EXPECT_FALSE(result.successful.empty());
+    EXPECT_EQ(result.failed.size(), 0);
+
+    // Verify proxy details
+    const auto& successfulProxy = result.successful[0];
+    EXPECT_EQ(successfulProxy.websocketUrl, proxyWebsocketUrl);
+    EXPECT_EQ(successfulProxy.ethereumAddress, proxyEthereumAddress);
+}
+
+TEST_F(StreamrProxyClientCppTest, ProxyPublishWithoutConnection) noexcept(false) {
+    // Create client
+    StreamrProxyClient client(validEthereumAddress, validStreamPartId2);
+    std::cout << "Created client" << std::endl;
+   
+    auto publishResult = client.publish("abc", "");
+    std::cout << "Published message" << std::endl;
+    // Verify publish results
+    EXPECT_EQ(publishResult.numConnected, 0);
+}
