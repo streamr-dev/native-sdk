@@ -29,7 +29,10 @@ public enum StreamrError: LocalizedError, Equatable {
         }
     }
     
-    public static func == (lhs: StreamrError, rhs: StreamrError) -> Bool {
+    public static func == (
+        lhs: StreamrError,
+        rhs: StreamrError
+    ) -> Bool {
         switch (lhs, rhs) {
         case (.invalidEthereumAddress, .invalidEthereumAddress):
             return true
@@ -47,13 +50,19 @@ public enum StreamrError: LocalizedError, Equatable {
             return false
         }
     }
+    
 }
 
-private func createStreamrProxyError(message: String, code: UnsafePointer<CChar>?) -> StreamrError {
+private func createStreamrProxyError(
+    message: String,
+    code: UnsafePointer<CChar>?
+) -> StreamrError {
     guard let code = code else {
         return .unknownError(message)
     }
+    
     let errorCode = String(cString: code)
+    
     switch errorCode {
     case "INVALID_ETHEREUM_ADDRESS":
         return .invalidEthereumAddress(message)
@@ -94,36 +103,62 @@ public struct StreamrProxyResult {
 public class StreamrProxyClient {
     private let clientHandle: UInt64
     
-    public init(ownEthereumAddress: String, streamPartId: String) throws {
+    public init(
+        ownEthereumAddress: String,
+        streamPartId: String
+    ) throws {
+        // Prepare proxy result pointer
         var proxyResult: UnsafeMutablePointer<streamr.ProxyResult>?
         let proxyResultPtr = withUnsafeMutablePointer(to: &proxyResult) { ptr in
-            UnsafeMutablePointer<UnsafePointer<streamr.ProxyResult>?>(OpaquePointer(ptr))
+            UnsafeMutablePointer<UnsafePointer<streamr.ProxyResult>?>(
+                OpaquePointer(ptr)
+            )
         }
         
-        self.clientHandle = proxyClientNew(proxyResultPtr,
-                                           ownEthereumAddress,
-                                           streamPartId)
+        // Initialize client
+        self.clientHandle = proxyClientNew(
+            proxyResultPtr,
+            ownEthereumAddress,
+            streamPartId
+        )
         
+        
+        // Ensure cleanup
         defer {
             if let result = proxyResult {
                 proxyClientResultDelete(UnsafePointer(result))
             }
         }
         
+        // Handle errors if any
         if let result = proxyResult, result.pointee.numErrors > 0 {
             let error = result.pointee.errors[0]
             let errorMessage = String(cString: error.message)
             let errorCode = String(cString: error.code)
-            throw createStreamrProxyError(message: errorMessage, code: errorCode)
+            
+            throw createStreamrProxyError(
+                message: errorMessage,
+                code: errorCode
+            )
         }
     }
     
     deinit {
+        // Prepare proxy result pointer
         var mutableProxyResult: UnsafeMutablePointer<streamr.ProxyResult>?
         let proxyResultPtr = withUnsafeMutablePointer(to: &mutableProxyResult) { ptr in
-            UnsafeMutablePointer<UnsafePointer<streamr.ProxyResult>?>(OpaquePointer(ptr))
+            UnsafeMutablePointer<UnsafePointer<streamr.ProxyResult>?>(
+                OpaquePointer(ptr)
+            )
         }
-        proxyClientDelete(proxyResultPtr, self.clientHandle)
+        
+        // Delete client
+        proxyClientDelete(
+            proxyResultPtr,
+            self.clientHandle
+        )
+        
+        // Cleanup result if needed
         if let result = mutableProxyResult {
             proxyClientResultDelete(UnsafePointer(result))
         }
@@ -181,23 +216,38 @@ public class StreamrProxyClient {
         return result
     }
     
-    public func publish(content: String, ethereumPrivateKey: String) -> StreamrProxyResult {
+    public func publish(
+        content: String,
+        ethereumPrivateKey: String
+    ) -> StreamrProxyResult {
+        // Prepare proxy result pointer
         var mutableProxyResult: UnsafeMutablePointer<streamr.ProxyResult>?
         let proxyResultPtr = withUnsafeMutablePointer(to: &mutableProxyResult) { ptr in
-            UnsafeMutablePointer<UnsafePointer<streamr.ProxyResult>?>(OpaquePointer(ptr))
+            UnsafeMutablePointer<UnsafePointer<streamr.ProxyResult>?>(
+                OpaquePointer(ptr)
+            )
         }
         
-        let numPublished = proxyClientPublish(proxyResultPtr,
-                                              self.clientHandle,
-                                              content,
-                                              UInt64(content.count),
-                                              ethereumPrivateKey)
+        // Publish content
+        let numPublished = proxyClientPublish(
+            proxyResultPtr,
+            self.clientHandle,
+            content,
+            UInt64(content.count),
+            ethereumPrivateKey
+        )
         
-        return convertToStreamrResult(mutableProxyResult, numConnected: numPublished)
+        // Convert and return result
+        return convertToStreamrResult(
+            mutableProxyResult,
+            numConnected: numPublished
+        )
     }
     
-    private func convertToStreamrResult(_ proxyResult: UnsafeMutablePointer<streamr.ProxyResult>?,
-                                        numConnected: UInt64) -> StreamrProxyResult {
+    private func convertToStreamrResult(
+        _ proxyResult: UnsafeMutablePointer<streamr.ProxyResult>?,
+        numConnected: UInt64
+    ) -> StreamrProxyResult {
         defer {
             if let result = proxyResult {
                 proxyClientResultDelete(UnsafePointer(result))
@@ -212,10 +262,12 @@ public class StreamrProxyClient {
             if let successfulPtr = result.pointee.successful {
                 for i in 0..<Int(result.pointee.numSuccessful) {
                     let proxy = successfulPtr.advanced(by: i)
-                    successful.append(StreamrProxyAddress(
-                        websocketUrl: String(cString: proxy.pointee.websocketUrl),
-                        ethereumAddress: String(cString: proxy.pointee.ethereumAddress)
-                    ))
+                    successful.append(
+                        StreamrProxyAddress(
+                            websocketUrl: String(cString: proxy.pointee.websocketUrl),
+                            ethereumAddress: String(cString: proxy.pointee.ethereumAddress)
+                        )
+                    )
                 }
             }
             
@@ -223,12 +275,21 @@ public class StreamrProxyClient {
             if let errorsPtr = result.pointee.errors {
                 for i in 0..<Int(result.pointee.numErrors) {
                     let error = errorsPtr.advanced(by: i)
-                    failed.append(StreamrProxyError(error: createStreamrProxyError(message: String(cString: error.pointee.message), code: String(cString: error.pointee.code)),
-                                                    proxy: StreamrProxyAddress(
-                                                        websocketUrl: String(cString: error.pointee.proxy.pointee.websocketUrl),
-                                                        ethereumAddress: String(cString: error.pointee.proxy.pointee.ethereumAddress)
-                                                    )
-                                                   ))
+                    let errorMessage = String(cString: error.pointee.message)
+                    let errorCode = String(cString: error.pointee.code)
+                    
+                    failed.append(
+                        StreamrProxyError(
+                            error: createStreamrProxyError(
+                                message: errorMessage,
+                                code: errorCode
+                            ),
+                            proxy: StreamrProxyAddress(
+                                websocketUrl: String(cString: error.pointee.proxy.pointee.websocketUrl),
+                                ethereumAddress: String(cString: error.pointee.proxy.pointee.ethereumAddress)
+                            )
+                        )
+                    )
                 }
             }
         }
@@ -239,5 +300,4 @@ public class StreamrProxyClient {
             failed: failed
         )
     }
-    
 }

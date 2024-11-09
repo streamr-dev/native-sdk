@@ -128,8 +128,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "165"
             endingLineNumber = "165"
-            landmarkName = "connect(proxies:)"
-            landmarkType = "7">
+            landmarkName = "StreamrProxyClient"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -192,7 +192,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "190"
             endingLineNumber = "190"
-            landmarkName = "publish(content:ethereumPrivateKey:)"
+            landmarkName = "connect(proxies:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -208,7 +208,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "134"
             endingLineNumber = "134"
-            landmarkName = "connect(proxies:)"
+            landmarkName = "init(ownEthereumAddress:streamPartId:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -224,7 +224,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "191"
             endingLineNumber = "191"
-            landmarkName = "publish(content:ethereumPrivateKey:)"
+            landmarkName = "connect(proxies:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
