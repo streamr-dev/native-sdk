@@ -241,5 +241,6 @@ TEST_F(StreamrProxyClientCppTest, ProxyPublishWithoutConnection) noexcept(false)
     auto publishResult = client.publish("abc", "");
     std::cout << "Published message" << std::endl;
     // Verify publish results
+    EXPECT_EQ(publishResult.failed.size(), 1);
     EXPECT_EQ(publishResult.numConnected, 0);
 }
