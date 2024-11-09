@@ -12,7 +12,6 @@
 		413E46C52C7867670030132D /* LocationShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46C42C7867670030132D /* LocationShareView.swift */; };
 		413E46C72C78676A0030132D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 413E46C62C78676A0030132D /* Assets.xcassets */; };
 		413E46CA2C78676A0030132D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 413E46C92C78676A0030132D /* Preview Assets.xcassets */; };
-		413E46D42C78676A0030132D /* LocationShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46D32C78676A0030132D /* LocationShareTests.swift */; };
 		413E46DE2C78676A0030132D /* LocationShareUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46DD2C78676A0030132D /* LocationShareUITests.swift */; };
 		413E46E02C78676A0030132D /* LocationShareUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46DF2C78676A0030132D /* LocationShareUITestsLaunchTests.swift */; };
 		413E46ED2C7875CE0030132D /* LocationShareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46EC2C7875CD0030132D /* LocationShareViewModel.swift */; };
@@ -48,7 +47,6 @@
 		413E46C62C78676A0030132D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		413E46C92C78676A0030132D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		413E46CF2C78676A0030132D /* LocationShareTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocationShareTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		413E46D32C78676A0030132D /* LocationShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareTests.swift; sourceTree = "<group>"; };
 		413E46D92C78676A0030132D /* LocationShareUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocationShareUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		413E46DD2C78676A0030132D /* LocationShareUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareUITests.swift; sourceTree = "<group>"; };
 		413E46DF2C78676A0030132D /* LocationShareUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareUITestsLaunchTests.swift; sourceTree = "<group>"; };
@@ -144,7 +142,6 @@
 			isa = PBXGroup;
 			children = (
 				4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */,
-				413E46D32C78676A0030132D /* LocationShareTests.swift */,
 			);
 			path = LocationShareTests;
 			sourceTree = "<group>";
@@ -305,7 +302,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				413E46D42C78676A0030132D /* LocationShareTests.swift in Sources */,
 				4154A2B52CDCAFC70057D042 /* ProxyClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -17,6 +17,7 @@ class ProxyClient {
     var status: Status = .stopped
     private let locationManager: LocationManager
     private let streamrProxyClient = try! StreamrProxyClient(ownEthereumAddress: "0xa5374e3c19f15e1847881979dd0c6c9ffe846bd5", streamPartId: "0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01")
+        //"0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0")
     static let defaultPublishingIntervalInSeconds: TimeInterval = 5
     @ObservationIgnored private var pCallroxyClientHandle: UInt64 = 0
     @ObservationIgnored private var task: Task<Void, Never>?
