@@ -5,48 +5,69 @@ import streamr
 import Foundation
 
 public enum StreamrError: LocalizedError, Equatable {
-    case initializationError(String)
-    case connectionError(String)
-    case publishError(String)
-    case conversionError(String)
+    case invalidEthereumAddress(String = "")
+    case invalidStreamPartId(String = "")
+    case invalidProxyUrl(String = "")
+    case noProxiesDefined(String = "")
+    case proxyConnectionFailed(String = "")
+    case unknownError(String = "")
     
     public var errorDescription: String? {
         switch self {
-        case .initializationError(let message):
-            return "Initialization error: \(message)"
-        case .connectionError(let message):
-            return "Connection error: \(message)"
-        case .publishError(let message):
-            return "Publish error: \(message)"
-        case .conversionError(let message):
-            return "Conversion error: \(message)"
+        case .invalidEthereumAddress(let message):
+            return "Invalid Ethereum address: \(message)"
+        case .invalidStreamPartId(let message):
+            return "Invalid stream part ID: \(message)"
+        case .invalidProxyUrl(let message):
+            return "Invalid proxy URL: \(message)"
+        case .noProxiesDefined(let message):
+            return "No proxies defined: \(message)"
+        case .proxyConnectionFailed(let message):
+            return "Proxy connection failed: \(message)"
+        case .unknownError(let message):
+            return "Unknown error: \(message)"
         }
     }
     
     public static func == (lhs: StreamrError, rhs: StreamrError) -> Bool {
-           switch (lhs, rhs) {
-           case (.initializationError(let lhsMessage), .initializationError(let rhsMessage)):
-               return lhsMessage == rhsMessage
-           case (.connectionError(let lhsMessage), .connectionError(let rhsMessage)):
-               return lhsMessage == rhsMessage
-           case (.publishError(let lhsMessage), .publishError(let rhsMessage)):
-               return lhsMessage == rhsMessage
-           case (.conversionError(let lhsMessage), .conversionError(let rhsMessage)):
-               return lhsMessage == rhsMessage
-           default:
-               return false
-           }
-       }
+        switch (lhs, rhs) {
+        case (.invalidEthereumAddress, .invalidEthereumAddress):
+            return true
+        case (.invalidStreamPartId, .invalidStreamPartId):
+            return true
+        case (.invalidProxyUrl, .invalidProxyUrl):
+            return true
+        case (.noProxiesDefined, .noProxiesDefined):
+            return true
+        case (.proxyConnectionFailed, .proxyConnectionFailed):
+            return true
+        case (.unknownError, .unknownError):
+            return true
+        default:
+            return false
+        }
+    }
 }
 
-public enum StreamrProxyErrorCode {
-    case invalidEthereumAddress
-    case invalidStreamPartId
-    case invalidProxyUrl
-    case proxyClientNotFound
-    case noProxiesDefined
-    case proxyConnectionFailed
-    case unknownError
+private func createStreamrProxyError(message: String, code: UnsafePointer<CChar>?) -> StreamrError {
+    guard let code = code else {
+        return .unknownError(message)
+    }
+    let errorCode = String(cString: code)
+    switch errorCode {
+    case "INVALID_ETHEREUM_ADDRESS":
+        return .invalidEthereumAddress(message)
+    case "INVALID_STREAM_PART_ID":
+        return .invalidStreamPartId(message)
+    case "INVALID_PROXY_URL":
+        return .invalidProxyUrl(message)
+    case "NO_PROXIES_DEFINED":
+        return .noProxiesDefined(message)
+    case "PROXY_CONNECTION_FAILED":
+        return .proxyConnectionFailed(message)
+    default:
+        return .unknownError(message)
+    }
 }
 
 public struct StreamrProxyAddress {
@@ -60,8 +81,7 @@ public struct StreamrProxyAddress {
 }
 
 public struct StreamrProxyError {
-    let message: String
-    let code: StreamrProxyErrorCode
+    let error: StreamrError
     let proxy: StreamrProxyAddress
 }
 
@@ -75,9 +95,8 @@ public class StreamrProxyClient {
     private let clientHandle: UInt64
     
     public init(ownEthereumAddress: String, streamPartId: String) throws {
-        // Create a mutable pointer that we'll cast appropriately
-        var mutableProxyResult: UnsafeMutablePointer<streamr.ProxyResult>?
-        let proxyResultPtr = withUnsafeMutablePointer(to: &mutableProxyResult) { ptr in
+        var proxyResult: UnsafeMutablePointer<streamr.ProxyResult>?
+        let proxyResultPtr = withUnsafeMutablePointer(to: &proxyResult) { ptr in
             UnsafeMutablePointer<UnsafePointer<streamr.ProxyResult>?>(OpaquePointer(ptr))
         }
         
@@ -85,13 +104,18 @@ public class StreamrProxyClient {
                                            ownEthereumAddress,
                                            streamPartId)
         
-        // Handle initialization errors
-        if let result = mutableProxyResult, result.pointee.numErrors > 0 {
-            let errorMessage = "Failed to initialize StreamrProxyClient"
-            proxyClientResultDelete(UnsafePointer(mutableProxyResult))
-            throw StreamrError.initializationError(errorMessage)
+        defer {
+            if let result = proxyResult {
+                proxyClientResultDelete(UnsafePointer(result))
+            }
         }
-        proxyClientResultDelete(UnsafePointer(mutableProxyResult))
+        
+        if let result = proxyResult, result.pointee.numErrors > 0 {
+            let error = result.pointee.errors[0]
+            let errorMessage = String(cString: error.message)
+            let errorCode = String(cString: error.code)
+            throw createStreamrProxyError(message: errorMessage, code: errorCode)
+        }
     }
     
     deinit {
@@ -112,9 +136,7 @@ public class StreamrProxyClient {
                 numConnected: 0,
                 successful: [],
                 failed: [StreamrProxyError(
-                    message: "No proxies defined",
-                    code: .noProxiesDefined,
-                    proxy: StreamrProxyAddress(websocketUrl: "", ethereumAddress: "")
+                    error: StreamrError.noProxiesDefined("No proxies defined"), proxy: StreamrProxyAddress(websocketUrl: "", ethereumAddress: "")
                 )]
             )
         }
@@ -182,9 +204,40 @@ public class StreamrProxyClient {
             }
         }
         
-        // Implementation remains the same
-        return StreamrProxyResult(numConnected: numConnected,
-                                  successful: [],
-                                  failed: [])
+        var successful: [StreamrProxyAddress] = []
+        var failed: [StreamrProxyError] = []
+        
+        if let result = proxyResult {
+            // Handle successful operations
+            if let successfulPtr = result.pointee.successful {
+                for i in 0..<Int(result.pointee.numSuccessful) {
+                    let proxy = successfulPtr.advanced(by: i)
+                    successful.append(StreamrProxyAddress(
+                        websocketUrl: String(cString: proxy.pointee.websocketUrl),
+                        ethereumAddress: String(cString: proxy.pointee.ethereumAddress)
+                    ))
+                }
+            }
+            
+            // Handle errors
+            if let errorsPtr = result.pointee.errors {
+                for i in 0..<Int(result.pointee.numErrors) {
+                    let error = errorsPtr.advanced(by: i)
+                    failed.append(StreamrProxyError(error: createStreamrProxyError(message: String(cString: error.pointee.message), code: String(cString: error.pointee.code)),
+                                                    proxy: StreamrProxyAddress(
+                                                        websocketUrl: String(cString: error.pointee.proxy.pointee.websocketUrl),
+                                                        ethereumAddress: String(cString: error.pointee.proxy.pointee.ethereumAddress)
+                                                    )
+                                                   ))
+                }
+            }
+        }
+        
+        return StreamrProxyResult(
+            numConnected: numConnected,
+            successful: successful,
+            failed: failed
+        )
     }
+    
 }
