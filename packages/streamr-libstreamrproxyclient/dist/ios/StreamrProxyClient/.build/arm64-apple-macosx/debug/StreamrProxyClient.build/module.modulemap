@@ -1,0 +1,4 @@
+module StreamrProxyClient {
+    header "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/StreamrProxyClient-Swift.h"
+    requires objc
+}

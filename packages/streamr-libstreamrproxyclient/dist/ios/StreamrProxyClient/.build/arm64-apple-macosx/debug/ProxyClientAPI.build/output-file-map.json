@@ -1,0 +1,17 @@
+{
+  "": {
+    "swift-dependencies": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/master.swiftdeps"
+  },
+  "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/CProxyClientAPI.swift": {
+    "dependencies": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/CProxyClientAPI.d",
+    "object": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/CProxyClientAPI.swift.o",
+    "swiftmodule": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/CProxyClientAPI~partial.swiftmodule",
+    "swift-dependencies": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/CProxyClientAPI.swiftdeps"
+  },
+  "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/StreamrProxyClientAPI.swift": {
+    "dependencies": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/StreamrProxyClientAPI.d",
+    "object": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/StreamrProxyClientAPI.swift.o",
+    "swiftmodule": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/StreamrProxyClientAPI~partial.swiftmodule",
+    "swift-dependencies": "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/StreamrProxyClientAPI.swiftdeps"
+  }
+}

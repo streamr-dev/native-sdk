@@ -1,0 +1,844 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.xctest/Contents/MacOS/StreamrProxyClientPackageTests",
+      "packagePath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient",
+      "productName" : "StreamrProxyClientPackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.ProxyClientAPI-arm64-apple-macosx14.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/sources",
+      "importPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/CProxyClientAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/StreamrProxyClientAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "ProxyClientAPI",
+      "moduleOutputPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/ProxyClientAPI.swiftmodule",
+      "objects" : [
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/CProxyClientAPI.swift.o",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/StreamrProxyClientAPI.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx10.13",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/ProxyClientAPI-Swift.h",
+        "-color-diagnostics",
+        "-swift-version",
+        "6",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "streamrproxyclient"
+      ],
+      "outputFileMapPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/CProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/StreamrProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/ProxyClientAPI.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/CProxyClientAPI.swift",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/StreamrProxyClientAPI.swift"
+      ],
+      "tempsPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.StreamrProxyClient-arm64-apple-macosx14.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/sources",
+      "importPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/StreamrProxyClient/DefaultProxyClientAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/StreamrProxyClient/StreamrProxyClient.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/ProxyClientAPI.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "StreamrProxyClient",
+      "moduleOutputPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/StreamrProxyClient.swiftmodule",
+      "objects" : [
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/DefaultProxyClientAPI.swift.o",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/StreamrProxyClient.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx10.13",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/StreamrProxyClient-Swift.h",
+        "-color-diagnostics",
+        "-swift-version",
+        "6",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "streamrproxyclient"
+      ],
+      "outputFileMapPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/DefaultProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/StreamrProxyClient.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/StreamrProxyClient.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/StreamrProxyClient/DefaultProxyClientAPI.swift",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/StreamrProxyClient/StreamrProxyClient.swift"
+      ],
+      "tempsPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.StreamrProxyClientPackageTests-arm64-apple-macosx14.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/sources",
+      "importPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/StreamrProxyClientTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "StreamrProxyClientPackageTests",
+      "moduleOutputPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/StreamrProxyClientPackageTests.swiftmodule",
+      "objects" : [
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx10.13",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/StreamrProxyClientPackageTests-Swift.h",
+        "-color-diagnostics",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "streamrproxyclient"
+      ],
+      "outputFileMapPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/StreamrProxyClientPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.StreamrProxyClientTests-arm64-apple-macosx14.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/sources",
+      "importPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/MockProxyClientAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/MockedProxyClientTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/StreamrProxyClientTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/StreamrProxyClient.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "StreamrProxyClientTests",
+      "moduleOutputPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/StreamrProxyClientTests.swiftmodule",
+      "objects" : [
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/MockProxyClientAPI.swift.o",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/MockedProxyClientTests.swift.o",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/StreamrProxyClientTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx13.0",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-color-diagnostics",
+        "-swift-version",
+        "6",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "streamrproxyclient"
+      ],
+      "outputFileMapPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/MockProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/MockedProxyClientTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/StreamrProxyClientTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules/StreamrProxyClientTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/MockProxyClientAPI.swift",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/MockedProxyClientTests.swift",
+        "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/StreamrProxyClientTests.swift"
+      ],
+      "tempsPath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "ProxyClientAPI" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "ProxyClientAPI",
+      "-package-name",
+      "streamrproxyclient",
+      "-incremental",
+      "-c",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/CProxyClientAPI.swift",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/StreamrProxyClientAPI.swift",
+      "-I",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx10.13",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/ProxyClientAPI-Swift.h",
+      "-color-diagnostics",
+      "-swift-version",
+      "6",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "streamrproxyclient",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "StreamrProxyClient" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "StreamrProxyClient",
+      "-package-name",
+      "streamrproxyclient",
+      "-incremental",
+      "-c",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/StreamrProxyClient/DefaultProxyClientAPI.swift",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/StreamrProxyClient/StreamrProxyClient.swift",
+      "-I",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx10.13",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/StreamrProxyClient-Swift.h",
+      "-color-diagnostics",
+      "-swift-version",
+      "6",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "streamrproxyclient",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "StreamrProxyClientPackageTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "StreamrProxyClientPackageTests",
+      "-package-name",
+      "streamrproxyclient",
+      "-incremental",
+      "-c",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx10.13",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/StreamrProxyClientPackageTests-Swift.h",
+      "-color-diagnostics",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "streamrproxyclient",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "StreamrProxyClientTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "StreamrProxyClientTests",
+      "-package-name",
+      "streamrproxyclient",
+      "-incremental",
+      "-c",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/MockProxyClientAPI.swift",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/MockedProxyClientTests.swift",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/StreamrProxyClientTests.swift",
+      "-I",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-color-diagnostics",
+      "-swift-version",
+      "6",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "streamrproxyclient",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "ProxyClientAPI" : [
+
+    ],
+    "StreamrProxyClient" : [
+      "ProxyClientAPI",
+      "streamr"
+    ],
+    "StreamrProxyClientPackageTests" : [
+      "StreamrProxyClientTests",
+      "StreamrProxyClient",
+      "ProxyClientAPI",
+      "streamr"
+    ],
+    "StreamrProxyClientTests" : [
+      "StreamrProxyClient",
+      "ProxyClientAPI",
+      "streamr"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "writeCommands" : {
+    "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/CProxyClientAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/ProxyClientAPI/StreamrProxyClientAPI.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/sources"
+    },
+    "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/StreamrProxyClient/DefaultProxyClientAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Sources/StreamrProxyClient/StreamrProxyClient.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/sources"
+    },
+    "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/CProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/StreamrProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/DefaultProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/StreamrProxyClient.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.product/Objects.LinkFileList"
+    },
+    "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/sources"
+    },
+    "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/CProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/ProxyClientAPI.build/StreamrProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/DefaultProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClient.build/StreamrProxyClient.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/MockProxyClientAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/MockedProxyClientTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/StreamrProxyClientTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/MockProxyClientAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/MockedProxyClientTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Tests/StreamrProxyClientTests/StreamrProxyClientTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/StreamrProxyClientTests.build/sources"
+    },
+    "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

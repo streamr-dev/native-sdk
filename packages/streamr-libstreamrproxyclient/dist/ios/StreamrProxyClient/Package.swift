@@ -10,15 +10,24 @@ let package = Package(
         .iOS(.v17)
     ],
     products: [
-        .library(
-            name: "StreamrProxyClient",
-            type: .static,
-            targets: ["StreamrProxyClient"]),
-    ],
+           .library(
+               name: "StreamrProxyClient",
+               targets: ["StreamrProxyClient"]),
+           .library(
+               name: "ProxyClientAPI",
+               targets: ["ProxyClientAPI"])
+       ],
+   
     targets: [
         .target(
             name: "StreamrProxyClient",
-            dependencies: ["streamr"],
+            dependencies: ["streamr", "ProxyClientAPI"],
+            linkerSettings: [
+                .linkedFramework("Foundation")
+                // Add any other frameworks your library depends on
+            ]),
+        .target(
+            name: "ProxyClientAPI",
             linkerSettings: [
                 .linkedFramework("Foundation")
                 // Add any other frameworks your library depends on
@@ -27,9 +36,6 @@ let package = Package(
             name: "streamr",
             path: "Frameworks/streamr.xcframework"
         ),
-        .testTarget(
-            name: "StreamrProxyClientTests",
-            dependencies: ["StreamrProxyClient"]
-        ),
+    
     ]
 )

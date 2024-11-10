@@ -1,0 +1,24 @@
+{
+  "object" : {
+    "artifacts" : [
+      {
+        "kind" : "xcframework",
+        "packageRef" : {
+          "identity" : "streamrproxyclient",
+          "kind" : "root",
+          "location" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient",
+          "name" : "StreamrProxyClient"
+        },
+        "path" : "/Users/santturantanen/Source/native-sdk-swift-module/native-sdk/packages/streamr-libstreamrproxyclient/dist/ios/StreamrProxyClient/Frameworks/streamr.xcframework",
+        "source" : {
+          "type" : "local"
+        },
+        "targetName" : "streamr"
+      }
+    ],
+    "dependencies" : [
+
+    ]
+  },
+  "version" : 6
+}

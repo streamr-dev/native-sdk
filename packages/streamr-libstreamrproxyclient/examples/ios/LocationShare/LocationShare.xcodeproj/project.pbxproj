@@ -245,7 +245,7 @@
 			);
 			mainGroup = 413E46B62C7867670030132D;
 			packageReferences = (
-				4154A2B32CDC9DD60057D042 /* XCLocalSwiftPackageReference "../../../dist/ios/StreamrProxyClient" */,
+				418411792CE0BD3C0046B113 /* XCLocalSwiftPackageReference "../../../dist/ios/StreamrProxyClient" */,
 			);
 			productRefGroup = 413E46C02C7867670030132D /* Products */;
 			projectDirPath = "";
@@ -641,7 +641,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		4154A2B32CDC9DD60057D042 /* XCLocalSwiftPackageReference "../../../dist/ios/StreamrProxyClient" */ = {
+		418411792CE0BD3C0046B113 /* XCLocalSwiftPackageReference "../../../dist/ios/StreamrProxyClient" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../dist/ios/StreamrProxyClient;
 		};

@@ -7,6 +7,7 @@
 
 import XCTest
 @testable import StreamrProxyClient
+@testable import ProxyClientAPI
 
 final class ProxyClientTests: XCTestCase {
     let proxyWebsocketUrl =
