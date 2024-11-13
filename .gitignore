@@ -3,4 +3,4 @@ vcpkg_installed
 .vscode
 .trunk
 setenvs.sh
-*.DS_Store*
+*.DS_Store*packages/streamr-libstreamrproxyclient/dist/android/StreamrProxyClient/libs/arm64-v8a/libstreamrproxyclient.so
