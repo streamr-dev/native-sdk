@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22.1)
 project(ProxyClient)
 
 # Set the correct relative path to the library
-set(STREAMR_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../../../../../build/libstreamrproxyclient.so")
+set(STREAMR_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../../build/libstreamrproxyclient.so")
 
 message(STATUS "Looking for libstreamrproxyclient.so at: ${STREAMR_LIB_PATH}")
 

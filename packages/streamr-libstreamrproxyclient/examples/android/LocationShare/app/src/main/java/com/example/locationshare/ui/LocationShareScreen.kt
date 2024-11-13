@@ -46,17 +46,17 @@ fun LocationShareScreen(
         horizontalAlignment = Alignment.Start
     ) {
         ProxyFieldsLayout(
-            proxyAddress = locationShareViewModel.streamrProxyClient.proxyAddress,
-            proxyId = locationShareViewModel.streamrProxyClient.proxyId,
-            ethereumPrivateKey = locationShareViewModel.streamrProxyClient.ethereumPrivateKey,
-            status = locationShareViewModel.streamrProxyClient.status,
+            proxyAddress = locationShareViewModel.proxyClient.proxyAddress,
+            proxyId = locationShareViewModel.proxyClient.proxyId,
+            ethereumPrivateKey = locationShareViewModel.proxyClient.ethereumPrivateKey,
+            status = locationShareViewModel.proxyClient.status,
             onProxyAddressChanged = {
-                locationShareViewModel.streamrProxyClient.updateProxyAddress(
+                locationShareViewModel.proxyClient.updateProxyAddress(
                     it
                 )
             },
-            onProxyIdChanged = { locationShareViewModel.streamrProxyClient.updateProxyId(it) },
-            onEthereumPrivateKeyChanged = { locationShareViewModel.streamrProxyClient.updateEthereumPrivateKey(it) },
+            onProxyIdChanged = { locationShareViewModel.proxyClient.updateProxyId(it) },
+            onEthereumPrivateKeyChanged = { locationShareViewModel.proxyClient.updateEthereumPrivateKey(it) },
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -77,9 +77,9 @@ fun LocationShareScreen(
             ) {
 
                 OutlinedTextField(
-                    value = locationShareViewModel.streamrProxyClient.intervalSeconds,
+                    value = locationShareViewModel.proxyClient.intervalSeconds,
                     onValueChange = {
-                        locationShareViewModel.streamrProxyClient.updateIntervalSeconds(
+                        locationShareViewModel.proxyClient.updateIntervalSeconds(
                             it
                         )
                     },
@@ -116,9 +116,9 @@ fun LocationShareScreen(
             }
         }
         Button(
-            enabled = if (locationShareViewModel.streamrProxyClient.proxyId != "" &&
-                locationShareViewModel.streamrProxyClient.proxyAddress != "" &&
-                locationShareViewModel.streamrProxyClient.intervalSeconds != ""
+            enabled = if (locationShareViewModel.proxyClient.proxyId != "" &&
+                locationShareViewModel.proxyClient.proxyAddress != "" &&
+                locationShareViewModel.proxyClient.intervalSeconds != ""
             ) {
                 true
             } else {
@@ -127,7 +127,7 @@ fun LocationShareScreen(
             modifier = Modifier.fillMaxWidth(),
             onClick = { locationShareViewModel.buttonClicked() }
         ) {
-            if (locationShareViewModel.streamrProxyClient.status == Status.stopped) {
+            if (locationShareViewModel.proxyClient.status == Status.stopped) {
                 Text("Start Sharing")
             } else {
                 Text("Stop Sharing")

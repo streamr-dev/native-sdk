@@ -1,11 +1,16 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
     namespace = "com.example.locationshare"
     compileSdk = 34
+
+    buildFeatures {
+        compose = true
+        buildConfig = true  // Add this
+    }
 
     defaultConfig {
         applicationId = "com.example.locationshare"
@@ -18,18 +23,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        externalNativeBuild {
-            cmake {
-                cppFlags += ""
-            }
-        }
-
-        ndk {
-            // Specifies the ABI configurations of your native
-            // libraries Gradle should build and package with your app.
-            abiFilters += "arm64-v8a"
-        }
-
     }
 
     buildTypes {
@@ -39,11 +32,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-    }
-    sourceSets {
-        getByName("main") {
-            jniLibs.srcDirs("libs")
         }
     }
     compileOptions {
@@ -64,15 +52,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
 }
 
 dependencies {
+    implementation(project(":StreamrProxyClient"))  // Move this to top
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

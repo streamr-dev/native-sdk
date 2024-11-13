@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var locationClient: FusedLocationProviderClient
     private val locationViewModel: LocationViewModel by viewModels()
     private val locationShareViewModel: LocationShareViewModel by viewModels {
-        LocationShareViewModelFactory(StreamrProxyClient(locationViewModel.state))
+        LocationShareViewModelFactory(ProxyClient(locationViewModel.state))
     }
     private fun checkPermissions() {
 
@@ -98,11 +98,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-class LocationShareViewModelFactory(private val streamrProxyClient: StreamrProxyClient) : ViewModelProvider.Factory {
+class LocationShareViewModelFactory(private val proxyClient: ProxyClient) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LocationShareViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return LocationShareViewModel(streamrProxyClient) as T
+            return LocationShareViewModel(proxyClient) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

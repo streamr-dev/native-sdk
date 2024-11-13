@@ -1,16 +1,11 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -19,6 +14,8 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LocationShare"
-include(":app")
- 
+rootProject.name = "LocationShare"  // Use double quotes for strings
+include(":app")  // Use include() function with parentheses
+include(":StreamrProxyClient")
+
+project(":StreamrProxyClient").projectDir = file("StreamrProxyClient")
