@@ -29,7 +29,6 @@ class StreamrProxyClientTest {
         private const val VALID_PROXY_URL = "ws://valid.proxy.url"
         private const val INVALID_ETHEREUM_ADDRESS = "invalid_address"
         private const val INVALID_STREAM_PART_ID = "invalid_stream_id"
-        private const val TAG = "StreamrProxyClientTest"
         private const val NON_EXISTENT_PROXY_URL_0 = "ws://non.existent.proxy0.url"
         private const val VALID_ETHEREUM_ADDRESS2 = "0x2234567890123456789012345678901234567890"
         private const val VALID_ETHEREUM_ADDRESS3 = "0x3234567890123456789012345678901234567890"
@@ -109,9 +108,7 @@ class StreamrProxyClientTest {
                 streamPartId = VALID_STREAM_PART_ID
             )
         }
-        assertEquals("INVALID_ETHEREUM_ADDRESS", exception.code)
-        assertEquals(null, exception.proxyUrl)
-        assertEquals(null, exception.proxyEthereumAddress)
+        assertEquals(StreamrError.InvalidEthereumAddress::class, exception.error::class)
     }
 
     @Test
@@ -122,9 +119,7 @@ class StreamrProxyClientTest {
                 streamPartId = INVALID_STREAM_PART_ID
             )
         }
-        assertEquals("INVALID_STREAM_PART_ID", exception.code)
-        assertEquals(null, exception.proxyUrl)
-        assertEquals(null, exception.proxyEthereumAddress)
+        assertEquals(StreamrError.InvalidStreamPartId::class, exception.error::class)
     }
 
     @Test
