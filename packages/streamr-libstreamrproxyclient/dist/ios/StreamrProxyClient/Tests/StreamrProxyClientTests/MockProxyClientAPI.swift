@@ -2,8 +2,6 @@ import Testing
 @testable import ProxyClientAPI
 import Foundation
 
-
-// First, create mock types that match the C API structure
 public class MockProxy: ProxyData {
     public var websocketUrl: UnsafePointer<CChar>!
     public var ethereumAddress: UnsafePointer<CChar>!
@@ -137,7 +135,6 @@ class MockCProxyClientAPI: CProxyClientAPI {
                 successful: createEmptyProxyArray(),
                 numSuccessful: mockConnectedCount
             )
-            print("FFF")
             let resultPtr = UnsafeMutablePointer<R>.allocate(capacity: 1)
             resultPtr.initialize(to: mockResult)
             result.pointee = UnsafePointer(resultPtr)
