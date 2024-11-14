@@ -1,9 +1,27 @@
 
 plugins {
-    id("com.android.library") 
-    id("org.jetbrains.kotlin.android")
+    id("com.android.library") version "8.2.0"  // Add version here
+    id("org.jetbrains.kotlin.android") version "1.9.20"  // Add Kotlin version here
+}
+/*
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.2.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20")
+    }
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+*/
 tasks.withType<Test> {
     testLogging {
         events("passed", "skipped", "failed")
@@ -16,9 +34,11 @@ android {
     compileSdk = 34
     ndkVersion = "27.1.12297006"  // Specify the NDK version
 
-    packagingOptions {
-        pickFirst("libs/arm64-v8a/libstreamrproxyclient.so")
 
+    packaging {
+        jniLibs {
+            pickFirsts.add("libs/arm64-v8a/libstreamrproxyclient.so")
+        }
     }
 
 

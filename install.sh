@@ -91,3 +91,11 @@ fi
 if [ "$CREATE_XCFRAMEWORK" = true ]; then
     ./create-streamr-xcframework.pl    
 fi
+
+if [ "$TARGET_TRIPLET" = "arm64-android" ]; then
+    mkdir -p packages/streamr-libstreamrproxyclient/dist/android/StreamrProxyClient/libs/arm64-v8a
+    cp packages/streamr-libstreamrproxyclient/build/libstreamrproxyclient.so packages/streamr-libstreamrproxyclient/dist/android/StreamrProxyClient/libs/arm64-v8a/libstreamrproxyclient.so
+    mkdir -p packages/streamr-libstreamrproxyclient/examples/android/LocationShare/StreamrProxyClient/libs/arm64-v8a 
+    cp packages/streamr-libstreamrproxyclient/build/libstreamrproxyclient.so packages/streamr-libstreamrproxyclient/examples/android/LocationShare/StreamrProxyClient/libs/arm64-v8a/libstreamrproxyclient.so
+fi
+
