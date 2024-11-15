@@ -16,7 +16,7 @@ You can download pre-compiled binaries of the library from the following links:
 - [arm64-linux] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-linux-1.0.0.tgz)
 - [x64-osx] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-x64-osx-1.0.0.tgz)
 - [arm64-osx] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-osx-1.0.0.tgz)
-- [arm64-ios] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-ios-1.0.0.tgz)
+- [arm64-ios] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-ios-2.0.0.tgz)
 - [arm64-android] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-android-1.0.0.tgz)
 
 # Installation for iOS (arm64)
