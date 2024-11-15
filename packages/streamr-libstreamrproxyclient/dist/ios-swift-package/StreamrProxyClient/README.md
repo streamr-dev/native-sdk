@@ -15,8 +15,7 @@ A Swift package that provides a client interface for connecting to Streamr Netwo
 
 1. **Package Extraction**
 
-bash
-tar -xzf streamrproxyclient-arm64-ios-2.0.0.tgz
+    - Terminal: tar -xzf streamrproxyclient-arm64-ios-2.0.0.tgz
 
 2. **Add Package to Xcode Project**
    - Open your Xcode project
@@ -46,25 +45,31 @@ tar -xzf streamrproxyclient-arm64-ios-2.0.0.tgz
 
 ## Quick Start
 
+```swift
 import StreamrProxyClient
 
 // Initialize client
 let client = try StreamrProxyClient(
-  ownEthereumAddress: "0x1234567890123456789012345678901234567890",
-streamPartId: "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
+    ownEthereumAddress: "0x1234567890123456789012345678901234567890",
+    streamPartId: "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
 )
+
 // Create proxy configuration
 let proxy = StreamrProxyAddress(
-  websocketUrl: "ws://95.216.15.80:44211",
-  ethereumAddress: "0xd0d14b38d1f6b59d3772a63d84ece0a79e6e1c1f"
+    websocketUrl: "ws://95.216.15.80:44211",
+    ethereumAddress: "0xd0d14b38d1f6b59d3772a63d84ece0a79e6e1c1f"
 )
 
 // Connect to proxy
 let connectResult = client.connect(proxies: [proxy])
+
 // Check connection result
 if connectResult.numConnected > 0 {
-  // Publish message
-  let publishResult = client.publish(content: "test message", ethereumPrivateKey: "0x...")
+    // Publish message
+    let publishResult = client.publish(
+        content: "test message",
+        ethereumPrivateKey: "0x..."
+    )
 }
 
 ## API Documentation
@@ -72,7 +77,6 @@ if connectResult.numConnected > 0 {
 StreamrProxyClient provides a Swift interface to the C++ StreamrProxyClient library. The interface is defined in the StreamrProxyClientAPI protocol.
 
 The API is documented below. For more information how to use the API, see integration tests in the example app in the repository: https://github.com/streamr-dev/native-sdk-last/native-sdk/packages/streamr-libstreamrproxyclient/examples/ios/LocationShare/LocationShareTests/ProxyClientTests.swift or the example app itself.
-
 
 /// Protocol defining the Streamr Proxy Client API interface
 public protocol StreamrProxyClientAPI {
