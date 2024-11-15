@@ -71,6 +71,7 @@ if connectResult.numConnected > 0 {
         ethereumPrivateKey: "0x..."
     )
 }
+```
 
 ## API Documentation
 
@@ -78,6 +79,7 @@ StreamrProxyClient provides a Swift interface to the C++ StreamrProxyClient libr
 
 The API is documented below. For more information how to use the API, see integration tests in the example app in the repository: https://github.com/streamr-dev/native-sdk-last/native-sdk/packages/streamr-libstreamrproxyclient/examples/ios/LocationShare/LocationShareTests/ProxyClientTests.swift or the example app itself.
 
+```swift
 /// Protocol defining the Streamr Proxy Client API interface
 public protocol StreamrProxyClientAPI {
     /// Initializes a new Streamr Proxy Client
@@ -99,5 +101,5 @@ public protocol StreamrProxyClientAPI {
     /// - Returns: StreamrProxyResult containing publish status, error details, and proxy node details
     func publish(content: String, ethereumPrivateKey: String?) -> StreamrProxyResult
 }
-
+```
 
