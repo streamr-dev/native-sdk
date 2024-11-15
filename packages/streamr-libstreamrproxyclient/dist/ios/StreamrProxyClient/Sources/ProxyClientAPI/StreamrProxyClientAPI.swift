@@ -121,64 +121,78 @@ public protocol StreamrProxyClientAPI: AnyObject {
 }
 
 public extension StreamrProxyClientAPI {
+    // Helper Functions
+    private func withProxyResultPointer<T>(
+        operation: (UnsafeMutablePointer<UnsafePointer<CAPI.R>?>) -> T
+    ) -> (result: T, proxyResult: UnsafeMutablePointer<CAPI.R>?) {
+        var mutableProxyResult: UnsafeMutablePointer<CAPI.R>?
+        let proxyResultPtr = withUnsafeMutablePointer(to: &mutableProxyResult) { ptr in
+            UnsafeMutablePointer<UnsafePointer<CAPI.R>?>(OpaquePointer(ptr))
+        }
+        let result = operation(proxyResultPtr)
+        return (result, mutableProxyResult)
+    }
     
-    func initialize(ownEthereumAddress: String = "",
-                    streamPartId: String = ""
-    ) throws {
-        // Prepare proxy result pointer
-        var proxyResult: UnsafeMutablePointer<CAPI.R>?
-        let proxyResultPtr = withUnsafeMutablePointer(to: &proxyResult) { ptr in
-            UnsafeMutablePointer<UnsafePointer<CAPI.R>?>(
-                OpaquePointer(ptr)
+    private func cleanupProxyResult(_ result: UnsafeMutablePointer<CAPI.R>?) {
+        if let result = result {
+            api.cProxyClientResultDelete(UnsafePointer(result))
+        }
+    }
+    
+    private func processSuccessful(_ result: UnsafeMutablePointer<CAPI.R>) -> [StreamrProxyAddress] {
+        let successfulPtr = result.pointee.successful
+        return (0..<Int(result.pointee.numSuccessful)).map { i in
+            let proxy = successfulPtr!.advanced(by: i)
+            return StreamrProxyAddress(
+                websocketUrl: String(cString: proxy.pointee.websocketUrl),
+                ethereumAddress: String(cString: proxy.pointee.ethereumAddress)
             )
         }
-        
-        // Initialize client
-        self.clientHandle = api.cProxyClientNew(
-            proxyResultPtr,
-            ownEthereumAddress,
-            streamPartId
-        )
-        
-        // Ensure cleanup
-        defer {
-            if let result = proxyResult {
-                api.cProxyClientResultDelete(UnsafePointer(result))
-            }
+    }
+    
+    private func processErrors(_ result: UnsafeMutablePointer<CAPI.R>) -> [StreamrProxyError] {
+        let errorsPtr = result.pointee.errors
+        return (0..<Int(result.pointee.numErrors)).map { i in
+            let error = errorsPtr!.advanced(by: i)
+            return StreamrProxyError(
+                error: createStreamrProxyError(
+                    message: String(cString: error.pointee.message),
+                    code: error.pointee.code
+                ),
+                proxy: StreamrProxyAddress(
+                    websocketUrl: String(cString: error.pointee.proxy.pointee.websocketUrl),
+                    ethereumAddress: String(cString: error.pointee.proxy.pointee.ethereumAddress)
+                )
+            )
+        }
+    }
+
+    // Main Functions
+    func initialize(ownEthereumAddress: String = "",
+                   streamPartId: String = "") throws {
+        let (handle, proxyResult) = withProxyResultPointer { proxyResultPtr in
+            api.cProxyClientNew(proxyResultPtr,
+                              ownEthereumAddress,
+                              streamPartId)
         }
         
-        // Handle errors if any
+        defer { cleanupProxyResult(proxyResult) }
+        self.clientHandle = handle
+        
         if let result = proxyResult, result.pointee.numErrors > 0 {
             let error = result.pointee.errors[0]
-            let errorMessage = String(cString: error.message)
-            let errorCode = String(cString: error.code)
-            
             throw createStreamrProxyError(
-                message: errorMessage,
-                code: errorCode
+                message: String(cString: error.message),
+                code: error.code
             )
         }
     }
     
     func deinitialize() {
-        // Prepare proxy result pointer
-        var mutableProxyResult: UnsafeMutablePointer<CAPI.R>?
-        let proxyResultPtr = withUnsafeMutablePointer(to: &mutableProxyResult) { ptr in
-            UnsafeMutablePointer<UnsafePointer<CAPI.R>?>(
-                OpaquePointer(ptr)
-            )
+        let (_, proxyResult) = withProxyResultPointer { proxyResultPtr in
+            api.cProxyClientDelete(proxyResultPtr, self.clientHandle)
         }
-        
-        // Delete client
-        api.cProxyClientDelete(
-            proxyResultPtr,
-            self.clientHandle
-        )
-        
-        // Cleanup result if needed
-        if let result = mutableProxyResult {
-            api.cProxyClientResultDelete(UnsafePointer(result))
-        }
+        cleanupProxyResult(proxyResult)
     }
     
     func createCProxyInstance(from swiftProxy: StreamrProxyAddress) -> CAPI.P {
@@ -190,35 +204,27 @@ public extension StreamrProxyClientAPI {
     }
     
     func connect(proxies: [StreamrProxyAddress]) -> StreamrProxyResult {
-        // Handle empty proxy list case first
         if proxies.isEmpty {
             return StreamrProxyResult(
                 numConnected: 0,
                 successful: [],
                 failed: [StreamrProxyError(
-                    error: StreamrError.noProxiesDefined("No proxies defined"), proxy: StreamrProxyAddress(websocketUrl: "", ethereumAddress: "")
+                    error: .noProxiesDefined("No proxies defined"),
+                    proxy: StreamrProxyAddress(websocketUrl: "", ethereumAddress: "")
                 )]
             )
         }
         
-        // Convert Swift proxies to C structure
-        var cProxies = proxies.map { proxy -> CAPI.P in
-            return createCProxyInstance(from: proxy)
-        }
+        var cProxies = proxies.map { createCProxyInstance(from: $0) }
         
-        // Set up the proxy result pointer
-        var mutableProxyResult: UnsafeMutablePointer<CAPI.R>?
-        let proxyResultPtr = withUnsafeMutablePointer(to: &mutableProxyResult) { ptr in
-            UnsafeMutablePointer<UnsafePointer<CAPI.R>?>(OpaquePointer(ptr))
+        let (numConnected, proxyResult) = withProxyResultPointer { proxyResultPtr in
+            api.cProxyClientConnect(
+                proxyResultPtr,
+                self.clientHandle,
+                &cProxies,
+                UInt64(proxies.count)
+            )
         }
-        
-        // Make the connection call
-        let numConnected = api.cProxyClientConnect(
-            proxyResultPtr,
-            self.clientHandle,
-            &cProxies,
-            UInt64(proxies.count)
-        )
         
         // Clean up C strings
         for proxy in cProxies {
@@ -226,98 +232,41 @@ public extension StreamrProxyClientAPI {
             free(UnsafeMutablePointer(mutating: proxy.ethereumAddress))
         }
         
-        // Convert the result
-        let result = convertToStreamrResult(mutableProxyResult, numConnected: numConnected)
-        
-        return result
+        return convertToStreamrResult(proxyResult, numConnected: numConnected)
     }
     
-    func publish(
-        content: String,
-        ethereumPrivateKey: String
-    ) -> StreamrProxyResult {
-        // Prepare proxy result pointer
-        var mutableProxyResult: UnsafeMutablePointer<CAPI.R>?
-        let proxyResultPtr = withUnsafeMutablePointer(to: &mutableProxyResult) { ptr in
-            UnsafeMutablePointer<UnsafePointer<CAPI.R>?>(
-                OpaquePointer(ptr)
+    func publish(content: String, ethereumPrivateKey: String) -> StreamrProxyResult {
+        let (numPublished, proxyResult) = withProxyResultPointer { proxyResultPtr in
+            api.cProxyClientPublish(
+                proxyResultPtr,
+                self.clientHandle,
+                content,
+                UInt64(content.count),
+                ethereumPrivateKey
             )
         }
         
-        // Publish content
-        let numPublished = api.cProxyClientPublish(
-            proxyResultPtr,
-            self.clientHandle,
-            content,
-            UInt64(content.count),
-            ethereumPrivateKey
-        )
-        
-        // Convert and return result
-        return convertToStreamrResult(
-            mutableProxyResult,
-            numConnected: numPublished
-        )
+        return convertToStreamrResult(proxyResult, numConnected: numPublished)
     }
     
     func convertToStreamrResult(
         _ proxyResult: UnsafeMutablePointer<CAPI.R>?,
         numConnected: UInt64
     ) -> StreamrProxyResult {
-        
-        defer {
-            if let result = proxyResult {
-                api.cProxyClientResultDelete(UnsafePointer(result))
-            }
-        }
+        defer { cleanupProxyResult(proxyResult) }
         
         var successful: [StreamrProxyAddress] = []
         var failed: [StreamrProxyError] = []
         
         if let result = proxyResult {
-            // Handle successful operations
-            // if let successfulPtr = result.pointee.successful {
-            let successfulPtr = result.pointee.successful
-            
-            for i in 0..<Int(result.pointee.numSuccessful) {
-                let proxy = successfulPtr!.advanced(by: i)
-                successful.append(
-                    StreamrProxyAddress(
-                        websocketUrl: String(cString: proxy.pointee.websocketUrl),
-                        ethereumAddress: String(cString: proxy.pointee.ethereumAddress)
-                    )
-                )
-            }
-            //  }
-            
-            // Handle errors
-            let errorsPtr = result.pointee.errors
-            for i in 0..<Int(result.pointee.numErrors) {
-                let error = errorsPtr!.advanced(by: i)
-                let errorMessage = String(cString: error.pointee.message)
-                let errorCode = String(cString: error.pointee.code)
-                
-                failed.append(
-                    StreamrProxyError(
-                        error: createStreamrProxyError(
-                            message: errorMessage,
-                            code: errorCode
-                        ),
-                        proxy: StreamrProxyAddress(
-                            websocketUrl: String(cString: error.pointee.proxy.pointee.websocketUrl),
-                            ethereumAddress: String(cString: error.pointee.proxy.pointee.ethereumAddress)
-                        )
-                    )
-                )
-            }
-            
+            successful = processSuccessful(result)
+            failed = processErrors(result)
         }
-        let ret = StreamrProxyResult(
+        
+        return StreamrProxyResult(
             numConnected: numConnected,
             successful: successful,
             failed: failed
         )
-        return ret
     }
-    
 }
