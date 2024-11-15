@@ -6,7 +6,7 @@ The library is available for the following platforms:
 
 - Linux (x86_64, arm64)
 - macOS (x86_64, arm64)
-- iOS (arm64) (Swift package which includes C++ libraries)
+- iOS (arm64)
 - Android (arm64)
 
 # Pre-compiled binaries
@@ -16,37 +16,8 @@ You can download pre-compiled binaries of the library from the following links:
 - [arm64-linux] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-linux-1.0.0.tgz)
 - [x64-osx] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-x64-osx-1.0.0.tgz)
 - [arm64-osx] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-osx-1.0.0.tgz)
-- [arm64-ios] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-ios-2.0.0.tgz)
+- [arm64-ios] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-ios-1.0.0.tgz)
 - [arm64-android] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-android-1.0.0.tgz)
-
-# Installation for iOS (arm64)
-
-1. Package Extraction: tar -xzf streamrproxyclient-arm64-ios-2.0.0.tgz
-
-2. Add Package to Xcode Project
- - Open your Xcode project
- - Go to `File -> Add Package Dependencies`
- - Click `Add Local...`
- - Navigate to and select the extracted `StreamrProxyClient` folder
-
-3. Configure Framework Dependencies
- - Select your app target in Xcode
- - Go to the `General` tab
- - Scroll to `Frameworks, Libraries, and Embedded Content`
- - Click `+` and add:
-   * StreamProxyClient
-   * libc++abi.tbd
-
-4. Configure Build Settings
- - Select your app target
- - Go to `Build Settings` tab
- - Configure C++ settings:
-   * Set `C++ Language Dialect` to `GNU++23`
-   * Set `C++ and Objective-C Interoperability` to `C++/Objective-C`
-
-5. Device Configuration
- - Connect a physical iOS device
- - Select it as your run destination (simulator is not supported)
 
 # Installation for other platforms
 

@@ -9,5 +9,5 @@ fi
 
 VERSION=$1
 cd dist/ios-swift-package
-tar -czh -f "../streamrproxyclient-arm64-ios-${VERSION}.tgz" StreamrProxyClient
+tar -czh -f "streamrproxyclient-arm64-ios-${VERSION}.tgz" StreamrProxyClient
 cd ../..
