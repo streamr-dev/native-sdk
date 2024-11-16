@@ -13,7 +13,9 @@ This package contains unit tests for the StreamrProxyClient API, focusing on tes
 
 ## Running Tests
 
-- To run the test suite, navigate to the package directory and execute in Terminal: swift test
+- Open Terminal
+- Navigate to the package directory
+- Execute: swift test
 
 ## Test Coverage
 
