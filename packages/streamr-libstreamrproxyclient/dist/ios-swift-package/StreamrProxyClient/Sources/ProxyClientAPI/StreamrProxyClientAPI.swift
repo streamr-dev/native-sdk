@@ -79,8 +79,8 @@ private func createStreamrProxyError(
 }
 
 public struct StreamrProxyAddress {
-    let websocketUrl: String
-    let ethereumAddress: String
+    public let websocketUrl: String
+    public let ethereumAddress: String
     
     public init(websocketUrl: String, ethereumAddress: String) {
         self.websocketUrl = websocketUrl
@@ -89,14 +89,14 @@ public struct StreamrProxyAddress {
 }
 
 public struct StreamrProxyError {
-    let error: StreamrError
-    let proxy: StreamrProxyAddress
+    public let error: StreamrError
+    public let proxy: StreamrProxyAddress
 }
 
 public struct StreamrProxyResult {
-    let numConnected: UInt64
-    let successful: [StreamrProxyAddress]
-    let failed: [StreamrProxyError]
+    public let numConnected: UInt64
+    public let successful: [StreamrProxyAddress]
+    public let failed: [StreamrProxyError]
 }
 
 public protocol StreamrProxyClientAPI: AnyObject {
