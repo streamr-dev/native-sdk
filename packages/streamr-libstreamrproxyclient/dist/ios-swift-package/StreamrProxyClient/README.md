@@ -53,28 +53,30 @@ A Swift package that provides a client interface for connecting to Streamr Netwo
 import ProxyClientAPI
 import StreamrProxyClient
 
-// Initialize client
-let client = try StreamrProxyClient(
-    ownEthereumAddress: "0x1234567890123456789012345678901234567890",
-    streamPartId: "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
-)
-
-// Create proxy configuration
-let proxy = StreamrProxyAddress(
-    websocketUrl: "ws://95.216.15.80:44211",
-    ethereumAddress: "0xd0d14b38d1f6b59d3772a63d84ece0a79e6e1c1f"
-)
-
-// Connect to proxy
-let connectResult = client.connect(proxies: [proxy])
-
-// Check connection result
-if connectResult.numConnected > 0 {
-    // Publish message
-    let publishResult = client.publish(
-        content: "test message",
-        ethereumPrivateKey: "0x..."
+func test() throws {
+    // Initialize client
+    let client = try StreamrProxyClient(
+        ownEthereumAddress: "0x1234567890123456789012345678901234567890",
+        streamPartId: "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
     )
+    
+    // Create proxy configuration
+    let proxy = StreamrProxyAddress(
+        websocketUrl: "ws://95.216.15.80:44211",
+        ethereumAddress: "0xd0d14b38d1f6b59d3772a63d84ece0a79e6e1c1f"
+    )
+    
+    // Connect to proxy
+    let connectResult = client.connect(proxies: [proxy])
+    
+    // Check connection result
+    if connectResult.numConnected > 0 {
+        // Publish message
+        let publishResult = client.publish(
+            content: "test message",
+            ethereumPrivateKey: "0x..."
+        )
+    }
 }
 ```
 
