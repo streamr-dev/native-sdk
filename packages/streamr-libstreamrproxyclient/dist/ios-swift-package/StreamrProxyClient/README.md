@@ -35,6 +35,9 @@ A Swift package that provides a client interface for connecting to Streamr Netwo
   - Click `+`
   - Search for `libc++abi.tbd`
   - Click `Add`
+  - Click `+` (For some reason, it is not added under `Frameworks, Libraries, and Embedded Content` when adding the first time, it only adds in under Frameworks)
+  - Search for `libc++abi.tbd`
+  - Click `Add`
 
 ### 5. Configure C++ Settings
 - Select your app target
@@ -77,7 +80,7 @@ if connectResult.numConnected > 0 {
 
 StreamrProxyClient provides a Swift interface to the C++ StreamrProxyClient library. The interface is defined in the StreamrProxyClientAPI protocol.
 
-The API is documented below. For more information how to use the API, see integration tests in the example app in the repository: https://github.com/streamr-dev/native-sdk-last/native-sdk/packages/streamr-libstreamrproxyclient/examples/ios/LocationShare/LocationShareTests/ProxyClientTests.swift or the example app itself.
+The API is documented below. For more information how to use the API, see integration tests in the example app in the repository: https://github.com/streamr-dev/native-sdk/blob/cpp-swift-ios-wrappers-packages-and-apps/packages/streamr-libstreamrproxyclient/examples/ios/LocationShare/LocationShareTests/ProxyClientTests.swift or the example app itself.
 
 ```swift
 /// Protocol defining the Streamr Proxy Client API interface
