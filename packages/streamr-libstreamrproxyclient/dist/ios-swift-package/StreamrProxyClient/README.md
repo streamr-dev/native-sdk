@@ -13,35 +13,35 @@ A Swift package that provides a client interface for connecting to Streamr Netwo
 
 ## Installation for iOS (arm64)
 
-1. **Package Extraction**
+### 1. Extract Package
+- Terminal: tar -xzf streamrproxyclient-arm64-ios-2.0.0.tgz
 
-    - Terminal: tar -xzf streamrproxyclient-arm64-ios-2.0.0.tgz
+### 2. Configure Device
+- Open Xcode
+- Go to `Product -> Destination -> Manage Run Destinations`
+- Connect a physical iOS device
+- Select the device as your run destination
 
-2. **Add Package to Xcode Project**
-   - Open your Xcode project
-   - Go to `File -> Add Package Dependencies`
-   - Click `Add Local...`
-   - Navigate to and select the extracted `StreamrProxyClient` folder
+### 3. Add Swift Package
+- In Xcode, select `File -> Add Package Dependencies`
+- Click `Add Local...`
+- Navigate to the extracted `StreamrProxyClient` folder
+- Select `StreamrProxyClient` for your app target
 
-3. **Configure Framework Dependencies**
-   - Select your app target in Xcode
-   - Go to the `General` tab
-   - Scroll to `Frameworks, Libraries, and Embedded Content`
-   - Click `+` and add:
-     * StreamProxyClient
-     * libc++abi.tbd
+### 4. Add Required Framework
+- Select your app target
+- Go to `General` tab
+- Under `Frameworks, Libraries, and Embedded Content`:
+  - Click `+`
+  - Search for `libc++abi.tbd`
+  - Click `Add`
 
-4. **Configure Build Settings**
-   - Select your app target
-   - Go to `Build Settings` tab
-   - Configure C++ settings:
-     * Set `C++ Language Dialect` to `GNU++23`
-     * Set `C++ and Objective-C Interoperability` to `C++/Objective-C`
-
-5. **Device Configuration**
-   - Connect a physical iOS device
-   - Select it as your run destination (simulator is not supported)
-
+### 5. Configure C++ Settings
+- Select your app target
+- Go to `Build Settings` tab
+- Find and set:
+  - `C++ Language Dialect` = `GNU++23`
+  - `C++ and Objective-C Interoperability` = `C++/Objective-C`
 
 ## Quick Start
 
