@@ -26,6 +26,7 @@ A Swift package that provides a client interface for connecting to Streamr Netwo
 - In Xcode, select `File -> Add Package Dependencies`
 - Click `Add Local...`
 - Navigate to the extracted `StreamrProxyClient` folder
+- Select `ProxyClientAPI` for your app target
 - Select `StreamrProxyClient` for your app target
 
 ### 4. Add Required Framework
@@ -49,6 +50,7 @@ A Swift package that provides a client interface for connecting to Streamr Netwo
 ## Quick Start
 
 ```swift
+import ProxyClientAPI
 import StreamrProxyClient
 
 // Initialize client
