@@ -40,6 +40,7 @@ The project uses two build configurations:
 ## Switch between configurations using:
 Switch to test configuration
 - Terminal: ./switch_build.sh test
+
 Switch to production configuration
 - Terminal: ./switch_build.sh
 
