@@ -1,6 +1,6 @@
 include(":app")
 include (":StreamrProxyClient")
-project(":StreamrProxyClient").projectDir = File("../../../dist/android/StreamrProxyClient")
+project(":StreamrProxyClient").projectDir = File("../../../dist/android-library-module/StreamrProxyClient")
 
 pluginManagement {
     repositories {

@@ -8,8 +8,8 @@
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/../../../dist/android-library-module/StreamrProxyClient" />
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/StreamrProxyClient" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>

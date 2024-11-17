@@ -4,3 +4,4 @@ vcpkg_installed
 .trunk
 setenvs.sh
 *.DS_Store*packages/streamr-libstreamrproxyclient/dist/android/StreamrProxyClient/libs/arm64-v8a/libstreamrproxyclient.so
+packages/streamr-libstreamrproxyclient/dist/android-library-module/StreamrProxyClient/libs/arm64-v8a/libstreamrproxyclient.so
