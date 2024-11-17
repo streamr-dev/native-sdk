@@ -5,8 +5,8 @@ Development workspace for the StreamrProxyClient Android library module.
 ## Project Structure
 ```
 android-library-module/
-├── StreamrProxyClient/         # Main library module
-│   ├── src/                    # Source code
+├── StreamrProxyClient/        # Main library module
+│   ├── src/                   # Source code
 │   │   ├── main/              # Main source set
 │   │   │   ├── cpp/           # Native code
 │   │   │   ├── java/          # Kotlin/Java code
@@ -39,9 +39,9 @@ The project uses two build configurations:
 
 ## Switch between configurations using:
 Switch to test configuration
-./switch_build.sh test
+- Terminal: ./switch_build.sh test
 Switch to production configuration
-./switch_build.sh
+- Terminal: ./switch_build.sh
 
 ### Run Tests
 - Terminal: ./test.sh
