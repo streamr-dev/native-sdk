@@ -1,12 +1,31 @@
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.2.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20")
+    }
+}
+
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    id("com.android.library") version "8.2.0"
+    id("org.jetbrains.kotlin.android") version "1.9.20"
+}
+
+
+tasks.withType<Test> {
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
 }
 
 android {
     namespace = "network.streamr.proxyclient"
-    compileSdk = 35
+    compileSdk = 34
     ndkVersion = "27.1.12297006"  // Specify the NDK version
 
 
@@ -16,8 +35,10 @@ android {
         }
     }
 
+
     defaultConfig {
         minSdk = 24
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
         externalNativeBuild {
@@ -73,15 +94,15 @@ android {
 }
 
 dependencies {
-   // testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    // testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation ("org.jetbrains.kotlin:kotlin-test-junit:2.0.21")
-  //  testImplementation(kotlin("test"))
+    //  testImplementation(kotlin("test"))
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-  //  testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.0")
-   // testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.0")
+    //  testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.0")
+    // testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.0")
 }

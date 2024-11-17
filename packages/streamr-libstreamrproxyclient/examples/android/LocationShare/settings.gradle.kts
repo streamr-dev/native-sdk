@@ -1,3 +1,7 @@
+include(":app")
+include (":StreamrProxyClient")
+project(":StreamrProxyClient").projectDir = File("../../../dist/android/StreamrProxyClient")
+
 pluginManagement {
     repositories {
         google()
@@ -14,8 +18,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LocationShare"  // Use double quotes for strings
-include(":app")  // Use include() function with parentheses
-include(":StreamrProxyClient")
-
-project(":StreamrProxyClient").projectDir = file("StreamrProxyClient")
+rootProject.name = "LocationShare"
