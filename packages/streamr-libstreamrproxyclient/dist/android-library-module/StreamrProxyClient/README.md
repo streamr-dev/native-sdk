@@ -9,18 +9,20 @@ Android library module that provides native Streamr client functionality through
 ## Installation
 
 1. Add the library to your project's `settings.gradle.kts`:
-
+```
 include(":app")
 include (":StreamrProxyClient")
 project(":StreamrProxyClient").projectDir = File(<Path to the library module>/StreamrProxyClient")
+```
 
 2. Add the dependency in your app's `build.gradle.kts`:
-
+```
 dependencies {
     ... Other dependencies
     // Add this line:
     implementation(project(":StreamrProxyClient"))
 }
+```
 
 ## Usage
 
