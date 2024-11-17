@@ -9,5 +9,5 @@ fi
 
 VERSION=$1
 cd dist/android-library-module
-tar -czh -f "streamrproxyclient-arm64-android-${VERSION}.tgz" StreamrProxyClient
+tar --exclude-from=StreamrProxyClient/.gitignore -czh -f "streamrproxyclient-arm64-android-${VERSION}.tgz" StreamrProxyClient
 cd ../..
