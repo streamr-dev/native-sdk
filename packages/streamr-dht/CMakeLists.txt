@@ -129,6 +129,7 @@ if(NOT IOS)
         test/unit/ConnectionLockerTest.cpp
         test/unit/AddressToolsTest.cpp
         test/unit/DuplicateDetectorTest.cpp
+        test/unit/ConnectionLockStatesTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
