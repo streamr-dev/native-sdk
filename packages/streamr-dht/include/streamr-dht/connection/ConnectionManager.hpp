@@ -32,8 +32,8 @@ using ::dht::UnlockRequest;
 using streamr::dht::connection::ConnectionLocker;
 using streamr::dht::connection::ConnectionLockRpcLocal;
 using streamr::dht::connection::ConnectionsView;
-using streamr::dht::connection::PendingConnection;
 using streamr::dht::connection::IPendingConnection;
+using streamr::dht::connection::PendingConnection;
 using streamr::dht::connection::endpoint::Endpoint;
 using streamr::dht::helpers::CannotConnectToSelf;
 using streamr::dht::helpers::CouldNotStart;
@@ -482,7 +482,8 @@ public:
     }
 
 private:
-    bool onNewConnection(const std::shared_ptr<IPendingConnection>& connection) {
+    bool onNewConnection(
+        const std::shared_ptr<IPendingConnection>& connection) {
         if (this->state == ConnectionManagerState::STOPPED) {
             return false;
         }

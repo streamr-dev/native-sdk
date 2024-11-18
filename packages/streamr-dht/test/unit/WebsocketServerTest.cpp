@@ -1,6 +1,6 @@
+#include "streamr-dht/connection/websocket/WebsocketServer.hpp"
 #include <gtest/gtest.h>
-#include <streamr-dht/connection/websocket/WebsocketServer.hpp>
-#include <streamr-dht/helpers/Errors.hpp>
+#include "streamr-dht/helpers/Errors.hpp"
 
 using streamr::dht::connection::websocket::TlsCertificateFiles;
 using streamr::dht::connection::websocket::WebsocketServer;
@@ -175,8 +175,8 @@ HdxDqpEPa/uGsv+EPnapodKuXO5a2rUCRMEJBcqRIWNZE4Gsey0s61hGCz5O9PpG
 noOPvyLe52Hc2twPb9+w8g==
 -----END PRIVATE KEY-----)";
 
-    EXPECT_THROW(  // NOLINT
-        server.updateCertificate(certContent, keyContent),  // NOLINT
+    EXPECT_THROW( // NOLINT
+        server.updateCertificate(certContent, keyContent), // NOLINT
         WebsocketServerStartError); // NOLINT
 
     server.stop();

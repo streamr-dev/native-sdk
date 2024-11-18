@@ -3,9 +3,9 @@
 #include <gtest/gtest.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/Identifiers.hpp"
+#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
 #include "streamr-dht/transport/Transport.hpp"
-#include "streamr-dht/connection/IPendingConnection.hpp"
 
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;
@@ -31,7 +31,9 @@ public:
 
 class DummyConnection : public streamr::dht::connection::Connection {
 public:
-    DummyConnection() : Connection(streamr::dht::connection::ConnectionType::WEBSOCKET_CLIENT) {}
+    DummyConnection()
+        : Connection(
+              streamr::dht::connection::ConnectionType::WEBSOCKET_CLIENT) {}
 
     void send(const std::vector<std::byte>& data) override {}
 
@@ -87,7 +89,8 @@ protected:
 };
 
 TEST_F(
-    WebsocketClientConnectorTest, IsPossibleToFormConnection_NodeWithoutServer) { // NOLINT
+    WebsocketClientConnectorTest,
+    IsPossibleToFormConnection_NodeWithoutServer) { // NOLINT
     connector->setLocalPeerDescriptor(createMockPeerDescriptor("local", false));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
         createMockPeerDescriptor("remote", true)));
@@ -100,7 +103,8 @@ TEST_F(
 }
 
 TEST_F(
-    WebsocketClientConnectorTest, IsPossibleToFormConnection_NodeWithTLSServer) { // NOLINT
+    WebsocketClientConnectorTest,
+    IsPossibleToFormConnection_NodeWithTLSServer) { // NOLINT
     connector->setLocalPeerDescriptor(
         createMockPeerDescriptor("local", true, true));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
@@ -143,7 +147,9 @@ TEST_F(
         createMockPeerDescriptor("remote", false, false, NodeType::BROWSER)));
 }
 
-TEST_F(WebsocketClientConnectorTest, IsPossibleToFormConnection_Browser) { // NOLINT
+TEST_F(
+    WebsocketClientConnectorTest,
+    IsPossibleToFormConnection_Browser) { // NOLINT
     connector->setLocalPeerDescriptor(
         createMockPeerDescriptor("local", false, false, NodeType::BROWSER));
     EXPECT_TRUE(connector->isPossibleToFormConnection(
@@ -156,9 +162,10 @@ TEST_F(WebsocketClientConnectorTest, IsPossibleToFormConnection_Browser) { // NO
         createMockPeerDescriptor("remote", false, false, NodeType::BROWSER)));
 }
 
-TEST_F(WebsocketClientConnectorTest, Connect_ReturnsExistingConnectingConnection) { // NOLINT
-    connector->setLocalPeerDescriptor(
-        createMockPeerDescriptor("local", false));
+TEST_F(
+    WebsocketClientConnectorTest,
+    Connect_ReturnsExistingConnectingConnection) { // NOLINT
+    connector->setLocalPeerDescriptor(createMockPeerDescriptor("local", false));
     auto remotePeerDescriptor = createMockPeerDescriptor("remote", true);
     auto firstConnection = connector->connect(remotePeerDescriptor);
     auto secondConnection = connector->connect(remotePeerDescriptor);
@@ -166,24 +173,26 @@ TEST_F(WebsocketClientConnectorTest, Connect_ReturnsExistingConnectingConnection
     firstConnection->close(false);
 }
 
-TEST_F(WebsocketClientConnectorTest, Connect_DisconnectedEventRemovesConnectingConnection) { // NOLINT
-    connector->setLocalPeerDescriptor(
-        createMockPeerDescriptor("local", false));
+TEST_F(
+    WebsocketClientConnectorTest,
+    Connect_DisconnectedEventRemovesConnectingConnection) { // NOLINT
+    connector->setLocalPeerDescriptor(createMockPeerDescriptor("local", false));
     auto remotePeerDescriptor = createMockPeerDescriptor("remote", true);
     auto firstConnection = connector->connect(remotePeerDescriptor);
-    firstConnection->emit<Disconnected>(false); 
+    firstConnection->emit<Disconnected>(false);
     auto secondConnection = connector->connect(remotePeerDescriptor);
     EXPECT_FALSE(firstConnection == secondConnection);
     firstConnection->close(false);
     secondConnection->close(false);
 }
 
-TEST_F(WebsocketClientConnectorTest, Connect_ConnectedEventRemovesConnectingConnection) { // NOLINT
-    connector->setLocalPeerDescriptor(
-        createMockPeerDescriptor("local", false));
+TEST_F(
+    WebsocketClientConnectorTest,
+    Connect_ConnectedEventRemovesConnectingConnection) { // NOLINT
+    connector->setLocalPeerDescriptor(createMockPeerDescriptor("local", false));
     auto remotePeerDescriptor = createMockPeerDescriptor("remote", true);
     auto firstConnection = connector->connect(remotePeerDescriptor);
-    firstConnection->emit<Disconnected>(false); 
+    firstConnection->emit<Disconnected>(false);
     auto secondConnection = connector->connect(remotePeerDescriptor);
     EXPECT_FALSE(firstConnection == secondConnection);
     firstConnection->close(false);
