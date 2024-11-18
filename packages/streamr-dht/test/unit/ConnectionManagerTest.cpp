@@ -91,7 +91,8 @@ public:
 };
 
 TEST_F(
-    ConnectionManagerTest, DISABLED_CanSendDataToOtherConnectionmanagerOverWebsocket) {
+    ConnectionManagerTest,
+    DISABLED_CanSendDataToOtherConnectionmanagerOverWebsocket) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
     auto connectionManager1 =
@@ -170,7 +171,8 @@ TEST_F(
 }
 
 TEST_F(
-    ConnectionManagerTest, DISABLED_ReportsCorrectErrorIfConnectingToNonExistentPort) {
+    ConnectionManagerTest,
+    DISABLED_ReportsCorrectErrorIfConnectingToNonExistentPort) {
     auto connectionManager1 =
         createConnectionManager(DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport1,

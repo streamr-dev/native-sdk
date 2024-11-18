@@ -5,8 +5,8 @@
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/dht/protos/DhtRpc.server.pb.h"
 #include "streamr-dht/Identifiers.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-dht/connection/IPendingConnection.hpp"
+#include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
 #include "streamr-utils/AbortController.hpp"
 
