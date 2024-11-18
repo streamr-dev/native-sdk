@@ -3,6 +3,9 @@ import platform
 import os
 
 class ErrorCodes:
+    """
+    Error codes from the C library.
+    """
     ERROR_INVALID_ETHEREUM_ADDRESS = "INVALID_ETHEREUM_ADDRESS"
     ERROR_INVALID_STREAM_PART_ID = "INVALID_STREAM_PART_ID"
     ERROR_PROXY_CLIENT_NOT_FOUND = "PROXY_CLIENT_NOT_FOUND"
@@ -12,68 +15,134 @@ class ErrorCodes:
     ERROR_PROXY_BROADCAST_FAILED = "PROXY_BROADCAST_FAILED"
 
 class CProxy(ctypes.Structure):
+    """
+    C struct for Proxy.
+    """
     _fields_ = [("websocketUrl", ctypes.c_char_p),
                 ("ethereumAddress", ctypes.c_char_p)]
 
 class CError(ctypes.Structure):
+    """
+    C struct for Error.
+    """
     _fields_ = [("message", ctypes.c_char_p),
                 ("code", ctypes.c_char_p),
                 ("proxy", ctypes.POINTER(CProxy))]
 
 class CProxyClientResult(ctypes.Structure):
+    """
+    C struct for ProxyClientResult.
+    """
     _fields_ = [("errors", ctypes.POINTER(CError)),
                 ("numErrors", ctypes.c_uint64),
                 ("successful", ctypes.POINTER(CProxy)),
                 ("numSuccessful", ctypes.c_uint64)]
-# Native python classes for the C structs above
 
 class Proxy:
+    """
+    Native Python class for Proxy.
+    """
     def __init__(self, websocket_url: str, ethereum_address: str):
+        """
+        Initialize a Proxy instance.
+        
+        :param websocket_url: The websocket URL of the proxy.
+        :param ethereum_address: The Ethereum address of the proxy.
+        """
         self.websocket_url = websocket_url
         self.ethereum_address = ethereum_address
     
     @classmethod    
     def from_c_proxy(cls, c_proxy: CProxy):
-        #print(c_proxy.contents.websocketUrl)
-        #print(c_proxy.contents.ethereumAddress)
-        #print("c_proxy.contents: ", c_proxy.contents)
-        print(c_proxy.websocketUrl)
+        """
+        Create a Proxy instance from a CProxy instance.
+        
+        :param c_proxy: The CProxy instance.
+        :return: A Proxy instance.
+        """
         return cls(c_proxy.websocketUrl.decode('utf-8'), c_proxy.ethereumAddress.decode('utf-8'))
     
     def __str__(self):
+        """
+        Return a string representation of the Proxy.
+        
+        :return: A string representation of the Proxy.
+        """
         return f"Proxy(websocketUrl={self.websocket_url}, ethereumAddress={self.ethereum_address})"
     
     def __repr__(self):
+        """
+        Return a string representation of the Proxy.
+        
+        :return: A string representation of the Proxy.
+        """
         return self.__str__()
     
     def __eq__(self, other):
+        """
+        Check if two Proxy instances are equal.
+        
+        :param other: The other Proxy instance.
+        :return: True if the instances are equal, False otherwise.
+        """
         return self.websocket_url == other.websocket_url and self.ethereum_address == other.ethereum_address
 
 class Error:
+    """
+    Native Python class for Error.
+    """
     def __init__(self, c_error: CError):
+        """
+        Initialize an Error instance from a CError instance.
+        
+        :param c_error: The CError instance.
+        """
         self.message = c_error.message.decode('utf-8')
         self.code = c_error.code.decode('utf-8')
-        #print(c_error.proxy)
         self.proxy = None if not c_error.proxy else Proxy.from_c_proxy(c_error.proxy.contents)
 
     def __str__(self):
+        """
+        Return a string representation of the Error.
+        
+        :return: A string representation of the Error.
+        """
         return f"Error(message={self.message}, code={self.code}, proxy={self.proxy})"
     
     def __repr__(self):
+        """
+        Return a string representation of the Error.
+        
+        :return: A string representation of the Error.
+        """
         return self.__str__()   
 
-# The exception that wraps the C library errors
 class ProxyClientException(Exception):
+    """
+    The exception that wraps the C library errors.
+    """
     def __init__(self, error: Error):
+        """
+        Initialize a ProxyClientException instance.
+        
+        :param error: The Error instance.
+        """
         super().__init__(str(error))
         self.error = error
 
 class ProxyClientResult:
+    """
+    Native Python class for ProxyClientResult.
+    """
     def __init__(self, proxy_result_ptr: CProxyClientResult):
+        """
+        Initialize a ProxyClientResult instance from a CProxyClientResult instance.
+        
+        :param proxy_result_ptr: The CProxyClientResult instance.
+        """
         self.errors = []
         self.successful = []
         
-        print(proxy_result_ptr.contents.numErrors)
         for i in range(proxy_result_ptr.contents.numErrors):
             c_error = proxy_result_ptr.contents.errors[i]
             error = Error(c_error)
@@ -84,11 +153,16 @@ class ProxyClientResult:
             proxy = Proxy.from_c_proxy(c_proxy)
             self.successful.append(proxy)
 
-# The class that wraps the C library
-
 class LibStreamrProxyClient:
+    """
+    The class that wraps the C library.
+    """
     def __enter__(self):
-        # Load dynamic library
+        """
+        Load the dynamic library and initialize the library.
+        
+        :return: The LibStreamrProxyClient instance.
+        """
         lib_name = 'libstreamrproxyclient.so'
 
         if platform.system() == "Darwin":
@@ -124,16 +198,33 @@ class LibStreamrProxyClient:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # Cleanup library
+        """
+        Cleanup the library.
+        """
         self.lib.proxyClientCleanupLibrary()
 
 class ProxyClient:
+    """
+    The class that represents a ProxyClient.
+    """
     def __init__(self, lib: LibStreamrProxyClient, ownEthereumAddress: str, streamPartId: str):
+        """
+        Initialize a ProxyClient instance.
+        
+        :param lib: The LibStreamrProxyClient instance.
+        :param ownEthereumAddress: The Ethereum address of the client.
+        :param streamPartId: The stream part ID.
+        """
         self.lib = lib.lib
         self.ownEthereumAddress = ownEthereumAddress
         self.streamPartId = streamPartId
         
     def __enter__(self):
+        """
+        Create a new ProxyClient instance.
+        
+        :return: The ProxyClient instance.
+        """
         result = ctypes.POINTER(CProxyClientResult)()
         self.clientHandle = self.lib.proxyClientNew(ctypes.byref(result), self.ownEthereumAddress.encode('utf-8'), self.streamPartId.encode('utf-8'))
         if result.contents.numErrors > 0:
@@ -142,25 +233,37 @@ class ProxyClient:
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Delete the ProxyClient instance.
+        """
         result = ctypes.POINTER(CProxyClientResult)()
         self.lib.proxyClientDelete(ctypes.byref(result), self.clientHandle)
         assert result.contents.numErrors == 0
         self.lib.proxyClientResultDelete(result)
 
     def connect(self, proxies: list[Proxy]) -> ProxyClientResult:
+        """
+        Connect the ProxyClient to the given proxies.
+        
+        :param proxies: The list of Proxy instances.
+        :return: The ProxyClientResult instance.
+        """
         proxy_array = (CProxy * len(proxies))(*[CProxy(proxy.websocket_url.encode('utf-8'), proxy.ethereum_address.encode('utf-8')) for proxy in proxies])
         num_proxies = ctypes.c_uint64(len(proxies))
-        print(f'num_proxies: {num_proxies.value}')
-        for i in range(num_proxies.value):
-            print(f'proxy_array[{i}]: websocket_url={proxy_array[i].websocketUrl.decode("utf-8")}, ethereum_address={proxy_array[i].ethereumAddress.decode("utf-8")}')
         result = ctypes.POINTER(CProxyClientResult)()
-        print(result)
         self.lib.proxyClientConnect(ctypes.byref(result), self.clientHandle, proxy_array, num_proxies)
         res = ProxyClientResult(result)
         self.lib.proxyClientResultDelete(result)
         return res
     
     def publish(self, data: bytes, ethereumPrivateKey: str = None) -> ProxyClientResult:
+        """
+        Publish data using the ProxyClient.
+        
+        :param data: The data to be published.
+        :param ethereumPrivateKey: The Ethereum private key.
+        :return: The ProxyClientResult instance.
+        """
         result = ctypes.POINTER(CProxyClientResult)()
         if ethereumPrivateKey:
             self.lib.proxyClientPublish(ctypes.byref(result), self.clientHandle, data, len(data), ethereumPrivateKey.encode('utf-8'))

@@ -17,6 +17,6 @@ with LibStreamrProxyClient() as lib:
         assert len(result.errors) == 0
         assert len(result.successful) == 1
         
-        result = client.publish(b"test", ethereum_private_key)
+        result = client.publish(b"Hello from python!", ethereum_private_key)
         assert len(result.errors) == 0
         assert len(result.successful) == 1
