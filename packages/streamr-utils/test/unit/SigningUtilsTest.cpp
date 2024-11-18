@@ -1,6 +1,5 @@
+#include "streamr-utils/SigningUtils.hpp"
 #include <gtest/gtest.h>
-#include <streamr-utils/BinaryUtils.hpp>
-#include <streamr-utils/SigningUtils.hpp>
 
 using streamr::utils::BinaryUtils;
 using streamr::utils::SigningUtils;

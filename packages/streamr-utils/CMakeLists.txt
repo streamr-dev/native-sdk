@@ -102,8 +102,8 @@ if(NOT IOS)
     test/unit/EthereumAddressTest.cpp
     test/unit/ENSNameTest.cpp
     test/unit/AbortControllerTest.cpp
+    test/unit/SigningUtilsTest.cpp
     test/unit/BinaryUtilsTest.cpp
-    test/unit/SigninUtilsTest.cpp
   )
 
   target_link_libraries(streamr-utils-test-unit 
