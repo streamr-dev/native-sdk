@@ -5,7 +5,6 @@
 #include <streamr-utils/waitForEvent.hpp>
 #include <folly/coro/BlockingWait.h>
 #include "streamr-dht/connection/Connection.hpp"
-#include "streamr-dht/connection/IPendingConnection.hpp"
 
 using ::dht::PeerDescriptor;
 using streamr::dht::connection::Connection;
