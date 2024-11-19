@@ -242,7 +242,10 @@ concept AssignableToJsonBuilder =
 
 template <AssignableToJsonBuilder T = std::initializer_list<JsonBuilder>>
 json toJson(const T& value) {
-    if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
+    if constexpr (std::is_null_pointer_v<T>) {
+        return {};
+    }
+    if constexpr (std::is_pointer_v<T>) {
         return pointerToJson(value);
     }
     return JsonBuilder(value).getJson();
