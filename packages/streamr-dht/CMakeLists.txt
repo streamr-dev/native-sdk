@@ -136,6 +136,7 @@ if(NOT IOS)
         test/unit/WebsocketServerConnectionTest.cpp
         test/unit/WebsocketServerConnectorTest.cpp
         test/unit/WebsocketServerTest.cpp
+        test/unit/ListeningRpcCommunicatorTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
