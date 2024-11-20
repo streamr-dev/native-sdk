@@ -54,3 +54,20 @@ runs:
         git lfs fetch origin $BRANCH_NAME --all
         git push
       shell: bash
+    - name: cache homedir save
+      id: cache-homedir-save
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir1-${{ hashFiles('./vcpkg.json') }}
+        path: |
+          ~/.cache/vcpkg/archives
+    - name: cache vcpkg installed save
+      id: cache-vcpkg-installed-save
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed1-${{ hashFiles('./vcpkg.json') }}
+        path: |
+          ./build/vcpkg_installed
+
