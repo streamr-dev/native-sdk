@@ -2,6 +2,10 @@
 
 This is the ongoing development repository for the Streamr Native SDK, a native counterpart of the [streamr-dev/network](https://github.com/your-github-username/streamr-dev/network).
 
+## Libstreamrproxyclient
+
+[Libstreamrproxyclient](packages/streamr-libstreamrproxyclient) is a multi-platform native library for publishing messages to the Streamr network implemented as a part of the Streamr Native SDK. The library can be used to publish messages to the Streamr network on all platforms supported by the Streamr Native SDK, including Linux, macOS, iOS, and Android.
+
 ## Getting started
 
 ### Recommended development environment
@@ -35,7 +39,7 @@ source install-prerequisities.sh
 
 This script will recognize the operating system type and install the prerequisities for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal.
 
-### Install all the dependencies and build the SDK
+### Install all the dependencies and build the SDK for MacOS and Linux
 
 ```bash
 ./install.sh
@@ -47,6 +51,28 @@ The `install.sh` script supports an optional `--prod` parameter. When this param
 
 1. Loops through packages listed in `MonorepoPackages.cmake`, and builds each using `cmake` and `make`. This will trigger the fetching of dependencies using `vcpkg` and the building of each package in its own `build` directory.
 2. Builds the SDK in the root directory using `cmake` and `make`. This will trigger the building of the SDK in the `build` folder of the root directory. This is needed for VSCode and its extensions to work correctly.
+
+### Install all the dependencies and build the SDK for iOS
+
+```bash
+./install.sh --ios
+```
+
+This command installs the Streamr XCFramework and an example iOS app, LocationShare, which uses the XCFramework. The Streamr XCFramework includes the static library of the Streamr native-sdk. When it comes to using C++ libraries in iOS apps, static libraries are generally recommended over dynamic libraries.
+
+The Streamr XCFramework is located in `dist/ios/streamr.xcframework` and can be used in an iOS app by simply dragging and dropping it into the Xcode project.
+
+The example iOS app can be found in `packages/streamr-libstreamrproxyclient/examples/ios/LocationShare`.
+
+### Install all the dependencies and build the SDK for Android 
+
+```bash
+./install.sh --android
+```
+
+This command installs the shared library libstreamrproxyclient.so and an example Android app, LocationShare, which uses the shared library.
+
+The example Android app can be found in `packages/streamr-libstreamrproxyclient/examples/android/LocationShare`.
 
 ### Cleaning the build folders
 
@@ -106,6 +132,7 @@ The Streamr Native SDK monorepo has two GIT submodules at its root:
 | `test.sh` | npm run test           | Run the tests of the whole monorepo. |
 | `clean.sh`   | npm run clean         | Clean the build folders of all the packages in the monorepo. |
 | `merge-dependencies.sh` | N/A       | A helper script called by install.sh to merge the VCPKG dependencies of the monorepo packages to the root vcpkg.json **must not be invoked by the user** |
+| `iostest.sh`| N/A                   | Run selected unit tests in iOS Device (In MacOS by default). Unit tests can be selected by adding tests (Drag and drop) to the App iOSUnitTesting. |
 
 
 #### Configuration files

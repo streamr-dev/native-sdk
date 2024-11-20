@@ -4,4 +4,7 @@ set(MonorepoPackages
     streamr-eventemitter
     streamr-utils
     streamr-proto-rpc
+    streamr-dht
+    streamr-trackerless-network
+    streamr-libstreamrproxyclient
 )
