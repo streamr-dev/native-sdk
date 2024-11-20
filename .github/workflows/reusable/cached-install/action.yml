@@ -6,18 +6,18 @@ runs:
   steps:
     - name: cache homedir
       id: cache-homedir
-      uses: actions/cache@v4
+      uses: actions/cache/restore@v4
       with:
-        key: cache-homedir-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir1-${{ hashFiles('./vcpkg.json') }}
         path: |
-          ~/.cache
+          ~/.cache/vcpkg/archives
     - name: cache vcpkg installed
       id: cache-vcpkg-installed
-      uses: actions/cache@v4
+      uses: actions/cache/restore@v4
       with:
-        key: cache-vcpkg-installed-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed1-${{ hashFiles('./vcpkg.json') }}
         path: |
-          **/vcpkg_installed
+          ./build/vcpkg_installed
     - name: install-prerequisities
       run:
         source install-prerequisities.sh
@@ -26,3 +26,20 @@ runs:
       run:
         ./install.sh
       shell: bash
+    - name: cache homedir save
+      id: cache-homedir-save
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir1-${{ hashFiles('./vcpkg.json') }}
+        path: |
+          ~/.cache/vcpkg/archives
+    - name: cache vcpkg installed save
+      id: cache-vcpkg-installed-save
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed1-${{ hashFiles('./vcpkg.json') }}
+        path: |
+          ./build/vcpkg_installed
+

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export GTEST_COLOR=1
 cmake --build build
 cd build
 

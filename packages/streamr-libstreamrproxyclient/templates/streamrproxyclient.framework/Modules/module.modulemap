@@ -1,0 +1,4 @@
+framework module streamrproxyclient {
+    umbrella header "streamrproxyclient.h"
+    export *
+}
