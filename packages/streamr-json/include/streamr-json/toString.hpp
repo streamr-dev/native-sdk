@@ -5,12 +5,13 @@
  * Convert (almost) any struct to string in C++20.
  **/
 
-// #include "streamr-json/JsonBuilder.hpp"
 #include "streamr-json/jsonConcepts.hpp"
 #include "streamr-json/toJson.hpp"
 
 namespace streamr::json {
 
+using suppresslint::SuppressLint; // otherwise linter thinks jsonConcepts.hpp
+                                  // is unused
 template <typename T>
 concept TypeWithToString = requires(T obj) {
     { obj.toString() } -> std::same_as<std::string>;
