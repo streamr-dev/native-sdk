@@ -1,6 +1,8 @@
 #ifndef STREAMR_DHT_CONNECTION_WEBSOCKET_CONNECTION_HPP
 #define STREAMR_DHT_CONNECTION_WEBSOCKET_CONNECTION_HPP
 
+#include <functional>
+#include <rtc/global.hpp>
 #include <rtc/rtc.hpp>
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-logger/SLogger.hpp"
@@ -18,13 +20,123 @@ using streamr::utils::EnableSharedFromThis;
 constexpr size_t maxMessageSize = 1048576;
 
 class WebsocketConnection : public Connection, public EnableSharedFromThis {
+private:
+    std::function<void(const std::string&)> onError;
+    std::function<void(rtc::binary)> onMessage;
+    std::function<void(const std::string&)> onStringMessage;
+    std::function<void()> onOpen;
+    std::function<void()> onClosed;
+
 protected:
     std::shared_ptr<rtc::WebSocket> mSocket; // NOLINT
     std::atomic<bool> mDestroyed{false}; // NOLINT
     std::recursive_mutex mMutex; // NOLINT
 
     // Only allow subclasses to be created
-    explicit WebsocketConnection(ConnectionType type) : Connection(type) {}
+    explicit WebsocketConnection(ConnectionType type)
+        : Connection(type),
+          onError{[this](const std::string& error) {
+              std::scoped_lock lock(this->mMutex);
+              SLogger::trace(
+                  "onError() " + error,
+                  {{"connectionType", getConnectionTypeString()},
+                   {"mDestroyed", this->mDestroyed.load()}});
+              if (!this->mDestroyed) {
+                  auto self = this->sharedFromThis<WebsocketConnection>();
+                  self->emit<Error>(error);
+              }
+          }},
+          onMessage{[this](rtc::binary data) {
+              // std::scoped_lock lock(this->mMutex);
+              SLogger::trace(
+                  "onMessage()",
+                  {
+                      {"connectionType", getConnectionTypeString()},
+                      {"mDestroyed", mDestroyed.load()},
+                  });
+              auto self = this->sharedFromThis<WebsocketConnection>();
+              if (!self->mDestroyed) {
+                  if (!data.empty()) {
+                      SLogger::trace(
+                          "onMessage() received binary data",
+                          {{"size", data.size()}});
+                      self->emit<Data>(std::move(data));
+                  } else {
+                      SLogger::debug(
+                          "onMessage() received empty binary data from binary-only callback");
+                  }
+              }
+          }},
+          onStringMessage{[this](const std::string&) {
+              SLogger::debug(
+                  "onMessage() received string data, only binary data is supported");
+          }},
+          onClosed{[this]() {
+              std::scoped_lock lock(this->mMutex);
+              SLogger::trace(
+                  "onClosed()",
+                  {
+                      {"connectionType", getConnectionTypeString()},
+                      {"mDestroyed", this->mDestroyed.load()},
+                  });
+
+              if (!this->mDestroyed) {
+                  // SLogger::debug("Trying to acquire mutex lock in onClosed "
+                  // + getConnectionTypeString()); std::scoped_lock
+                  // lock(mMutex);
+                  SLogger::debug("Getting shared pointer in onClosed");
+                  auto self = this->sharedFromThis<Connection>();
+                  SLogger::debug("Got shared pointer in onClosed");
+                  SLogger::debug("Setting mDestroyed to true in onClosed");
+                  this->mDestroyed = true;
+
+                  // SLogger::debug("Acquired mutex lock in onClosed " +
+                  // getConnectionTypeString()); SLogger::debug("Resetting
+                  // callbacks in onClosed " + getConnectionTypeString());
+                  // self->mSocket->resetCallbacks();
+                  /*
+                  if (this->mSocket) {
+                      SLogger::debug("Resetting socket in onClosed");
+                      this->mSocket.reset();
+                  } else {
+                      SLogger::debug("Socket is nullptr in onClosed");
+                  }
+                  */
+                  this->mSocket->close();
+
+                  SLogger::debug(
+                      "Emitting Disconnected in onClosed " +
+                      getConnectionTypeString());
+                  // const auto gracefulLeave = false;
+                  this->emit<Disconnected>(false, 0, "");
+                  SLogger::debug(
+                      "Removing all listeners in onClosed" +
+                      getConnectionTypeString());
+                  this->removeAllListeners();
+              }
+          }},
+          onOpen{[this]() {
+              std::scoped_lock lock(this->mMutex);
+              auto self = this->sharedFromThis<WebsocketConnection>();
+              SLogger::trace(
+                  "onOpen()",
+                  {{"connectionType", getConnectionTypeString()},
+                   {"mDestroyed", mDestroyed.load()}});
+              if (!self->mDestroyed) {
+                  if (self->mSocket &&
+                      self->mSocket->readyState() ==
+                          rtc::WebSocket::State::Open) {
+                      SLogger::trace(
+                          "onOpen() emitting Connected " +
+                              getConnectionTypeString(),
+                          {{"numberofListeners", listenerCount<Connected>()}});
+
+                      self->emit<Connected>();
+                  }
+              }
+          }} {
+        rtc::InitLogger(rtc::LogLevel::Verbose);
+    }
 
     void setSocket(std::shared_ptr<rtc::WebSocket> socket) {
         SLogger::trace("setSocket() " + getConnectionTypeString());
@@ -34,111 +146,13 @@ protected:
         mSocket = std::move(socket);
 
         SLogger::trace("setSocket() after move " + getConnectionTypeString());
+
         // Set socket callbacks
 
-        mSocket->onMessage(
-            [this](rtc::binary data) {
-                // std::scoped_lock lock(this->mMutex);
-                SLogger::trace(
-                    "onMessage()",
-                    {
-                        {"connectionType", getConnectionTypeString()},
-                        {"mDestroyed", mDestroyed.load()},
-                    });
-                auto self = this->sharedFromThis<WebsocketConnection>();
-                if (!self->mDestroyed) {
-                    if (!data.empty()) {
-                        SLogger::trace(
-                            "onMessage() received binary data",
-                            {{"size", data.size()}});
-                        self->emit<Data>(std::move(data));
-                    } else {
-                        SLogger::debug(
-                            "onMessage() received empty binary data from binary-only callback");
-                    }
-                }
-            },
-            [this](const std::string&) {
-                SLogger::debug(
-                    "onMessage() received string data, only binary data is supported");
-            });
-
-        mSocket->onError([this](const std::string& error) {
-            std::scoped_lock lock(this->mMutex);
-            SLogger::trace(
-                "onError() " + error,
-                {{"connectionType", getConnectionTypeString()},
-                 {"mDestroyed", this->mDestroyed.load()}});
-            if (!this->mDestroyed) {
-                auto self = this->sharedFromThis<WebsocketConnection>();
-                self->emit<Error>(error);
-            }
-        });
-
-        mSocket->onClosed([this]() {
-            std::scoped_lock lock(this->mMutex);
-            SLogger::trace(
-                "onClosed()",
-                {
-                    {"connectionType", getConnectionTypeString()},
-                    {"mDestroyed", this->mDestroyed.load()},
-                });
-
-            if (!this->mDestroyed) {
-                // SLogger::debug("Trying to acquire mutex lock in onClosed " +
-                // getConnectionTypeString()); std::scoped_lock lock(mMutex);
-                SLogger::debug("Getting shared pointer in onClosed");
-                auto self = this->sharedFromThis<Connection>();
-                SLogger::debug("Got shared pointer in onClosed");
-                SLogger::debug("Setting mDestroyed to true in onClosed");
-                this->mDestroyed = true;
-
-                // SLogger::debug("Acquired mutex lock in onClosed " +
-                // getConnectionTypeString()); SLogger::debug("Resetting
-                // callbacks in onClosed " + getConnectionTypeString());
-                // self->mSocket->resetCallbacks();
-                /*
-                if (this->mSocket) {
-                    SLogger::debug("Resetting socket in onClosed");
-                    this->mSocket.reset();
-                } else {
-                    SLogger::debug("Socket is nullptr in onClosed");
-                }
-                */
-                this->mSocket->close();
-
-                SLogger::debug(
-                    "Emitting Disconnected in onClosed " +
-                    getConnectionTypeString());
-                // const auto gracefulLeave = false;
-                this->emit<Disconnected>(false, 0, "");
-                SLogger::debug(
-                    "Removing all listeners in onClosed" +
-                    getConnectionTypeString());
-                this->removeAllListeners();
-            }
-        });
-
-        mSocket->onOpen([this]() {
-            std::scoped_lock lock(this->mMutex);
-            auto self = this->sharedFromThis<WebsocketConnection>();
-            SLogger::trace(
-                "onOpen()",
-                {{"connectionType", getConnectionTypeString()},
-                 {"mDestroyed", mDestroyed.load()}});
-            if (!self->mDestroyed) {
-                if (self->mSocket &&
-                    self->mSocket->readyState() ==
-                        rtc::WebSocket::State::Open) {
-                    SLogger::trace(
-                        "onOpen() emitting Connected " +
-                            getConnectionTypeString(),
-                        {{"numberofListeners", listenerCount<Connected>()}});
-
-                    self->emit<Connected>();
-                }
-            }
-        });
+        mSocket->onMessage(this->onMessage, this->onStringMessage);
+        mSocket->onError(this->onError);
+        mSocket->onClosed(this->onClosed);
+        mSocket->onOpen(this->onOpen);
 
         SLogger::trace("setSocket() end " + getConnectionTypeString());
     }
@@ -191,13 +205,18 @@ public:
         SLogger::debug(
             "close() got mutex lock in close()" + getConnectionTypeString());
         if (!mDestroyed) {
-            // SLogger::debug("close() resetting callbacks");
-            // mSocket->resetCallbacks();
+            mDestroyed = true;
+            SLogger::debug("close() resetting callbacks");
+            mSocket->resetCallbacks();
             mSocket->close();
             // mSocket = nullptr;
         } else {
             SLogger::debug("close() on destroyed connection");
         }
+        SLogger::trace(
+            "close() end",
+            {{"connectionType", getConnectionTypeString()},
+             {"mDestroyed", mDestroyed.load()}});
     }
 
     void destroy() override {

@@ -178,6 +178,7 @@ TEST_F(
     Connect_DisconnectedEventRemovesConnectingConnection) { // NOLINT
     connector->setLocalPeerDescriptor(createMockPeerDescriptor("local", false));
     auto remotePeerDescriptor = createMockPeerDescriptor("remote", true);
+
     auto firstConnection = connector->connect(remotePeerDescriptor);
     firstConnection->emit<Disconnected>(false);
     auto secondConnection = connector->connect(remotePeerDescriptor);

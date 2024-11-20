@@ -104,7 +104,10 @@ public:
         removeAllListeners();
         SLogger::info(
             "stop() removeAllListeners() end, calling mServer->stop()");
-        mServer->stop();
+        if (mServer) {
+            mServer->stop();
+            mServer = nullptr;
+        }
         SLogger::info("stop() mServer->stop() end");
     }
 
