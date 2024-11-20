@@ -52,7 +52,7 @@ TEST(WebsocketClientServerTest, TestServerCanAcceptConnection) {
     SLogger::info("after stop()");
 }
 
-TEST(WebsocketClientServerTest, TestServerCanTrasmitMessageToServer) {
+TEST(WebsocketClientServerTest, TestClientCanTrasmitMessageToServer) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     WebsocketServerConfig config{
         .portRange = {10001, 10001}, // NOLINT
