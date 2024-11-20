@@ -20,8 +20,8 @@ Include the `EventEmitter.hpp` header and add using declarations for `Event` and
 ```cpp
 #include <streamr-eventemitter/EventEmitter.hpp>
 
-using Event = streamr::eventemitter::Event;
-using EventEmitter = streamr::eventemitter::EventEmitter;
+using streamr::eventemitter::Event;
+using streamr::eventemitter::EventEmitter;
 ```
 
 **Define your event types** as structs or classes inherited from `Event`. Place the parameter types of the listener of each event in the `Event`'s template parameters. Finally, group the events together in a `std::tuple` type.

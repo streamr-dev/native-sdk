@@ -1,7 +1,6 @@
 #ifndef STREAMER_LOGGER_LOGGER_HPP
 #define STREAMER_LOGGER_LOGGER_HPP
 
-#include <initializer_list>
 #include <source_location>
 #include <string_view>
 #include <nlohmann/json.hpp>
@@ -87,7 +86,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void trace(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -103,7 +102,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void debug(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -119,7 +118,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void info(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -135,7 +134,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void warn(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -151,7 +150,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void error(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -167,7 +166,7 @@ public:
 
     template <typename T = StreamrJsonInitializerList>
     void fatal(
-        const char* msg,
+        std::string_view msg,
         T metadata = {},
         const std::source_location& location =
             std::source_location::current()) {
@@ -185,7 +184,7 @@ private:
             return element;
         }
         if (element.is_null() ||
-            (element.is_string() && element.get<std::string>() == "")) {
+            (element.is_string() && element.get<std::string>().empty())) {
             return nlohmann::json::object({});
         }
         return nlohmann::json::object({{key, element}});
@@ -196,7 +195,7 @@ private:
     template <typename MetadataType>
     void log(
         const StreamrLogLevel messageLogLevel,
-        const std::string& msg,
+        std::string_view msg,
         MetadataType metadata,
         const std::source_location& location) {
         // Merge the possible metadata with the context bindings

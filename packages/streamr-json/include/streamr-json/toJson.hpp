@@ -12,9 +12,9 @@
 #include <nlohmann/json.hpp>
 
 #include "streamr-json/jsonConcepts.hpp"
-
 namespace streamr::json {
-
+using suppresslint::SuppressLint; // otherwise linter thinks jsonConcepts.hpp
+                                  // is unused
 using json = nlohmann::json;
 using JsonInitializerList = nlohmann::json::initializer_list_t;
 
@@ -126,7 +126,7 @@ template <typename T>
 json pointerToJson(T value) {
     // if (isNullPointer(*value)) {
     if (!value) {
-        return json(nullptr);
+        return json();
     }
 
     return toJson(*value);
@@ -182,8 +182,10 @@ public:
     }
 
     JsonBuilder(std::initializer_list<JsonBuilder> init) {
-        bool isObject = std::all_of(
-            init.begin(), init.end(), [](const JsonBuilder& element) -> bool {
+        bool isObject = std::all_of( // NOLINT
+            init.begin(),
+            init.end(),
+            [](const JsonBuilder& element) -> bool {
                 // the use of cast exists to avoid a warning on Windows
                 // (according to nlohmann)
                 return element.isArray() && element.getSize() == 2 &&
@@ -227,7 +229,7 @@ public:
 
 template <typename T>
 concept AssignableToJsonBuilder =
-    std::is_same<std::initializer_list<JsonBuilder>, T>::value;
+    std::is_same_v<std::initializer_list<JsonBuilder>, T>;
 
 /**
  * @brief Specialization to initializer_lists. The initializer lists should be
@@ -240,7 +242,10 @@ concept AssignableToJsonBuilder =
 
 template <AssignableToJsonBuilder T = std::initializer_list<JsonBuilder>>
 json toJson(const T& value) {
-    if constexpr (std::is_null_pointer_v<T> || std::is_pointer_v<T>) {
+    if constexpr (std::is_null_pointer_v<T>) {
+        return {};
+    }
+    if constexpr (std::is_pointer_v<T>) {
         return pointerToJson(value);
     }
     return JsonBuilder(value).getJson();

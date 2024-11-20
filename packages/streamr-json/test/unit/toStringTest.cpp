@@ -168,7 +168,7 @@ TEST_F(ToStringTest, TestForwardListToString) {
 }
 
 TEST_F(ToStringTest, TestClassToString) {
-    std::string expectedString = "Hello world!";
+    // std::string expectedString = "Hello world!";
     // EXPECT_EQ(toString(testClass), expectedString);
 }
 
