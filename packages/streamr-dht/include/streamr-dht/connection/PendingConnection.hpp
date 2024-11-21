@@ -55,7 +55,8 @@ public:
         this->replacedAsDuplicate = true;
     }
 
-    void onHandshakeCompleted(const std::shared_ptr<Connection>& connection) override {
+    void onHandshakeCompleted(
+        const std::shared_ptr<Connection>& connection) override {
         this->connectingAbortController.abort();
         if (!this->replacedAsDuplicate) {
             this->emit<pendingconnectionevents::Connected>(

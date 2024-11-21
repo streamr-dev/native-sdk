@@ -1,6 +1,6 @@
 
-#include <gtest/gtest.h>
 #include "streamr-dht/helpers/Version.hpp"
+#include <gtest/gtest.h>
 
 using streamr::dht::helpers::Version;
 
@@ -18,14 +18,13 @@ protected:
 TEST_F(VersionTest, Supported) {
     EXPECT_TRUE(Version::isMaybeSupportedVersion("1.0"));
     EXPECT_TRUE(Version::isMaybeSupportedVersion("1.1"));
-    EXPECT_TRUE(Version::isMaybeSupportedVersion("2.0"));          
+    EXPECT_TRUE(Version::isMaybeSupportedVersion("2.0"));
     EXPECT_TRUE(Version::isMaybeSupportedVersion("3.5"));
 }
 
 TEST_F(VersionTest, NotSupported) {
     EXPECT_FALSE(Version::isMaybeSupportedVersion(""));
     EXPECT_FALSE(Version::isMaybeSupportedVersion("100.0.0-testnet-three.3"));
-    EXPECT_FALSE(Version::isMaybeSupportedVersion("0.0"));          
+    EXPECT_FALSE(Version::isMaybeSupportedVersion("0.0"));
     EXPECT_FALSE(Version::isMaybeSupportedVersion("0.1"));
 }
-

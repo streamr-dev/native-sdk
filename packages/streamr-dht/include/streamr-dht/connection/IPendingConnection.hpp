@@ -2,9 +2,9 @@
 #define STREAMR_DHT_CONNECTION_IPENDINGCONNECTION_HPP
 
 #include <memory>
+#include "packages/dht/protos/DhtRpc.pb.h"
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 namespace streamr::dht::connection {
 

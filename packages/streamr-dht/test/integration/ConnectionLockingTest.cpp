@@ -93,7 +93,7 @@ public:
               fakeEnvironment.createTransport(mockPeerDescriptor2)) {}
 };
 
-TEST_F(ConnectionLockingTest, DISABLED_CanLockConnections) {
+TEST_F(ConnectionLockingTest, CanLockConnections) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
     auto connectionManager1 =
@@ -141,7 +141,7 @@ TEST_F(ConnectionLockingTest, DISABLED_CanLockConnections) {
         Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1)));
 }
 
-TEST_F(ConnectionLockingTest, DISABLED_MultipleServicesOnTheSamePeer) {
+TEST_F(ConnectionLockingTest, MultipleServicesOnTheSamePeer) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
     auto connectionManager1 =

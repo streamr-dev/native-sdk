@@ -9,10 +9,11 @@
 
 namespace streamr::dht::connection {
 
+using DhtAddress = streamr::dht::DhtAddress;
+using LockID = streamr::utils::Branded<std::string, struct LockIDBrand>;
+
 // Connection locks are independent of the existence of connections
 // that is why this class is needed
-
-using LockID = streamr::utils::Branded<std::string, struct LockIDBrand>;
 
 class ConnectionLockStates {
 private:
