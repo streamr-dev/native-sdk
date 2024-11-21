@@ -1,7 +1,6 @@
 #include "streamrproxyclient.h"
 #include <folly/Singleton.h>
 #include "LibProxyClientApi.hpp"
-#include <iostream>
 
 using streamr::libstreamrproxyclient::LibProxyClientApi;
 
@@ -16,7 +15,7 @@ static void initFolly() { // NOLINT
 static LibProxyClientApi* libProxyClientApi = nullptr; // NOLINT
 
 static void initialize() { // NOLINT
-    //std::cout << "initialize()" << "\n";
+    // std::cout << "initialize()" << "\n";
     proxyClientInitLibrary();
 }
 
@@ -52,8 +51,7 @@ uint64_t proxyClientNew(
         proxyResult, ownEthereumAddress, streamPartId);
 }
 
-void proxyClientDelete(
-    const ProxyResult** proxyResult, uint64_t clientHandle) {
+void proxyClientDelete(const ProxyResult** proxyResult, uint64_t clientHandle) {
     getProxyClientApi().proxyClientDelete(proxyResult, clientHandle);
 }
 
@@ -73,9 +71,5 @@ uint64_t proxyClientPublish(
     uint64_t contentLength,
     const char* ethereumPrivateKey) {
     return getProxyClientApi().proxyClientPublish(
-        proxyResult,
-        clientHandle,
-        content,
-        contentLength,
-        ethereumPrivateKey);
+        proxyResult, clientHandle, content, contentLength, ethereumPrivateKey);
 }

@@ -3,5 +3,5 @@
 #include <gtest/gtest.h>
 
 TEST(StreamrProxyClientWrapperTest, WrapperTest) {
-    //StreamrProxyClient client;
+    ProxyAddress proxyAddress;
 }

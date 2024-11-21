@@ -1,9 +1,8 @@
 #ifndef STREAMR_PROXY_CLIENT_HPP
 #define STREAMR_PROXY_CLIENT_HPP
 
-#include <string>
-#include <vector>
 #include <streamrproxyclient.h>
+#include <string>
 #include <variant>
 struct ProxyAddress {
     std::string websocketUrl;
@@ -70,7 +69,7 @@ class StreamrProxyClient {
     ProxyResult connect(const std::vector<ProxyAddress> proxies) {
             // call proxyClientConnect
         }
-    
+
     ProxyResult publish(const std::string message) {
             // call proxyClientPublish
         }
