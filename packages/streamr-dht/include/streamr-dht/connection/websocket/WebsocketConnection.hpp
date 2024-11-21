@@ -133,8 +133,7 @@ protected:
                       self->emit<Connected>();
                   }
               }
-          }} {
-    }
+          }} {}
 
     void setSocket(std::shared_ptr<rtc::WebSocket> socket) {
         SLogger::trace("setSocket() " + getConnectionTypeString());
