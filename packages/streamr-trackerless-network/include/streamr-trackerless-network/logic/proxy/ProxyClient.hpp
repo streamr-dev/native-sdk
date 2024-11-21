@@ -74,7 +74,7 @@ private:
 
 public:
     explicit ConnectingToProxyError(
-        const std::exception_ptr& originalException,
+        const std::exception_ptr& originalException, // NOLINT
         PeerDescriptor peerDescriptor)
         : originalException(originalException),
           peerDescriptor(std::move(peerDescriptor)) {}
