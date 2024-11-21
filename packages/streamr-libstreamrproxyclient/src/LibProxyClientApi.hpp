@@ -12,10 +12,10 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/ConnectionManager.hpp"
 #include "streamr-dht/connection/ConnectorFacade.hpp"
 #include "streamr-dht/helpers/Connectivity.hpp"
-#include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/transport/FakeTransport.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-trackerless-network/logic/proxy/ProxyClient.hpp"
@@ -121,8 +121,9 @@ public:
         this->codeString = std::string(code);
         this->error.message = this->messageString.c_str();
         this->error.code = this->codeString.c_str();
-        this->error.proxy =
-            this->proxyCpp.has_value() ? this->proxyCpp.value().getProxy() : nullptr;
+        this->error.proxy = this->proxyCpp.has_value()
+            ? this->proxyCpp.value().getProxy()
+            : nullptr;
     }
     ErrorCpp(const ErrorCpp& other) {
         this->messageString = other.messageString;
@@ -508,7 +509,9 @@ public:
                     e.what(),
                     ERROR_PROXY_CONNECTION_FAILED,
                     ProxyCpp(
-                        "0x" + Identifiers::getNodeIdFromPeerDescriptor(error.getPeerDescriptor()),
+                        "0x" +
+                            Identifiers::getNodeIdFromPeerDescriptor(
+                                error.getPeerDescriptor()),
                         Connectivity::connectivityMethodToWebsocketUrl(
                             error.getPeerDescriptor().websocket())))));
             }
@@ -632,7 +635,9 @@ public:
                     "Failed to send message to proxy",
                     ERROR_PROXY_BROADCAST_FAILED,
                     ProxyCpp(
-                        "0x" + Identifiers::getNodeIdFromPeerDescriptor(failedPeer),
+                        "0x" +
+                            Identifiers::getNodeIdFromPeerDescriptor(
+                                failedPeer),
                         Connectivity::connectivityMethodToWebsocketUrl(
                             failedPeer.websocket())))));
             }
