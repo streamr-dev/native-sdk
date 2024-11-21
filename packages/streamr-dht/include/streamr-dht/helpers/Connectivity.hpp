@@ -3,8 +3,8 @@
 
 #include <optional>
 #include <string>
-#include <streamr-dht/connection/Connection.hpp>
 #include "packages/dht/protos/DhtRpc.pb.h"
+#include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/helpers/AddressTools.hpp"
 
 namespace streamr::dht::helpers {

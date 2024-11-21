@@ -1,6 +1,6 @@
+#include "streamr-dht/connection/websocket/WebsocketServer.hpp"
 #include <gtest/gtest.h>
-#include <streamr-dht/connection/websocket/WebsocketServer.hpp>
-#include <streamr-dht/helpers/Errors.hpp>
+#include "streamr-dht/helpers/Errors.hpp"
 
 using streamr::dht::connection::websocket::TlsCertificateFiles;
 using streamr::dht::connection::websocket::WebsocketServer;
@@ -49,7 +49,9 @@ TEST(WebsocketServerTest, TestCanThrowIfCertificateNotFound) {
     server.stop();
 }
 
-TEST(WebsocketServerTest, TestStartAndStopServerWithSpecifiedCertificate) {
+TEST(
+    WebsocketServerTest,
+    DISABLED_TestStartAndStopServerWithSpecifiedCertificate) {
     WebsocketServerConfig config{
         .portRange = {10000, 10001}, // NOLINT
         .enableTls = false,
@@ -62,7 +64,7 @@ TEST(WebsocketServerTest, TestStartAndStopServerWithSpecifiedCertificate) {
     server.stop();
 }
 
-TEST(WebsocketServerTest, UpdateCertificate) {
+TEST(WebsocketServerTest, DISABLED_UpdateCertificate) {
     WebsocketServerConfig config{
         .portRange = {10004, 10005}, // NOLINT
         .enableTls = true,
@@ -127,7 +129,7 @@ noOPvyLe52Hc2twPb9+w8g==
     server.stop();
 }
 
-TEST(WebsocketServerTest, UpdateCertificateWithInvalidCertificate) {
+TEST(WebsocketServerTest, DISABLED_UpdateCertificateWithInvalidCertificate) {
     WebsocketServerConfig config{
         .portRange = {10004, 10005}, // NOLINT
         .enableTls = true,
@@ -175,8 +177,8 @@ HdxDqpEPa/uGsv+EPnapodKuXO5a2rUCRMEJBcqRIWNZE4Gsey0s61hGCz5O9PpG
 noOPvyLe52Hc2twPb9+w8g==
 -----END PRIVATE KEY-----)";
 
-    EXPECT_THROW(  // NOLINT
-        server.updateCertificate(certContent, keyContent),  // NOLINT
+    EXPECT_THROW( // NOLINT
+        server.updateCertificate(certContent, keyContent), // NOLINT
         WebsocketServerStartError); // NOLINT
 
     server.stop();

@@ -129,6 +129,14 @@ if(NOT IOS)
         test/unit/ConnectionLockerTest.cpp
         test/unit/AddressToolsTest.cpp
         test/unit/DuplicateDetectorTest.cpp
+        test/unit/ConnectionLockStatesTest.cpp
+        test/unit/ConnectivityTest.cpp
+        test/unit/IPendingConnectionTest.cpp
+        test/unit/VersionTest.cpp
+        test/unit/WebsocketClientConnectorTest.cpp
+        test/unit/WebsocketServerConnectionTest.cpp
+        test/unit/WebsocketServerTest.cpp
+        test/unit/ListeningRpcCommunicatorTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit

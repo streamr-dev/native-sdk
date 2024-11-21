@@ -7,8 +7,8 @@
 
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/Handshaker.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-dht/connection/IPendingConnection.hpp"
+#include "streamr-dht/connection/PendingConnection.hpp"
 #include "streamr-eventemitter/EventEmitter.hpp"
 
 namespace streamr::dht::connection {

@@ -22,18 +22,28 @@ using streamr::dht::connection::handshakerevents::HandshakeFailed;
 class MockPendingConnection : public IPendingConnection {
 public:
     MockPendingConnection() = default;
-    MOCK_METHOD(void, onHandshakeCompleted, (const std::shared_ptr<Connection>&), (override)); // NOLINT
+    MOCK_METHOD(
+        void,
+        onHandshakeCompleted,
+        (const std::shared_ptr<Connection>&),
+        (override)); // NOLINT
     MOCK_METHOD(void, close, (bool), (override)); // NOLINT
     MOCK_METHOD(void, destroy, (), (override)); // NOLINT
-    MOCK_METHOD(const PeerDescriptor&, getPeerDescriptor, (), (const, override)); // NOLINT
-    MOCK_METHOD(void, onError, (const std::exception_ptr&), (override)); // NOLINT
+    MOCK_METHOD(
+        const PeerDescriptor&,
+        getPeerDescriptor,
+        (),
+        (const, override)); // NOLINT
+    MOCK_METHOD(
+        void, onError, (const std::exception_ptr&), (override)); // NOLINT
 };
 
 class MockConnection : public Connection {
 public:
     MockConnection()
         : Connection(ConnectionType::WEBSOCKET_CLIENT) {} // Add this line
-    MOCK_METHOD(void, send, (const std::vector<std::byte>&), (override)); // NOLINT
+    MOCK_METHOD(
+        void, send, (const std::vector<std::byte>&), (override)); // NOLINT
     MOCK_METHOD(void, close, (bool), (override)); // NOLINT
     MOCK_METHOD(void, destroy, (), (override)); // NOLINT
 };
@@ -45,7 +55,7 @@ protected:
     std::shared_ptr<Handshaker> handshaker;
     PeerDescriptor localPeerDescriptor;
     PeerDescriptor remotePeerDescriptor;
-    
+
     void SetUp() override {
         pendingConnection = std::make_shared<MockPendingConnection>();
         connection = std::make_shared<MockConnection>();

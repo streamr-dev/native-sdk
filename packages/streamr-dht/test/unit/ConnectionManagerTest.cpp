@@ -91,7 +91,7 @@ public:
 };
 
 TEST_F(
-    ConnectionManagerTest, DISABLED_CanSendDataToOtherConnectionmanagerOverWebsocket) {
+    ConnectionManagerTest, CanSendDataToOtherConnectionmanagerOverWebsocket) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
     auto connectionManager1 =
@@ -169,8 +169,12 @@ TEST_F(
     connectionManager2->stop();
 }
 
+// Disabled because send() only throws if onError() callback
+// gets called before the send() call returns.
+// This is not guaranteed to happen because onError() happens asynchronously.
 TEST_F(
-    ConnectionManagerTest, DISABLED_ReportsCorrectErrorIfConnectingToNonExistentPort) {
+    ConnectionManagerTest,
+    DISABLED_ReportsCorrectErrorIfConnectingToNonExistentPort) {
     auto connectionManager1 =
         createConnectionManager(DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport1,
