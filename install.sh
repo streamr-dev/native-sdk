@@ -73,6 +73,10 @@ for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | g
         cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
     fi
     cmake --build .
+    #if the package is streamr-libstreamrproxyclient, run cmake --install .
+    if [ "$package" = "streamr-libstreamrproxyclient" ]; then
+        cmake --install .
+    fi
     cd ../../..
 done
 
