@@ -3,8 +3,6 @@ description: "install dependencies, build and cache result, or restore from cach
 
 runs:
   using: "composite"
-  env:
-    BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   steps:
     - name: cache homedir
       id: cache-homedir
