@@ -50,5 +50,6 @@ runs:
         git add packages/streamr-libstreamrproxyclient/wrappers/go
         git commit -m "Automatically compiled binaries"
         git lfs push origin $BRANCH_NAME --all
+        git lfs fetch origin $BRANCH_NAME --all
         git push
       shell: bash
