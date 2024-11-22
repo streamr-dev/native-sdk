@@ -134,5 +134,14 @@ if (NOT IOS)
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist
         )
     ")
+
+    # If not ios or android, and build type is Release, copy the .so or .dylib file to the wrappers/go/dist/target-triplet/lib/Release/ directory
+    if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android") AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+        install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/copyfilesforgowrapper.sh ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE} ${VCPKG_TARGET_TRIPLET} ${CMAKE_CURRENT_LIST_DIR})")
+        
+        # Also install header to wrappers/go
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
+                DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/wrappers/go)
+    endif()
 endif()
 

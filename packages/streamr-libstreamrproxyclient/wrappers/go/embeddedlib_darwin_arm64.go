@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 )
 
-//go:embed dist/arm64-osx/lib/Debug/libstreamrproxyclient.1.0.0.dylib
+//go:embed dist/arm64-osx/lib/Release/libstreamrproxyclient.dylib
 var libFileFs embed.FS
 
-const libFullPath = "dist/arm64-osx/lib/Debug/libstreamrproxyclient.1.0.0.dylib"
-const libName = "libstreamrproxyclient.1.0.0.dylib"
+const libFullPath = "dist/arm64-osx/lib/Release/libstreamrproxyclient.dylib"
+const libName = "libstreamrproxyclient.dylib"
 
 func SaveLibToTempFile() (string, error) {
 	dirName, err := os.MkdirTemp("", "*")
@@ -28,6 +28,5 @@ func SaveLibToTempFile() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	println(libPath)
 	return libPath, nil
 }
