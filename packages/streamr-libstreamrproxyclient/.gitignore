@@ -5,5 +5,3 @@
 **/*.pyd
 **/.pytest_cache/
 **/wheelhouse/
-wrappers/go/dist/
-
