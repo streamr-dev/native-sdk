@@ -22,10 +22,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-          lfs: true
-      - name: Checkout LFS objects
-        run: git lfs checkout
-        shell: bash
       - name: install
         uses: ./.github/workflows/reusable/cached-install
       - name: lint
