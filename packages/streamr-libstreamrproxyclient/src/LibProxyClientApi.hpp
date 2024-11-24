@@ -249,12 +249,12 @@ private:
     };
 
     FakeEnvironment fakeEnvironment;
-  
+
     std::map<uint64_t, std::shared_ptr<ProxyClientWrapper>> proxyClients;
     std::recursive_mutex proxyClientsMutex;
     std::map<const ProxyResult*, std::shared_ptr<ProxyResultCpp>> results;
     std::recursive_mutex resultsMutex;
-  
+
     class InvalidUrlException : public std::runtime_error {
     public:
         explicit InvalidUrlException(const std::string& message)
