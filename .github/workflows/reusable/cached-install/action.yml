@@ -50,4 +50,5 @@ runs:
         git add packages/streamr-libstreamrproxyclient/wrappers/go
         git commit -m "Automatically compiled binaries"
         git push
+      shell: bash
 
