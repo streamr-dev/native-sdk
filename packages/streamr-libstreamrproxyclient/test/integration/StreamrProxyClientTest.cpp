@@ -216,6 +216,7 @@ TEST_F(StreamrProxyClientTest, ThreeProxyConnectionsFailed) {
         proxyClientNew(&result, ownEthereumAddress, streamPartId);
 
     proxyClientResultDelete(result);
+
     // NOLINTNEXTLINE
     Proxy proxies[] = {
         {.websocketUrl = nonExistentProxyUrl0,

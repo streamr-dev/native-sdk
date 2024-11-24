@@ -106,6 +106,7 @@ if (NOT IOS)
         include(GoogleTest)
         gtest_discover_tests(streamr-streamrproxyclient-test-integration)
         gtest_discover_tests(streamrproxyclient-cpp-wrapper-test)
+
         add_test(
             NAME ts-end-to-end-test
             COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-tests.sh"
