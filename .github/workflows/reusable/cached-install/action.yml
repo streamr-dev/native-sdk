@@ -49,7 +49,7 @@ runs:
         git add packages/streamr-libstreamrproxyclient/dist
         git add packages/streamr-libstreamrproxyclient/wrappers/go
         git commit -m "Automatically compiled binaries"
-        git pull
+        git pull --rebase --no-edit
         git push --no-verify
       shell: bash
 
