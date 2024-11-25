@@ -18,7 +18,10 @@ concurrency:
 
 jobs:
   install-lint-test:
-    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        os: [macos-latest, macos-13, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
