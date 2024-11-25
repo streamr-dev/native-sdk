@@ -11,7 +11,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     #PROFILE_FILE=~/.zprofile
     PROFILE_FILE=./setenvs.sh
     
-    xcode-select --install
+    xcode-select --install || true
     export HOMEBREW_PREFIX=$(brew --prefix)
     if [[ -n "$GITHUB_ENV" ]]; then
         echo "HOMEBREW_PREFIX=$(brew --prefix)" >> $GITHUB_ENV
