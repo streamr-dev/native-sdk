@@ -50,5 +50,6 @@ TEST(AbortableTimers, Interval) {
         std::chrono::milliseconds(100), // NOLINT
         controller.getSignal());
     std::this_thread::sleep_for(std::chrono::milliseconds(550)); // NOLINT
+    controller.abort("test");
     EXPECT_EQ(counter, 6);
 }
