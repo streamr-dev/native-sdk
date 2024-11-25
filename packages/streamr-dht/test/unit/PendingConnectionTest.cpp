@@ -65,7 +65,7 @@ TEST_F(PendingConnectionTest, EmitsDisconnectedAfterTimedOut) {
     pendingConnection->once<Disconnected>(
         [&](bool /* gracefulLeave */) { isEmitted = true; });
 
-    auto task = waitForCondition(condition, timeout, retryInternal);
+    auto task = waitForCondition(std::move(condition), timeout, retryInternal);
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
     EXPECT_TRUE(isEmitted);
 }

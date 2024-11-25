@@ -17,7 +17,7 @@ TEST_F(WaitForConditionTest, ConditionMetImmediately) {
         conditionMet = true;
         return conditionMet;
     };
-    auto task = waitForCondition(condition);
+    auto task = waitForCondition(std::move(condition));
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
 }
 
@@ -43,7 +43,7 @@ TEST_F(WaitForConditionTest, ConditionMetAfterDelay) {
 
 TEST_F(WaitForConditionTest, TimeoutExceeded) {
     auto task =
-        waitForCondition([&]() { return false; }, 500ms, 100ms); // NOLINT
+        waitForCondition([]() { return false; }, 500ms, 100ms); // NOLINT
     EXPECT_THROW(
         folly::coro::blockingWait(std::move(task)), folly::FutureTimeout);
 }

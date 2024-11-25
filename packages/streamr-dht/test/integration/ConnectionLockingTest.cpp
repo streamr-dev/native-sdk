@@ -131,7 +131,7 @@ TEST_F(ConnectionLockingTest, CanLockConnections) {
         return connectionManager2->hasRemoteLockedConnection(
             Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1));
     };
-    auto task = waitForCondition(condition);
+    auto task = waitForCondition(std::move(condition));
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
     ASSERT_TRUE(connectionManager1->hasConnection(
         Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
@@ -186,7 +186,7 @@ TEST_F(ConnectionLockingTest, MultipleServicesOnTheSamePeer) {
             connectionManager1->lockConnection(
                 mockPeerDescriptor2, LockID("testLock1"));
         },
-        waitForCondition(condition) // NOLINT
+        waitForCondition(std::move(condition)) // NOLINT
     );
 
     folly::coro::blockingWait(std::move(task));
@@ -196,7 +196,7 @@ TEST_F(ConnectionLockingTest, MultipleServicesOnTheSamePeer) {
             connectionManager1->lockConnection(
                 mockPeerDescriptor2, LockID("testLock2"));
         },
-        waitForCondition(condition) // NOLINT
+        waitForCondition(std::move(condition)) // NOLINT
     );
 
     folly::coro::blockingWait(std::move(task2));

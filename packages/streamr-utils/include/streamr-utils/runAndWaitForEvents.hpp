@@ -18,8 +18,8 @@ constexpr std::chrono::milliseconds runAndWaitForEventsDefaultTimeout =
 
 template <typename... BoundEventTypes>
 inline void runAndWaitForEvents(
-    const std::vector<std::function<void()>>& operations,
-    const std::tuple<BoundEventTypes...>& eventsToWaitFor,
+    std::vector<std::function<void()>>&& operations,
+    std::tuple<BoundEventTypes...>&& eventsToWaitFor,
     std::chrono::milliseconds timeout = runAndWaitForEventsDefaultTimeout) {
     auto replayEventEmitterWrappers = std::apply(
         [](auto&&... args) {
