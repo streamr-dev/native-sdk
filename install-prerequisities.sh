@@ -19,7 +19,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     TEMP_PROFILE_CONTENTS+="export HOMEBREW_PREFIX=$(brew --prefix)\n"
 
     brew install jq
-    brew uninstall llvm
+    brew uninstall llvm || true
     brew install llvm@17
     brew install cmake
     brew install pkg-config
