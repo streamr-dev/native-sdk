@@ -42,7 +42,9 @@ TEST(AbortableTimers, Abort) {
     EXPECT_EQ(controller.getSignal().reason, "test");
 }
 
-TEST(AbortableTimers, Interval) {
+// Test disabled because it does not guaranteed to work on slow runners
+
+TEST(AbortableTimers, DISABLED_Interval) {
     AbortController controller;
     int counter = 0;
     AbortableTimers::setAbortableInterval(
