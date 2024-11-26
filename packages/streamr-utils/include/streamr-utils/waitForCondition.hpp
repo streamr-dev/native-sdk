@@ -26,7 +26,7 @@ private:
 
 public:
     void start(
-        std::function<bool()>&& conditionFn,
+        std::function<bool()> conditionFn,
         std::chrono::milliseconds retryInterval) {
         AbortableTimers::setAbortableInterval(
             [this, fn = std::move(conditionFn)]() {
@@ -43,7 +43,7 @@ public:
 };
 
 inline folly::coro::Task<void> waitForCondition(
-    std::function<bool()>&& conditionFn,
+    std::function<bool()> conditionFn,
     std::chrono::milliseconds timeout = defaultTimeout, // NOLINT
     std::chrono::milliseconds retryInterval = defaultRetryInterval,
     AbortSignal* abortSignal = nullptr) {
