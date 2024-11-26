@@ -20,7 +20,7 @@ jobs:
   install-lint-test:
     strategy:
       matrix:
-        os: [macos-14]
+        os: [macos-14, macos-13, ubuntu-24.04, linux-arm64-runner]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
