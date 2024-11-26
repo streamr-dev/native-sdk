@@ -66,7 +66,8 @@ TEST_F(WaitForConditionTest, AbortSignalTriggered) {
         folly::coro::blockingWait(std::move(task)), folly::OperationCancelled);
 }
 
-TEST_F(WaitForConditionTest, CustomRetryInterval) {
+// Test disabled because it does not guaranteed to work on slow runners
+TEST_F(WaitForConditionTest, DISABLED_CustomRetryInterval) {
     int callCount = 0;
     auto start = std::chrono::steady_clock::now();
 

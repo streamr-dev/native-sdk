@@ -61,8 +61,8 @@ std::shared_ptr<ConnectionManager> createConnectionManager(
 }
 
 constexpr auto SERVICE_ID = "demo"; // NOLINT
-constexpr uint16_t mockWebsocketPort1 = 9995;
-constexpr uint16_t mockWebsocketPort2 = 9996;
+constexpr uint16_t mockWebsocketPort1 = 9997;
+constexpr uint16_t mockWebsocketPort2 = 9998;
 
 class ConnectionManagerTest : public ::testing::Test {
 protected:
