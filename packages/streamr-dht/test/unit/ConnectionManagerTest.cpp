@@ -48,12 +48,12 @@ PeerDescriptor createMockPeerDescriptor(uint16_t websocketPort) {
 }
 
 std::shared_ptr<ConnectionManager> createConnectionManager(
-    const DefaultConnectorFacadeOptions& opts) {
+    DefaultConnectorFacadeOptions options) {
     SLogger::info("Calling connection manager constructor");
 
     ConnectionManagerOptions connectionManagerOptions{
-        .createConnectorFacade =
-            [&opts]() -> std::shared_ptr<DefaultConnectorFacade> {
+        .createConnectorFacade = [opts = std::move(options)]()
+            -> std::shared_ptr<DefaultConnectorFacade> {
             return std::make_shared<DefaultConnectorFacade>(opts);
         }};
     return std::make_shared<ConnectionManager>(

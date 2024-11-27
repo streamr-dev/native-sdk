@@ -129,7 +129,9 @@ protected:
         std::vector<std::byte> byteVec(nBytes);
         msg.SerializeToArray(byteVec.data(), static_cast<int>(nBytes));
         this->connection->send(byteVec);
-        SLogger::trace("sendHandshakeResponse(): handshake response sent");
+        SLogger::trace(
+            "sendHandshakeResponse(): handshake response sent: " +
+            msg.DebugString());
     }
 
     static bool isAcceptedVersion(const std::string& version) {
@@ -147,27 +149,33 @@ protected:
 private:
     void onData(const std::vector<std::byte>& data) {
         try {
+            auto self = this->sharedFromThis<Handshaker>();
             Message message;
             message.ParseFromArray(data.data(), static_cast<int>(data.size()));
             const auto debugString = message.DebugString();
             SLogger::trace(
-                "handshake message received " + message.DebugString());
+                "Handshaker::onData() handshake message received " +
+                message.DebugString());
             if (message.has_handshakerequest()) {
-                SLogger::trace("handshake request received");
+                SLogger::trace(
+                    "Handshaker::onData() handshake request received");
                 const auto& handshake = message.handshakerequest();
                 this->onHandshakeRequest(
                     handshake.sourcepeerdescriptor(),
                     handshake.version(),
                     handshake.targetpeerdescriptor());
             } else if (message.has_handshakeresponse()) {
-                SLogger::trace("handshake response received");
+                SLogger::trace(
+                    "Handshaker::onData() handshake response received");
                 this->onHandshakeResponse(message.handshakeresponse());
             } else {
-                SLogger::error("received unknown message type");
+                SLogger::error(
+                    "Handshaker::onData() received unknown message type");
             }
         } catch (const std::exception& err) {
             SLogger::error(
-                "error while parsing handshake message: ", err.what());
+                "Handshaker::onData() error while parsing handshake message: " +
+                std::string(err.what()));
         }
     }
 };

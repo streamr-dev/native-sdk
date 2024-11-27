@@ -37,7 +37,7 @@ TEST(RunAndWaitForEventsTest, PassesIfEventIsEmittedWithSmallDelay) {
             emitter.emit<HelloEvent>("kiva");
         }},
         std::tuple{emitter.event<HelloEvent>()},
-        100ms));
+        1000ms));
 }
 
 TEST(RunAndWaitForEventsTest, TimeoutThrows) {

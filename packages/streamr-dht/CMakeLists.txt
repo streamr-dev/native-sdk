@@ -13,6 +13,8 @@ set (VCPKG_OVERLAY_TRIPLETS ENV{VCPKG_OVERLAY_TRIPLETS})
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(dht CXX)
+# add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+# add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 
 find_package(streamr-utils CONFIG REQUIRED)
 find_package(streamr-logger CONFIG REQUIRED)

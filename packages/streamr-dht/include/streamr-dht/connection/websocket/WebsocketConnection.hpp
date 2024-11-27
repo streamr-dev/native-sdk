@@ -234,7 +234,7 @@ public:
             SLogger::debug("destroy() trying to get mutex lock");
             std::lock_guard<std::recursive_mutex> lock(mMutex);
             SLogger::debug("destroy() got mutex lock");
-            // mSocket->resetCallbacks();
+            mSocket->resetCallbacks();
             mSocket->close();
             // mSocket = nullptr;
         }
