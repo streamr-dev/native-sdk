@@ -100,6 +100,14 @@ public:
             std::ranges::to<std::vector<DhtAddress>>();
     }
 
+    [[nodiscard]] std::vector<PeerDescriptor> getPeerDescriptors() const {
+        return this->nodes | std::views::values |
+            std::views::transform([](const auto& remote) {
+                   return remote->getPeerDescriptor();
+               }) |
+            std::ranges::to<std::vector<PeerDescriptor>>();
+    }
+
     [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> get(
         const DhtAddress& id) const {
         return this->nodes.at(id);

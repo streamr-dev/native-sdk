@@ -1,10 +1,9 @@
 #include "streamr-dht/connection/PendingConnection.hpp"
 #include <chrono>
 #include <gtest/gtest.h>
-#include <streamr-utils/waitForCondition.hpp>
-#include <streamr-utils/waitForEvent.hpp>
 #include <folly/coro/BlockingWait.h>
 #include "streamr-dht/connection/Connection.hpp"
+#include "streamr-utils/waitForCondition.hpp"
 
 using ::dht::PeerDescriptor;
 using streamr::dht::connection::Connection;
@@ -66,7 +65,7 @@ TEST_F(PendingConnectionTest, EmitsDisconnectedAfterTimedOut) {
     pendingConnection->once<Disconnected>(
         [&](bool /* gracefulLeave */) { isEmitted = true; });
 
-    auto task = waitForCondition(condition, timeout, retryInternal);
+    auto task = waitForCondition(std::move(condition), timeout, retryInternal);
     EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
     EXPECT_TRUE(isEmitted);
 }

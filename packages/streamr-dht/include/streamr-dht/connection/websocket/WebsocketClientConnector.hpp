@@ -78,14 +78,6 @@ public:
                 });
     }
 
-    static std::string connectivityMethodToWebsocketUrl(
-        const ConnectivityMethod& ws,
-        const std::optional<std::string>& action = std::nullopt) {
-        return (ws.tls() ? "wss://" : "ws://") + ws.host() + ":" +
-            std::to_string(ws.port()) +
-            (action.has_value() ? "?action=" + action.value() : "");
-    }
-
     bool isPossibleToFormConnection(
         const PeerDescriptor& targetPeerDescriptor) {
         std::scoped_lock lock(this->mutex);
@@ -110,8 +102,8 @@ public:
 
         auto socket = WebsocketClientConnection::newInstance();
 
-        const auto url =
-            connectivityMethodToWebsocketUrl(targetPeerDescriptor.websocket());
+        const auto url = Connectivity::connectivityMethodToWebsocketUrl(
+            targetPeerDescriptor.websocket());
 
         auto pendingConnection = std::make_shared<PendingConnection>(
             targetPeerDescriptor, std::move(errorCallback));

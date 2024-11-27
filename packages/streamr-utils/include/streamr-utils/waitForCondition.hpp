@@ -26,11 +26,11 @@ private:
 
 public:
     void start(
-        const std::function<bool()>& conditionFn,
+        std::function<bool()> conditionFn,
         std::chrono::milliseconds retryInterval) {
         AbortableTimers::setAbortableInterval(
-            [this, conditionFn]() {
-                if (conditionFn()) {
+            [this, fn = std::move(conditionFn)]() {
+                if (fn()) {
                     this->stop();
                     this->emit<ConditionMet>();
                 }
@@ -43,12 +43,12 @@ public:
 };
 
 inline folly::coro::Task<void> waitForCondition(
-    const std::function<bool()>& conditionFn,
+    std::function<bool()> conditionFn,
     std::chrono::milliseconds timeout = defaultTimeout, // NOLINT
     std::chrono::milliseconds retryInterval = defaultRetryInterval,
     AbortSignal* abortSignal = nullptr) {
     Poller poller;
-    poller.start(conditionFn, retryInterval);
+    poller.start(std::move(conditionFn), retryInterval);
     co_await waitForEvent<ConditionMet>(&poller, timeout, abortSignal);
 }
 

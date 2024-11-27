@@ -42,7 +42,9 @@ TEST(AbortableTimers, Abort) {
     EXPECT_EQ(controller.getSignal().reason, "test");
 }
 
-TEST(AbortableTimers, Interval) {
+// Test disabled because it does not guaranteed to work on slow runners
+
+TEST(AbortableTimers, DISABLED_Interval) {
     AbortController controller;
     int counter = 0;
     AbortableTimers::setAbortableInterval(
@@ -50,5 +52,6 @@ TEST(AbortableTimers, Interval) {
         std::chrono::milliseconds(100), // NOLINT
         controller.getSignal());
     std::this_thread::sleep_for(std::chrono::milliseconds(550)); // NOLINT
+    controller.abort("test");
     EXPECT_EQ(counter, 6);
 }

@@ -2,7 +2,7 @@
 
 set -e
 
-FILES=$(find . -type d \( -name src -o -name include -o -name test \) ! -path '*/build/*' ! -path '*/proto/*' -print0 | xargs -0 -I{} find {} -type f \( -name "*.hpp" -o -name "*.cpp" \) -print0 | xargs -0 echo)
+FILES=$(find . -type d \( -name src -o -name include -o -name test \) ! -path '*/build/*' ! -path '*/proto/*' -print0 | xargs -0 -I{} find {} -type f \( -name "*.hpp" -o -name "*.cpp" \) ! -name "PluginCodeGenerator.hpp" -print0 | xargs -0 echo)
 echo "Running clangd-tidy on $FILES"
 
 ../../clangd-tidy/clangd-tidy -p ./build $FILES

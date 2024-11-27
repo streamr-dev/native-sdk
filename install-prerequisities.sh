@@ -11,18 +11,18 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     #PROFILE_FILE=~/.zprofile
     PROFILE_FILE=./setenvs.sh
     
-    xcode-select --install
+    xcode-select --install || true
     export HOMEBREW_PREFIX=$(brew --prefix)
     if [[ -n "$GITHUB_ENV" ]]; then
         echo "HOMEBREW_PREFIX=$(brew --prefix)" >> $GITHUB_ENV
     fi
     TEMP_PROFILE_CONTENTS+="export HOMEBREW_PREFIX=$(brew --prefix)\n"
 
-    brew install jq
-    brew uninstall llvm
-    brew install llvm@17
-    brew install cmake
-    brew install pkg-config
+    brew install jq || true
+    brew uninstall llvm || true
+    brew install llvm@17 || true
+    brew install cmake || true
+    brew install pkg-config || true
    
     brew link --overwrite --force llvm@17
     

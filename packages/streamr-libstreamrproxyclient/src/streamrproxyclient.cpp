@@ -5,60 +5,71 @@
 using streamr::libstreamrproxyclient::LibProxyClientApi;
 
 const char* testRpc() {
-    return "Hajotkaa siihen";
+    return "testRpc() called";
 }
 
 static void initFolly() { // NOLINT
-
     folly::SingletonVault::singleton()->registrationComplete();
 }
 
-void initialize() {
-    // getFollyInit();
+static LibProxyClientApi* libProxyClientApi = nullptr; // NOLINT
+
+static void initialize() { // NOLINT
+    // std::cout << "initialize()" << "\n";
+    proxyClientInitLibrary();
+}
+
+void proxyClientInitLibrary() { // NOLINT
+    if (libProxyClientApi != nullptr) {
+        return;
+    }
+    libProxyClientApi = new LibProxyClientApi();
+}
+
+void proxyClientCleanupLibrary() { // NOLINT
+    if (libProxyClientApi == nullptr) {
+        return;
+    }
+    delete libProxyClientApi;
+    libProxyClientApi = nullptr;
 }
 
 static LibProxyClientApi& getProxyClientApi() { // NOLINT
-    static LibProxyClientApi proxyClientApi; // NOLINT
-    return proxyClientApi;
+    return *libProxyClientApi;
+}
+
+void proxyClientResultDelete(const ProxyResult* proxyResult) {
+    getProxyClientApi().proxyClientResultDelete(proxyResult);
 }
 
 uint64_t proxyClientNew(
-    Error** errors,
-    uint64_t* numErrors,
+    const ProxyResult** proxyResult,
     const char* ownEthereumAddress,
     const char* streamPartId) {
     initFolly(); // this can be safely called multiple times
     return getProxyClientApi().proxyClientNew(
-        errors, numErrors, ownEthereumAddress, streamPartId);
+        proxyResult, ownEthereumAddress, streamPartId);
 }
 
-void proxyClientDelete(
-    Error** errors, uint64_t* numErrors, uint64_t clientHandle) {
-    getProxyClientApi().proxyClientDelete(errors, numErrors, clientHandle);
+void proxyClientDelete(const ProxyResult** proxyResult, uint64_t clientHandle) {
+    getProxyClientApi().proxyClientDelete(proxyResult, clientHandle);
 }
 
 uint64_t proxyClientConnect(
-    Error** errors,
-    uint64_t* numErrors,
+    const ProxyResult** proxyResult,
     uint64_t clientHandle,
     const Proxy* proxies,
     uint64_t numProxies) {
     return getProxyClientApi().proxyClientConnect(
-        errors, numErrors, clientHandle, proxies, numProxies);
+        proxyResult, clientHandle, proxies, numProxies);
 }
 
 uint64_t proxyClientPublish(
-    Error** errors,
-    uint64_t* numErrors, // NOLINT
+    const ProxyResult** proxyResult,
     uint64_t clientHandle,
     const char* content,
     uint64_t contentLength,
     const char* ethereumPrivateKey) {
     return getProxyClientApi().proxyClientPublish(
-        errors,
-        numErrors,
-        clientHandle,
-        content,
-        contentLength,
-        ethereumPrivateKey);
+        proxyResult, clientHandle, content, contentLength, ethereumPrivateKey);
 }
