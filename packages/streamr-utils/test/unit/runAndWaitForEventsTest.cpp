@@ -50,7 +50,7 @@ TEST(RunAndWaitForEventsTest, TimeoutThrows) {
     EXPECT_THROW(
         runAndWaitForEvents(
             {[&emitter]() {
-                std::this_thread::sleep_for(20ms);
+                std::this_thread::sleep_for(2000ms);
                 emitter.emit<HelloEvent>("kiva");
             }},
             std::tuple{emitter.event<HelloEvent>()},
