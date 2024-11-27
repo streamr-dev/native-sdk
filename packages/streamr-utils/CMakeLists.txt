@@ -12,8 +12,8 @@ set(CMAKE_CXX_STANDARD 26)
 
 project(streamr-utils CXX)
 
-add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-add_link_options(-fsanitize=address -fno-omit-frame-pointer)
+# add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+# add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 
 find_package(folly CONFIG REQUIRED)
 find_package(Boost CONFIG REQUIRED)
