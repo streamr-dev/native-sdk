@@ -1,0 +1,26 @@
+{
+    "name": "streamr-dht",
+    "version": "1.0.0",
+    "dependencies": [
+        "gtest",
+        "protobuf",
+        "folly",
+        "boost-uuid",
+        "magic-enum",
+        "libdatachannel",
+        "openssl",
+        "boost-algorithm",
+        "vladimirshaleev-ipaddress"
+    ],
+    "features": {
+        "monorepo": {
+            "description": "Monorepo dependencies",
+            "dependencies": [
+                "streamr-utils",
+                "streamr-eventemitter",
+                "streamr-logger",
+                "streamr-proto-rpc"
+            ]
+        }
+    }
+}

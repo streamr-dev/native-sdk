@@ -1,0 +1,11 @@
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/microsoft/vcpkg.git
+	ignore = dirty
+[submodule "clangd-tidy"]
+	path = clangd-tidy
+	url = https://github.com/lljbash/clangd-tidy.git
+	ignore = dirty
+[submodule "packages/streamr-trackerless-network/test/integration/ts-integration"]
+	path = packages/streamr-trackerless-network/test/integration/ts-integration
+	url = https://github.com/streamr-dev/native-ts-integration.git

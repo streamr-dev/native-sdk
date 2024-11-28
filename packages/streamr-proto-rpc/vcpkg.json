@@ -1,0 +1,21 @@
+{
+    "name": "streamr-proto-rpc",
+    "version": "1.0.0",
+    "dependencies": [
+        "gtest",
+        "protobuf",
+        "folly",
+        "boost-uuid",
+        "magic-enum"
+    ],
+    "features": {
+        "monorepo": {
+            "description": "Monorepo dependencies",
+            "dependencies": [
+                "streamr-logger",
+                "streamr-eventemitter",
+                "streamr-utils"
+            ]
+        }
+    }
+}

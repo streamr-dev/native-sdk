@@ -1,0 +1,14 @@
+{
+  "name": "streamr-utils",
+  "version": "1.0.0",
+  "dependencies": ["gtest", "folly", "boost-uuid", "boost-endian", "boost-algorithm", "cryptopp", "secp256k1"],
+  "features": {
+    "monorepo": {
+        "description": "Monorepo dependencies",
+        "dependencies": [
+            "streamr-eventemitter",
+            "streamr-logger"
+        ]
+    }
+  }
+}

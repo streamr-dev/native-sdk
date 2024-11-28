@@ -1,0 +1,13 @@
+diff --git a/folly/GroupVarint.h b/folly/GroupVarint.h
+index e364431..c27c2cf 100644
+--- a/folly/GroupVarint.h
++++ b/folly/GroupVarint.h
+@@ -33,7 +33,7 @@
+ 
+ #if FOLLY_X64 || defined(__i386__) || FOLLY_PPC64 || FOLLY_AARCH64 || \
+     FOLLY_RISCV64
+-#define FOLLY_HAVE_GROUP_VARINT 1
++#define FOLLY_HAVE_GROUP_VARINT 0
+ #else
+ #define FOLLY_HAVE_GROUP_VARINT 0
+ #endif

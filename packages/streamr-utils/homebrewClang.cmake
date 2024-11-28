@@ -1,0 +1,31 @@
+if (APPLE AND NOT (VCPKG_TARGET_TRIPLET MATCHES "android" OR VCPKG_TARGET_TRIPLET MATCHES "linux"))
+    message(STATUS "APPLE is defined")
+    set(HOMEBREW_PREFIX $ENV{HOMEBREW_PREFIX})
+
+    set(LLVM_PREFIX "${HOMEBREW_PREFIX}")
+    set(CMAKE_C_COMPILER "${LLVM_PREFIX}/bin/clang")
+    set(CMAKE_CXX_COMPILER "${LLVM_PREFIX}/bin/clang++")
+    set(ENV{CC} "${CMAKE_C_COMPILER}")
+    set(ENV{CXX} "${CMAKE_CXX_COMPILER}")
+
+
+    set(CMAKE_PREFIX_PATH
+        "${LLVM_PREFIX}"
+        "${HOMEBREW_PREFIX}"
+    )
+
+    list(TRANSFORM CMAKE_PREFIX_PATH APPEND "/include"
+         OUTPUT_VARIABLE CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES)
+    set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}")
+
+    if (NOT (VCPKG_TARGET_TRIPLET MATCHES "ios"))
+        set(CMAKE_FIND_FRAMEWORK LAST)
+        set(CMAKE_FIND_APPBUNDLE LAST)
+        add_link_options("-L/opt/homebrew/lib/c++" "-Wl,-rpath,/opt/homebrew/lib/c++")
+    endif()
+
+    if (VCPKG_TARGET_TRIPLET MATCHES "ios")
+        set(CMAKE_FIND_FRAMEWORK FIRST)
+        set(CMAKE_FIND_APPBUNDLE FIRST)
+    endif()
+endif()
