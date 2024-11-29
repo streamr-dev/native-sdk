@@ -146,6 +146,12 @@ if (NOT IOS)
     install(TARGETS streamrproxyclient
             DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE})
 
+    # Install shared lib to android module
+    if(VCPKG_TARGET_TRIPLET MATCHES "android" AND CMAKE_BUILD_TYPE STREQUAL "Release")
+        install(TARGETS streamrproxyclient
+                DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/android-library-module/StreamrProxyClient/libs/arm64-v8a)
+    endif()
+
     # Pack dist/target-triplet using tgz
     install(CODE "
         execute_process(
