@@ -98,11 +98,3 @@ if [ -n "$TARGET_TRIPLET" ]; then
 else
     cd build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && cmake --build . && cd ..
 fi
-
-#if [ "$TARGET_TRIPLET" = "arm64-android" ]; then
-#    mkdir -p packages/streamr-libstreamrproxyclient/dist/android-library-module/StreamrProxyClient/libs/arm64-v8a
-#    cp packages/streamr-libstreamrproxyclient/build/libstreamrproxyclient.so packages/streamr-libstreamrproxyclient/dist/android-library-module/StreamrProxyClient/libs/arm64-v8a/libstreamrproxyclient.so
-#    mkdir -p packages/streamr-libstreamrproxyclient/examples/android/LocationShare/StreamrProxyClient/libs/arm64-v8a 
-#    cp packages/streamr-libstreamrproxyclient/build/libstreamrproxyclient.so packages/streamr-libstreamrproxyclient/examples/android/LocationShare/StreamrProxyClient/libs/arm64-v8a/libstreamrproxyclient.so
-#fi
-
