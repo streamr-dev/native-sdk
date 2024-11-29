@@ -9,5 +9,5 @@ fi
 
 VERSION=$1
 cd dist/ios-swift-package
-tar --exclude-from=StreamrProxyClient/.gitignore -czh -f "streamrproxyclient-arm64-ios-${VERSION}.tgz" StreamrProxyClient
+tar --exclude-from=StreamrProxyClient/.gitignore -czh -f "streamrproxyclient-ios-swift-package-${VERSION}.tgz" StreamrProxyClient
 cd ../..
