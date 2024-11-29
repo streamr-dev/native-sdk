@@ -16,6 +16,8 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 set (SHAREDLIB_VERSION 1.0.0)
 set (SHAREDLIB_SOVERSION 1)
+set (IOS_SWIFT_PACKAGE_VERSION 1.0.0)
+set (ANDROID_LIBRARY_VERSION 1.0.0)
 
 project(streamr-streamrproxyclient CXX)
 add_library(streamrproxyclient SHARED
@@ -41,25 +43,29 @@ target_link_libraries(streamrproxyclient
 )
 
 if (IOS)
-    message(STATUS "Building dylib for iOS")
-    target_link_libraries(streamrproxyclient ${FOUNDATION_LIBRARY})
-    target_compile_definitions(streamrproxyclient PUBLIC IS_BUILDING_SHARED)
-    set_target_properties(streamrproxyclient PROPERTIES
-        FRAMEWORK TRUE
-        FRAMEWORK_VERSION A
-        MACOSX_FRAMEWORK_IDENTIFIER network.streamr.streamrproxyclient
-        VERSION ${SHAREDLIB_VERSION}
-        SOVERSION ${SHAREDLIB_SOVERSION}
-        PUBLIC_HEADER include/streamrproxyclient.h
-        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Petri Savolainen"
-    )
-    install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/createiosframework.sh)")
-    # Pack dist/target-triplet using tgz
+    message(STATUS "Building Swift package for iOS")
     install(CODE "
+        file(MAKE_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/dist/ios-swift-package\")
+        
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar cvzf streamrproxyclient-${VCPKG_TARGET_TRIPLET}-${SHAREDLIB_VERSION}.tgz ${VCPKG_TARGET_TRIPLET}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist
+            COMMAND tar 
+                -czf streamrproxyclient-ios-swift-package-${IOS_SWIFT_PACKAGE_VERSION}.tgz
+                --exclude-from=StreamrProxyClient/.gitignore
+                StreamrProxyClient
+            WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/dist/ios-swift-package\"
+            RESULT_VARIABLE TAR_RESULT
+            OUTPUT_VARIABLE TAR_OUTPUT
+            ERROR_VARIABLE TAR_ERROR
         )
+        
+        message(STATUS \"Working directory: ${CMAKE_CURRENT_SOURCE_DIR}/dist/ios-swift-package\")
+        if(TAR_ERROR)
+            message(STATUS \"Tar command error: \${TAR_ERROR}\")
+        endif()
+        
+        if(NOT TAR_RESULT EQUAL 0)
+            message(FATAL_ERROR \"Failed to create Swift package tar file\")
+        endif()
     ")
 endif()
 

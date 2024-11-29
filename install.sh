@@ -63,6 +63,7 @@ fi
 # Call build for all monorepo packages in their own build directories
 for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | grep -v ")"); do
     cd packages/$package/build
+
     if [ -n "$TARGET_TRIPLET" ]; then
         if [ "$TARGET_TRIPLET" = "arm64-android" ]; then
             cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVCPKG_TARGET_TRIPLET=$TARGET_TRIPLET -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$CHAINLOAD_TOOLCHAIN_FILE -DANDROID_ABI=$ANDROID_ABI -DANDROID_PLATFORM=$ANDROID_PLATFORM ..
@@ -76,6 +77,11 @@ for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | g
 
     #if the package is streamr-libstreamrproxyclient, run cmake --install .
     if [ "$package" = "streamr-libstreamrproxyclient" ]; then
+        if [ "$TARGET_TRIPLET" = "arm64-ios" ];  then
+            cd ../../.. 
+            ./create-streamr-xcframework.pl
+            cd packages/$package/build
+        fi
         cmake --install .
     fi
     cd ../../..
@@ -91,10 +97,6 @@ if [ -n "$TARGET_TRIPLET" ]; then
     fi
 else
     cd build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && cmake --build . && cd ..
-fi
-
-if [ "$CREATE_XCFRAMEWORK" = true ]; then
-    ./create-streamr-xcframework.pl    
 fi
 
 if [ "$TARGET_TRIPLET" = "arm64-android" ]; then

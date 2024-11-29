@@ -59,7 +59,6 @@ print "\nstreamr.xcframework was created in the directory: dist/ios.\n";
 # Subroutine to process each directory
 sub process_dir {
     my $dir = $File::Find::name;
-    print "Current dir: $dir\n";
     if ($dir =~ m|^\./build/vcpkg_installed/arm64-ios/include$|) {
        # Copy includes from vcpkg-packages (vcpkg/packages/<Package>/include)
        dircopy("$abs_path/$dir", $build_include);
