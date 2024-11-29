@@ -146,10 +146,43 @@ if (NOT IOS)
     install(TARGETS streamrproxyclient
             DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE})
 
-    # Install shared lib to android module
+    # Install shared lib to android module and create tgz package
     if(VCPKG_TARGET_TRIPLET MATCHES "android" AND CMAKE_BUILD_TYPE STREQUAL "Release")
+        # Install the library
         install(TARGETS streamrproxyclient
                 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/android-library-module/StreamrProxyClient/libs/arm64-v8a)
+
+        message(STATUS "Building Library module for Android")
+        
+        # Create tar package
+        install(CODE "
+            # Ensure directory exists
+            file(MAKE_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/dist/android-library-module\")
+
+            # Create tar archive
+            execute_process(
+                COMMAND tar
+                    -czf streamrproxyclient-android-library-module-${ANDROID_LIBRARY_VERSION}.tgz
+                    --exclude-from=StreamrProxyClient/.gitignore
+                    StreamrProxyClient
+                WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/dist/android-library-module\"
+                RESULT_VARIABLE TAR_RESULT
+                OUTPUT_VARIABLE TAR_OUTPUT
+                ERROR_VARIABLE TAR_ERROR
+            )
+
+            # Log working directory
+            message(STATUS \"Working directory: ${CMAKE_CURRENT_SOURCE_DIR}/dist/android-library-module\")
+            
+            # Handle errors
+            if(TAR_ERROR)
+                message(STATUS \"Tar command error: \${TAR_ERROR}\")
+            endif()
+
+            if(NOT TAR_RESULT EQUAL 0)
+                message(FATAL_ERROR \"Failed to create Android library module tar file\")
+            endif()
+        ")
     endif()
 
     # Pack dist/target-triplet using tgz
