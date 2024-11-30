@@ -2,14 +2,12 @@
 #include <gtest/gtest.h>
 #include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/PendingConnection.hpp"
-#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-utils/AbortController.hpp"
 
 using ::dht::PeerDescriptor;
 using streamr::dht::DhtAddress;
 using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::PendingConnection;
-using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::websocket::WebsocketClientConnectorRpcLocal;
 using streamr::dht::connection::websocket::
     WebsocketClientConnectorRpcLocalOptions;

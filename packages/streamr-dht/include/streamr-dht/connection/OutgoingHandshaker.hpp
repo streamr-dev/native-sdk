@@ -17,7 +17,6 @@ using streamr::dht::Identifiers;
 using streamr::dht::connection::Connection;
 using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::PendingConnection;
-using streamr::dht::connection::IPendingConnection;
 using streamr::eventemitter::HandlerToken;
 
 class OutgoingHandshaker : public Handshaker {

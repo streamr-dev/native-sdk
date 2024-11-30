@@ -7,7 +7,6 @@
 #include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/connection/PendingConnection.hpp"
-#include "streamr-dht/connection/IPendingConnection.hpp"
 #include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
 #include "streamr-utils/AbortController.hpp"
 
