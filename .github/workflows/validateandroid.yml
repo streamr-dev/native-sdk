@@ -33,17 +33,12 @@ jobs:
           echo "NDK Home: $ANDROID_NDK_HOME"
           ls -l $ANDROID_NDK_HOME
           cat $ANDROID_NDK_HOME/source.properties
-      - name: Install Android NDK
-        run: |
-          echo "y" | sdkmanager "ndk;27.1.12297006"
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.1.12297006" >> $GITHUB_ENV
-      - name: Verify NDK
-        run: |
-          echo "NDK Home: $ANDROID_NDK_HOME"
-          ls -l $ANDROID_NDK_HOME
-          cat $ANDROID_NDK_HOME/source.properties
       - name: install
         uses: ./.github/workflows/reusable/cached-install
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+          ANDROID_NDK: ${{ env.ANDROID_NDK }}
+          NDK_HOME: ${{ env.NDK_HOME }}
       - name: lint
         run:
           ./lint.sh
