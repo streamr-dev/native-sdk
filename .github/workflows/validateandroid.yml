@@ -21,10 +21,16 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-      - name: Setup Android SDK & NDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
         with:
-          ndk-version: 27.1.12297006
+          ndk-version: '27.1.12297006'
+      - name: Verify NDK Setup
+        run: |
+          echo "ANDROID_NDK_HOME: $ANDROID_NDK_HOME"
+          echo "NDK Version:"
+          cat $ANDROID_NDK_HOME/source.properties
+        shell: bash
       - name: install
         uses: ./.github/workflows/reusable/cached-install
       - name: lint
