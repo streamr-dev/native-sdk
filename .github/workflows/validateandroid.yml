@@ -37,8 +37,8 @@ jobs:
         uses: ./.github/workflows/reusable/cached-install
         env:
           ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
-          ANDROID_NDK: ${{ env.ANDROID_NDK }}
-          NDK_HOME: ${{ env.NDK_HOME }}
+          ANDROID_NDK: ${{ env.ANDROID_NDK_HOME }}
+          NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
       - name: lint
         run:
           ./lint.sh
