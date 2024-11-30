@@ -21,6 +21,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
+      - name: Setup Android SDK & NDK
+        uses: android-actions/setup-android@v3
+        with:
+          ndk-version: 27.1.12297006
       - name: install
         uses: ./.github/workflows/reusable/cached-install
       - name: lint
