@@ -2,8 +2,8 @@
 #define StreamrProxyClient_hpp
 
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 #include "streamrproxyclient.h"
 
 namespace streamr::libstreamrproxyclient {
@@ -55,7 +55,7 @@ struct StreamrProxyResult {
 
 // Helper function to convert C error codes (strings) to C++ enum
 inline StreamrProxyErrorCode convertErrorCode(const char* cErrorCode) {
-    static const std::unordered_map<std::string, StreamrProxyErrorCode>
+    static constexpr std::unordered_map<std::string, StreamrProxyErrorCode>
         errorMap = {
             {ERROR_INVALID_ETHEREUM_ADDRESS,
              StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS},
@@ -89,39 +89,37 @@ inline StreamrProxyError convertError(const Error& cError) {
         convertProxyAddress(*cError.proxy)};
 }
 
+static StreamrProxyResult convertToStreamrResult(
+    const ProxyResult* proxyResult, uint64_t numSuccess) {
+    StreamrProxyResult streamrResult;
+    streamrResult.numConnected = numSuccess;
+
+    if (proxyResult != nullptr) {
+        // Handle successful operations
+        for (size_t i = 0; i < proxyResult->numSuccessful; i++) {
+            streamrResult.successful.push_back(
+                convertProxyAddress(proxyResult->successful[i]));
+        }
+
+        // Handle errors
+        for (size_t i = 0; i < proxyResult->numErrors; i++) {
+            streamrResult.failed.push_back(
+                convertError(proxyResult->errors[i]));
+        }
+
+        proxyClientResultDelete(proxyResult);
+    }
+
+    return streamrResult;
+}
+
 class StreamrProxyClient {
 private:
     uint64_t clientHandle;
 
-    // Helper method to convert C ProxyResult to C++ StreamrProxyResult
-    StreamrProxyResult convertToStreamrResult(
-        const ProxyResult* proxyResult, uint64_t numSuccess) {
-        StreamrProxyResult streamrResult;
-        streamrResult.numConnected = numSuccess;
-
-        if (proxyResult != nullptr) {
-            // Handle successful operations
-            for (size_t i = 0; i < proxyResult->numSuccessful; i++) {
-                streamrResult.successful.push_back(
-                    convertProxyAddress(proxyResult->successful[i]));
-            }
-
-            // Handle errors
-            for (size_t i = 0; i < proxyResult->numErrors; i++) {
-                streamrResult.failed.push_back(
-                    convertError(proxyResult->errors[i]));
-            }
-
-            proxyClientResultDelete(proxyResult);
-        }
-
-        return streamrResult;
-    }
-
 public:
-
     StreamrProxyClient(
-        std::string ownEthereumAddress, std::string streamPartId) {
+        std::string& ownEthereumAddress, std::string& streamPartId) {
         const ProxyResult* proxyResult = nullptr;
         this->clientHandle = proxyClientNew(
             &proxyResult, ownEthereumAddress.c_str(), streamPartId.c_str());

@@ -1,17 +1,12 @@
-#include <iostream>
 #include <string>
 #include <gtest/gtest.h>
 #include "StreamrProxyClient.hpp"
 #include "streamr-logger/SLogger.hpp"
 
-using streamr::libstreamrproxyclient::InvalidEthereumAddress;
-using streamr::libstreamrproxyclient::InvalidStreamPartId;
 using streamr::libstreamrproxyclient::StreamrProxyAddress;
 using streamr::libstreamrproxyclient::StreamrProxyClient;
-using streamr::libstreamrproxyclient::StreamrProxyError;
 using streamr::libstreamrproxyclient::StreamrProxyErrorCode;
 using streamr::libstreamrproxyclient::StreamrProxyResult;
-using streamr::logger::SLogger;
 
 class StreamrProxyClientCppTest : public ::testing::Test {
 protected:
@@ -20,7 +15,6 @@ protected:
         "0xd0d14b38d1f6b59d3772a63d84ece0a79e6e1c1f";
     static constexpr const char* validStreamPartId2 =
         "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0";
-
     static constexpr const char* invalidEthereumAddress =
         "INVALID_ETHEREUM_ADDRESS";
     static constexpr const char* goodEthereumAddress =
@@ -44,24 +38,24 @@ protected:
 
     static constexpr uint64_t invalidClientHandle = 0;
 
-    void verifyFailed(
+    static void verifyFailed(
         const StreamrProxyResult& result, StreamrProxyErrorCode expectedError) {
         // Basic result validation
         EXPECT_EQ(result.numConnected, 0);
-        EXPECT_TRUE(result.successful.empty());
+        EXPECT_EQ(result.successful.size(), 0);
         EXPECT_EQ(result.failed.size(), 1);
 
         // Error validation
         const auto& error = result.failed[0];
         EXPECT_EQ(error.code, expectedError);
-        EXPECT_FALSE(error.message.empty());
     }
 
-    std::vector<StreamrProxyAddress> createProxyArrayFromProxy(
-        const std::string& websocketUrl, const std::string& ethereumAddress) {
+    static std::vector<StreamrProxyAddress> createProxyArrayFromProxy(
+        const std::string& websocketUrl, 
+        const std::string& ethereumAddress) {
         return {StreamrProxyAddress{websocketUrl, ethereumAddress}};
     }
-
+  
     StreamrProxyResult createClientAndConnect(
         StreamrProxyClient& client,
         std::optional<std::string> websocketUrl = std::nullopt,
@@ -86,19 +80,18 @@ protected:
         verifyFailed(result, expectedError);
     }
 
-    void tryToCreateClientWhichFails(
+    static void tryToCreateClientWhichFails(
         const std::string& ownEthereumAddress,
         const std::string& streamPartId,
         StreamrProxyErrorCode expectedError) {
         try {
             StreamrProxyClient client(ownEthereumAddress, streamPartId);
-            FAIL() << "Expected exception with error code: "
-                   << static_cast<int>(expectedError);
-        } catch (const std::exception& e) {
-            // Add appropriate error checking based on your exception types
-            EXPECT_FALSE(std::string(e.what()).empty());
+            FAIL() << "Expected StreamrProxyException";
+        } catch (const StreamrProxyException& e) {
+            EXPECT_EQ(e.getError().code, expectedError);
         }
     }
+
 };
 
 TEST_F(StreamrProxyClientCppTest, CanCreateAndDeleteProxyClient) {

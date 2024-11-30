@@ -20,20 +20,17 @@ protected:
 TEST_F(PublishToTsServerCppTest, ProxyPublish) noexcept(false) {
     // Create client
     StreamrProxyClient client(ownEthereumAddress, tsStreamPartId);
-    std::cout << "Created client" << std::endl;
     // Connect to proxy
     std::vector<StreamrProxyAddress> proxies = {
         StreamrProxyAddress{tsProxyUrl, tsEthereumAddress}};
 
     auto connectResult = client.connect(proxies);
-    std::cout << "Client connected" << std::endl;
     EXPECT_EQ(connectResult.failed.size(), 0);
     EXPECT_EQ(connectResult.numConnected, 1);
 
     // Publish message
     std::string message = "Hello from libstreamrproxyclient!";
     auto publishResult = client.publish(message, "");
-    std::cout << "Published message" << std::endl;
     // Verify publish results
     EXPECT_EQ(publishResult.failed.size(), 0);
     EXPECT_EQ(publishResult.numConnected, 1);
