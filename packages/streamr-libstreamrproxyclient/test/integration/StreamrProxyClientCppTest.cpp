@@ -1,8 +1,10 @@
 #include <string>
 #include <gtest/gtest.h>
 #include "StreamrProxyClient.hpp"
-#include "streamr-logger/SLogger.hpp"
 
+using streamr::libstreamrproxyclient::Err;
+using streamr::libstreamrproxyclient::InvalidEthereumAddress;
+using streamr::libstreamrproxyclient::InvalidStreamPartId;
 using streamr::libstreamrproxyclient::StreamrProxyAddress;
 using streamr::libstreamrproxyclient::StreamrProxyClient;
 using streamr::libstreamrproxyclient::StreamrProxyErrorCode;
@@ -51,12 +53,11 @@ protected:
     }
 
     static std::vector<StreamrProxyAddress> createProxyArrayFromProxy(
-        const std::string& websocketUrl, 
-        const std::string& ethereumAddress) {
+        const std::string& websocketUrl, const std::string& ethereumAddress) {
         return {StreamrProxyAddress{websocketUrl, ethereumAddress}};
     }
-  
-    StreamrProxyResult createClientAndConnect(
+
+    static StreamrProxyResult createClientAndConnect(
         StreamrProxyClient& client,
         std::optional<std::string> websocketUrl = std::nullopt,
         std::optional<std::string> ethereumAddress = std::nullopt) {
@@ -69,7 +70,7 @@ protected:
         return client.connect(proxies);
     }
 
-    void createClientConnectAndVerify(
+    static void createClientConnectAndVerify(
         const std::string& websocketUrl,
         const std::string& ethereumAddress,
         StreamrProxyErrorCode expectedError) {
@@ -86,12 +87,19 @@ protected:
         StreamrProxyErrorCode expectedError) {
         try {
             StreamrProxyClient client(ownEthereumAddress, streamPartId);
-            FAIL() << "Expected StreamrProxyException";
-        } catch (const StreamrProxyException& e) {
-            EXPECT_EQ(e.getError().code, expectedError);
+            FAIL() << "Expected exception with error code: "
+                   << static_cast<int>(expectedError);
+        } catch (const InvalidEthereumAddress& e) {
+            EXPECT_EQ(e.code, expectedError);
+            EXPECT_FALSE(e.message.empty());
+        } catch (const InvalidStreamPartId& e) {
+            EXPECT_EQ(e.code, expectedError);
+            EXPECT_FALSE(e.message.empty());
+        } catch (const Err& e) {
+            EXPECT_EQ(e.code, expectedError);
+            EXPECT_FALSE(e.message.empty());
         }
     }
-
 };
 
 TEST_F(StreamrProxyClientCppTest, CanCreateAndDeleteProxyClient) {

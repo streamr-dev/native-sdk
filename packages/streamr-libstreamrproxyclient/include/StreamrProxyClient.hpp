@@ -55,8 +55,8 @@ struct StreamrProxyResult {
 
 // Helper function to convert C error codes (strings) to C++ enum
 inline StreamrProxyErrorCode convertErrorCode(const char* cErrorCode) {
-    static constexpr std::unordered_map<std::string, StreamrProxyErrorCode>
-        errorMap = {
+    static const std::unordered_map<std::string, StreamrProxyErrorCode>
+        ErrorMap = {
             {ERROR_INVALID_ETHEREUM_ADDRESS,
              StreamrProxyErrorCode::INVALID_ETHEREUM_ADDRESS},
             {ERROR_INVALID_STREAM_PART_ID,
@@ -71,8 +71,8 @@ inline StreamrProxyErrorCode convertErrorCode(const char* cErrorCode) {
         return StreamrProxyErrorCode::UNKNOWN_ERROR;
     }
 
-    auto it = errorMap.find(cErrorCode);
-    return it != errorMap.end() ? it->second
+    auto it = ErrorMap.find(cErrorCode);
+    return it != ErrorMap.end() ? it->second
                                 : StreamrProxyErrorCode::UNKNOWN_ERROR;
 }
 
@@ -119,7 +119,8 @@ private:
 
 public:
     StreamrProxyClient(
-        std::string& ownEthereumAddress, std::string& streamPartId) {
+        const std::string& ownEthereumAddress,
+        const std::string& streamPartId) {
         const ProxyResult* proxyResult = nullptr;
         this->clientHandle = proxyClientNew(
             &proxyResult, ownEthereumAddress.c_str(), streamPartId.c_str());
@@ -150,8 +151,8 @@ public:
         proxyClientResultDelete(proxyResult);
     }
 
-    StreamrProxyResult connect(
-        const std::vector<StreamrProxyAddress>& proxies) {
+    [[nodiscard]] StreamrProxyResult connect(
+        const std::vector<StreamrProxyAddress>& proxies) const {
         const ProxyResult* proxyResult = nullptr;
         StreamrProxyResult streamrResult;
 
@@ -180,8 +181,9 @@ public:
         return convertToStreamrResult(proxyResult, numConnected);
     }
 
-    StreamrProxyResult publish(
-        const std::string& content, const std::string& ethereumPrivateKey) {
+    [[nodiscard]] StreamrProxyResult publish(
+        const std::string& content,
+        const std::string& ethereumPrivateKey) const {
         const ProxyResult* proxyResult = nullptr;
 
         uint64_t numPublished = proxyClientPublish(

@@ -2,9 +2,9 @@
 // Created by Santtu Rantanen on 28.8.2024.
 //
 
-#include <jni.h>
-#include <android/log.h>
-#include "streamrproxyclient.h"
+#include <jni.h>  // NOLINT(pp_file_not_found)
+#include <android/log.h>  // NOLINT(pp_file_not_found)
+#include "streamrproxyclient.h" // NOLINT
 
 #define LOG_TAG "YourTag"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
