@@ -14,7 +14,7 @@ A Swift package that provides a client interface for connecting to Streamr Netwo
 ## Installation for iOS (arm64)
 
 ### 1. Extract Package
-- Terminal: tar -xzf streamrproxyclient-arm64-ios-2.0.1.tgz
+- Terminal: tar -xzf streamrproxyclient-ios-swift-package-1.0.0.tgz
 
 ### 2. Configure Device
 - Open Xcode
