@@ -49,7 +49,7 @@ if (IOS)
         
         execute_process(
             COMMAND tar 
-                -czf streamrproxyclient-ios-swift-package-${IOS_SWIFT_PACKAGE_VERSION}.tgz
+                -czhf streamrproxyclient-ios-swift-package-${IOS_SWIFT_PACKAGE_VERSION}.tgz
                 --exclude-from=StreamrProxyClient/.gitignore
                 StreamrProxyClient
             WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/dist/ios-swift-package\"
@@ -162,7 +162,7 @@ if (NOT IOS)
             # Create tar archive
             execute_process(
                 COMMAND tar
-                    -czf streamrproxyclient-android-library-module-${ANDROID_LIBRARY_VERSION}.tgz
+                    -czhf streamrproxyclient-android-library-module-${ANDROID_LIBRARY_VERSION}.tgz
                     --exclude-from=StreamrProxyClient/.gitignore
                     StreamrProxyClient
                 WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/dist/android-library-module\"
