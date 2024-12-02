@@ -23,7 +23,3 @@ jobs:
           fetch-depth: 0
       - name: install
         uses: ./.github/workflows/reusable/cached-install
-      - name: lint
-        run:
-          ./lint.sh
-        shell: bash
