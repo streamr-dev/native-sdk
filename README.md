@@ -55,7 +55,7 @@ The `install.sh` script supports an optional `--prod` parameter. When this param
 ### Install all the dependencies and build the SDK for iOS
 
 ```bash
-./install.sh --ios
+./install.sh --prod --ios
 ```
 
 This command installs the Streamr XCFramework and an example iOS app, LocationShare, which uses the XCFramework. The Streamr XCFramework includes the static library of the Streamr native-sdk. When it comes to using C++ libraries in iOS apps, static libraries are generally recommended over dynamic libraries.
@@ -67,7 +67,7 @@ The example iOS app can be found in `packages/streamr-libstreamrproxyclient/exam
 ### Install all the dependencies and build the SDK for Android 
 
 ```bash
-./install.sh --android
+./install.sh --prod --android
 ```
 
 This command installs the shared library libstreamrproxyclient.so and an example Android app, LocationShare, which uses the shared library.
@@ -182,7 +182,11 @@ Apple Silicon ARM: If you encounter CMake errors early in `./install.sh` step (i
 
 ### Linting
 
-Linter is run when doing a git commit. If you get lots of errors like such as this one:
+Linter is run when doing a git push. 
+
+Linter should not be run for iOS because unit tests are not compiled for iOS. To disable linter when pushing for iOS, add `--no-verify` using: `git push --no-verify`.
+
+If you get lots of errors like such as this one:
 
 ```
 packages/streamr-json/include/streamr-json/JsonBuilder.hpp:5:10: Error: In included file: a space is required between consecutive right angle brackets (use '> >') [two_right_angle_brackets_need_space]
