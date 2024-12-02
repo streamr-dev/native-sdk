@@ -3,7 +3,6 @@ name: validate Android
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   ARCHFLAGS: --android
-  ANDROID_NDK_VERSION: 27.1.12297006
 
 on:
   push:
@@ -16,29 +15,14 @@ on:
 jobs:
   install-lint:
     if: contains(github.event.head_commit.message, 'androidbuild')
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Install Android NDK
-        run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.1.12297006"
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.1.12297006" >> $GITHUB_ENV
-      - name: Verify NDK
-        run: |
-          echo "NDK Home: $ANDROID_NDK_HOME"
-          ls -l $ANDROID_NDK_HOME
-          cat $ANDROID_NDK_HOME/source.properties
       - name: install
         uses: ./.github/workflows/reusable/cached-install
-        env:
-          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
-          ANDROID_NDK: ${{ env.ANDROID_NDK_HOME }}
-          NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
       - name: lint
         run:
           ./lint.sh
