@@ -48,12 +48,12 @@ PeerDescriptor createMockPeerDescriptor(uint16_t websocketPort) {
 }
 
 std::shared_ptr<ConnectionManager> createConnectionManager(
-    const DefaultConnectorFacadeOptions& opts) {
+    DefaultConnectorFacadeOptions options) {
     SLogger::info("Calling connection manager constructor");
 
     ConnectionManagerOptions connectionManagerOptions{
-        .createConnectorFacade =
-            [&opts]() -> std::shared_ptr<DefaultConnectorFacade> {
+        .createConnectorFacade = [opts = std::move(options)]()
+            -> std::shared_ptr<DefaultConnectorFacade> {
             return std::make_shared<DefaultConnectorFacade>(opts);
         }};
     return std::make_shared<ConnectionManager>(
@@ -61,8 +61,8 @@ std::shared_ptr<ConnectionManager> createConnectionManager(
 }
 
 constexpr auto SERVICE_ID = "demo"; // NOLINT
-constexpr uint16_t mockWebsocketPort1 = 9995;
-constexpr uint16_t mockWebsocketPort2 = 9996;
+constexpr uint16_t mockWebsocketPort1 = 9997;
+constexpr uint16_t mockWebsocketPort2 = 9998;
 
 class ConnectionManagerTest : public ::testing::Test {
 protected:

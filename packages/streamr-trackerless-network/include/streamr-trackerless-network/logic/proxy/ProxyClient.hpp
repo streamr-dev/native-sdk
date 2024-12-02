@@ -67,6 +67,27 @@ struct Message : Event<StreamMessage> {};
 
 using ProxyClientEvents = std::tuple<Message>;
 
+class ConnectingToProxyError {
+private:
+    std::exception_ptr originalException;
+    PeerDescriptor peerDescriptor;
+
+public:
+    explicit ConnectingToProxyError(
+        const std::exception_ptr& originalException, // NOLINT
+        PeerDescriptor peerDescriptor)
+        : originalException(originalException),
+          peerDescriptor(std::move(peerDescriptor)) {}
+
+    [[nodiscard]] PeerDescriptor getPeerDescriptor() const {
+        return this->peerDescriptor;
+    }
+
+    [[nodiscard]] std::exception_ptr getOriginalException() const {
+        return this->originalException;
+    }
+};
+
 class ProxyClient : public EventEmitter<ProxyClientEvents> {
 private:
     struct ProxyConnection {
@@ -166,8 +187,8 @@ private:
 
 public:
     std::pair<
-        size_t /* number of connections */,
-        std::vector<std::exception_ptr> /* connection errors */>
+        std::vector<ConnectingToProxyError> /* connection errors */,
+        std::vector<PeerDescriptor> /* successfully connected proxies */>
     setProxies(
         const std::vector<PeerDescriptor>& nodes,
         ProxyDirection direction,
@@ -196,26 +217,32 @@ public:
             .userId = userId,
         };
 
-        auto errors = this->updateConnections();
-        return {this->connections.size(), errors};
+        return this->updateConnections();
     }
 
-    std::vector<std::exception_ptr /* connection errors */>
+    std::pair<
+        std::vector<ConnectingToProxyError> /* connection errors */,
+        std::vector<PeerDescriptor> /* successfully connected proxies */>
     updateConnections() {
         auto invalidConnections = this->getInvalidConnections();
         for (const auto& id : invalidConnections) {
             this->closeConnection(id);
         }
-        std::vector<std::exception_ptr> errors;
+        std::vector<ConnectingToProxyError> errors;
+        std::vector<PeerDescriptor> successfullyConnected;
         auto connectionCountDiff =
             this->definition->connectionCount - this->connections.size();
         if (connectionCountDiff > 0) {
-            errors = this->openRandomConnections(connectionCountDiff);
+            auto [errs, success] =
+                this->openRandomConnections(connectionCountDiff);
+            errors.insert(errors.end(), errs.begin(), errs.end());
+            successfullyConnected.insert(
+                successfullyConnected.end(), success.begin(), success.end());
         } else if (connectionCountDiff < 0) {
             this->closeRandomConnections(-connectionCountDiff);
         }
 
-        return errors;
+        return {errors, successfullyConnected};
     }
 
     std::vector<DhtAddress> getInvalidConnections() {
@@ -228,24 +255,30 @@ public:
             std::ranges::to<std::vector>();
     }
 
-    std::vector<std::exception_ptr> openRandomConnections(
-        size_t connectionCount) {
+    std::pair<
+        std::vector<ConnectingToProxyError> /* connection errors */,
+        std::vector<PeerDescriptor> /* successfully connected proxies */>
+    openRandomConnections(size_t connectionCount) {
         const auto proxiesToAttempt =
             this->definition->nodes | std::views::keys |
             std::views::filter([this](const auto& id) {
                 return !this->connections.contains(id);
             }) |
             std::views::take(connectionCount) | std::ranges::to<std::vector>();
-        std::vector<std::exception_ptr> errors;
+        std::vector<ConnectingToProxyError> errors;
+        std::vector<PeerDescriptor> successfullyConnected;
         for (const auto& id : proxiesToAttempt) {
             try {
                 this->attemptConnection(
                     id, this->definition->direction, this->definition->userId);
-            } catch (const std::exception& e) {
-                errors.push_back(std::current_exception());
+                const auto peerDescriptor =
+                    this->connections.at(id).peerDescriptor;
+                successfullyConnected.push_back(peerDescriptor);
+            } catch (const ConnectingToProxyError& e) {
+                errors.push_back(std::move(ConnectingToProxyError(e)));
             }
         }
-        return errors;
+        return {errors, successfullyConnected};
     }
 
     void attemptConnection(
@@ -266,11 +299,8 @@ public:
                 "Unable to open proxy connection",
                 {{"nodeId", nodeId},
                  {"streamPartId", this->options.streamPartId}});
-            throw std::runtime_error(
-                "Failed to open proxy connection, exception: " +
-                std::string(e.what()) +
-                " was thrown when trying to lock connection to " +
-                peerDescriptor.DebugString());
+            throw ConnectingToProxyError(
+                std::current_exception(), peerDescriptor);
         }
         if (accepted) {
             this->options.connectionLocker.lockConnection(
@@ -291,12 +321,11 @@ public:
                  {"streamPartId", this->options.streamPartId}});
         } else {
             SLogger::warn(
-                "Unable to open proxy connection",
+                "Unable to open proxy connection, connection lock rejected",
                 {{"nodeId", nodeId},
                  {"streamPartId", this->options.streamPartId}});
-            throw std::runtime_error(
-                "Failed to open proxy connection, connection lock rejected at: " +
-                peerDescriptor.DebugString());
+            throw ConnectingToProxyError(
+                std::current_exception(), peerDescriptor);
         }
     }
 
@@ -343,10 +372,16 @@ public:
      *
      * @param msg The message to broadcast.
      * @param previousNode The node that sent the message.
-     * @return The number of proxy nodes that received the message immediately.
+     * @return A pair of vectors, the first containing the DhtAddresses of the
+     * proxy nodes that received the message immediately, and the second
+     * containing the DhtAddresses of the proxy nodes that failed to receive
+     * the message.
      */
 
-    size_t broadcast(
+    std::pair<
+        std::vector<PeerDescriptor> /* failed to send to */,
+        std::vector<PeerDescriptor> /* successfully sent to */>
+    broadcast(
         const StreamMessage& msg,
         const std::optional<DhtAddress>& previousNode = std::nullopt) {
         SLogger::debug("ProxyClient::broadcast()");
@@ -362,7 +397,7 @@ public:
         SLogger::debug(
             "ProxyClient::broadcast() calling propagation.feedUnseenMessage()");
         return this->propagation.feedUnseenMessage(
-            msg, this->neighbors.getIds(), previousNode);
+            msg, this->neighbors.getPeerDescriptors(), previousNode);
     }
 
     [[nodiscard]] bool hasConnection(

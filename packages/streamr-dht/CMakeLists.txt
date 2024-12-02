@@ -14,6 +14,12 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(dht CXX)
 
+<<<<<<< HEAD
+=======
+# add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+# add_link_options(-fsanitize=address -fno-omit-frame-pointer)
+
+>>>>>>> cpp-kotlin-ios-libs-and-apps-lfs-removed
 find_package(streamr-utils CONFIG REQUIRED)
 find_package(streamr-logger CONFIG REQUIRED)
 find_package(streamr-proto-rpc CONFIG REQUIRED)

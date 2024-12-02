@@ -11,7 +11,7 @@ using streamr::utils::abortsignalevents::Aborted;
 class AbortableTimers {
 public:
     static void setAbortableTimeout(
-        std::function<void()>&& callback,
+        std::function<void()> callback,
         std::chrono::milliseconds timeout,
         AbortSignal& abortSignal) {
         if (abortSignal.aborted) {
@@ -42,7 +42,7 @@ public:
     }
 
     static void setAbortableInterval(
-        std::function<void()>&& callback,
+        std::function<void()> callback,
         std::chrono::milliseconds interval,
         AbortSignal& abortSignal) {
         const auto signalName = std::to_string(getNextId());

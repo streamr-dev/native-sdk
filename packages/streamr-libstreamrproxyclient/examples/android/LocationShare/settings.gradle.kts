@@ -1,16 +1,15 @@
+include(":app")
+include (":StreamrProxyClient")
+project(":StreamrProxyClient").projectDir = File("../../../dist/android-library-module/StreamrProxyClient")
+
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -20,5 +19,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "LocationShare"
-include(":app")
- 

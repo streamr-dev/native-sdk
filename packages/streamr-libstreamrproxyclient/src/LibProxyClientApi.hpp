@@ -6,10 +6,16 @@
 #include <chrono>
 #include <cstdlib>
 #include <map>
+#include <memory>
+#include <mutex>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
+#include "streamr-dht/Identifiers.hpp"
 #include "streamr-dht/connection/ConnectionManager.hpp"
 #include "streamr-dht/connection/ConnectorFacade.hpp"
+#include "streamr-dht/helpers/Connectivity.hpp"
 #include "streamr-dht/transport/FakeTransport.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-trackerless-network/logic/proxy/ProxyClient.hpp"
@@ -24,13 +30,17 @@ using ::dht::ConnectivityMethod;
 using ::dht::ConnectivityResponse;
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;
+using streamr::dht::DhtAddress;
+using streamr::dht::Identifiers;
 using streamr::dht::connection::ConnectionManager;
 using streamr::dht::connection::ConnectionManagerOptions;
 using streamr::dht::connection::DefaultConnectorFacade;
 using streamr::dht::connection::DefaultConnectorFacadeOptions;
+using streamr::dht::helpers::Connectivity;
 using streamr::dht::transport::FakeEnvironment;
 using streamr::dht::transport::FakeTransport;
 using streamr::logger::SLogger;
+using streamr::trackerlessnetwork::proxy::ConnectingToProxyError;
 using streamr::trackerlessnetwork::proxy::ProxyClient;
 using streamr::trackerlessnetwork::proxy::ProxyClientOptions;
 using streamr::utils::BinaryUtils;
@@ -39,6 +49,161 @@ using streamr::utils::SigningUtils;
 using streamr::utils::StreamPartID;
 using streamr::utils::StreamPartIDUtils;
 using streamr::utils::toEthereumAddress;
+
+class ProxyCpp {
+private:
+    std::string ethereumAddressString;
+    std::string websocketUrlString;
+    Proxy proxy;
+
+public:
+    ProxyCpp(
+        const std::string& ethereumAddress, const std::string& websocketUrl) {
+        this->ethereumAddressString = ethereumAddress;
+        this->websocketUrlString = websocketUrl;
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+    }
+    ProxyCpp(const ProxyCpp& other) {
+        this->ethereumAddressString = other.ethereumAddressString;
+        this->websocketUrlString = other.websocketUrlString;
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+    }
+
+    ProxyCpp(ProxyCpp&& other) noexcept {
+        this->ethereumAddressString = std::move(other.ethereumAddressString);
+        this->websocketUrlString = std::move(other.websocketUrlString);
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+    }
+
+    ProxyCpp& operator=(const ProxyCpp& other) {
+        if (this == &other) {
+            return *this;
+        }
+        this->ethereumAddressString = other.ethereumAddressString;
+        this->websocketUrlString = other.websocketUrlString;
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+        return *this;
+    }
+
+    ProxyCpp& operator=(ProxyCpp&& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+        this->ethereumAddressString = std::move(other.ethereumAddressString);
+        this->websocketUrlString = std::move(other.websocketUrlString);
+        this->proxy.ethereumAddress = this->ethereumAddressString.c_str();
+        this->proxy.websocketUrl = this->websocketUrlString.c_str();
+        return *this;
+    }
+    [[nodiscard]] const Proxy* getProxy() const { return &this->proxy; }
+};
+
+class ErrorCpp {
+private:
+    std::string messageString;
+    std::string codeString;
+    std::optional<ProxyCpp> proxyCpp;
+
+    Error error;
+
+public:
+    ErrorCpp(
+        const std::string& message, // NOLINT
+        const std::string& code,
+        const std::optional<ProxyCpp>& proxyCpp) {
+        this->proxyCpp = proxyCpp;
+
+        this->messageString = std::string(message);
+        this->codeString = std::string(code);
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy = this->proxyCpp.has_value()
+            ? this->proxyCpp.value().getProxy()
+            : nullptr;
+    }
+    ErrorCpp(const ErrorCpp& other) {
+        this->messageString = other.messageString;
+        this->codeString = other.codeString;
+        this->proxyCpp = other.proxyCpp;
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy =
+            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+    }
+    ErrorCpp(ErrorCpp&& other) noexcept {
+        this->messageString = std::move(other.messageString);
+        this->codeString = std::move(other.codeString);
+        this->proxyCpp = std::move(other.proxyCpp);
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy =
+            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+    }
+    ErrorCpp& operator=(const ErrorCpp& other) {
+        if (this == &other) {
+            return *this;
+        }
+        this->messageString = other.messageString;
+        this->codeString = other.codeString;
+        this->proxyCpp = other.proxyCpp;
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy =
+            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+        return *this;
+    }
+
+    ErrorCpp& operator=(ErrorCpp&& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+        this->messageString = std::move(other.messageString);
+        this->codeString = std::move(other.codeString);
+        this->proxyCpp = std::move(other.proxyCpp);
+        this->error.message = this->messageString.c_str();
+        this->error.code = this->codeString.c_str();
+        this->error.proxy =
+            this->proxyCpp ? this->proxyCpp->getProxy() : nullptr;
+        return *this;
+    }
+    [[nodiscard]] const Error* getError() const { return &this->error; }
+};
+
+class ProxyResultCpp {
+private:
+    std::vector<ErrorCpp> errorsCppVector;
+    std::vector<ProxyCpp> successfulCppVector;
+    std::vector<Error> errorsVector;
+    std::vector<Proxy> successfulVector;
+    ProxyResult proxyResult;
+
+public:
+    ProxyResultCpp(
+        const std::vector<ErrorCpp>& errorsCpp,
+        const std::vector<ProxyCpp>& successfulCpp) {
+        this->errorsCppVector = errorsCpp;
+        this->successfulCppVector = successfulCpp;
+
+        for (const auto& errorCpp : this->errorsCppVector) {
+            this->errorsVector.push_back(*errorCpp.getError());
+        }
+        for (const auto& proxyCpp : this->successfulCppVector) {
+            this->successfulVector.push_back(*proxyCpp.getProxy());
+        }
+
+        this->proxyResult.errors = this->errorsVector.data();
+        this->proxyResult.successful = this->successfulVector.data();
+        this->proxyResult.numErrors = this->errorsVector.size();
+        this->proxyResult.numSuccessful = this->successfulVector.size();
+    }
+    [[nodiscard]] const ProxyResult* getProxyResult() const {
+        return &this->proxyResult;
+    }
+};
 
 class LibProxyClientApi {
 private:
@@ -84,10 +249,11 @@ private:
     };
 
     FakeEnvironment fakeEnvironment;
-    std::vector<Error> errors;
-    std::vector<std::string> errorMessages;
-    std::recursive_mutex mutex;
+
     std::map<uint64_t, std::shared_ptr<ProxyClientWrapper>> proxyClients;
+    std::recursive_mutex proxyClientsMutex;
+    std::map<const ProxyResult*, std::shared_ptr<ProxyResultCpp>> results;
+    std::recursive_mutex resultsMutex;
 
     class InvalidUrlException : public std::runtime_error {
     public:
@@ -172,33 +338,38 @@ private:
             std::move(connectionManagerOptions));
     }
 
-    void addError(
-        std::string_view errorMessage, const char* errorCode) { // NOLINT
-        std::scoped_lock lock(this->mutex);
-        this->errorMessages.emplace_back(errorMessage);
-        this->errors.push_back(Error{
-            .message = this->errorMessages.back().c_str(), .code = errorCode});
+    const ProxyResult* addResult(
+        const std::vector<ErrorCpp>& errorsCpp,
+        const std::vector<ProxyCpp>& successfulCpp) {
+        std::shared_ptr<ProxyResultCpp> result =
+            std::make_shared<ProxyResultCpp>(errorsCpp, successfulCpp);
+        std::scoped_lock lock(this->resultsMutex);
+        this->results[result->getProxyResult()] = result;
+        return this->results[result->getProxyResult()]->getProxyResult();
     }
 
 public:
+    void proxyClientResultDelete(const ProxyResult* proxyResult) {
+        std::scoped_lock lock(this->resultsMutex);
+        this->results.erase(proxyResult);
+    }
+
     uint64_t proxyClientNew(
-        Error** errors,
-        uint64_t* numErrors,
+        const ProxyResult** proxyResult,
         const char* ownEthereumAddress, // NOLINT
         const char* streamPartId) {
-        this->errors.clear();
-        this->errorMessages.clear();
         std::shared_ptr<EthereumAddress> parsedEthereumAddress;
         try {
             parsedEthereumAddress = std::make_shared<EthereumAddress>(
                 toEthereumAddress(ownEthereumAddress));
         } catch (const std::runtime_error& e) {
             SLogger::error("Error in proxyClientNew: " + std::string(e.what()));
-            this->errors.clear();
-            this->errorMessages.clear();
-            this->addError(e.what(), ERROR_INVALID_ETHEREUM_ADDRESS);
-            *errors = this->errors.data();
-            *numErrors = 1;
+
+            const auto* result = addResult(
+                {ErrorCpp(
+                    e.what(), ERROR_INVALID_ETHEREUM_ADDRESS, std::nullopt)},
+                {});
+            *proxyResult = result;
             return 0;
         }
         std::shared_ptr<StreamPartID> parsedStreamPartID;
@@ -209,12 +380,9 @@ public:
             SLogger::error("Error in proxyClientNew: " + std::string(e.what()));
             std::string message =
                 "Error in proxyClientNew: " + std::string(e.what());
-            this->errors.clear();
-            this->errorMessages.clear();
-            std::cout << "Error in proxyClientNew: " << e.what() << "\n";
-            this->addError(e.what(), ERROR_INVALID_STREAM_PART_ID);
-            *errors = this->errors.data();
-            *numErrors = 1;
+            *proxyResult = addResult(
+                {ErrorCpp(message, ERROR_INVALID_STREAM_PART_ID, std::nullopt)},
+                {});
             return 0;
         }
 
@@ -249,46 +417,52 @@ public:
         proxyClient->getProxyClient()->start();
         SLogger::trace("Proxy client started");
 
+        std::scoped_lock lock(this->proxyClientsMutex);
         this->proxyClients[handle] = proxyClient;
-        *errors = nullptr;
-        *numErrors = 0;
+        *proxyResult = addResult({}, {});
         return handle;
     }
 
     void proxyClientDelete(
-        Error** errors, uint64_t* numErrors, uint64_t clientHandle) {
-        this->errors.clear();
-        this->errorMessages.clear();
+        const ProxyResult** proxyResult, uint64_t clientHandle) {
+        std::scoped_lock lock(this->proxyClientsMutex);
         this->proxyClients.erase(clientHandle);
         SLogger::trace("Proxy client erased");
-        *errors = nullptr;
-        *numErrors = 0;
+        *proxyResult = addResult({}, {});
     }
 
     uint64_t proxyClientConnect(
-        Error** errors,
-        uint64_t* numErrors,
+        const ProxyResult** proxyResult,
         uint64_t clientHandle,
         const Proxy* proxies,
         size_t numProxies) {
-        this->errors.clear();
-        this->errorMessages.clear();
-
         if (numProxies <= 0) {
             SLogger::error("No proxies defined, returning error");
-            this->addError("No proxies defined", ERROR_NO_PROXIES_DEFINED);
-            *errors = this->errors.data();
-            *numErrors = 1;
+            *proxyResult = addResult(
+                {ErrorCpp(
+                    "No proxies defined",
+                    ERROR_NO_PROXIES_DEFINED,
+                    std::nullopt)},
+                {});
             return 0;
         }
 
-        auto proxyClient = this->proxyClients.find(clientHandle);
-        if (proxyClient == this->proxyClients.end()) {
-            this->addError(
-                "Proxy client not found", ERROR_PROXY_CLIENT_NOT_FOUND);
-            *errors = this->errors.data();
-            *numErrors = 1;
-            return 0;
+        std::shared_ptr<ProxyClientWrapper> proxyClient;
+        {
+            std::scoped_lock lock(this->proxyClientsMutex);
+            auto proxyClientIterator = this->proxyClients.find(clientHandle);
+
+            if (proxyClientIterator == this->proxyClients.end()) {
+                *proxyResult = addResult(
+                    {ErrorCpp(
+                        "Proxy client not found with handle " +
+                            std::to_string(clientHandle),
+                        ERROR_PROXY_CLIENT_NOT_FOUND,
+                        std::nullopt)},
+                    {});
+                return 0;
+            }
+            proxyClient = proxyClientIterator->second;
         }
 
         std::vector<PeerDescriptor> proxyPeerDescriptors;
@@ -298,59 +472,69 @@ public:
                 proxyPeerDescriptors.push_back(createProxyPeerDescriptor(
                     proxy.ethereumAddress, proxy.websocketUrl));
             } catch (const InvalidUrlException& e) {
-                this->addError(e.what(), ERROR_INVALID_PROXY_URL);
-                *errors = this->errors.data();
-                *numErrors = 1;
+                *proxyResult = addResult(
+                    {ErrorCpp(
+                        e.what(),
+                        ERROR_INVALID_PROXY_URL,
+                        ProxyCpp(proxy.ethereumAddress, proxy.websocketUrl))},
+                    {});
                 return 0;
             } catch (const std::runtime_error& e) {
-                this->addError(e.what(), ERROR_INVALID_ETHEREUM_ADDRESS);
-                *errors = this->errors.data();
-                *numErrors = 1;
+                *proxyResult = addResult(
+                    {ErrorCpp(
+                        e.what(),
+                        ERROR_INVALID_ETHEREUM_ADDRESS,
+                        ProxyCpp(proxy.ethereumAddress, proxy.websocketUrl))},
+                    {});
                 return 0;
             }
         }
 
-        auto result = proxyClient->second->getProxyClient()->setProxies(
-            proxyPeerDescriptors,
-            ProxyDirection::PUBLISH,
-            proxyClient->second->getProxyClient()->getLocalEthereumAddress());
+        auto [connectionErrors, successfullyConnected] =
+            proxyClient->getProxyClient()->setProxies(
+                proxyPeerDescriptors,
+                ProxyDirection::PUBLISH,
+                proxyClient->getProxyClient()->getLocalEthereumAddress());
 
-        if (!result.second.empty()) {
-            for (const auto& error : result.second) {
-                try {
-                    if (error) {
-                        std::rethrow_exception(error);
-                    }
-                } catch (const std::exception& e) {
-                    this->addError(e.what(), ERROR_PROXY_CONNECTION_FAILED);
+        std::vector<ErrorCpp> errorsCpp;
+        std::vector<ProxyCpp> successfullyConnectedCpp;
+
+        for (const auto& error : connectionErrors) {
+            try {
+                if (error.getOriginalException()) {
+                    std::rethrow_exception(error.getOriginalException());
+                } else {
+                    throw std::runtime_error("No original exception");
                 }
+            } catch (const std::exception& e) {
+                errorsCpp.emplace_back(std::move(ErrorCpp(
+                    e.what(),
+                    ERROR_PROXY_CONNECTION_FAILED,
+                    ProxyCpp(
+                        "0x" +
+                            Identifiers::getNodeIdFromPeerDescriptor(
+                                error.getPeerDescriptor()),
+                        Connectivity::connectivityMethodToWebsocketUrl(
+                            error.getPeerDescriptor().websocket())))));
             }
-            *errors = this->errors.data();
-            *numErrors = this->errors.size();
         }
 
-        return result.first;
+        for (const auto& proxy : successfullyConnected) {
+            successfullyConnectedCpp.emplace_back(std::move(ProxyCpp(
+                "0x" + Identifiers::getNodeIdFromPeerDescriptor(proxy),
+                Connectivity::connectivityMethodToWebsocketUrl(
+                    proxy.websocket()))));
+        }
+
+        *proxyResult = addResult(errorsCpp, successfullyConnectedCpp);
+        return successfullyConnected.size();
     }
 
-    uint64_t proxyClientPublish(
-        Error** errors,
-        uint64_t* numErrors,
-        uint64_t clientHandle,
+    static StreamMessage createStreamMessage(
+        const std::shared_ptr<ProxyClientWrapper>& proxyClient,
         const char* content,
         uint64_t contentLength,
         const char* ethereumPrivateKey) {
-        auto proxyClient = this->proxyClients.find(clientHandle);
-        if (proxyClient == this->proxyClients.end()) {
-            this->addError(
-                "Proxy client not found", ERROR_PROXY_CLIENT_NOT_FOUND);
-            *errors = this->errors.data();
-            *numErrors = 1;
-            return 0;
-        }
-
-        this->errors.clear();
-        this->errorMessages.clear();
-
         StreamMessage message;
         std::string contentString(content, contentLength);
         auto* contentMessage = message.mutable_contentmessage();
@@ -360,7 +544,8 @@ public:
 
         MessageID messageId;
         std::string publisherIdHex =
-            proxyClient->second->getProxyClient()->getLocalEthereumAddress();
+            proxyClient->getProxyClient()->getLocalEthereumAddress();
+
         if (!publisherIdHex.starts_with("0x")) {
             publisherIdHex = "0x" + publisherIdHex;
         }
@@ -371,11 +556,9 @@ public:
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch())
                 .count());
-        messageId.set_sequencenumber(
-            proxyClient->second->getNextSequenceNumber());
+        messageId.set_sequencenumber(proxyClient->getNextSequenceNumber());
 
-        auto streamPartID =
-            proxyClient->second->getProxyClient()->getStreamPartID();
+        auto streamPartID = proxyClient->getProxyClient()->getStreamPartID();
         messageId.set_streampartition(static_cast<int32_t>(
             StreamPartIDUtils::getStreamPartition(streamPartID).value()));
         messageId.set_streamid(StreamPartIDUtils::getStreamID(streamPartID));
@@ -421,19 +604,60 @@ public:
                 "Signature in hex: \"" +
                 BinaryUtils::binaryStringToHex(signature) + "\"");
         }
-
+        return message;
+    }
+    uint64_t proxyClientPublish(
+        const ProxyResult** proxyResult,
+        uint64_t clientHandle,
+        const char* content,
+        uint64_t contentLength,
+        const char* ethereumPrivateKey) {
+        std::shared_ptr<ProxyClientWrapper> proxyClient;
+        {
+            std::scoped_lock lock(this->proxyClientsMutex);
+            auto proxyClientIterator = this->proxyClients.find(clientHandle);
+            if (proxyClientIterator == this->proxyClients.end()) {
+                *proxyResult = addResult(
+                    {ErrorCpp(
+                        "Proxy client  not found",
+                        ERROR_PROXY_CLIENT_NOT_FOUND,
+                        std::nullopt)},
+                    {});
+                return 0;
+            }
+            proxyClient = proxyClientIterator->second;
+        }
+        std::vector<ErrorCpp> errorsCpp;
+        std::vector<ProxyCpp> successfullySentCpp;
         try {
-            auto result =
-                proxyClient->second->getProxyClient()->broadcast(message);
-            *errors = nullptr;
-            *numErrors = 0;
-            return result;
+            auto message = createStreamMessage(
+                proxyClient, content, contentLength, ethereumPrivateKey);
+            auto result = proxyClient->getProxyClient()->broadcast(message);
+            for (const auto& failedPeer : result.first) {
+                errorsCpp.emplace_back(std::move(ErrorCpp(
+                    "Failed to send message to proxy",
+                    ERROR_PROXY_BROADCAST_FAILED,
+                    ProxyCpp(
+                        "0x" +
+                            Identifiers::getNodeIdFromPeerDescriptor(
+                                failedPeer),
+                        Connectivity::connectivityMethodToWebsocketUrl(
+                            failedPeer.websocket())))));
+            }
+            for (const auto& proxy : result.second) {
+                successfullySentCpp.emplace_back(std::move(ProxyCpp(
+                    "0x" + Identifiers::getNodeIdFromPeerDescriptor(proxy),
+                    Connectivity::connectivityMethodToWebsocketUrl(
+                        proxy.websocket()))));
+            }
+            *proxyResult = addResult(errorsCpp, successfullySentCpp);
+            return successfullySentCpp.size();
         } catch (const std::exception& e) {
             SLogger::error(
-                "Error in proxyClientPublish: " + std::string(e.what()));
-            this->addError(e.what(), ERROR_PROXY_BROADCAST_FAILED);
-            *errors = this->errors.data();
-            *numErrors = this->errors.size();
+                "Exception in proxyClientPublish: " + std::string(e.what()));
+            errorsCpp.emplace_back(std::move(ErrorCpp(
+                e.what(), ERROR_PROXY_BROADCAST_FAILED, std::nullopt)));
+            *proxyResult = addResult(errorsCpp, {});
             return 0;
         }
     }

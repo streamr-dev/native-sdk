@@ -2,7 +2,6 @@
 #define STREAMR_DHT_CONNECTION_WEBSOCKET_CONNECTION_HPP
 
 #include <functional>
-#include <rtc/global.hpp>
 #include <rtc/rtc.hpp>
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-logger/SLogger.hpp"
@@ -134,9 +133,7 @@ protected:
                       self->emit<Connected>();
                   }
               }
-          }} {
-        rtc::InitLogger(rtc::LogLevel::Verbose);
-    }
+          }} {}
 
     void setSocket(std::shared_ptr<rtc::WebSocket> socket) {
         SLogger::trace("setSocket() " + getConnectionTypeString());
@@ -237,7 +234,7 @@ public:
             SLogger::debug("destroy() trying to get mutex lock");
             std::lock_guard<std::recursive_mutex> lock(mMutex);
             SLogger::debug("destroy() got mutex lock");
-            // mSocket->resetCallbacks();
+            mSocket->resetCallbacks();
             mSocket->close();
             // mSocket = nullptr;
         }

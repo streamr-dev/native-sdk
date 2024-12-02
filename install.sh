@@ -73,6 +73,16 @@ for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | g
         cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
     fi
     cmake --build .
+
+    #if the package is streamr-libstreamrproxyclient, run cmake --install .
+    if [ "$package" = "streamr-libstreamrproxyclient" ]; then
+        if [ "$TARGET_TRIPLET" = "arm64-ios" ];  then
+            cd ../../.. 
+            ./create-streamr-xcframework.pl
+            cd packages/$package/build
+        fi
+        cmake --install .
+    fi
     cd ../../..
 done
 
@@ -86,8 +96,4 @@ if [ -n "$TARGET_TRIPLET" ]; then
     fi
 else
     cd build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && cmake --build . && cd ..
-fi
-
-if [ "$CREATE_XCFRAMEWORK" = true ]; then
-    ./create-streamr-xcframework.pl    
 fi

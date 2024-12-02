@@ -51,7 +51,7 @@ target_link_libraries(streamr-json INTERFACE nlohmann_json::nlohmann_json)
 if(NOT IOS)
   enable_testing()
 
-  add_executable(streamr-json-test-unit test/unit/toStringTest.cpp test/unit/toJsonTest.cpp)
+  add_executable(streamr-json-test-unit test/unit/TestJsonConcepts.cpp test/unit/toStringTest.cpp test/unit/toJsonTest.cpp)
   target_link_libraries(streamr-json-test-unit 
     PRIVATE streamr-json
     PRIVATE GTest::gtest 
