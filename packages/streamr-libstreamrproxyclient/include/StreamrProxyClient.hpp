@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <stdexcept>
 #include "streamrproxyclient.h"
 
 namespace streamr::libstreamrproxyclient {
@@ -22,8 +23,8 @@ public:
     StreamrProxyErrorCode code; // NOLINT
     std::string message; // NOLINT
 
-    Err(StreamrProxyErrorCode code, const std::string& message)
-        : std::runtime_error(message), code(code), message(message) {}
+    Err(StreamrProxyErrorCode code, std::string message)
+        : runtime_error(message), code(code), message(std::move(message)) {}
 };
 
 struct InvalidEthereumAddress : public Err {
@@ -34,6 +35,21 @@ struct InvalidEthereumAddress : public Err {
 struct InvalidStreamPartId : public Err {
     explicit InvalidStreamPartId(const std::string& message)
         : Err(StreamrProxyErrorCode::INVALID_STREAM_PART_ID, message) {}
+};
+
+struct InvalidProxyUrl : public Err {
+    explicit InvalidProxyUrl(const std::string& message)
+        : Err(StreamrProxyErrorCode::INVALID_PROXY_URL, message) {}
+};
+
+struct NoProxiesDefined : public Err {
+    explicit NoProxiesDefined(const std::string& message)
+        : Err(StreamrProxyErrorCode::NO_PROXIES_DEFINED, message) {}
+};
+
+struct ProxyConnectionFailed : public Err {
+    explicit ProxyConnectionFailed(const std::string& message)
+        : Err(StreamrProxyErrorCode::PROXY_CONNECTION_FAILED, message) {}
 };
 
 struct StreamrProxyAddress {
