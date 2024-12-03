@@ -1,10 +1,10 @@
 #ifndef StreamrProxyClient_hpp
 #define StreamrProxyClient_hpp
 
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <stdexcept>
 #include "streamrproxyclient.h"
 
 namespace streamr::libstreamrproxyclient {
