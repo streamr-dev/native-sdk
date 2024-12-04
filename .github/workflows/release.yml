@@ -79,7 +79,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
- verify-release:
+  verify-release:
     needs: [build-desktop, build-ios, build-android]
     runs-on: ubuntu-latest
     steps:
