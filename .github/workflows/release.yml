@@ -36,8 +36,7 @@ jobs:
         run: |
           # Only package the compiled libraries
           cd ./packages/streamr-libstreamrproxyclient/dist
-          tar -czf streamrproxyclient-${{ matrix.target }}.tgz ${{ matrix.target }}
-          gh release upload ${{ github.event.release.tag_name }} streamrproxyclient-${{ matrix.target }}.tgz
+          gh release upload ${{ github.event.release.tag_name }} streamrproxyclient-${{ matrix.target }}-*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -54,9 +53,8 @@ jobs:
         
       - name: Package and Upload
         run: |
-          cd ./packages/streamr-libstreamrproxyclient/dist/ios-swift-package
-          tar -czhf streamrproxyclient-ios-swift-package.tgz --exclude-from=StreamrProxyClient/.gitignore StreamrProxyClient
-          gh release upload ${{ github.event.release.tag_name }} streamrproxyclient-ios-swift-package.tgz
+          cd ./packages/streamr-libstreamrproxyclient/dist
+          gh release upload ${{ github.event.release.tag_name }} ios-swift-package/streamrproxyclient-ios-swift-package-*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -87,9 +85,8 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
       - name: Package and Upload
         run: |
-          cd ./packages/streamr-libstreamrproxyclient/dist/android-library-module
-          tar -czhf streamrproxyclient-android-library-module.tgz --exclude-from=StreamrProxyClient/.gitignore StreamrProxyClient
-          gh release upload ${{ github.event.release.tag_name }} streamrproxyclient-android-library-module.tgz
+          cd ./packages/streamr-libstreamrproxyclient/dist
+          gh release upload ${{ github.event.release.tag_name }} android-library-module/streamrproxyclient-android-library-module-*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -99,7 +96,7 @@ jobs:
     steps:
       - name: Verify Release Artifacts
         run: |
-          gh release view ${{ github.event.release.tag_name }} --json assets -q '.assets[].name' | grep -E 'streamrproxyclient-((arm64|x64)-(osx|linux)|ios-swift-package|android-library-module).tgz'
+     gh release view ${{ github.event.release.tag_name }} --json assets -q '.assets[].name' | grep -E 'streamrproxyclient-(arm64|x64)-(osx|linux|ios|android)-[0-9]+\.[0-9]+\.[0-9]+\.tgz|streamrproxyclient-(ios-swift-package|android-library-module)-[0-9]+\.[0-9]+\.[0-9]+\.tgz'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
 
