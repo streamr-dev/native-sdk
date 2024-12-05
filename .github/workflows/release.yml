@@ -8,19 +8,68 @@ env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
+  build-desktop:
+    strategy:
+      matrix:
+        include:
+          - os: macos-14
+            target: arm64-osx
+          - os: macos-13
+            target: x64-osx
+          - os: ubuntu-24.04
+            target: x64-linux
+          - os: linux-arm64-runner
+            target: arm64-linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Dependencies
+        uses: ./.github/workflows/reusable/cached-install
+      
+      - name: test
+        run:
+          ./test.sh
+        shell: bash
+      
+      - name: Package and Upload
+        run: |
+          # Only package the compiled libraries
+          cd ./packages/streamr-libstreamrproxyclient/dist
+          gh release upload ${{ github.event.release.tag_name }} streamrproxyclient-${{ matrix.target }}-*.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-ios:
+    needs: build-desktop
+    runs-on: macos-14
+    env:
+      ARCHFLAGS: --ios
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Dependencies
+        uses: ./.github/workflows/reusable/cached-install
+        
+      - name: Package and Upload
+        run: |
+          cd ./packages/streamr-libstreamrproxyclient/dist
+          gh release upload ${{ github.event.release.tag_name }} ios-swift-package/streamrproxyclient-ios-swift-package-*.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build-android:
+    needs: build-desktop
     runs-on: macos-15
     env:
-      ARCHFLAGS: --android
+      ARCHFLAGS: --ios
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-          
       - name: Install Dependencies
         uses: ./.github/workflows/reusable/cached-install
-          
       - name: Package and Upload
         run: |
           cd ./packages/streamr-libstreamrproxyclient/dist
