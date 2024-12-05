@@ -147,7 +147,7 @@ if (NOT IOS)
             DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE})
 
     # Install shared lib to android module and create tgz package
-    if(VCPKG_TARGET_TRIPLET MATCHES "android" AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    if(VCPKG_TARGET_TRIPLET MATCHES "android")
         # Install the library
         install(TARGETS streamrproxyclient
                 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/android-library-module/StreamrProxyClient/libs/arm64-v8a)
