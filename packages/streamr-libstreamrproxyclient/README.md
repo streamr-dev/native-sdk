@@ -12,7 +12,7 @@ The library is available for the following platforms:
 # Pre-compiled binaries
 
 You can download pre-compiled binaries of the library from the following links:
-- [x64-linux] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-x64-linux-1.0.0.tgz) 
+- [x64-linux] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-x64-linux-1.0.0.tgz)
 - [arm64-linux] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-linux-1.0.0.tgz)
 - [x64-osx] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-x64-osx-1.0.0.tgz)
 - [arm64-osx] (https://github.com/streamr-dev/native-sdk/packages/streamr-libstreamrproxyclient/dist/streamrproxyclient-arm64-osx-1.0.0.tgz)
@@ -33,7 +33,7 @@ The best way to get is started by studying and trying out the example apps in th
 
 # Limitations of the current release
 
-* The messages are not singned nor encrypted, so they cannot be seen by network-monorepo based standard Streamr clients.
+* The messages are not signed nor encrypted, so they cannot be seen by network-monorepo based standard Streamr clients.
 
 # API Documentation
 
