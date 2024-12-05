@@ -10,6 +10,8 @@ env:
 jobs:
   build-android:
     runs-on: macos-15
+    env:
+      ARCHFLAGS: --android
     steps:
       - uses: actions/checkout@v4
         with:
@@ -18,10 +20,6 @@ jobs:
           
       - name: Install Dependencies
         uses: ./.github/workflows/reusable/cached-install
-        env:
-          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
-          ANDROID_NDK: ${{ env.ANDROID_NDK_HOME }}
-          NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
           
       - name: Package and Upload
         run: |
