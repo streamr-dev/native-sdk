@@ -142,6 +142,10 @@ if (NOT IOS)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
             DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/include)
 
+    # Install CPP header to dist/target-triplet
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/StreamrProxyClient.hpp
+            DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/include)
+
     # Install library to dist/target-triplet
     install(TARGETS streamrproxyclient
             DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE})
