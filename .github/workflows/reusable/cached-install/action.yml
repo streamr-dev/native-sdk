@@ -12,21 +12,25 @@ runs:
       run: |
         ./install.sh --prod ${ARCHFLAGS:-} || (
           for target in arm64-osx x64-osx x64-linux arm64-linux arm64-android arm64-ios; do
-            echo "=== config-$target-dbg-CMakeCache.txt.log ===" && \
-            cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-$target-dbg-CMakeCache.txt.log || true && \
-            echo "=== config-$target-rel-CMakeCache.txt.log ===" && \
-            cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-$target-rel-CMakeCache.txt.log || true && \
-            echo "=== config-$target-dbg-CMakeConfigureLog.yaml.log ===" && \
-            cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-$target-dbg-CMakeConfigureLog.yaml.log || true && \
-            echo "=== config-$target-rel-CMakeConfigureLog.yaml.log ===" && \
-            cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-$target-rel-CMakeConfigureLog.yaml.log || true && \
-            echo "=== config-$target-rel-ninja.log ===" && \
-            cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-$target-rel-ninja.log || true && \
-            echo "=== config-$target-out.log ===" && \
-            cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-$target-out.log || true && \
-            echo "=== ../../$target-dbg/CMakeCache.txt ===" && \
-            cat ../../$target-dbg/CMakeCache.txt || true
+            BASE_DIR="/Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel"
+            
+            # Function to print file if it exists
+            print_if_exists() {
+              if [ -f "$1" ]; then
+                echo "=== $2 ==="
+                cat "$1"
+              fi
+            }
+            
+            print_if_exists "$BASE_DIR/config-$target-dbg-CMakeCache.txt.log" "config-$target-dbg-CMakeCache.txt.log"
+            print_if_exists "$BASE_DIR/config-$target-rel-CMakeCache.txt.log" "config-$target-rel-CMakeCache.txt.log"
+            print_if_exists "$BASE_DIR/config-$target-dbg-CMakeConfigureLog.yaml.log" "config-$target-dbg-CMakeConfigureLog.yaml.log"
+            print_if_exists "$BASE_DIR/config-$target-rel-CMakeConfigureLog.yaml.log" "config-$target-rel-CMakeConfigureLog.yaml.log"
+            print_if_exists "$BASE_DIR/config-$target-rel-ninja.log" "config-$target-rel-ninja.log"
+            print_if_exists "$BASE_DIR/config-$target-out.log" "config-$target-out.log"
+            print_if_exists "../../$target-dbg/CMakeCache.txt" "../../$target-dbg/CMakeCache.txt"
           done
           exit 1
         )
       shell: bash
+
