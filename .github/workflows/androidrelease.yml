@@ -1,0 +1,20 @@
+name: Android Release StreamrProxyClient
+
+on:
+  release:
+    types: [published]
+
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  build-android:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          
+      - name: Install Dependencies
+        uses: ./.github/workflows/reusable/android-install
