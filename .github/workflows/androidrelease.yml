@@ -10,6 +10,8 @@ env:
 jobs:
   build-android:
     runs-on: macos-15
+    env:
+      ARCHFLAGS: --android
     steps:
       - uses: actions/checkout@v4
         with:
