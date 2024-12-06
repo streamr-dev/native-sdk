@@ -12,19 +12,19 @@ runs:
       run: |
         ./install.sh --prod ${ARCHFLAGS:-} || (
           echo "=== config-arm64-android-dbg-CMakeCache.txt.log ===" && \
-          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-dbg-CMakeCache.txt.log && \
+          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-dbg-CMakeCache.txt.log || true && \
           echo "=== config-arm64-android-rel-CMakeCache.txt.log ===" && \
-          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-rel-CMakeCache.txt.log && \
+          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-rel-CMakeCache.txt.log || true && \
           echo "=== config-arm64-android-dbg-CMakeConfigureLog.yaml.log ===" && \
-          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-dbg-CMakeConfigureLog.yaml.log && \
+          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-dbg-CMakeConfigureLog.yaml.log || true && \
           echo "=== config-arm64-android-rel-CMakeConfigureLog.yaml.log ===" && \
-          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-rel-CMakeConfigureLog.yaml.log && \
+          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-rel-CMakeConfigureLog.yaml.log || true && \
           echo "=== config-arm64-android-rel-ninja.log ===" && \
-          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-rel-ninja.log && \
+          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-rel-ninja.log || true && \
           echo "=== config-arm64-android-out.log ===" && \
-          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-out.log && \
+          cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-out.log || true && \
           echo "=== ../../arm64-android-dbg/CMakeCache.txt ===" && \
-          cat ../../arm64-android-dbg/CMakeCache.txt && \
+          cat ../../arm64-android-dbg/CMakeCache.txt || true && \
           exit 1
         )
       shell: bash
