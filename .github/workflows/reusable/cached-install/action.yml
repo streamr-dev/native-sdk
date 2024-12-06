@@ -24,7 +24,7 @@ runs:
       shell: bash
     - name: install
       run: |
-        ./install.sh --prod ${ARCHFLAGS:-} || (echo heippa && cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-osx-out.log && exit 1)
+        ./install.sh --prod ${ARCHFLAGS:-} || (echo heippa && cat /Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel/config-arm64-android-out.log && exit 1)
       shell: bash
     - name: cache homedir save
       id: cache-homedir-save
