@@ -4,4 +4,7 @@
 **/*.pyo
 **/*.pyd
 **/.pytest_cache/
-**/wheelhouse/
+wrappers/python/dist
+wrappers/python/src/streamrproxyclient/libstreamrproxyclient.dylib
+wrappers/python/src/streamrproxyclient/libstreamrproxyclient.so
+dist

@@ -20,7 +20,7 @@ VCPKG_TARGET_TRIPLET=$2
 CURRENT_LIST_DIR=$3
 
 #find out if the file is a .so or .dylib file by checking the file extension of the files in the source directory
-FILE_TYPE=$(ls $SOURCE_DIR | grep -o '\.so\|\.dylib')
+FILE_TYPE=$(ls $SOURCE_DIR | grep -o '\.so\|\.dylib' | head -n 1)
 
 # create the destination directory if it doesn't exist
 mkdir -p $CURRENT_LIST_DIR/wrappers/go/dist/$VCPKG_TARGET_TRIPLET/lib/Release/
