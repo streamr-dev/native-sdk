@@ -60,7 +60,7 @@ jobs:
 
   build-android:
     needs: build-desktop
-    runs-on: macos-15
+    runs-on: macos-13
     env:
       ARCHFLAGS: --android
     steps:
@@ -69,8 +69,26 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.1.12297006"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.1.12297006" >> $GITHUB_ENV
+
+      - name: Verify NDK
+        run: |
+          echo "NDK Home: $ANDROID_NDK_HOME"
+          ls -l $ANDROID_NDK_HOME
+          cat $ANDROID_NDK_HOME/source.properties
+
       - name: Install Dependencies
         uses: ./.github/workflows/reusable/cached-install
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+          ANDROID_NDK: ${{ env.ANDROID_NDK_HOME }}
+          NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
 
       - name: Package and Upload
         run: |
@@ -78,4 +96,3 @@ jobs:
           gh release upload ${{ github.event.release.tag_name }} android-library-module/streamrproxyclient-android-library-module-*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
