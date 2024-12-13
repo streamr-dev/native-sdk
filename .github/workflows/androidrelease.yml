@@ -28,6 +28,10 @@ jobs:
           echo "NDK Home: $ANDROID_NDK_HOME"
           ls -l $ANDROID_NDK_HOME
           cat $ANDROID_NDK_HOME/source.properties
-          
+
       - name: Install Dependencies
         uses: ./.github/workflows/reusable/cached-install
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+          ANDROID_NDK: ${{ env.ANDROID_NDK_HOME }}
+          NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
