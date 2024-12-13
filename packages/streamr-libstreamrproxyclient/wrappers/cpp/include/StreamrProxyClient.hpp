@@ -10,56 +10,56 @@
 
 namespace streamrproxyclient {
 
-/** 
+/**
  * @brief Error indicating an invalid Ethereum address
  */
 struct ErrorInvalidEthereumAddress {
     static constexpr const char* name = ERROR_INVALID_ETHEREUM_ADDRESS;
 };
 
-/** 
+/**
  * @brief Error indicating an invalid stream part ID
  */
 struct ErrorInvalidStreamPartId {
     static constexpr const char* name = ERROR_INVALID_STREAM_PART_ID;
 };
 
-/** 
+/**
  * @brief Error indicating proxy client was not found
  */
 struct ErrorProxyClientNotFound {
     static constexpr const char* name = ERROR_PROXY_CLIENT_NOT_FOUND;
 };
 
-/** 
+/**
  * @brief Error indicating an invalid proxy URL
  */
 struct ErrorInvalidProxyUrl {
     static constexpr const char* name = ERROR_INVALID_PROXY_URL;
 };
 
-/** 
+/**
  * @brief Error indicating no proxies were defined
  */
 struct ErrorNoProxiesDefined {
     static constexpr const char* name = ERROR_NO_PROXIES_DEFINED;
 };
 
-/** 
+/**
  * @brief Error indicating proxy connection failed
  */
 struct ErrorProxyConnectionFailed {
     static constexpr const char* name = ERROR_PROXY_CONNECTION_FAILED;
 };
 
-/** 
+/**
  * @brief Error indicating proxy broadcast failed
  */
 struct ErrorProxyBroadcastFailed {
     static constexpr const char* name = ERROR_PROXY_BROADCAST_FAILED;
 };
 
-/** 
+/**
  * @brief Variant type containing all possible proxy error codes
  */
 using StreamrProxyErrorCode = std::variant<
@@ -71,12 +71,12 @@ using StreamrProxyErrorCode = std::variant<
     ErrorProxyConnectionFailed,
     ErrorProxyBroadcastFailed>;
 
-/** 
+/**
  * @brief Represents a Streamr proxy address
  */
 struct StreamrProxyAddress {
-    std::string websocketUrl;     /**< WebSocket URL of the proxy */
-    std::string ethereumAddress;  /**< Ethereum address of the proxy */
+    std::string websocketUrl; /**< WebSocket URL of the proxy */
+    std::string ethereumAddress; /**< Ethereum address of the proxy */
 
     static StreamrProxyAddress fromCProxy(const Proxy* proxy) {
         return StreamrProxyAddress{
@@ -85,24 +85,22 @@ struct StreamrProxyAddress {
     }
 };
 
-/** 
+/**
  * @brief Custom exception class for Streamr proxy errors
  */
 struct StreamrProxyError : public std::runtime_error {
-    StreamrProxyAddress proxy;    /**< The proxy where the error occurred */
-    StreamrProxyErrorCode code;   /**< The error code */
+    StreamrProxyAddress proxy; /**< The proxy where the error occurred */
+    StreamrProxyErrorCode code; /**< The error code */
 
     // NOLINTNEXTLINE(google-explicit-constructor)
     StreamrProxyError(const Error* error)
-        : std::runtime_error(error->message),
-          code(getErrorCode(error->code)) {
+        : std::runtime_error(error->message), code(getErrorCode(error->code)) {
         if (error->proxy) {
             proxy = StreamrProxyAddress::fromCProxy(error->proxy);
         }
     }
 
 private:
-
     static StreamrProxyErrorCode getErrorCode(const char* code) {
         if (strcmp(code, ERROR_INVALID_ETHEREUM_ADDRESS) == 0) {
             return ErrorInvalidEthereumAddress{};
@@ -129,12 +127,14 @@ private:
     }
 };
 
-/** 
+/**
  * @brief Contains results of proxy operations
  */
 struct StreamrProxyResult {
-    std::vector<StreamrProxyAddress> successful;  /**< List of successful proxy operations */
-    std::vector<StreamrProxyError> errors;        /**< List of failed proxy operations */
+    std::vector<StreamrProxyAddress>
+        successful; /**< List of successful proxy operations */
+    std::vector<StreamrProxyError>
+        errors; /**< List of failed proxy operations */
 
     // NOLINTNEXTLINE(google-explicit-constructor)
     StreamrProxyResult(const ProxyResult* result) {
@@ -156,7 +156,7 @@ public:
     ~SharedLibraryWrapper() { proxyClientCleanupLibrary(); }
 };
 
-/** 
+/**
  * @brief Main client class for interacting with Streamr proxies
  */
 class StreamrProxyClient {
@@ -166,7 +166,7 @@ private:
     std::string ethereumPrivateKey;
 
 public:
-    /** 
+    /**
      * @brief Constructs a new StreamrProxyClient
      * @param ownEthereumAddress Ethereum address of the client
      * @param ethereumPrivateKey Private key for the Ethereum address
@@ -198,7 +198,7 @@ public:
         }
     }
 
-    /** 
+    /**
      * @brief Connects to specified proxies
      * @param proxies Vector of proxy addresses to connect to
      * @return Result containing successful connections and errors
@@ -219,7 +219,7 @@ public:
         return streamrProxyResult;
     }
 
-    /** 
+    /**
      * @brief Publishes a message through connected proxies
      * @param message Message to publish
      * @return Result containing successful publications and errors
