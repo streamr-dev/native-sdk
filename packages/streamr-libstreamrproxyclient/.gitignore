@@ -8,3 +8,5 @@ wrappers/python/dist
 wrappers/python/src/streamrproxyclient/libstreamrproxyclient.dylib
 wrappers/python/src/streamrproxyclient/libstreamrproxyclient.so
 dist
+**/**.dylib
+**/**.so
