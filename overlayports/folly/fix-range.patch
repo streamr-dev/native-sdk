@@ -1,0 +1,26 @@
+diff --git a/folly/Range.h b/folly/Range.h
+index bdcef6d..9b5b8b9 100644
+--- a/folly/Range.h
++++ b/folly/Range.h
+@@ -634,13 +634,15 @@ class Range {
+   //
+   // At the moment the set of implicit target types consists of just
+   // std::string_view (when it is available).
+-  struct NotStringView {};
++  struct IsStringView { using type = std::basic_string_view<char>; };
++  struct ImpossibleType {};
++  struct NotStringView { using type = ImpossibleType; };
++
+   template <typename ValueType>
+-  struct StringViewType //
+-      : std::conditional<
+-            std::is_trivial<ValueType>::value,
+-            std::basic_string_view<ValueType>,
+-            NotStringView> {};
++  struct StringViewType : NotStringView {};
++
++  template <>
++  struct StringViewType<char> : IsStringView {};
+ 
+   template <typename Target>
+   struct IsConstructibleViaStringView
