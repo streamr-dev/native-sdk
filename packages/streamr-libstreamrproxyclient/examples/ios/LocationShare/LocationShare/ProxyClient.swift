@@ -18,7 +18,7 @@ class ProxyClient: @unchecked Sendable {
     var status: Status = .stopped
     private let locationManager: LocationManager
     private let streamrProxyClient = try! StreamrProxyClient(ownEthereumAddress: "0x1234567890123456789012345678901234567890", streamPartId: "0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01")
-        //"0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0")
+    //"0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0")
     static let defaultPublishingIntervalInSeconds: TimeInterval = 5
     @ObservationIgnored private var pCallroxyClientHandle: UInt64 = 0
     @ObservationIgnored private var task: Task<Void, Never>?
@@ -26,7 +26,7 @@ class ProxyClient: @unchecked Sendable {
         .publish(every: 1, on: .main, in: .default)
         .autoconnect()
         .values
-
+    
     enum Status {
         case stopped
         case proxySet
@@ -42,12 +42,12 @@ class ProxyClient: @unchecked Sendable {
         print("Set Proxy start")
         let streamrProxyAddess = StreamrProxyAddress(websocketUrl: proxyInfo.peerId, ethereumAddress: proxyInfo.peerAddress)
         let result = await Task.detached {
-                  self.streamrProxyClient.connect(proxies: [streamrProxyAddess])
-              }.value
+            self.streamrProxyClient.connect(proxies: [streamrProxyAddess])
+        }.value
         print("Set Proxy end")
         return result
     }
- 
+    
     @MainActor
     private func publish() async -> StreamrProxyResult {
         print("Publish start")
@@ -68,9 +68,9 @@ class ProxyClient: @unchecked Sendable {
             status = .proxySet
             _ = await setProxy()
             timerSequence = Timer
-                  .publish(every: publishingIntervalInSeconds, on: .main, in: .default)
-                  .autoconnect()
-                  .values
+                .publish(every: publishingIntervalInSeconds, on: .main, in: .default)
+                .autoconnect()
+                .values
             task = Task {
                 for await _ in timerSequence {
                     _ = await publish()
