@@ -2,11 +2,6 @@
 
 set -e
 
-export CC=$(brew --prefix)/bin/clang
-export CXX=$(brew --prefix)/bin/clang++
-export CMAKE_C_COMPILER=$(brew --prefix)/bin/clang
-export CMAKE_CXX_COMPILER=$(brew --prefix)/bin/clang++
-
 # Check if VCPKG_ROOT is set and points to the correct directory
 if [ -z "$VCPKG_ROOT" ]; then
     echo "Error: VCPKG_ROOT is not set. Please run 'source install-prerequisities.sh' or 'source setenvs.sh' before running this script."
