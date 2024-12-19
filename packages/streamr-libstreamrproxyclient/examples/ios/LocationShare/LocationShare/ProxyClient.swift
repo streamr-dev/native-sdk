@@ -44,15 +44,6 @@ class ProxyClient: @unchecked Sendable {
         let result = await Task.detached {
                   self.streamrProxyClient.connect(proxies: [streamrProxyAddess])
               }.value
-     //   let client = streamrProxyClient
-       // let result = await withCheckedContinuation { @Sendable continuation in
-        /*
-            Task.detached {
-                let result = streamrProxyClient.connect(proxies: [streamrProxyAddess])
-              //  continuation.resume(returning: result)
-            }
-      //  }
-         */
         print("Set Proxy end")
         return result
     }
@@ -69,25 +60,6 @@ class ProxyClient: @unchecked Sendable {
         }.value
         print("Publish end")
         return result
-        /*
-        print("Publish start")
-        let latitude = locationManager.location?.latitude ?? 0
-        let longitude = locationManager.location?.longitude ?? 0
-        let privateKey = ethereumPrivateKey
-        self.status = .publishing
-        
-        let client = streamrProxyClient
-        let content = "\(latitude) \(longitude)"
-        
-        let result = await withCheckedContinuation { @Sendable continuation in
-            Task.detached {
-                let result = client.publish(content: content, ethereumPrivateKey: privateKey)
-                continuation.resume(returning: result)
-            }
-        }
-        print("Publish end")
-        return result
-         */
     }
     
     func startPublishing() {
@@ -95,12 +67,6 @@ class ProxyClient: @unchecked Sendable {
         Task { @MainActor in
             status = .proxySet
             _ = await setProxy()
-            /*
-            if result.code == 0 {
-                status = .stopped
-                return
-            }
-             */
             timerSequence = Timer
                   .publish(every: publishingIntervalInSeconds, on: .main, in: .default)
                   .autoconnect()
@@ -124,7 +90,5 @@ class ProxyClient: @unchecked Sendable {
         }
         print("stopPublishing stop")
     }
-    
-
 }
 
