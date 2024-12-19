@@ -24,7 +24,6 @@ set (ANDROID_LIBRARY_VERSION ${STREAMRPROXYCLIENT_VERSION})
 project(streamr-streamrproxyclient CXX)
 add_library(streamrproxyclient SHARED
             src/streamrproxyclient.cpp
-            include/streamrproxyclient.h include/StreamrProxyClient.hpp
 )
 
 set_target_properties(streamrproxyclient PROPERTIES VERSION ${SHAREDLIB_VERSION} SOVERSION ${SHAREDLIB_SOVERSION})
@@ -76,7 +75,7 @@ if (NOT IOS)
     find_package(GTest CONFIG REQUIRED)
     find_package(folly CONFIG REQUIRED)
      
-    add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp test/integration/StreamrProxyClientCppTest.cpp)
+    add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp)
     target_link_directories(streamr-streamrproxyclient-test-integration PUBLIC ${SHAREDLIB_OUTPUT_DIRECTORY})
     
     target_include_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -88,7 +87,7 @@ if (NOT IOS)
         PRIVATE GTest::gtest_main
     )
 
-    add_executable(streamr-streamrproxyclient-test-end-to-end test/end-to-end/PublishToTsServerTest.cpp test/end-to-end/PublishToTsServerCppTest.cpp)
+    add_executable(streamr-streamrproxyclient-test-end-to-end test/end-to-end/PublishToTsServerTest.cpp)
     target_link_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
     
     target_include_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -125,27 +124,9 @@ if (NOT IOS)
             COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-multiple-messages-test.sh"
             WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
             )
-
-        add_test(
-            NAME ts-end-to-end-cpp-test
-            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-cpp-tests.sh"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-            )
-
-        add_test(
-            NAME ts-multiple-messages-cpp-test
-            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-multiple-messages-cpp-test.sh"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-            )
-
-
     endif()
     # Install header to dist/target-triplet
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
-            DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/include)
-
-    # Install CPP header to dist/target-triplet
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/StreamrProxyClient.hpp
             DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/include)
 
     # Install library to dist/target-triplet
