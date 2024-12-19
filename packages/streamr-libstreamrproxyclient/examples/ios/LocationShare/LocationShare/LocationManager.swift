@@ -9,9 +9,9 @@ import SwiftUI
 import CoreLocation
 
 @Observable
-class LocationManager {
+class LocationManager: @unchecked Sendable {
     
-    @MainActor var location: (latitude: Double, longitude: Double)? = nil
+    var location: (latitude: Double, longitude: Double)? = nil
     private let locationManager = CLLocationManager()
     
     func requestUserAuthorization() async throws {

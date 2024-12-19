@@ -78,7 +78,7 @@ private func createStreamrProxyError(
     }
 }
 
-public struct StreamrProxyAddress {
+public struct StreamrProxyAddress : Sendable {
     public let websocketUrl: String
     public let ethereumAddress: String
     
@@ -88,12 +88,12 @@ public struct StreamrProxyAddress {
     }
 }
 
-public struct StreamrProxyError {
+public struct StreamrProxyError : Sendable {
     public let error: StreamrError
     public let proxy: StreamrProxyAddress
 }
 
-public struct StreamrProxyResult {
+public struct StreamrProxyResult: Sendable {
     public let numConnected: UInt64
     public let successful: [StreamrProxyAddress]
     public let failed: [StreamrProxyError]
