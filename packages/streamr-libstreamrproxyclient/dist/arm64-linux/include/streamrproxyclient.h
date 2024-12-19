@@ -84,10 +84,6 @@ EXTERN_C SHARED_EXPORT void proxyClientResultDelete(const ProxyResult* proxyResu
  * proxyClientResultDelete() on this after the call returns. The resulting ProxyResult
  * may only contain  "errors" - the "successful" and "numSuccessful" fields are
  * unused.
-<<<<<<< HEAD
-
-=======
->>>>>>> main
  * @param ownEthereumAddress The Ethereum address of the client in format
  * 0x1234567890123456789012345678901234567890.
  * @param streamPartId The stream part id in format

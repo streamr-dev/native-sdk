@@ -99,11 +99,7 @@ if (NOT IOS)
         PRIVATE GTest::gtest_main
     )
 
-<<<<<<< HEAD
     add_executable(streamrproxyclient-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrProxyClientCppWrapperTest.cpp)
-=======
-    add_executable(streamrproxyclient-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrProxyClientTest.cpp)
->>>>>>> main
     target_link_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
     
     target_include_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/include)
@@ -118,10 +114,6 @@ if (NOT IOS)
         include(GoogleTest)
         gtest_discover_tests(streamr-streamrproxyclient-test-integration)
         gtest_discover_tests(streamrproxyclient-cpp-wrapper-test)
-<<<<<<< HEAD
-
-=======
->>>>>>> main
         add_test(
             NAME ts-end-to-end-test
             COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-tests.sh"
@@ -210,7 +202,6 @@ if (NOT IOS)
     # If not ios or android, and build type is Release, copy the .so or .dylib file to the wrappers/go/dist/target-triplet/lib/Release/ directory
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android") AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
         install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/copyfilesforgowrapper.sh ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE} ${VCPKG_TARGET_TRIPLET} ${CMAKE_CURRENT_LIST_DIR})")
-<<<<<<< HEAD
 
         # Also install header to wrappers/go
         install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
@@ -219,13 +210,5 @@ if (NOT IOS)
         # Also create a python package and upload it to PyPi
         install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/createpythonpackage.sh ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE} ${VCPKG_TARGET_TRIPLET} ${CMAKE_CURRENT_LIST_DIR} ${STREAMRPROXYCLIENT_VERSION})")
     endif()
-=======
-        
-        # Also install header to wrappers/go
-        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
-                DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/wrappers/go)
-    endif()
-  
->>>>>>> main
 endif()
 
