@@ -48,6 +48,8 @@ EXTERN_C SHARED_EXPORT void proxyClientInitLibrary(void);
  */
 // NOLINTNEXTLINE
 EXTERN_C SHARED_EXPORT void proxyClientCleanupLibrary(void);
+
+
 // NOLINTNEXTLINE
 typedef struct Proxy {
     const char* websocketUrl;

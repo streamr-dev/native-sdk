@@ -101,43 +101,43 @@ if(NOT IOS)
     )
 
     add_executable(streamr-dht-test-unit
-        test/unit/AddressToolsTest.cpp
-        test/unit/CertificateHelperTest.cpp
-        test/unit/ConnectedEndpointStateTest.cpp
-        test/unit/ConnectingEndpointStateTest.cpp
-        test/unit/ConnectionLockRpcLocalTest.cpp
-        test/unit/ConnectionLockRpcRemoteTest.cpp
-        test/unit/ConnectionLockStatesTest.cpp
-        test/unit/ConnectionLockerTest.cpp
-        test/unit/ConnectionManagerTest.cpp
-        test/unit/ConnectionsViewTest.cpp
-        test/unit/ConnectivityTest.cpp
-        test/unit/ConnectorFacadeTest.cpp
-        test/unit/DhtCallContextTest.cpp
-        test/unit/DisconnectedEndpointStateTest.cpp
-        test/unit/DuplicateDetectorTest.cpp
-        test/unit/EndpointStateInterfaceTest.cpp
-        test/unit/EndpointStateTest.cpp
-        test/unit/EndpointTest.cpp
-        test/unit/FakeTransportTest.cpp
-        test/unit/HandshakerTest.cpp
-        test/unit/IPendingConnectionTest.cpp
-        test/unit/IdentifiersTest.cpp
-        test/unit/IncomingHandshakerTest.cpp
-        test/unit/InitialEndpointStateTest.cpp
-        test/unit/OffererTest.cpp
-        test/unit/OutgoingHandshakerTest.cpp
-        test/unit/PendingConnectionTest.cpp
-        test/unit/RoutingRpcCommunicatorTest.cpp
-        test/unit/TransportTest.cpp
-        test/unit/VersionTest.cpp
         test/unit/WebsocketClientConnectionTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
+        test/unit/CertificateHelperTest.cpp
+        test/unit/ConnectionManagerTest.cpp
         test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
-        test/unit/WebsocketClientConnectorTest.cpp
-        test/unit/WebsocketConnectionTest.cpp
-        test/unit/WebsocketServerConnectionTest.cpp
+        test/unit/IdentifiersTest.cpp
+        test/unit/ConnectionLockRpcRemoteTest.cpp
+        test/unit/ConnectorFacadeTest.cpp
+        test/unit/ConnectionsViewTest.cpp
         test/unit/WebsocketServerConnectorTest.cpp
+        test/unit/OffererTest.cpp
+        test/unit/DhtCallContextTest.cpp
+        test/unit/PendingConnectionTest.cpp
+        test/unit/ConnectionLockRpcLocalTest.cpp
+        test/unit/EndpointTest.cpp
+        test/unit/ConnectingEndpointStateTest.cpp
+        test/unit/ConnectedEndpointStateTest.cpp
+        test/unit/DisconnectedEndpointStateTest.cpp
+        test/unit/InitialEndpointStateTest.cpp
+        test/unit/FakeTransportTest.cpp
+        test/unit/EndpointStateTest.cpp
+        test/unit/OutgoingHandshakerTest.cpp
+        test/unit/IncomingHandshakerTest.cpp
+        test/unit/EndpointStateInterfaceTest.cpp
+        test/unit/WebsocketConnectionTest.cpp
+        test/unit/TransportTest.cpp
+        test/unit/HandshakerTest.cpp
+        test/unit/RoutingRpcCommunicatorTest.cpp
+        test/unit/ConnectionLockerTest.cpp
+        test/unit/AddressToolsTest.cpp
+        test/unit/DuplicateDetectorTest.cpp
+        test/unit/ConnectionLockStatesTest.cpp
+        test/unit/ConnectivityTest.cpp
+        test/unit/IPendingConnectionTest.cpp
+        test/unit/VersionTest.cpp
+        test/unit/WebsocketClientConnectorTest.cpp
+        test/unit/WebsocketServerConnectionTest.cpp
         test/unit/WebsocketServerTest.cpp
         test/unit/ListeningRpcCommunicatorTest.cpp
     )
