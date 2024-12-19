@@ -3,24 +3,23 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		412FDA702CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 412FDA6F2CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework */; };
 		412FDA7B2CAF8DC3008DC50E /* libc++abi.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 412FDA7A2CAF8DC3008DC50E /* libc++abi.tbd */; };
 		413E46C32C7867670030132D /* LocationShareApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46C22C7867670030132D /* LocationShareApp.swift */; };
 		413E46C52C7867670030132D /* LocationShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46C42C7867670030132D /* LocationShareView.swift */; };
 		413E46C72C78676A0030132D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 413E46C62C78676A0030132D /* Assets.xcassets */; };
 		413E46CA2C78676A0030132D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 413E46C92C78676A0030132D /* Preview Assets.xcassets */; };
-		413E46D42C78676A0030132D /* LocationShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46D32C78676A0030132D /* LocationShareTests.swift */; };
 		413E46DE2C78676A0030132D /* LocationShareUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46DD2C78676A0030132D /* LocationShareUITests.swift */; };
 		413E46E02C78676A0030132D /* LocationShareUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46DF2C78676A0030132D /* LocationShareUITestsLaunchTests.swift */; };
 		413E46ED2C7875CE0030132D /* LocationShareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46EC2C7875CD0030132D /* LocationShareViewModel.swift */; };
 		413E46EF2C78773C0030132D /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46EE2C78773C0030132D /* LocationManager.swift */; };
-		413E46F22C7895900030132D /* StreamrProxyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F12C7895900030132D /* StreamrProxyClient.swift */; };
+		413E46F22C7895900030132D /* ProxyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F12C7895900030132D /* ProxyClient.swift */; };
 		413E46F62C7898D40030132D /* PeerDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F52C7898D40030132D /* PeerDesc.swift */; };
-		4176FEC02C7B9078004F8A48 /* ProxyClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4176FEBE2C7B9078004F8A48 /* ProxyClient.cpp */; };
+		4154A2B22CDC93770057D042 /* StreamrProxyClient in Frameworks */ = {isa = PBXBuildFile; productRef = 4154A2B12CDC93770057D042 /* StreamrProxyClient */; };
+		4154A2B52CDCAFC70057D042 /* ProxyClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,7 +40,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		412FDA6F2CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = ../../../../../../dist/ios/streamr.xcframework; sourceTree = "<group>"; };
 		412FDA7A2CAF8DC3008DC50E /* libc++abi.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++abi.tbd"; path = "usr/lib/libc++abi.tbd"; sourceTree = SDKROOT; };
 		413E46BF2C7867670030132D /* LocationShare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LocationShare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		413E46C22C7867670030132D /* LocationShareApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareApp.swift; sourceTree = "<group>"; };
@@ -49,19 +47,15 @@
 		413E46C62C78676A0030132D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		413E46C92C78676A0030132D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		413E46CF2C78676A0030132D /* LocationShareTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocationShareTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		413E46D32C78676A0030132D /* LocationShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareTests.swift; sourceTree = "<group>"; };
 		413E46D92C78676A0030132D /* LocationShareUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LocationShareUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		413E46DD2C78676A0030132D /* LocationShareUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareUITests.swift; sourceTree = "<group>"; };
 		413E46DF2C78676A0030132D /* LocationShareUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		413E46EC2C7875CD0030132D /* LocationShareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationShareViewModel.swift; sourceTree = "<group>"; };
 		413E46EE2C78773C0030132D /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		413E46F02C787E820030132D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		413E46F12C7895900030132D /* StreamrProxyClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamrProxyClient.swift; sourceTree = "<group>"; };
+		413E46F12C7895900030132D /* ProxyClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyClient.swift; sourceTree = "<group>"; };
 		413E46F52C7898D40030132D /* PeerDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDesc.swift; sourceTree = "<group>"; };
-		4176FEBD2C7B9077004F8A48 /* LocationShare-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LocationShare-Bridging-Header.h"; sourceTree = "<group>"; };
-		4176FEBE2C7B9078004F8A48 /* ProxyClient.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ProxyClient.cpp; sourceTree = "<group>"; };
-		4176FEBF2C7B9078004F8A48 /* ProxyClient.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ProxyClient.hpp; sourceTree = "<group>"; };
-		4176FEC12C7B9204004F8A48 /* Result.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Result.hpp; sourceTree = "<group>"; };
+		4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyClientTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,7 +64,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				412FDA7B2CAF8DC3008DC50E /* libc++abi.tbd in Frameworks */,
-				412FDA702CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework in Frameworks */,
+				4154A2B22CDC93770057D042 /* StreamrProxyClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,19 +118,14 @@
 			isa = PBXGroup;
 			children = (
 				413E46F02C787E820030132D /* Info.plist */,
-				412FDA6F2CAF7780008DC50E /* ../../../../../../dist/ios/streamr.xcframework */,
 				413E46C22C7867670030132D /* LocationShareApp.swift */,
 				413E46C42C7867670030132D /* LocationShareView.swift */,
 				413E46C62C78676A0030132D /* Assets.xcassets */,
 				413E46C82C78676A0030132D /* Preview Content */,
 				413E46EC2C7875CD0030132D /* LocationShareViewModel.swift */,
 				413E46EE2C78773C0030132D /* LocationManager.swift */,
-				413E46F12C7895900030132D /* StreamrProxyClient.swift */,
+				413E46F12C7895900030132D /* ProxyClient.swift */,
 				413E46F52C7898D40030132D /* PeerDesc.swift */,
-				4176FEBE2C7B9078004F8A48 /* ProxyClient.cpp */,
-				4176FEBF2C7B9078004F8A48 /* ProxyClient.hpp */,
-				4176FEBD2C7B9077004F8A48 /* LocationShare-Bridging-Header.h */,
-				4176FEC12C7B9204004F8A48 /* Result.hpp */,
 			);
 			path = LocationShare;
 			sourceTree = "<group>";
@@ -152,7 +141,7 @@
 		413E46D22C78676A0030132D /* LocationShareTests */ = {
 			isa = PBXGroup;
 			children = (
-				413E46D32C78676A0030132D /* LocationShareTests.swift */,
+				4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */,
 			);
 			path = LocationShareTests;
 			sourceTree = "<group>";
@@ -255,6 +244,9 @@
 				Base,
 			);
 			mainGroup = 413E46B62C7867670030132D;
+			packageReferences = (
+				418411792CE0BD3C0046B113 /* XCLocalSwiftPackageReference "../../../dist/ios-swift-package/StreamrProxyClient" */,
+			);
 			productRefGroup = 413E46C02C7867670030132D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -300,9 +292,8 @@
 				413E46F62C7898D40030132D /* PeerDesc.swift in Sources */,
 				413E46EF2C78773C0030132D /* LocationManager.swift in Sources */,
 				413E46C52C7867670030132D /* LocationShareView.swift in Sources */,
-				413E46F22C7895900030132D /* StreamrProxyClient.swift in Sources */,
+				413E46F22C7895900030132D /* ProxyClient.swift in Sources */,
 				413E46ED2C7875CE0030132D /* LocationShareViewModel.swift in Sources */,
-				4176FEC02C7B9078004F8A48 /* ProxyClient.cpp in Sources */,
 				413E46C32C7867670030132D /* LocationShareApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -311,7 +302,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				413E46D42C78676A0030132D /* LocationShareTests.swift in Sources */,
+				4154A2B52CDCAFC70057D042 /* ProxyClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,7 +483,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "LocationShare/LocationShare-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -526,7 +517,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "LocationShare/LocationShare-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -539,7 +530,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S933S46DZS;
+				DEVELOPMENT_TEAM = 42FMY535TP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
@@ -559,7 +550,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S933S46DZS;
+				DEVELOPMENT_TEAM = 42FMY535TP;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
@@ -578,7 +569,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S933S46DZS;
+				DEVELOPMENT_TEAM = 42FMY535TP;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShareUITests;
@@ -596,7 +587,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S933S46DZS;
+				DEVELOPMENT_TEAM = 42FMY535TP;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = testing.LocationShareUITests;
@@ -648,6 +639,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		418411792CE0BD3C0046B113 /* XCLocalSwiftPackageReference "../../../dist/ios-swift-package/StreamrProxyClient" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../dist/ios-swift-package/StreamrProxyClient;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4154A2B12CDC93770057D042 /* StreamrProxyClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StreamrProxyClient;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 413E46B72C7867670030132D /* Project object */;
 }

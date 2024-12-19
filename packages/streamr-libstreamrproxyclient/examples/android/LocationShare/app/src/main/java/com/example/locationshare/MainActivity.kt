@@ -20,21 +20,81 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import android.Manifest;
+import android.os.Handler
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.locationshare.ui.LocationShareViewModel
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.Priority
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
-
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
+    private val scope = CoroutineScope(Dispatchers.IO + Job())
     private lateinit var locationClient: FusedLocationProviderClient
     private val locationViewModel: LocationViewModel by viewModels()
     private val locationShareViewModel: LocationShareViewModel by viewModels {
-        LocationShareViewModelFactory(StreamrProxyClient(locationViewModel.state))
+        LocationShareViewModelFactory(ProxyClient(locationViewModel.state))
     }
-    private fun checkPermissions() {
 
+    @SuppressLint("MissingPermission")
+    private fun initUpdates(viewModel: LocationViewModel) {
+        scope.launch {
+            try {
+                withContext(Dispatchers.Main) {
+                    locationClient = LocationServices.getFusedLocationProviderClient(this@MainActivity)
+                }
+                val request = createLocationRequest()
+                val locationCallback = object : LocationCallback() {
+                    override fun onLocationResult(result: LocationResult) {
+                        scope.launch {
+                            result.lastLocation?.let { location ->
+                                withContext(Dispatchers.Main) {
+                                    viewModel.update(location.latitude, location.longitude)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    locationClient.requestLocationUpdates(
+                        request,
+                        locationCallback,
+                        Looper.getMainLooper()
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("LocationShare", "Error initializing location updates", e)
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel() // Clean up coroutines
+    }
+
+    private fun createLocationRequest(): LocationRequest {
+        return LocationRequest.Builder(1000)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .setWaitForAccurateLocation(false)
+            .setMinUpdateIntervalMillis(500)
+            .setMaxUpdateDelayMillis(1000)
+            .build()
+    }
+
+    private fun checkPermissions() {
         if (!hasLocationPermissions()) {
             requestLocationPermissions()
             return
@@ -44,9 +104,19 @@ class MainActivity : ComponentActivity() {
     private fun requestLocationPermissions() {
         ActivityCompat.requestPermissions(
             this,
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ),
             LOCATION_PERMISSION_REQUEST_CODE
         )
+    }
+
+    private fun hasPermission(permission: String): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            this,
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun hasLocationPermissions(): Boolean {
@@ -54,55 +124,73 @@ class MainActivity : ComponentActivity() {
                 hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 
-    private fun hasPermission(permission: String): Boolean {
-        val result = ActivityCompat.checkSelfPermission(this,permission);
-
-        return result == PackageManager.PERMISSION_GRANTED;
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun initUpdates(viewModel: LocationViewModel) {
-        locationClient = LocationServices.getFusedLocationProviderClient(this);
-        locationClient.requestLocationUpdates(
-            createLocationRequest(),
-            {
-                location -> viewModel.update(location.latitude, location.longitude)
-            },
-            Looper.getMainLooper()
-        )
-    }
-
-    private fun createLocationRequest(): LocationRequest {
-        return LocationRequest.Builder(1000).build()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        println("Start LocationShare")
-        super.onCreate(savedInstanceState)
-        checkPermissions()
-        initUpdates(locationViewModel)
-        enableEdgeToEdge()
-        setContent {
-            LocationShareTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    LocationShareScreen(
-                        locationViewModel = locationViewModel,
-                        locationShareViewModel = locationShareViewModel
-                    )
+    // Add this to handle permission results
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            LOCATION_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted, initialize location updates
+                    initUpdates(locationViewModel)
+                } else {
+                    // Permission denied, handle accordingly
+                    Log.w("LocationShare", "Location permission denied")
+                    // You might want to show a message to the user here
                 }
             }
         }
     }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        try {
+            enableEdgeToEdge()
+
+            // Check Google Play Services availability
+            val availability = GoogleApiAvailability.getInstance()
+            val resultCode = availability.isGooglePlayServicesAvailable(this)
+
+            if (resultCode != ConnectionResult.SUCCESS) {
+                if (availability.isUserResolvableError(resultCode)) {
+                    availability.getErrorDialog(this, resultCode, 1)?.show()
+                }
+                return
+            }
+
+            checkPermissions()
+            if (hasLocationPermissions()) {
+                initUpdates(locationViewModel)
+            }
+
+            setContent {
+                LocationShareTheme {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        LocationShareScreen(
+                            locationViewModel = locationViewModel,
+                            locationShareViewModel = locationShareViewModel
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("LocationShare", "Error in onCreate", e)
+        }
+    }
 }
 
-class LocationShareViewModelFactory(private val streamrProxyClient: StreamrProxyClient) : ViewModelProvider.Factory {
+class LocationShareViewModelFactory(private val proxyClient: ProxyClient) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LocationShareViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return LocationShareViewModel(streamrProxyClient) as T
+            return LocationShareViewModel(proxyClient) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -10,3 +10,7 @@ wrappers/python/src/streamrproxyclient/libstreamrproxyclient.so
 dist
 **/**.dylib
 **/**.so
+**/wheelhouse/
+*.tgz
+*.so.*
+**/libstreamrproxyclient.[0-9].[0-9].[0-9].dylib

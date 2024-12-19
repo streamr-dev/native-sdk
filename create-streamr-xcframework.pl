@@ -34,7 +34,20 @@ dircopy("$abs_path/packages/streamr-proto-rpc/src/proto", $build_include);
 dircopy("$abs_path/packages/streamr-dht/src/proto", $build_include);
 dircopy("$abs_path/packages/streamr-trackerless-network/src/proto", $build_include);
 `cp packages/streamr-libstreamrproxyclient/include/streamrproxyclient.h $build_include`;
+`cp packages/streamr-libstreamrproxyclient/include/StreamrProxyClient.hpp $build_include`;
 `cp packages/streamr-libstreamrproxyclient/src/LibProxyClientApi.hpp $build_include`;
+
+my $filename = "$build_include/module.modulemap";
+open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
+
+print $fh <<'END_MODULE';
+module streamr {
+    header "streamrproxyclient.h"    // Replace with your main header file name
+    export *
+}
+END_MODULE
+
+close $fh;
  
 # Find all include and lib directories and process them 
 find(\&process_dir, "./build/vcpkg_installed/arm64-ios");
@@ -46,7 +59,6 @@ print "\nstreamr.xcframework was created in the directory: dist/ios.\n";
 # Subroutine to process each directory
 sub process_dir {
     my $dir = $File::Find::name;
-    print "Current dir: $dir\n";
     if ($dir =~ m|^\./build/vcpkg_installed/arm64-ios/include$|) {
        # Copy includes from vcpkg-packages (vcpkg/packages/<Package>/include)
        dircopy("$abs_path/$dir", $build_include);
