@@ -14,10 +14,12 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
-set (SHAREDLIB_VERSION 1.0.0)
-set (SHAREDLIB_SOVERSION 1)
-set (IOS_SWIFT_PACKAGE_VERSION 1.0.0)
-set (ANDROID_LIBRARY_VERSION 1.0.0)
+include(${CMAKE_CURRENT_SOURCE_DIR}/VERSION.cmake)
+set (SHAREDLIB_VERSION ${STREAMRPROXYCLIENT_VERSION})
+set (SHAREDLIB_SOVERSION ${STREAMRPROXYCLIENT_SOVERSION})
+
+set (IOS_SWIFT_PACKAGE_VERSION ${STREAMRPROXYCLIENT_VERSION})
+set (ANDROID_LIBRARY_VERSION ${STREAMRPROXYCLIENT_VERSION})
 
 project(streamr-streamrproxyclient CXX)
 add_library(streamrproxyclient SHARED
@@ -97,7 +99,7 @@ if (NOT IOS)
         PRIVATE GTest::gtest_main
     )
 
-    add_executable(streamrproxyclient-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrProxyClientTest.cpp)
+    add_executable(streamrproxyclient-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrProxyClientCppWrapperTest.cpp)
     target_link_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
     
     target_include_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/include)
@@ -200,11 +202,13 @@ if (NOT IOS)
     # If not ios or android, and build type is Release, copy the .so or .dylib file to the wrappers/go/dist/target-triplet/lib/Release/ directory
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android") AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
         install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/copyfilesforgowrapper.sh ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE} ${VCPKG_TARGET_TRIPLET} ${CMAKE_CURRENT_LIST_DIR})")
-        
+
         # Also install header to wrappers/go
         install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
                 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/wrappers/go)
+
+        # Also create a python package and upload it to PyPi
+        install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/createpythonpackage.sh ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE} ${VCPKG_TARGET_TRIPLET} ${CMAKE_CURRENT_LIST_DIR} ${STREAMRPROXYCLIENT_VERSION})")
     endif()
-  
 endif()
 

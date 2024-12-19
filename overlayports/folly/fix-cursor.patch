@@ -1,0 +1,13 @@
+diff --git a/folly/io/Cursor.h b/folly/io/Cursor.h
+index 7a0abc9..710ba3e 100644
+--- a/folly/io/Cursor.h
++++ b/folly/io/Cursor.h
+@@ -683,7 +683,7 @@ class CursorBase {
+    *
+    * @methodset Accessors
+    */
+-  std::basic_string_view<uint8_t> peekView() {
++  std::basic_string_view<char> peekView() {
+     auto bytes = peekBytes();
+     return {bytes.data(), bytes.size()};
+   }

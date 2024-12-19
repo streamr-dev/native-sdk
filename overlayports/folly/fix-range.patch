@@ -1,0 +1,13 @@
+diff --git a/folly/Range.h b/folly/Range.h
+index 42cd92d69..d87914a99 100644
+--- a/folly/Range.h
++++ b/folly/Range.h
+@@ -638,7 +638,7 @@ class Range {
+   template <typename ValueType>
+   struct StringViewType //
+       : std::conditional<
+-            std::is_trivial<ValueType>::value,
++            detail::range_is_char_type_v_<Iter>,
+             std::basic_string_view<ValueType>,
+             NotStringView> {};
+ 
