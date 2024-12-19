@@ -63,14 +63,14 @@ runs:
         key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed1-${{ hashFiles('./vcpkg.json') }}
         path: |
           ./build/vcpkg_installed
-    - name: Commit compiled binaries
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add packages/streamr-libstreamrproxyclient/dist
-        git add packages/streamr-libstreamrproxyclient/wrappers/go
-        git commit -m "Automatically compiled binaries"
-        git pull --rebase --no-edit
-        git push --no-verify
-      shell: bash
+    #- name: Commit compiled binaries
+    #  run: |
+    #    git config --global user.name 'github-actions[bot]'
+    #    git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+    #    git add packages/streamr-libstreamrproxyclient/dist
+    #    git add packages/streamr-libstreamrproxyclient/wrappers/go
+    #    git commit -m "Automatically compiled binaries"
+    #    git pull --rebase --no-edit
+    #    git push --no-verify
+    #  shell: bash
 
