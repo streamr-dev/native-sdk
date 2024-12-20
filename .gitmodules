@@ -9,3 +9,6 @@
 [submodule "packages/streamr-trackerless-network/test/integration/ts-integration"]
 	path = packages/streamr-trackerless-network/test/integration/ts-integration
 	url = https://github.com/streamr-dev/native-ts-integration.git
+[submodule "packages/streamr-libstreamrproxyclient/wrappers/go"]
+	path = packages/streamr-libstreamrproxyclient/wrappers/go
+	url = git@github.com:streamr-dev/goproxyclient.git

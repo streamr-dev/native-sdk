@@ -1,0 +1,28 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 38e069e..0ada768 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -260,10 +260,20 @@ else()
+ 	add_library(Usrsctp::Usrsctp ALIAS usrsctp)
+ endif()
+ 
+-configure_file (
+-    ${PROJECT_SOURCE_DIR}/cmake/version.h.in
+-	${CMAKE_CURRENT_SOURCE_DIR}/include/rtc/version.h
++if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/rtc/version.h")
++    file(REMOVE "${CMAKE_CURRENT_SOURCE_DIR}/include/rtc/version.h") 
++endif()
++
++file(COPY
++    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in
++	DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/rtc
+ )
++file(RENAME
++    ${CMAKE_CURRENT_SOURCE_DIR}/include/rtc/version.h.in
++    ${CMAKE_CURRENT_SOURCE_DIR}/include/rtc/version.h
++)
++
++
+ 
+ add_library(datachannel SHARED
+ 	${LIBDATACHANNEL_SOURCES}

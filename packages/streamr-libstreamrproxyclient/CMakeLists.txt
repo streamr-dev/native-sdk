@@ -14,15 +14,16 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
-set (SHAREDLIB_VERSION 1.0.0)
-set (SHAREDLIB_SOVERSION 1)
-set (IOS_SWIFT_PACKAGE_VERSION 1.0.0)
-set (ANDROID_LIBRARY_VERSION 1.0.0)
+include(${CMAKE_CURRENT_SOURCE_DIR}/VERSION.cmake)
+set (SHAREDLIB_VERSION ${STREAMRPROXYCLIENT_VERSION})
+set (SHAREDLIB_SOVERSION ${STREAMRPROXYCLIENT_SOVERSION})
+
+set (IOS_SWIFT_PACKAGE_VERSION ${STREAMRPROXYCLIENT_VERSION})
+set (ANDROID_LIBRARY_VERSION ${STREAMRPROXYCLIENT_VERSION})
 
 project(streamr-streamrproxyclient CXX)
 add_library(streamrproxyclient SHARED
             src/streamrproxyclient.cpp
-            include/streamrproxyclient.h include/StreamrProxyClient.hpp
 )
 
 set_target_properties(streamrproxyclient PROPERTIES VERSION ${SHAREDLIB_VERSION} SOVERSION ${SHAREDLIB_SOVERSION})
@@ -74,7 +75,7 @@ if (NOT IOS)
     find_package(GTest CONFIG REQUIRED)
     find_package(folly CONFIG REQUIRED)
      
-    add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp test/integration/StreamrProxyClientCppTest.cpp)
+    add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp)
     target_link_directories(streamr-streamrproxyclient-test-integration PUBLIC ${SHAREDLIB_OUTPUT_DIRECTORY})
     
     target_include_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -86,7 +87,7 @@ if (NOT IOS)
         PRIVATE GTest::gtest_main
     )
 
-    add_executable(streamr-streamrproxyclient-test-end-to-end test/end-to-end/PublishToTsServerTest.cpp test/end-to-end/PublishToTsServerCppTest.cpp)
+    add_executable(streamr-streamrproxyclient-test-end-to-end test/end-to-end/PublishToTsServerTest.cpp)
     target_link_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
     
     target_include_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -97,7 +98,7 @@ if (NOT IOS)
         PRIVATE GTest::gtest_main
     )
 
-    add_executable(streamrproxyclient-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrProxyClientTest.cpp)
+    add_executable(streamrproxyclient-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrProxyClientCppWrapperTest.cpp)
     target_link_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
     
     target_include_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/include)
@@ -123,27 +124,9 @@ if (NOT IOS)
             COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-multiple-messages-test.sh"
             WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
             )
-
-        add_test(
-            NAME ts-end-to-end-cpp-test
-            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-cpp-tests.sh"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-            )
-
-        add_test(
-            NAME ts-multiple-messages-cpp-test
-            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-multiple-messages-cpp-test.sh"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-            )
-
-
     endif()
     # Install header to dist/target-triplet
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
-            DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/include)
-
-    # Install CPP header to dist/target-triplet
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/StreamrProxyClient.hpp
             DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/include)
 
     # Install library to dist/target-triplet
@@ -200,11 +183,13 @@ if (NOT IOS)
     # If not ios or android, and build type is Release, copy the .so or .dylib file to the wrappers/go/dist/target-triplet/lib/Release/ directory
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android") AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
         install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/copyfilesforgowrapper.sh ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE} ${VCPKG_TARGET_TRIPLET} ${CMAKE_CURRENT_LIST_DIR})")
-        
+
         # Also install header to wrappers/go
         install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
                 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/wrappers/go)
+
+        # Also create a python package and upload it to PyPi
+        install(CODE "execute_process(COMMAND ${CMAKE_CURRENT_LIST_DIR}/createpythonpackage.sh ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/lib/${CMAKE_BUILD_TYPE} ${VCPKG_TARGET_TRIPLET} ${CMAKE_CURRENT_LIST_DIR} ${STREAMRPROXYCLIENT_VERSION})")
     endif()
-  
 endif()
 
