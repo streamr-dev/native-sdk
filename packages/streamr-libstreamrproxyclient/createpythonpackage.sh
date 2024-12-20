@@ -35,7 +35,7 @@ cp -L $SOURCE_FILE $DEST_FILE  2>/dev/null || :
 # Install needed python packages
 
 python -m pip install pip
-python -m pip install hatch hatchling pip twine
+python -m pip install hatch hatchling pip twine build
 
 # Copy the dylib to the package
 
