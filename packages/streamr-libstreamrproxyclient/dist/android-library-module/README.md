@@ -1,4 +1,4 @@
-# Streamr Android Library Development
+# StreamrProxyClient Android Library Development Workspace
 
 Development workspace for the StreamrProxyClient Android library module.
 

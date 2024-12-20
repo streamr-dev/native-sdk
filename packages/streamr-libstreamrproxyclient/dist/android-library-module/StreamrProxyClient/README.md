@@ -1,4 +1,4 @@
-# StreamrProxyClient Android Library
+# StreamrProxyClient Kotlin Wrapper
 
 Android library module that provides native Streamr client functionality through JNI bindings.
 

@@ -1,4 +1,4 @@
-# Python wrapper for the StreamrProxyClient
+# StreamrProxyClient Python Wrapper
 
 This is a Python wrapper for the StreamrProxyClient C++ library. It is used to publish data to the Streamr network.
 

@@ -1,10 +1,10 @@
-# Streamr Proxy Client C++ Wrapper
+# StreamrProxyClient C++ Wrapper
 
-This is a C++ wrapper for the Streamr Proxy Client library.
+This is a C++ wrapper for the StreamrProxyClient library.
 
 ## Installation and usage
 
-* Obtain the Streamr Proxy Client shared library by building the [native-sdk](https://github.com/streamr-dev/native-sdk) project or by downloading the pre-built library from the [Streamr Proxy Client Releases](https://github.com/streamr-dev/native-sdk/releases) page.
+* Obtain the StreamrProxyClient shared library by building the [native-sdk](https://github.com/streamr-dev/native-sdk) project or by downloading the pre-built library from the [StreamrProxyClient Releases](https://github.com/streamr-dev/native-sdk/releases) page.
 
 * Open the shared library by linking it to your project or by loading it dynamically at runtime using `dlopen`
 

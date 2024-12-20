@@ -1,4 +1,4 @@
-# StreamrProxyClient
+# StreamrProxyClient Swift Wrapper
 
 A Swift package that provides a client interface for connecting to Streamr Network via proxy nodes. This package is part of the Streamr Network ecosystem and enables easy integration with Streamr's data streaming capabilities.
 
