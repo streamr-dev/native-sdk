@@ -28,6 +28,7 @@ A Swift package that provides a client interface for connecting to Streamr Netwo
 - Navigate to the extracted `StreamrProxyClient` folder
 - Select `ProxyClientAPI` for your app target
 - Select `StreamrProxyClient` for your app target
+- Select `StreamrProxyClientActor` for your app target
 
 ### 4. Add Required Framework
 - Select your app target
@@ -108,6 +109,7 @@ func test() async throws {
         )
     }
 }
+```
 
 ## API Documentation
 
@@ -138,4 +140,5 @@ public protocol StreamrProxyClientAPI {
     func publish(content: String, ethereumPrivateKey: String?) -> StreamrProxyResult
 }
 ```
+
 
