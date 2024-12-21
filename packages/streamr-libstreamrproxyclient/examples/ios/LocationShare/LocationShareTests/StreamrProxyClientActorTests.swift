@@ -1,15 +1,15 @@
 //
-//  ProxyClientTests.swift
+//  StreamrProxyClientActorTests.swift
 //  LocationShare
 //
-//  Created by Santtu Rantanen on 7.11.2024.
+//  Created by Santtu Rantanen on 21.12.2024.
 //
 
 import XCTest
-@testable import StreamrProxyClient
+@testable import StreamrProxyClientActor
 @testable import ProxyClientAPI
 
-final class ProxyClientTests: XCTestCase {
+final class StreamrProxyClientActorTests: XCTestCase {
     let proxyWebsocketUrl =
     "ws://95.216.15.80:44211";
     let proxyEthereumAddress =
@@ -29,7 +29,7 @@ final class ProxyClientTests: XCTestCase {
     let validEthereumAddress2 = "0x2234567890123456789012345678901234567890"
     let validEthereumAddress3 = "0x3234567890123456789012345678901234567890"
     let ethereumPrivateKey = "23bead9b499af21c4c16e4511b3b6b08c3e22e76e0591f5ab5ba8d4c3a5b1820"
-    var client: StreamrProxyClient?
+    var client: StreamrProxyClientActor?
     
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -68,9 +68,9 @@ final class ProxyClientTests: XCTestCase {
     private func createClientAndConnect(
         websocketUrl: String? = nil,
         ethereumAddress: String? = nil
-    ) throws -> StreamrProxyResult {
+    ) async throws -> StreamrProxyResult {
         // Create client
-        self.client = try StreamrProxyClient(
+        self.client = try StreamrProxyClientActor(
             ownEthereumAddress: validEthereumAddress,
             streamPartId: validStreamPartId
         )
@@ -81,15 +81,15 @@ final class ProxyClientTests: XCTestCase {
             ethereumAddress: ethereumAddress!
         )
         
-        return self.client!.connect(proxies: proxies)
+        return await self.client!.connect(proxies: proxies)
     }
         
     private func createClientConnectAndVerify(
         websocketUrl: String? = nil,
         ethereumAddress: String? = nil,
         expectedError: StreamrError
-    ) throws {
-        let result = try createClientAndConnect(
+    ) async throws {
+        let result = try await createClientAndConnect(
             websocketUrl: websocketUrl,
             ethereumAddress: ethereumAddress
         )
@@ -106,7 +106,7 @@ final class ProxyClientTests: XCTestCase {
         expectedError: StreamrError
     ) {
         XCTAssertThrowsError(
-            try StreamrProxyClient(
+            try StreamrProxyClientActor(
                 ownEthereumAddress: ownEthereumAddress,
                 streamPartId: streamPartId
             )
@@ -135,36 +135,36 @@ final class ProxyClientTests: XCTestCase {
         )
     }
   
-    func testInvalidProxyUrl() throws {
-        try createClientConnectAndVerify(
+    func testInvalidProxyUrl() async throws {
+        try await createClientConnectAndVerify(
             websocketUrl: invalidProxyUrl,
             ethereumAddress: validEthereumAddress,
             expectedError: .invalidProxyUrl()
         )
     }
     
-    func testNoProxiesDefined() throws {
-        try createClientConnectAndVerify(expectedError: .noProxiesDefined())
+    func testNoProxiesDefined() async throws {
+        try await createClientConnectAndVerify(expectedError: .noProxiesDefined())
     }
     
-    func testInvalidProxyEthereumAddress() throws {
-        try createClientConnectAndVerify(
+    func testInvalidProxyEthereumAddress() async throws {
+        try await createClientConnectAndVerify(
             websocketUrl: validProxyUrl,
             ethereumAddress: invalidEthereumAddress,
             expectedError: .invalidEthereumAddress()
         )
     }
     
-    func testProxyConnectionFailed() throws {
-        try createClientConnectAndVerify(
+    func testProxyConnectionFailed() async throws {
+        try await createClientConnectAndVerify(
             websocketUrl: nonExistentProxyUrl0,
             ethereumAddress: validEthereumAddress,
             expectedError: .proxyConnectionFailed()
         )
     }
     
-    func testThreeProxyConnectionsFailed() throws {
-        let client = try StreamrProxyClient(
+    func testThreeProxyConnectionsFailed() async throws {
+        let client = try StreamrProxyClientActor(
             ownEthereumAddress: validEthereumAddress,
             streamPartId: validStreamPartId
         )
@@ -184,7 +184,7 @@ final class ProxyClientTests: XCTestCase {
             )
         ]
         
-        let result = client.connect(proxies: proxies)
+        let result = await client.connect(proxies: proxies)
         
         XCTAssertEqual(result.numConnected, 0)
         XCTAssertTrue(result.successful.isEmpty)
@@ -199,8 +199,8 @@ final class ProxyClientTests: XCTestCase {
         XCTAssertEqual(actualError.error, .proxyConnectionFailed())
     }
      
-    func testConnectAndPublishSuccessfully() throws {
-        let result = try createClientAndConnect(
+    func testConnectAndPublishSuccessfully() async throws {
+        let result = try await createClientAndConnect(
             websocketUrl: proxyWebsocketUrl,
             ethereumAddress: proxyEthereumAddress
         )
@@ -221,7 +221,7 @@ final class ProxyClientTests: XCTestCase {
         let testMessage = "test message"
         
         // Add this to your test function after the connection test
-        let publishResult = client!.publish(
+        let publishResult = await client!.publish(
             content: testMessage,
             ethereumPrivateKey: ethereumPrivateKey
         )
@@ -231,8 +231,8 @@ final class ProxyClientTests: XCTestCase {
         XCTAssertTrue(publishResult.numConnected != 0)
     }
     
-    func testPublishWithoutConnection() throws {
-        self.client = try StreamrProxyClient(
+    func testPublishWithoutConnection() async throws {
+        self.client = try StreamrProxyClientActor(
             ownEthereumAddress: validEthereumAddress,
             streamPartId: validStreamPartId
         )
@@ -240,7 +240,7 @@ final class ProxyClientTests: XCTestCase {
         let testMessage = "test message"
 
         // Add this to your test function after the connection test
-        let publishResult = client!.publish(
+        let publishResult = await client!.publish(
             content: testMessage,
             ethereumPrivateKey: ethereumPrivateKey
         )
@@ -249,4 +249,3 @@ final class ProxyClientTests: XCTestCase {
         XCTAssertTrue(publishResult.numConnected == 0)
     }
 }
-

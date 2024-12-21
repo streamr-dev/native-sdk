@@ -19,13 +19,14 @@
 		413E46F22C7895900030132D /* ProxyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F12C7895900030132D /* ProxyClient.swift */; };
 		413E46F62C7898D40030132D /* PeerDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F52C7898D40030132D /* PeerDesc.swift */; };
 		4154A2B22CDC93770057D042 /* StreamrProxyClient in Frameworks */ = {isa = PBXBuildFile; productRef = 4154A2B12CDC93770057D042 /* StreamrProxyClient */; };
-		4154A2B52CDCAFC70057D042 /* ProxyClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */; };
+		4154A2B52CDCAFC70057D042 /* StreamrProxyClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154A2B42CDCAFB40057D042 /* StreamrProxyClientTests.swift */; };
 		41B663952D1650B200281EDB /* ProxyClientAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 41B663942D1650B200281EDB /* ProxyClientAPI */; };
 		41B663972D1650B200281EDB /* StreamrProxyClient in Frameworks */ = {isa = PBXBuildFile; productRef = 41B663962D1650B200281EDB /* StreamrProxyClient */; };
 		41B663992D1650B200281EDB /* StreamrProxyClientActor in Frameworks */ = {isa = PBXBuildFile; productRef = 41B663982D1650B200281EDB /* StreamrProxyClientActor */; };
 		41B6639E2D165AAA00281EDB /* ProxyClientAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 41B6639D2D165AAA00281EDB /* ProxyClientAPI */; };
 		41B663A02D165AAA00281EDB /* StreamrProxyClient in Frameworks */ = {isa = PBXBuildFile; productRef = 41B6639F2D165AAA00281EDB /* StreamrProxyClient */; };
 		41B663A22D165AAA00281EDB /* StreamrProxyClientActor in Frameworks */ = {isa = PBXBuildFile; productRef = 41B663A12D165AAA00281EDB /* StreamrProxyClientActor */; };
+		41CE1EE92D169CF900BE3D5C /* StreamrProxyClientActorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CE1EE82D169CE800BE3D5C /* StreamrProxyClientActorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,7 +62,8 @@
 		413E46F02C787E820030132D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		413E46F12C7895900030132D /* ProxyClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyClient.swift; sourceTree = "<group>"; };
 		413E46F52C7898D40030132D /* PeerDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDesc.swift; sourceTree = "<group>"; };
-		4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyClientTests.swift; sourceTree = "<group>"; };
+		4154A2B42CDCAFB40057D042 /* StreamrProxyClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamrProxyClientTests.swift; sourceTree = "<group>"; };
+		41CE1EE82D169CE800BE3D5C /* StreamrProxyClientActorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamrProxyClientActorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,7 +155,8 @@
 		413E46D22C78676A0030132D /* LocationShareTests */ = {
 			isa = PBXGroup;
 			children = (
-				4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */,
+				41CE1EE82D169CE800BE3D5C /* StreamrProxyClientActorTests.swift */,
+				4154A2B42CDCAFB40057D042 /* StreamrProxyClientTests.swift */,
 			);
 			path = LocationShareTests;
 			sourceTree = "<group>";
@@ -314,7 +317,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4154A2B52CDCAFC70057D042 /* ProxyClientTests.swift in Sources */,
+				4154A2B52CDCAFC70057D042 /* StreamrProxyClientTests.swift in Sources */,
+				41CE1EE92D169CF900BE3D5C /* StreamrProxyClientActorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
