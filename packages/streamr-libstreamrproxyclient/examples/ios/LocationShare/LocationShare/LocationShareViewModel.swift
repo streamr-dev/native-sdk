@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 struct LocationShareViewModel {
     private var locationManager: LocationManager
     var proxyClient: ProxyClient

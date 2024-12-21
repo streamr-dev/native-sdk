@@ -11,6 +11,9 @@ let package = Package(
     ],
     products: [
            .library(
+                name: "StreamrProxyClientActor",
+                targets: ["StreamrProxyClientActor"]),
+           .library(
                name: "StreamrProxyClient",
                targets: ["StreamrProxyClient"]),
            .library(
@@ -19,6 +22,13 @@ let package = Package(
        ],
    
     targets: [
+        .target(
+            name: "StreamrProxyClientActor",
+            dependencies: ["StreamrProxyClient"],
+            linkerSettings: [
+                .linkedFramework("Foundation")
+                // Add any other frameworks your library depends on
+            ]),
         .target(
             name: "StreamrProxyClient",
             dependencies: ["streamr", "ProxyClientAPI"],

@@ -9,7 +9,8 @@ import SwiftUI
 import CoreLocation
 
 @Observable
-class LocationManager: @unchecked Sendable {
+@MainActor
+final class LocationManager {
     
     var location: (latitude: Double, longitude: Double)? = nil
     private let locationManager = CLLocationManager()
@@ -21,10 +22,7 @@ class LocationManager: @unchecked Sendable {
     func startCurrentLocationUpdates() async throws {
         for try await locationUpdate in CLLocationUpdate.liveUpdates() {
             if let coodinate = locationUpdate.location?.coordinate {
-                await MainActor.run() {
-                    print("Thread: startCurrentLocationUpdates: \(Thread.current)")
-                    self.location = (coodinate.latitude, coodinate.longitude)
-                }
+                self.location = (coodinate.latitude, coodinate.longitude)
             }
         }
     }

@@ -20,6 +20,12 @@
 		413E46F62C7898D40030132D /* PeerDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413E46F52C7898D40030132D /* PeerDesc.swift */; };
 		4154A2B22CDC93770057D042 /* StreamrProxyClient in Frameworks */ = {isa = PBXBuildFile; productRef = 4154A2B12CDC93770057D042 /* StreamrProxyClient */; };
 		4154A2B52CDCAFC70057D042 /* ProxyClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154A2B42CDCAFB40057D042 /* ProxyClientTests.swift */; };
+		41B663952D1650B200281EDB /* ProxyClientAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 41B663942D1650B200281EDB /* ProxyClientAPI */; };
+		41B663972D1650B200281EDB /* StreamrProxyClient in Frameworks */ = {isa = PBXBuildFile; productRef = 41B663962D1650B200281EDB /* StreamrProxyClient */; };
+		41B663992D1650B200281EDB /* StreamrProxyClientActor in Frameworks */ = {isa = PBXBuildFile; productRef = 41B663982D1650B200281EDB /* StreamrProxyClientActor */; };
+		41B6639E2D165AAA00281EDB /* ProxyClientAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 41B6639D2D165AAA00281EDB /* ProxyClientAPI */; };
+		41B663A02D165AAA00281EDB /* StreamrProxyClient in Frameworks */ = {isa = PBXBuildFile; productRef = 41B6639F2D165AAA00281EDB /* StreamrProxyClient */; };
+		41B663A22D165AAA00281EDB /* StreamrProxyClientActor in Frameworks */ = {isa = PBXBuildFile; productRef = 41B663A12D165AAA00281EDB /* StreamrProxyClientActor */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,8 +69,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41B663A02D165AAA00281EDB /* StreamrProxyClient in Frameworks */,
 				412FDA7B2CAF8DC3008DC50E /* libc++abi.tbd in Frameworks */,
+				41B6639E2D165AAA00281EDB /* ProxyClientAPI in Frameworks */,
+				41B663972D1650B200281EDB /* StreamrProxyClient in Frameworks */,
+				41B663992D1650B200281EDB /* StreamrProxyClientActor in Frameworks */,
+				41B663952D1650B200281EDB /* ProxyClientAPI in Frameworks */,
 				4154A2B22CDC93770057D042 /* StreamrProxyClient in Frameworks */,
+				41B663A22D165AAA00281EDB /* StreamrProxyClientActor in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,7 +257,7 @@
 			);
 			mainGroup = 413E46B62C7867670030132D;
 			packageReferences = (
-				418411792CE0BD3C0046B113 /* XCLocalSwiftPackageReference "../../../dist/ios-swift-package/StreamrProxyClient" */,
+				41B6639C2D165AAA00281EDB /* XCLocalSwiftPackageReference "../../../dist/ios-swift-package/StreamrProxyClient" */,
 			);
 			productRefGroup = 413E46C02C7867670030132D /* Products */;
 			projectDirPath = "";
@@ -639,7 +651,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		418411792CE0BD3C0046B113 /* XCLocalSwiftPackageReference "../../../dist/ios-swift-package/StreamrProxyClient" */ = {
+		41B6639C2D165AAA00281EDB /* XCLocalSwiftPackageReference "../../../dist/ios-swift-package/StreamrProxyClient" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = "../../../dist/ios-swift-package/StreamrProxyClient";
 		};
@@ -649,6 +661,30 @@
 		4154A2B12CDC93770057D042 /* StreamrProxyClient */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = StreamrProxyClient;
+		};
+		41B663942D1650B200281EDB /* ProxyClientAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ProxyClientAPI;
+		};
+		41B663962D1650B200281EDB /* StreamrProxyClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StreamrProxyClient;
+		};
+		41B663982D1650B200281EDB /* StreamrProxyClientActor */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StreamrProxyClientActor;
+		};
+		41B6639D2D165AAA00281EDB /* ProxyClientAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ProxyClientAPI;
+		};
+		41B6639F2D165AAA00281EDB /* StreamrProxyClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StreamrProxyClient;
+		};
+		41B663A12D165AAA00281EDB /* StreamrProxyClientActor */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StreamrProxyClientActor;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
