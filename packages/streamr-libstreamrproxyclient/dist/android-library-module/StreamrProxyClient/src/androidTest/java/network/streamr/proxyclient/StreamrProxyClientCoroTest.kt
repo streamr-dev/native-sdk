@@ -1,22 +1,14 @@
 package network.streamr.proxyclient
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Assert.*
-
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(AndroidJUnit4::class)
-class StreamrProxyClientTest {
+class StreamrProxyClientCoroTest {
 
     companion object {
         private const val PROXY_WEBSOCKET_URL = "ws://95.216.15.80:44211"
@@ -37,7 +29,7 @@ class StreamrProxyClientTest {
             "23bead9b499af21c4c16e4511b3b6b08c3e22e76e0591f5ab5ba8d4c3a5b1820"
     }
 
-    private var client: StreamrProxyClient? = null
+    private var client: StreamrProxyClientCoro? = null
 
     @After
     fun tearDown() {
@@ -48,28 +40,24 @@ class StreamrProxyClientTest {
         result: StreamrProxyResult,
         expectedError: StreamrError
     ) {
-        // Basic result validation
         assertEquals(0, result.numConnected)
         assertTrue(result.successful.isEmpty())
         assertEquals(1, result.failed.size)
 
-        // Error validation
         val actualError = result.failed[0]
         assertEquals(expectedError::class, actualError.error::class)
     }
 
     @Throws(ProxyClientException::class)
-    private fun createClientAndConnect(
+    private suspend fun createClientAndConnect(
         websocketUrl: String? = null,
         ethereumAddress: String? = null
     ): StreamrProxyResult {
-        // Create client
-        client = StreamrProxyClient(
+        client = StreamrProxyClientCoro(
             ethereumAddress = VALID_ETHEREUM_ADDRESS,
             streamPartId = VALID_STREAM_PART_ID
         )
 
-        // Create and connect proxies
         val proxies = websocketUrl?.let {
             listOf(
                 StreamrProxyAddress(
@@ -83,7 +71,7 @@ class StreamrProxyClientTest {
     }
 
     @Throws(ProxyClientException::class)
-    private fun createClientConnectAndVerify(
+    private suspend fun createClientConnectAndVerify(
         websocketUrl: String? = null,
         ethereumAddress: String? = null,
         expectedError: StreamrError
@@ -100,9 +88,9 @@ class StreamrProxyClientTest {
     }
 
     @Test
-    fun testInvalidEthereumAddress() {
+    fun testInvalidEthereumAddress() = runBlocking {
         val exception = assertThrows(ProxyClientException::class.java) {
-            StreamrProxyClient(
+            StreamrProxyClientCoro(
                 ethereumAddress = INVALID_ETHEREUM_ADDRESS,
                 streamPartId = VALID_STREAM_PART_ID
             )
@@ -111,9 +99,9 @@ class StreamrProxyClientTest {
     }
 
     @Test
-    fun testInvalidStreamPartId() {
+    fun testInvalidStreamPartId() = runBlocking {
         val exception = assertThrows(ProxyClientException::class.java) {
-            StreamrProxyClient(
+            StreamrProxyClientCoro(
                 ethereumAddress = VALID_ETHEREUM_ADDRESS,
                 streamPartId = INVALID_STREAM_PART_ID
             )
@@ -122,7 +110,7 @@ class StreamrProxyClientTest {
     }
 
     @Test
-    fun testInvalidProxyUrl() {
+    fun testInvalidProxyUrl() = runBlocking {
         createClientConnectAndVerify(
             websocketUrl = INVALID_PROXY_URL,
             ethereumAddress = VALID_ETHEREUM_ADDRESS,
@@ -131,16 +119,14 @@ class StreamrProxyClientTest {
     }
 
     @Test
-    @Throws(ProxyClientException::class)
-    fun testNoProxiesDefined() {
+    fun testNoProxiesDefined() = runBlocking {
         createClientConnectAndVerify(
             expectedError = StreamrError.NoProxiesDefined()
         )
     }
 
     @Test
-    @Throws(ProxyClientException::class)
-    fun testInvalidProxyEthereumAddress() {
+    fun testInvalidProxyEthereumAddress() = runBlocking {
         createClientConnectAndVerify(
             websocketUrl = VALID_PROXY_URL,
             ethereumAddress = INVALID_ETHEREUM_ADDRESS,
@@ -149,8 +135,7 @@ class StreamrProxyClientTest {
     }
 
     @Test
-    @Throws(ProxyClientException::class)
-    fun testProxyConnectionFailed() {
+    fun testProxyConnectionFailed() = runBlocking {
         createClientConnectAndVerify(
             websocketUrl = NON_EXISTENT_PROXY_URL_0,
             ethereumAddress = VALID_ETHEREUM_ADDRESS,
@@ -159,9 +144,8 @@ class StreamrProxyClientTest {
     }
 
     @Test
-    @Throws(ProxyClientException::class)
-    fun testThreeProxyConnectionsFailed() {
-        val client = StreamrProxyClient(
+    fun testThreeProxyConnectionsFailed() = runBlocking {
+        val client = StreamrProxyClientCoro(
             ethereumAddress = VALID_ETHEREUM_ADDRESS,
             streamPartId = VALID_STREAM_PART_ID
         )
@@ -187,7 +171,6 @@ class StreamrProxyClientTest {
         assertTrue(result.successful.isEmpty())
         assertEquals(3, result.failed.size)
 
-        // Verify that errors match the original proxies
         assertEquals(proxies[0].websocketUrl + ":80", result.failed[0].proxy.websocketUrl)
         assertEquals(proxies[1].websocketUrl + ":80", result.failed[1].proxy.websocketUrl)
         assertEquals(proxies[2].websocketUrl + ":80", result.failed[2].proxy.websocketUrl)
@@ -197,14 +180,12 @@ class StreamrProxyClientTest {
     }
 
     @Test
-    @Throws(ProxyClientException::class)
-    fun testConnectAndPublishSuccessfully() {
+    fun testConnectAndPublishSuccessfully() = runBlocking {
         val result = createClientAndConnect(
             websocketUrl = PROXY_WEBSOCKET_URL,
             ethereumAddress = PROXY_ETHEREUM_ADDRESS
         )
 
-        // Verify connection results
         assertEquals(1, result.numConnected)
         assertFalse(result.successful.isEmpty())
         assertEquals(0, result.failed.size)
@@ -213,37 +194,29 @@ class StreamrProxyClientTest {
         assertEquals(PROXY_WEBSOCKET_URL, successfulProxy.websocketUrl)
         assertEquals(PROXY_ETHEREUM_ADDRESS, successfulProxy.ethereumAddress)
 
-        // Test publishing
         val testMessage = "test message"
         val publishResult = client!!.publish(
             content = testMessage,
             ethereumPrivateKey = ETHEREUM_PRIVATE_KEY
         )
 
-        // Verify publish results
         assertTrue(publishResult.failed.isEmpty())
         assertTrue(publishResult.numConnected > 0)
-
     }
 
     @Test
-    @Throws(ProxyClientException::class)
-    fun testPublishWithoutConnection() {
-        // Create client without connecting
-        client = StreamrProxyClient(
+    fun testPublishWithoutConnection() = runBlocking {
+        client = StreamrProxyClientCoro(
             ethereumAddress = VALID_ETHEREUM_ADDRESS,
             streamPartId = VALID_STREAM_PART_ID
         )
 
         val testMessage = "test message"
-
-        // Try to publish without any connections
         val publishResult = client!!.publish(
             content = testMessage,
             ethereumPrivateKey = ETHEREUM_PRIVATE_KEY
         )
 
-        // Verify publish results
         assertEquals(0, publishResult.numConnected)
     }
 }
