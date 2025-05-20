@@ -1,12 +1,18 @@
 package network.streamr.proxyclient
 
-class StreamrProxyClient @Throws(ProxyClientException::class) constructor(
-    ethereumAddress: String,
-    streamPartId: String
-) : AutoCloseable  {
-    private val handle: Long
+class StreamrProxyClient() : AutoCloseable {
+    private var handle: Long = -1L
 
-    init {
+    @Throws(ProxyClientException::class)
+    constructor(
+        ethereumAddress: String,
+        streamPartId: String
+    ) : this() {
+        initialize(ethereumAddress, streamPartId)
+    }
+
+    @Throws(ProxyClientException::class)  // Moved to method level
+    fun initialize(ethereumAddress: String, streamPartId: String) {
         handle = ProxyClientJNI.proxyClientNew(ethereumAddress, streamPartId)
     }
 
@@ -30,7 +36,11 @@ class StreamrProxyClient @Throws(ProxyClientException::class) constructor(
     }
 
     fun publish(content: String, ethereumPrivateKey: String?): StreamrProxyResult {
-        return ProxyClientJNI.proxyClientPublish(handle, content, ethereumPrivateKey)
+        return ProxyClientJNI.proxyClientPublishString(handle, content, ethereumPrivateKey)
+    }
+
+    fun publish(content: ByteArray, ethereumPrivateKey: String?): StreamrProxyResult {
+        return ProxyClientJNI.proxyClientPublishBytes(handle, content, ethereumPrivateKey)
     }
 
     override fun close() {

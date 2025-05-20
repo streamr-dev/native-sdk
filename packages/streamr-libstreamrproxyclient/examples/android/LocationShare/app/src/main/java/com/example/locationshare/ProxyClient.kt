@@ -18,7 +18,8 @@ class ProxyClient(private val state: StateFlow<LocationState>) {
     private val scope = CoroutineScope(Dispatchers.Default + job)
     private var publishingJob: Job? = null
     private val validEthereumAddress = "0x1234567890123456789012345678901234567890"
-    private val validStreamPartId = "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
+    private val validStreamPartId = "0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01"
+   // private val validStreamPartId = "0xd2078dc2d780029473a39ce873fc182587be69db/low-level-client#0"
     private val proxyClient: StreamrProxyClientCoro
 
     init {

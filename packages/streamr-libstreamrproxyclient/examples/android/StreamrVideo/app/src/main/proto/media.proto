@@ -1,0 +1,69 @@
+syntax = "proto3";
+package network.streamr.streamrvideo.data.model.proto;
+option java_multiple_files = true;
+option optimize_for = LITE_RUNTIME; 
+
+message Heartbeat {
+    string nodeId = 1;
+}
+
+message Leave {
+    string nodeId = 1;
+}
+
+message ViewerInfo {
+    int32 viewerCount = 1;
+}
+
+message Message {
+    string messageId = 1;
+    oneof body {
+        MediaPacketFragment mediaPacketFragment = 2;
+        Heartbeat heartbeat = 3;
+        Leave leave = 4;
+        ViewerInfo ViewerInfo = 5;
+    }
+}
+
+message VideoFrame {
+    int64 frameNumber = 1;
+    int64 timestamp = 2;
+    int64 duration = 3;
+    bool isKeyFrame = 5;
+    int32 screenOrientation = 6;
+    bytes data = 7;
+    bytes extradata = 8;
+    int32 codedWidth = 9;
+    int32 codedHeight = 10;
+    string codec = 11;
+    bool isScreenSharing = 12;
+    int32 videoOrientation = 13;
+}
+
+message AudioFrame {
+    int64 frameNumber = 1;
+    int64 timestamp = 2;
+    int64 duration = 3;
+    bool isKeyFrame = 4;
+    bytes data = 5;
+    optional bytes extradata = 6;
+}
+
+message MediaPacket {
+    // 0> counter
+    int64 packetNumber = 1;
+    optional string videoCodec = 2;
+    optional bytes videoMetadata = 3;
+    repeated VideoFrame videoFrames = 4;
+    optional string audioCodec = 5;
+    optional bytes audioMetadata = 6;
+    repeated AudioFrame audioFrames = 7;
+    string mediaStreamId = 8;
+}
+
+message MediaPacketFragment {
+    int64 packetNumber = 1;
+    int32 fragmentNumber = 2;
+    int32 numberOfFragments = 3;
+    bytes data = 4;
+}

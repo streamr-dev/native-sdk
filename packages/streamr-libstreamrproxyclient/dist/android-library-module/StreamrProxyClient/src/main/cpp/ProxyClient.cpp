@@ -281,7 +281,7 @@ Java_network_streamr_proxyclient_ProxyClientJNI_proxyClientConnect( // NOLINT
 }
 
 JNIEXPORT jobject JNICALL
-Java_network_streamr_proxyclient_ProxyClientJNI_proxyClientPublish( // NOLINT
+Java_network_streamr_proxyclient_ProxyClientJNI_proxyClientPublishString( // NOLINT
     JNIEnv* env,
     jobject /* thiz */,
     jlong handle,
@@ -315,6 +315,53 @@ Java_network_streamr_proxyclient_ProxyClientJNI_proxyClientPublish( // NOLINT
     }
 
     env->ReleaseStringUTFChars(jContent, content);
+    if (ethereumPrivateKey) {
+        env->ReleaseStringUTFChars(jEthereumPrivateKey, ethereumPrivateKey);
+    }
+
+    proxyClientResultDelete(proxyResult);
+    return result;
+}
+
+JNIEXPORT jobject JNICALL
+Java_network_streamr_proxyclient_ProxyClientJNI_proxyClientPublishBytes( // NOLINT
+        JNIEnv* env,
+        jobject /* thiz */,
+        jlong handle,
+        jbyteArray jContent,  // Changed from jstring to jbyteArray
+        jstring jEthereumPrivateKey) {
+    LOGD("Starting proxyClientPublish with handle: %ld", handle);
+
+    // Get byte array content
+    jbyte* content = env->GetByteArrayElements(jContent, nullptr);
+    jsize contentLength = env->GetArrayLength(jContent);
+
+    const char* ethereumPrivateKey = jEthereumPrivateKey
+                                     ? env->GetStringUTFChars(jEthereumPrivateKey, nullptr)
+                                     : nullptr;
+
+    const ProxyResult* proxyResult = nullptr;
+    uint64_t numPublished = proxyClientPublish(
+            &proxyResult,
+            static_cast<uint64_t>(handle),
+            reinterpret_cast<const char*>(content),  // Cast jbyte* to const char*
+            static_cast<uint64_t>(contentLength),
+            ethereumPrivateKey);
+
+    jobject result = nullptr;
+    if (proxyResult != nullptr) {
+        std::vector<Proxy> successful(
+                proxyResult->successful, // NOLINT
+                proxyResult->successful + proxyResult->numSuccessful);
+        std::vector<Error> errors(
+                proxyResult->errors, // NOLINT
+                proxyResult->errors + proxyResult->numErrors);
+        result = createProxyResult(env, numPublished, successful, errors);
+    }
+
+    // Release byte array
+    env->ReleaseByteArrayElements(jContent, content, JNI_ABORT);
+
     if (ethereumPrivateKey) {
         env->ReleaseStringUTFChars(jEthereumPrivateKey, ethereumPrivateKey);
     }

@@ -31,9 +31,15 @@ object ProxyClientJNI {
         proxies: List<StreamrProxyAddress>
     ): StreamrProxyResult
 
-    external fun proxyClientPublish(
+    external fun proxyClientPublishString(
         handle: Long,
         content: String,
+        ethereumPrivateKey: String?
+    ): StreamrProxyResult
+
+    external fun proxyClientPublishBytes(
+        handle: Long,
+        content: ByteArray,
         ethereumPrivateKey: String?
     ): StreamrProxyResult
 
