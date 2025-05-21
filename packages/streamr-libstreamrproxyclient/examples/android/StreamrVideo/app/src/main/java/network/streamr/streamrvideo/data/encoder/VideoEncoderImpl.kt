@@ -26,10 +26,10 @@ class VideoEncoderImpl @Inject constructor() : VideoEncoder {
         private const val NANOS_PER_SECOND = 1_000_000_000L
         private const val MICROS_PER_SECOND = 1_000_000L
         
-        // Switch to HEVC/H.265
+        // Switch to HEVC/H.265 with Main profile, Level 4.1
         private const val MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_HEVC
-        private const val PROFILE = MediaCodecInfo.CodecProfileLevel.  // Main profile
-        private const val LEVEL = MediaCodecInfo.CodecProfileLevel.HEVCMainTierLevel31
+        private const val PROFILE = MediaCodecInfo.CodecProfileLevel.HEVCProfileMain
+        private const val LEVEL = MediaCodecInfo.CodecProfileLevel.HEVCMainTierLevel41  // Level 4.1 is more widely supported
 
         private fun convertToWebCodecsCodecString(mimeType: String, profile: Int, level: Int): String {
             return when (mimeType) {
