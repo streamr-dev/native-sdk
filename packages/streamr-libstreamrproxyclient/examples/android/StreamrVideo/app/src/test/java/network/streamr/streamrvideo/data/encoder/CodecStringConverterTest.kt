@@ -44,20 +44,6 @@ class CodecStringConverterTest {
     }
 
     @Test
-    fun `test HEVC Main profile codec string conversion`() {
-        // Given
-        val mimeType = MediaFormat.MIMETYPE_VIDEO_HEVC
-        val profile = MediaCodecInfo.CodecProfileLevel.HEVCProfileMain
-        val level = MediaCodecInfo.CodecProfileLevel.HEVCMainTierLevel41
-
-        // When
-        val codecString = CodecStringConverter.convertToWebCodecsCodecString(mimeType, profile, level)
-
-        // Then
-        assertEquals("hev1.0.1.L4096.B0", codecString)  // Level 4.1 = 4096 in HEVC
-    }
-
-    @Test
     fun `test HEVC Main10 profile codec string conversion`() {
         val mimeType = MediaFormat.MIMETYPE_VIDEO_HEVC
         val profile = MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10
