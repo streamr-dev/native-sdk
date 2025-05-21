@@ -30,24 +30,6 @@ class VideoEncoderImpl @Inject constructor() : VideoEncoder {
         private const val MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_HEVC
         private const val PROFILE = MediaCodecInfo.CodecProfileLevel.HEVCProfileMain
         private const val LEVEL = MediaCodecInfo.CodecProfileLevel.HEVCMainTierLevel41  // Level 4.1 is more widely supported
-
-        private fun convertToWebCodecsCodecString(mimeType: String, profile: Int, level: Int): String {
-            return when (mimeType) {
-                MediaFormat.MIMETYPE_VIDEO_HEVC -> {
-                    // H.265/HEVC
-                    String.format("hev1.%d.%d.L%d.B%d",
-                        (profile shr 16) and 0xFF,  // profile_space
-                        profile and 0xFF,           // profile_idc
-                        level,                      // level_idc
-                        (profile shr 8) and 0xFF    // compatibility_flags
-                    )
-                }
-                MediaFormat.MIMETYPE_VIDEO_VP8 -> "vp8"
-                MediaFormat.MIMETYPE_VIDEO_VP9 -> "vp9"
-                MediaFormat.MIMETYPE_VIDEO_AV1 -> "av1"
-                else -> throw IllegalArgumentException("Unsupported mime type: $mimeType")
-            }
-        }
     }
 
     private fun computePresentationTimeUs(): Long {
@@ -215,7 +197,7 @@ class VideoEncoderImpl @Inject constructor() : VideoEncoder {
             } catch (e: Exception) {
                 LEVEL // Fall back to default level
             }
-            convertToWebCodecsCodecString(mimeType!!, profile, level)
+            CodecStringConverter.convertToWebCodecsCodecString(mimeType!!, profile, level)
         } ?: "hev1.1.6.L93.B0" // Default fallback
     }
 }
