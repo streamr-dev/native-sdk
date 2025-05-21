@@ -80,14 +80,14 @@ class VideoRepositoryImpl @Inject constructor(
             codecString = mediaCodecWrapper.getCodecString()
         )
 
-
+/*
         Log.d(TAG, "VideoFrame: number=${vFrame.frameNumber}, " +
             "timestamp=${vFrame.timestamp}, " +
             "duration=${vFrame.duration}, " +
             "isKeyFrame=${vFrame.isKeyFrame}, " +
             "codec=${vFrame.codec}, " +
             "size=${vFrame.data.size()} bytes")
-
+*/
         val mediaPacket = mediaPacketBuilder.build(
             videoFrame = vFrame
         )
