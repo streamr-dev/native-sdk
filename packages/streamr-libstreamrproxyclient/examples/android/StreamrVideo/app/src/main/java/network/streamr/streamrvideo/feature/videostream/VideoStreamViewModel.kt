@@ -1,13 +1,18 @@
 package network.streamr.streamrvideo.feature.videostream
 
 import android.app.Activity
+import android.view.Surface
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.serenegiant.usb.widget.CameraViewInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import network.streamr.streamrvideo.data.camera.CameraManager
 import network.streamr.streamrvideo.data.repository.VideoRepository
 import network.streamr.streamrvideo.data.repository.VideoRepositoryImpl
 import javax.inject.Inject
+import android.view.TextureView
 
 @HiltViewModel
 class VideoStreamViewModel @Inject constructor(
@@ -15,13 +20,18 @@ class VideoStreamViewModel @Inject constructor(
     private val videoRepository: VideoRepository
 ) : ViewModel() {
 
-    fun initializeCamera(activity: Activity) {
+    val cameraState: StateFlow<CameraManager.CameraState> = cameraManager.cameraState
+
+    fun initialize(activity: Activity) {
         cameraManager.initialize(activity)
     }
 
-    fun startPreview(textureView: CameraViewInterface) {
-        cameraManager.startPreview(textureView) { frame ->
-            videoRepository.encodeFrame(frame)
+    fun startPreview(textureView: TextureView) {
+        val surface = Surface(textureView.surfaceTexture)
+        cameraManager.startPreview(surface) { frame ->
+            viewModelScope.launch {
+                videoRepository.encodeFrame(frame)
+            }
         }
     }
 
@@ -34,7 +44,6 @@ class VideoStreamViewModel @Inject constructor(
         cameraManager.release()
         (videoRepository as? VideoRepositoryImpl)?.release()
     }
-
 }
 
 sealed class MainUiState {

@@ -1,20 +1,24 @@
 package network.streamr.streamrvideo.di
 
-import dagger.Binds
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import network.streamr.streamrvideo.data.camera.AndroidCameraManagerImpl
 import network.streamr.streamrvideo.data.camera.CameraManager
-import network.streamr.streamrvideo.data.camera.CameraManagerImpl
+import network.streamr.streamrvideo.data.repository.VideoRepository
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class CameraModule {
-    @Binds
+object CameraModule {
+    @Provides
     @Singleton
-    abstract fun bindCameraManager(
-        cameraManagerImpl: CameraManagerImpl
-    ): CameraManager
+    fun provideCameraManager(
+        context: Context,
+        videoRepository: VideoRepository
+    ): CameraManager {
+        return AndroidCameraManagerImpl(context, videoRepository)
+    }
 }

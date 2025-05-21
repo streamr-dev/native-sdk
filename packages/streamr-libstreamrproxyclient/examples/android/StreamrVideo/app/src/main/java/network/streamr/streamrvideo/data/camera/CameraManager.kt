@@ -13,14 +13,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import network.streamr.streamrvideo.data.repository.VideoRepository
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.view.Surface
 
 interface CameraManager {
-    val cameraState: StateFlow<CameraState>
+    val cameraState: StateFlow<CameraManager.CameraState>
     
     fun initialize(activity: Activity)
-    fun startPreview(textureView: CameraViewInterface, onFrame: suspend (ByteArray) -> Unit)
+    fun startPreview(surface: Surface, onFrame: suspend (ByteArray) -> Unit)
     fun stopPreview()
     fun release()
+
+    // Optional: Add configuration methods
+    fun setPreviewSize(width: Int, height: Int)
+    fun setFrameRate(fps: Int)
 
     sealed class CameraState {
         object Disconnected : CameraState()

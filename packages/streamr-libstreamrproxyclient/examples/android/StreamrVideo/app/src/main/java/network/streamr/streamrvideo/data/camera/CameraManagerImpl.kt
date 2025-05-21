@@ -1,3 +1,4 @@
+/*
 package network.streamr.streamrvideo.data.camera
 
 import android.app.Activity
@@ -153,3 +154,4 @@ class CameraManagerImpl @Inject constructor(
         _cameraState.value = CameraManager.CameraState.Disconnected
     }
 } 
+*/
