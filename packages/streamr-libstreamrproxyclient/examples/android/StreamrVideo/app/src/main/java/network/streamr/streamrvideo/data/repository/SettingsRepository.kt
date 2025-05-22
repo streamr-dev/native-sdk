@@ -23,17 +23,19 @@ class SettingsRepository @Inject constructor() {
     private val _streamPartId = MutableStateFlow("0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01")
     val streamPartId: StateFlow<String> = _streamPartId.asStateFlow()
 
-    fun updateSettings(
-        proxyId: String,
-        proxyAddress: String,
-        privateKey: String,
-        localAddress: String,
-        streamPartId: String
-    ) {
-        _proxyId.value = proxyId
-        _proxyAddress.value = proxyAddress
-        _privateKey.value = privateKey
-        _localAddress.value = localAddress
-        _streamPartId.value = streamPartId
+    data class Settings(
+        val proxyId: String,
+        val proxyAddress: String,
+        val privateKey: String,
+        val localAddress: String,
+        val streamPartId: String
+    )
+
+    fun saveSettings(settings: Settings) {
+        _proxyId.value = settings.proxyId
+        _proxyAddress.value = settings.proxyAddress
+        _privateKey.value = settings.privateKey
+        _localAddress.value = settings.localAddress
+        _streamPartId.value = settings.streamPartId
     }
 } 

@@ -80,6 +80,7 @@ class VideoStreamService : Service() {
                     
                     videoRepository.getMediaPacketFragmentFlow().collect { fragment ->
                         // Check for skipped fragments
+
                         if (fragment.packetNumber == lastPacketNumber && 
                             fragment.fragmentNumber > lastFragmentNumber + 1) {
                             Log.w(TAG, "Skipped fragments in packet ${fragment.packetNumber}: " +

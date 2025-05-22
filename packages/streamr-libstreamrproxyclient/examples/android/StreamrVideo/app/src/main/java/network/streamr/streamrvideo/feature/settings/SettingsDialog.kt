@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -16,14 +18,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun SettingsDialog(
-    viewModel: SettingsViewModel = hiltViewModel(),
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val proxyId by viewModel.proxyId.collectAsState()
-    val proxyAddress by viewModel.proxyAddress.collectAsState()
-    val privateKey by viewModel.privateKey.collectAsState()
-    val localAddress by viewModel.localAddress.collectAsState()
-    val streamPartId by viewModel.streamPartId.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -34,45 +32,47 @@ fun SettingsDialog(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator()
+                }
+                uiState.error?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
                 OutlinedTextField(
-                    value = proxyId,
-                    onValueChange = { viewModel.updateProxyId(it) },
+                    value = uiState.proxyId,
+                    onValueChange = viewModel::onProxyIdChanged,
                     label = { Text("Proxy ID") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 )
-                
                 OutlinedTextField(
-                    value = proxyAddress,
-                    onValueChange = { viewModel.updateProxyAddress(it) },
+                    value = uiState.proxyAddress,
+                    onValueChange = viewModel::onProxyAddressChanged,
                     label = { Text("Proxy Address") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 )
-                
                 OutlinedTextField(
-                    value = privateKey,
-                    onValueChange = { viewModel.updatePrivateKey(it) },
+                    value = uiState.privateKey,
+                    onValueChange = viewModel::onPrivateKeyChanged,
                     label = { Text("Private Key") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 )
-
                 OutlinedTextField(
-                    value = localAddress,
-                    onValueChange = { viewModel.updateLocalAddress(it) },
+                    value = uiState.localAddress,
+                    onValueChange = viewModel::onLocalAddressChanged,
                     label = { Text("Local Address") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 )
-
                 OutlinedTextField(
-                    value = streamPartId,
-                    onValueChange = { viewModel.updateStreamPartId(it) },
+                    value = uiState.streamPartId,
+                    onValueChange = viewModel::onStreamPartIdChanged,
                     label = { Text("Stream Part ID") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -83,7 +83,7 @@ fun SettingsDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    viewModel.saveSettings()
+                    viewModel.onSave()
                     onDismiss()
                 }
             ) {
@@ -91,7 +91,12 @@ fun SettingsDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    viewModel.onCancel()
+                    onDismiss()
+                }
+            ) {
                 Text("Cancel")
             }
         }

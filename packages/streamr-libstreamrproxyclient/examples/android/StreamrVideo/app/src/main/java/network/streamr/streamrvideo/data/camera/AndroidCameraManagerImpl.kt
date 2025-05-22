@@ -49,6 +49,9 @@ class AndroidCameraManagerImpl @Inject constructor(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    // Reuse buffer to avoid allocating new memory for each frame
+    private var imageBuffer: ByteArray? = null
+
     override fun initialize(activity: Activity) {
         // Check and request camera permissions if needed
         if (!hasCameraPermission(activity)) {
@@ -191,17 +194,29 @@ class AndroidCameraManagerImpl @Inject constructor(
         val ySize = yBuffer.remaining()
         val uSize = uBuffer.remaining()
         val vSize = vBuffer.remaining()
+        
+        val totalSize = ySize + uSize + vSize
+        
+        // Reuse or create buffer
+        if (imageBuffer == null || imageBuffer!!.size < totalSize) {
+            imageBuffer = ByteArray(totalSize)
+        }
 
-        val nv21 = ByteArray(ySize + uSize + vSize)
+        // Use the reused buffer
+        val nv21 = imageBuffer!!
+        
+        try {
+            yBuffer.get(nv21, 0, ySize)
+            vBuffer.get(nv21, ySize, vSize)
+            uBuffer.get(nv21, ySize + vSize, uSize)
 
-        yBuffer.get(nv21, 0, ySize)
-        vBuffer.get(nv21, ySize, vSize)
-        uBuffer.get(nv21, ySize + vSize, uSize)
-
-        frameCallback?.let { callback ->
-            scope.launch {
-                callback(nv21)
+            frameCallback?.let { callback ->
+                scope.launch {
+                    callback(nv21)
+                }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing image", e)
         }
     }
 
@@ -223,6 +238,7 @@ class AndroidCameraManagerImpl @Inject constructor(
         cameraDevice?.close()
         cameraDevice = null
         stopBackgroundThread()
+        imageBuffer = null  // Clear the buffer
         _cameraState.value = CameraManager.CameraState.Disconnected
     }
 
