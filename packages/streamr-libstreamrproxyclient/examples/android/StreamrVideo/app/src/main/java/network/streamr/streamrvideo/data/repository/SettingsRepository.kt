@@ -20,7 +20,7 @@ class SettingsRepository @Inject constructor() {
     private val _localAddress = MutableStateFlow("0x1234567890123456789012345678901234567890")
     val localAddress: StateFlow<String> = _localAddress.asStateFlow()
 
-    private val _streamPartId = MutableStateFlow("0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de/nativesdktest#01")
+    private val _streamPartId = MutableStateFlow("0xd7278f1e4a946fa7838b5d1e0fe50c5725fb23de#01")
     val streamPartId: StateFlow<String> = _streamPartId.asStateFlow()
 
     fun updateSettings(

@@ -56,8 +56,9 @@ class CameraManagerImpl @Inject constructor(
                 initUSBMonitor(act, textureView, createUsbListener())
                 registerUSB()
                 setOnPreviewFrameListener { nv21Yuv ->
+                   Log.d(TAG, "handleFrame")
                     handleFrame(nv21Yuv)
-                }
+                 }
                 _cameraState.value = CameraManager.CameraState.Preview
                 Log.d(TAG, "Preview started")
             } ?: run {
@@ -108,11 +109,15 @@ class CameraManagerImpl @Inject constructor(
 
                 Handler(Looper.getMainLooper()).postDelayed({
                     if (mCameraHelper?.isCameraOpened == true) {
+                        Log.d(TAG, "Camera opened successfully")
                         val width = mCameraHelper!!.previewWidth
                         val height = mCameraHelper!!.previewHeight
                         videoRepository.initializeEncoder(width, height)
                         Log.d(TAG, "Camera opened successfully")
                         _cameraState.value = CameraManager.CameraState.Preview
+                    }
+                    else {
+                        Log.d(TAG, "Camera not opened yet")
                     }
                 }, 1500)
             }

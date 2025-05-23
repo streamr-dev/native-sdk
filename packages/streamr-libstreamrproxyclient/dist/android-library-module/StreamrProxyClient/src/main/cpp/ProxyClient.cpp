@@ -287,7 +287,7 @@ Java_network_streamr_proxyclient_ProxyClientJNI_proxyClientPublishString( // NOL
     jlong handle,
     jstring jContent,
     jstring jEthereumPrivateKey) {
-    LOGD("Starting proxyClientPublish with handle: %ld", handle);
+    //LOGD("Starting proxyClientPublish with handle: %ld", handle);
 
     const char* content = env->GetStringUTFChars(jContent, nullptr);
     const char* ethereumPrivateKey = jEthereumPrivateKey
@@ -330,7 +330,7 @@ Java_network_streamr_proxyclient_ProxyClientJNI_proxyClientPublishBytes( // NOLI
         jlong handle,
         jbyteArray jContent,  // Changed from jstring to jbyteArray
         jstring jEthereumPrivateKey) {
-    LOGD("Starting proxyClientPublish with handle: %ld", handle);
+    //LOGD("Starting proxyClientPublish with handle: %ld", handle);
 
     // Get byte array content
     jbyte* content = env->GetByteArrayElements(jContent, nullptr);

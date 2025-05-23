@@ -11,7 +11,7 @@ class MediaPacketFragmentBuilder @Inject constructor() {
     private var packetNumberCounter: Long = 0
 
     companion object {
-        private const val MAX_FRAGMENT_SIZE = 1000
+        private const val MAX_FRAGMENT_SIZE = 64000
     }
 
     fun build(mediaPacket: MediaPacket): List<MediaPacketFragment> {

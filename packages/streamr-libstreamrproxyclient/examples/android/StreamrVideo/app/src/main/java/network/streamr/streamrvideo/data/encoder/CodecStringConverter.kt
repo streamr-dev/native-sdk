@@ -13,7 +13,9 @@ object CodecStringConverter {
      * @return WebCodecs compatible codec string
      */
     fun convertToWebCodecsCodecString(mimeType: String, profile: Int, level: Int): String {
+        /*
         return when (mimeType) {
+
             MediaFormat.MIMETYPE_VIDEO_HEVC -> {
                 // H.265/HEVC
                 val profileSpace = (profile shr 16) and 0xFF  // Usually 0
@@ -55,5 +57,8 @@ object CodecStringConverter {
             MediaFormat.MIMETYPE_VIDEO_AV1 -> "av1"
             else -> throw IllegalArgumentException("Unsupported mime type: $mimeType")
         }
+        */
+        return "hvc1.1.6.L93.90"
+
     }
 } 

@@ -78,7 +78,8 @@ class VideoStreamService : Service() {
                     var lastPacketNumber = -1L
                     var lastFragmentNumber = -1
                     
-                    videoRepository.getMediaPacketFragmentFlow().collect { fragment ->
+                    videoRepository.getMessageFlow().collect { message ->
+                        /*
                         // Check for skipped fragments
                         if (fragment.packetNumber == lastPacketNumber && 
                             fragment.fragmentNumber > lastFragmentNumber + 1) {
@@ -91,12 +92,16 @@ class VideoStreamService : Service() {
                         // Update tracking variables
                         lastPacketNumber = fragment.packetNumber
                         lastFragmentNumber = fragment.fragmentNumber
-
+*/
                         // Process fragment
-                        val publishResult = proxyClient.publish(fragment.toByteArray(), settingsRepository.privateKey.value)
+                        val publishResult = proxyClient.publish(message.toByteArray(), settingsRepository.privateKey.value)
+                        Log.w(TAG, "Publish result ${publishResult}")
+                        /*
                         if (publishResult.failed.size > 0) {
                             Log.w(TAG, "Failed to publish fragment: packetNumber=${fragment.packetNumber}, fragmentNumber=${fragment.fragmentNumber}")
                         }
+
+                         */
                         
                     }
                 }

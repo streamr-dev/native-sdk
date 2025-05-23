@@ -11,10 +11,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import network.streamr.streamrvideo.data.encoder.VideoEncoder
-import network.streamr.streamrvideo.data.model.proto.MediaPacketFragment
+import network.streamr.streamrvideo.data.model.proto.Message
 import network.streamr.streamrvideo.data.repository.builder.VideoFrameBuilder
 import network.streamr.streamrvideo.data.repository.builder.MediaPacketBuilder
 import network.streamr.streamrvideo.data.repository.builder.MediaPacketFragmentBuilder
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +27,7 @@ class VideoRepositoryImpl @Inject constructor(
     private val mediaPacketBuilder: MediaPacketBuilder
 ) : VideoRepository {
     
-    private val fragmentFlow = MutableSharedFlow<MediaPacketFragment>(
+    private val messageFlow = MutableSharedFlow<Message>(
         replay = 0,
         extraBufferCapacity = 1000,
         onBufferOverflow = BufferOverflow.SUSPEND
@@ -62,7 +63,7 @@ class VideoRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getMediaPacketFragmentFlow(): Flow<MediaPacketFragment> = fragmentFlow
+    override fun getMessageFlow(): Flow<Message> = messageFlow
 
     private suspend fun handleEncodedFrame(
         encodedData: ByteArray,
@@ -95,7 +96,10 @@ class VideoRepositoryImpl @Inject constructor(
         // Process fragments sequentially with suspending emit
         for (fragment in mediaPacketFragmentBuilder.build(mediaPacket)) {
             try {
-                fragmentFlow.emit(fragment)  // Will suspend if buffer is full
+
+                val message = Message.newBuilder().setMessageId(UUID.randomUUID().toString()).setMediaPacketFragment(fragment).build()
+                Log.d(TAG, "Send message")
+                messageFlow.emit(message)  // Will suspend if buffer is full
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to emit fragment ${fragment.fragmentNumber}", e)
             }
