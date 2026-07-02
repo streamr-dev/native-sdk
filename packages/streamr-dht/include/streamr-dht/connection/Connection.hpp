@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <tuple>
 #include <vector>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include "streamr-eventemitter/EventEmitter.hpp"
 #include "streamr-logger/SLogger.hpp"
 #include "streamr-utils/Branded.hpp"

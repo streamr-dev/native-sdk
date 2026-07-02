@@ -197,7 +197,8 @@ public:
                 try {
                     co_return co_await folly::coro::timeout(
                         folly::coro::detachOnCancel(
-                            std::move(callMakingTask).scheduleOn(&mExecutor)),
+                            folly::coro::co_withExecutor(
+                                &mExecutor, std::move(callMakingTask))),
                         timeoutValue);
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace(
@@ -262,8 +263,10 @@ public:
                     }
                 });
             co_return co_await folly::coro::timeout(
-                folly::coro::detachOnCancel(std::move(promiseContract.second))
-                    .scheduleOn(&mExecutor),
+                folly::coro::co_withExecutor(
+                    &mExecutor,
+                    folly::coro::detachOnCancel(
+                        std::move(promiseContract.second))),
                 timeoutValue);
         } catch (const folly::FutureTimeout& e) {
             SLogger::trace("notify() timed out");

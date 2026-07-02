@@ -11,7 +11,7 @@
 // #include <folly/coro/Sleep.h>
 #include <folly/experimental/coro/Task.h>
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include "RpcCommunicatorClientApi.hpp"
 #include "RpcCommunicatorServerApi.hpp"
 #include "ServerRegistry.hpp"

@@ -66,7 +66,7 @@ target_link_libraries(streamr-dht
     PRIVATE magic_enum::magic_enum
     PRIVATE Folly::folly
     PRIVATE OpenSSL::Crypto
-    PRIVATE LibDataChannel::LibDataChannelStatic
+    PRIVATE LibDataChannel::LibDataChannel
     INTERFACE ipaddress::ipaddress
     )
 

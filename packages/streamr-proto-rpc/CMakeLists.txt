@@ -19,7 +19,6 @@ set (VCPKG_OVERLAY_TRIPLETS ENV{VCPKG_OVERLAY_TRIPLETS})
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(proto-rpc CXX)
-add_compile_options(-fpermissive)
 find_package(streamr-logger CONFIG REQUIRED)
 find_package(streamr-eventemitter CONFIG REQUIRED)
 find_package(streamr-utils CONFIG REQUIRED)

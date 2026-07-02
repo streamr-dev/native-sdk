@@ -61,7 +61,7 @@ private:
         google::protobuf::compiler::GeneratorContext* generatorContext,
         std::string* /* error */) const {
         bool emptyIncluded = false;
-        const std::string& protoFilename = file->name();
+        const std::string protoFilename(file->name());
         const std::string protoFilenameWe =
             getFilenameWithoutExtension(protoFilename);
         const std::string headerFilename = protoFilenameWe + ".server.pb.h";
@@ -93,8 +93,8 @@ private:
         for (int i = 0; i < numServices; i++) {
             const google::protobuf::ServiceDescriptor* service =
                 file->service(i);
-            const std::string serviceFullname = service->full_name();
-            const std::string& serviceName = service->name();
+            const std::string serviceFullname(service->full_name());
+            const std::string serviceName(service->name());
 
             sourceSs << "template <typename CallContextType>\n";
             sourceSs << "class " << serviceName << " {\n";
@@ -106,14 +106,13 @@ private:
             for (int j = 0; j < numMethods; j++) {
                 const google::protobuf::MethodDescriptor* method =
                     service->method(j);
-                const std::string methodFullname = method->full_name();
-                const std::string& methodName = method->name();
+                const std::string methodFullname(method->full_name());
+                const std::string methodName(method->name());
 
                 const google::protobuf::Descriptor* methodInput =
                     method->input_type();
-                const std::string methodInputFullname =
-                    methodInput->full_name();
-                std::string methodInputName = methodInput->name();
+                const std::string methodInputFullname(methodInput->full_name());
+                std::string methodInputName(methodInput->name());
 
                 const google::protobuf::Descriptor* methodOutput =
                     method->output_type();
@@ -126,9 +125,8 @@ private:
                     methodInputName = "google::protobuf::Empty";
                 }
 
-                const std::string methodOutputFullname =
-                    methodOutput->full_name();
-                std::string methodOutputName = methodOutput->name();
+                const std::string methodOutputFullname(methodOutput->full_name());
+                std::string methodOutputName(methodOutput->name());
 
                 if (methodOutputName == "Empty") {
                     methodOutputName = "void";
@@ -173,7 +171,7 @@ private:
         google::protobuf::compiler::GeneratorContext* generatorContext,
         std::string* /* error */) const {
         bool emptyIncluded = false;
-        const std::string& protoFilename = file->name();
+        const std::string protoFilename(file->name());
         const std::string protoFilenameWe =
             getFilenameWithoutExtension(protoFilename);
         const std::string headerFilename = protoFilenameWe + ".client.pb.h";
@@ -212,8 +210,8 @@ private:
         for (int i = 0; i < numServices; i++) {
             const google::protobuf::ServiceDescriptor* service =
                 file->service(i);
-            const std::string serviceFullname = service->full_name();
-            const std::string& serviceName = service->name();
+            const std::string serviceFullname(service->full_name());
+            const std::string serviceName(service->name());
             sourceSs << "template <typename CallContextType>\n";
             sourceSs << "class " << serviceName << "Client" << " {\n";
             sourceSs << "private:\n";
@@ -228,14 +226,13 @@ private:
             for (int j = 0; j < numMethods; j++) {
                 const google::protobuf::MethodDescriptor* method =
                     service->method(j);
-                const std::string methodFullname = method->full_name();
-                const std::string& methodName = method->name();
+                const std::string methodFullname(method->full_name());
+                const std::string methodName(method->name());
 
                 const google::protobuf::Descriptor* methodInput =
                     method->input_type();
-                const std::string methodInputFullname =
-                    methodInput->full_name();
-                std::string methodInputName = methodInput->name();
+                const std::string methodInputFullname(methodInput->full_name());
+                std::string methodInputName(methodInput->name());
 
                 const google::protobuf::Descriptor* methodOutput =
                     method->output_type();
@@ -248,9 +245,8 @@ private:
                     methodInputName = "google::protobuf::Empty";
                 }
 
-                const std::string methodOutputFullname =
-                    methodOutput->full_name();
-                std::string methodOutputName = methodOutput->name();
+                const std::string methodOutputFullname(methodOutput->full_name());
+                std::string methodOutputName(methodOutput->name());
 
                 if (methodOutputName == "Empty") {
                     methodOutputName = "void";
