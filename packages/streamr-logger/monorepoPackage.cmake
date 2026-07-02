@@ -1,3 +1,9 @@
+# CANONICAL COPY — the per-package copies in packages/*/monorepoPackage.cmake
+# are generated from this file by ./sync-cmake-files.sh. Edit THIS file and
+# run the sync script; do not edit the package copies directly.
+# (Each package carries its own copy so that it can be published as a
+# standalone vcpkg package later.)
+
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../MonorepoPackages.cmake)
@@ -5,7 +11,7 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../MonorepoPackages.cmake)
 
     # if in monorepo, do not install vcpkg dependencies
     set(VCPKG_MANIFEST_INSTALL OFF)
-   
+
     # if in monorepo, use the vcpkg dependencies from the monorepo root
     set(OWNPATH ../../build/vcpkg_installed)
     file(REAL_PATH ${OWNPATH} OWNPATH)
@@ -15,14 +21,14 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../MonorepoPackages.cmake)
     # if in monorepo, use the monorepo deps from filesystem
     if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.json)
       file(READ ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.json VCPKG_JSON)
-      
+
       string(JSON VCPKG_JSON_DECODED ERROR_VARIABLE parse_error GET ${VCPKG_JSON} "features")
       if(VCPKG_JSON_DECODED)
           string(JSON MONOREPO_EXISTS ERROR_VARIABLE parse_error GET ${VCPKG_JSON_DECODED} "monorepo")
           if(MONOREPO_EXISTS)
               string(JSON MONOREPO_DEPENDENCIES ERROR_VARIABLE parse_error GET ${MONOREPO_EXISTS} "dependencies")
               set(MONOREPO_DEPENDENCIES ${MONOREPO_DEPENDENCIES})
-              
+
               string(JSON MONOREPO_DEPENDENCIES_LENGTH ERROR_VARIABLE parse_error LENGTH ${MONOREPO_DEPENDENCIES})
               math(EXPR END_INDEX "${MONOREPO_DEPENDENCIES_LENGTH}-1")
               message(STATUS "END_INDEX: ${END_INDEX}")
@@ -30,6 +36,11 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../MonorepoPackages.cmake)
                   string(JSON MONOREPO_DEPENDENCY ERROR_VARIABLE parse_error GET ${MONOREPO_DEPENDENCIES} "${idx}")
                   file(REAL_PATH "../${MONOREPO_DEPENDENCY}/build" MONBUILDDIR)
                   set(${MONOREPO_DEPENDENCY}_DIR ${MONBUILDDIR})
+                  # Append to both search variables: CMAKE_PREFIX_PATH covers
+                  # native builds, CMAKE_FIND_ROOT_PATH is needed when a
+                  # cross-compiling toolchain (iOS/Android) re-roots find_*.
+                  list(APPEND CMAKE_PREFIX_PATH ${MONBUILDDIR})
+                  list(APPEND CMAKE_PREFIX_PATH "${MONBUILDDIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/share")
                   list(APPEND CMAKE_FIND_ROOT_PATH ${MONBUILDDIR})
                   list(APPEND CMAKE_FIND_ROOT_PATH "${MONBUILDDIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/share")
                   message(STATUS "${MONOREPO_DEPENDENCY}_DIR: ${${MONOREPO_DEPENDENCY}_DIR}")
