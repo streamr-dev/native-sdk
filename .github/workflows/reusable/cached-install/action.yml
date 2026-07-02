@@ -8,14 +8,14 @@ runs:
       id: cache-homedir
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir1-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir2-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed
       id: cache-vcpkg-installed
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed1-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed2-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ./build/vcpkg_installed
     - name: install-prerequisities
@@ -24,35 +24,33 @@ runs:
       shell: bash
     - name: install
       run: |
-        ./install.sh --prod ${ARCHFLAGS:-} || (
-          for target in arm64-osx x64-osx x64-linux arm64-linux arm64-android arm64-ios; do
-            BASE_DIR="/Users/runner/work/native-sdk/native-sdk/vcpkg/buildtrees/libdatachannel"
-            
-            # Function to print file if it exists
-            print_if_exists() {
-              if [ -f "$1" ]; then
-                echo "=== $2 ==="
-                cat "$1"
-              fi
-            }
-            
-            print_if_exists "$BASE_DIR/config-$target-dbg-CMakeCache.txt.log" "config-$target-dbg-CMakeCache.txt.log"
-            print_if_exists "$BASE_DIR/config-$target-rel-CMakeCache.txt.log" "config-$target-rel-CMakeCache.txt.log"
-            print_if_exists "$BASE_DIR/config-$target-dbg-CMakeConfigureLog.yaml.log" "config-$target-dbg-CMakeConfigureLog.yaml.log"
-            print_if_exists "$BASE_DIR/config-$target-rel-CMakeConfigureLog.yaml.log" "config-$target-rel-CMakeConfigureLog.yaml.log"
-            print_if_exists "$BASE_DIR/config-$target-rel-ninja.log" "config-$target-rel-ninja.log"
-            print_if_exists "$BASE_DIR/config-$target-out.log" "config-$target-out.log"
-            print_if_exists "../../$target-dbg/CMakeCache.txt" "../../$target-dbg/CMakeCache.txt"
+        # Composite steps run under bash -e -o pipefail: disarm around the
+        # pipeline or a failure aborts the script before we can annotate.
+        set +e +o pipefail
+        ./install.sh --prod ${ARCHFLAGS:-} 2>&1 | tee install-output.log
+        EXITCODE=${PIPESTATUS[0]}
+        if [ "$EXITCODE" -ne 0 ]; then
+          # Surface failure context as error annotations so failures are
+          # diagnosable from the Checks UI (raw step logs need auth).
+          set +e
+          MSG=$(tail -40 install-output.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=install.sh output tail::${MSG}"
+          for log in $(ls -t vcpkg/buildtrees/*/*.log 2>/dev/null | head -16 | xargs grep -liE "(^|[^a-z])error[: ]" 2>/dev/null | head -3); do
+            echo "::group::${log}"
+            tail -120 "$log"
+            echo "::endgroup::"
+            MSG=$(grep -B3 -A8 -iE "(^|[^a-z])error[: ]" "$log" | tail -30 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            [ -n "$MSG" ] && echo "::error title=${log}::${MSG}"
           done
-          exit 1
-        )
+          exit "$EXITCODE"
+        fi
       shell: bash
     - name: cache homedir save
       id: cache-homedir-save
       if: always()
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir1-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir2-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed save
@@ -60,7 +58,7 @@ runs:
       if: always()
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed1-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed2-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ./build/vcpkg_installed
     #- name: Commit compiled binaries

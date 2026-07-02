@@ -47,23 +47,25 @@ public:
 
     explicit WebsocketClientConnector(WebsocketClientConnectorOptions&& options)
         : options(std::move(options)),
-          rpcLocal(WebsocketClientConnectorRpcLocalOptions{
-              .connect = [this](const PeerDescriptor& targetPeerDescriptor)
-                  -> std::shared_ptr<IPendingConnection> {
-                  return this->connect(targetPeerDescriptor, std::nullopt);
-              },
-              .hasConnection = [this](const DhtAddress& nodeId) -> bool {
-                  std::scoped_lock lock(this->mutex);
-                  return this->connectingHandshakers.find(nodeId) !=
-                      this->connectingHandshakers.end() ||
-                      this->options.hasConnection(nodeId);
-              },
-              .onNewConnection =
-                  [this](
-                      const std::shared_ptr<IPendingConnection>& connection) {
-                      return this->options.onNewConnection(connection);
+          rpcLocal(
+              WebsocketClientConnectorRpcLocalOptions{
+                  .connect = [this](const PeerDescriptor& targetPeerDescriptor)
+                      -> std::shared_ptr<IPendingConnection> {
+                      return this->connect(targetPeerDescriptor, std::nullopt);
                   },
-              .abortSignal = this->abortController.getSignal()}) {
+                  .hasConnection = [this](const DhtAddress& nodeId) -> bool {
+                      std::scoped_lock lock(this->mutex);
+                      return this->connectingHandshakers.find(nodeId) !=
+                          this->connectingHandshakers.end() ||
+                          this->options.hasConnection(nodeId);
+                  },
+                  .onNewConnection =
+                      [this](
+                          const std::shared_ptr<IPendingConnection>&
+                              connection) {
+                          return this->options.onNewConnection(connection);
+                      },
+                  .abortSignal = this->abortController.getSignal()}) {
         this->options.rpcCommunicator
             .registerRpcNotification<WebsocketConnectionRequest>(
                 "requestConnection",

@@ -19,31 +19,55 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     TEMP_PROFILE_CONTENTS+="export HOMEBREW_PREFIX=$(brew --prefix)\n"
 
     brew install jq || true
-    brew uninstall llvm || true
-    brew install llvm@17 || true
+    # Latest LLVM (keg-only: not linked into $HOMEBREW_PREFIX/bin; the build
+    # finds it via the LLVM_PREFIX environment variable exported below).
+    brew install llvm || true
+    brew upgrade llvm || true
     brew install cmake || true
     brew install ninja || true
     brew install pkg-config || true
-   
-    brew link --overwrite --force llvm@17
-    
-    rm -f $HOMEBREW_PREFIX/bin/clang-tidy
-    
+
+    export LLVM_PREFIX=$(brew --prefix llvm)
+    if [[ -n "$GITHUB_ENV" ]]; then
+        echo "LLVM_PREFIX=$LLVM_PREFIX" >> $GITHUB_ENV
+    fi
+    TEMP_PROFILE_CONTENTS+="export LLVM_PREFIX=$(brew --prefix llvm)\n"
+
+    # clangd (used by clangd-tidy for linting) must be able to parse the
+    # libc++ headers of the LLVM in use, so it comes from the same keg.
+    export PATH="$LLVM_PREFIX/bin:$PATH"
+    if [[ -n "$GITHUB_PATH" ]]; then
+        echo "$LLVM_PREFIX/bin" >> $GITHUB_PATH
+    fi
+    TEMP_PROFILE_CONTENTS+="export PATH=\$LLVM_PREFIX/bin:\$PATH\n"
+
 else
     #PROFILE_FILE=~/.profile
     PROFILE_FILE=./setenvs.sh
-    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    sudo apt-add-repository 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble main'
+    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt-llvm-org.asc > /dev/null
+    sudo apt-add-repository -y 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main'
     sudo apt-get update
-    sudo apt-get install -y build-essential cmake ninja-build jq clang-format-18 clangd-18
+    # clang-22 + libc++: Linux builds use the same LLVM toolchain family and
+    # standard library as macOS/iOS/Android (uniform C++26 feature set and a
+    # single modules implementation). The lint tools (clangd, clang-format)
+    # come from the same LLVM version on every platform: clangd must be able
+    # to parse libc++ 22 headers, and clang-format versions must not diverge
+    # between macOS and Linux or the format check flip-flops.
+    sudo apt-get install -y build-essential cmake ninja-build jq \
+        clang-22 lld-22 clang-tools-22 clangd-22 libc++-22-dev libc++abi-22-dev \
+        clang-format-22
     sudo rm -f /usr/bin/clang-format
     sudo rm -f /usr/bin/clangd
-    sudo ln -s /usr/bin/clang-format-18 /usr/bin/clang-format
-    sudo ln -s /usr/bin/clangd-18 /usr/bin/clangd
+    sudo ln -s /usr/bin/clang-format-22 /usr/bin/clang-format
+    sudo ln -s /usr/bin/clangd-22 /usr/bin/clangd
+    export CC=clang-22
+    export CXX=clang++-22
     if [[ -n "$GITHUB_ENV" ]]; then
-        echo "CC=gcc-14" >> $GITHUB_ENV
-        echo "CXX=g++-14" >> $GITHUB_ENV
+        echo "CC=clang-22" >> $GITHUB_ENV
+        echo "CXX=clang++-22" >> $GITHUB_ENV
     fi
+    TEMP_PROFILE_CONTENTS+="export CC=clang-22\n"
+    TEMP_PROFILE_CONTENTS+="export CXX=clang++-22\n"
 fi
 
 # Use the Ninja generator for all CMake builds. Ninja is faster than

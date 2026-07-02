@@ -1,11 +1,23 @@
 #!/bin/bash
 
+# Usage: ./iostest.sh                  run the tests on this Mac (default)
+#        ./iostest.sh --device         run on a connected iOS device
+#        ./iostest.sh --device "name"  run on the named iOS device
+DESTINATION='platform=macOS'
+if [ "$1" = "--device" ]; then
+    if [ -n "$2" ]; then
+        DESTINATION="platform=iOS,name=$2"
+    else
+        DESTINATION='platform=iOS'
+    fi
+fi
+
 rm -rf build/ios
 
 brew install chargepoint/xcparse/xcparse
 
 # Run tests
-xcodebuild test -project test/ios/iOSUnitTesting/iOSUnitTesting.xcodeproj -scheme iOSUnitTesting -destination 'platform=macOS' -configuration Debug -resultBundlePath build/ios/TestResults.xcresult
+xcodebuild test -project test/ios/iOSUnitTesting/iOSUnitTesting.xcodeproj -scheme iOSUnitTesting -destination "$DESTINATION" -configuration Debug -resultBundlePath build/ios/TestResults.xcresult -allowProvisioningUpdates
 
 # Check if xcodebuild was successful
 if [ $? -ne 0 ]; then

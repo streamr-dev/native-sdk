@@ -108,8 +108,8 @@ public:
 TEST_F(ConnectionLockingTest, CanLockConnections) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
-    auto connectionManager1 =
-        createConnectionManager(DefaultConnectorFacadeOptions{
+    auto connectionManager1 = createConnectionManager(
+        DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport1,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =
@@ -120,8 +120,8 @@ TEST_F(ConnectionLockingTest, CanLockConnections) {
     SLogger::info("Starting connection manager 1");
     connectionManager1->start();
 
-    auto connectionManager2 =
-        createConnectionManager(DefaultConnectorFacadeOptions{
+    auto connectionManager2 = createConnectionManager(
+        DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport2,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =
@@ -156,8 +156,8 @@ TEST_F(ConnectionLockingTest, CanLockConnections) {
 TEST_F(ConnectionLockingTest, LockingBothWays) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
-    auto connectionManager3 =
-        createConnectionManager(DefaultConnectorFacadeOptions{
+    auto connectionManager3 = createConnectionManager(
+        DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport3,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =
@@ -170,8 +170,8 @@ TEST_F(ConnectionLockingTest, LockingBothWays) {
     SLogger::info("Starting connection manager 3");
     connectionManager3->start();
 
-    auto connectionManager4 =
-        createConnectionManager(DefaultConnectorFacadeOptions{
+    auto connectionManager4 = createConnectionManager(
+        DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport4,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =

@@ -8,5 +8,4 @@
 
 extern "C" const char* SHARED_EXPORT testRpc();
 
-
 #endif // LIBSTREAMRPROXYCLIENT_HPP

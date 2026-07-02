@@ -94,8 +94,8 @@ TEST_F(
     ConnectionManagerTest, CanSendDataToOtherConnectionmanagerOverWebsocket) {
     rtc::InitLogger(rtc::LogLevel::Verbose);
     SLogger::trace("In the beginning");
-    auto connectionManager1 =
-        createConnectionManager(DefaultConnectorFacadeOptions{
+    auto connectionManager1 = createConnectionManager(
+        DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport1,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =
@@ -108,8 +108,8 @@ TEST_F(
     SLogger::info("Starting connection manager 1");
     connectionManager1->start();
 
-    auto connectionManager2 =
-        createConnectionManager(DefaultConnectorFacadeOptions{
+    auto connectionManager2 = createConnectionManager(
+        DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport2,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =
@@ -160,10 +160,11 @@ TEST_F(
 
     connectionManager1->send(msg, SendOptions{.connect = true});
 
-    folly::coro::blockingWait(folly::coro::collectAll(
-        std::move(promiseContract.second),
-        std::move(connectedPromiseContract1.second),
-        std::move(connectedPromiseContract2.second)));
+    folly::coro::blockingWait(
+        folly::coro::collectAll(
+            std::move(promiseContract.second),
+            std::move(connectedPromiseContract1.second),
+            std::move(connectedPromiseContract2.second)));
 
     connectionManager1->stop();
     connectionManager2->stop();
@@ -175,8 +176,8 @@ TEST_F(
 TEST_F(
     ConnectionManagerTest,
     DISABLED_ReportsCorrectErrorIfConnectingToNonExistentPort) {
-    auto connectionManager1 =
-        createConnectionManager(DefaultConnectorFacadeOptions{
+    auto connectionManager1 = createConnectionManager(
+        DefaultConnectorFacadeOptions{
             .transport = *mockConnectorTransport1,
             .websocketHost = "127.0.0.1",
             .websocketPortRange =

@@ -14,12 +14,14 @@ on:
 
 jobs:
   install-lint:
-    if: contains(github.event.head_commit.message, 'iosbuild')
-    runs-on: macos-14
+    if: contains(github.event.head_commit.message, 'iosbuild') || contains(github.event.pull_request.title, 'iosbuild')
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
+          submodules: true
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: install
         uses: ./.github/workflows/reusable/cached-install

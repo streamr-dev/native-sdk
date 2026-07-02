@@ -126,11 +126,12 @@ public:
 
         if (this->gaps.empty()) {
             // NOLINTNEXTLINE(modernize-use-emplace)
-            this->gaps.push_back(std::make_pair(
-                number,
-                NumberPair(
-                    std::numeric_limits<int>::max(),
-                    std::numeric_limits<int>::max())));
+            this->gaps.push_back(
+                std::make_pair(
+                    number,
+                    NumberPair(
+                        std::numeric_limits<int>::max(),
+                        std::numeric_limits<int>::max())));
             return true;
         }
 

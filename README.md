@@ -45,6 +45,12 @@ source install-prerequisities.sh
 
 This script will recognize the operating system type and install the prerequisities for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal.
 
+The compiler toolchain is the latest LLVM/Clang on every platform:
+
+* **macOS**: Homebrew `llvm` (keg-only — the build locates it through the `LLVM_PREFIX` environment variable exported by `install-prerequisities.sh`/`setenvs.sh`).
+* **Linux**: `clang-22` + `libc++` from [apt.llvm.org](https://apt.llvm.org/). libc++ (instead of libstdc++) keeps the standard library uniform across macOS, iOS, Android and Linux.
+* **iOS/Android**: cross-compiled with the same LLVM (iOS) or the Android NDK's clang.
+
 All builds use the [Ninja](https://ninja-build.org/) CMake generator (exported as `CMAKE_GENERATOR=Ninja` by `install-prerequisities.sh`/`setenvs.sh`). Ninja is faster than Makefiles and is required by CMake's C++ modules support. **If you have build directories configured with the previous Makefile generator, run `./clean.sh` once after updating.**
 
 ### Install all the dependencies and build the SDK for MacOS and Linux

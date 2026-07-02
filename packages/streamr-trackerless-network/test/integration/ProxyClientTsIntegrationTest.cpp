@@ -53,8 +53,9 @@ std::shared_ptr<ConnectionManager> createConnectionManager(
 TEST(ProxyClientTsIntegrationTest, ItCanPublishAMessage) {
     PeerDescriptor proxyPeerDescriptor;
 
-    proxyPeerDescriptor.set_nodeid(BinaryUtils::hexToBinaryString(
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+    proxyPeerDescriptor.set_nodeid(
+        BinaryUtils::hexToBinaryString(
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
     proxyPeerDescriptor.set_type(NodeType::NODEJS);
     ConnectivityMethod connectivityMethod;
     connectivityMethod.set_host("127.0.0.1");
@@ -68,8 +69,8 @@ TEST(ProxyClientTsIntegrationTest, ItCanPublishAMessage) {
         fakeEnvironment.createTransport(createLocalPeerDescriptor());
 
     auto localPeerDescriptor = createLocalPeerDescriptor();
-    auto connectionManager =
-        createConnectionManager(DefaultConnectorFacadeOptions{
+    auto connectionManager = createConnectionManager(
+        DefaultConnectorFacadeOptions{
             .transport = *fakeTransport,
             .createLocalPeerDescriptor =
                 [&localPeerDescriptor](
@@ -78,12 +79,13 @@ TEST(ProxyClientTsIntegrationTest, ItCanPublishAMessage) {
     SLogger::info("Starting connection manager");
     connectionManager->start();
 
-    ProxyClient proxyClient(ProxyClientOptions{
-        .transport = *connectionManager,
-        .localPeerDescriptor = createLocalPeerDescriptor(),
-        .streamPartId =
-            StreamPartID{"0xa000000000000000000000000000000000000000#01"},
-        .connectionLocker = *connectionManager});
+    ProxyClient proxyClient(
+        ProxyClientOptions{
+            .transport = *connectionManager,
+            .localPeerDescriptor = createLocalPeerDescriptor(),
+            .streamPartId =
+                StreamPartID{"0xa000000000000000000000000000000000000000#01"},
+            .connectionLocker = *connectionManager});
 
     proxyClient.start();
 
