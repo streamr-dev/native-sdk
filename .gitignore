@@ -1,5 +1,6 @@
 vcpkg_installed
 *.cache*
+*~
 .vscode
 .trunk
 setenvs.sh
