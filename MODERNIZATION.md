@@ -160,7 +160,16 @@ Android NDK r28+.
   iOS cross-build green locally and in CI (first pre-merge iOS validation in
   the repo's history); XCFramework binary confirmed `platform=iOS`,
   `minos=13.0`, no references to runtime symbols newer than the deployment
-  target. Outstanding: physical-device `iostest.sh` run.
+  target; both Linux CI legs repeatedly fully green on clang-22 + libc++.
+  Outstanding: physical-device `iostest.sh` run.
+- **Known issue (separate workstream, accepted at merge):** the socket-based
+  integration tests (ConnectionLockingTest, ConnectionManagerTest,
+  WebsocketClientServerTest) intermittently fail or hang on shared macOS CI
+  runners — a rotating cast, each also green on at least one macOS run, all
+  consistently green locally and on Linux. Mitigations in `test.sh` (ctest
+  `--repeat until-pass:2 --timeout 300`) keep hangs bounded and retries
+  honest; the tests' timing/port assumptions need their own fix. This debt
+  predates the modernization and was exposed by introducing macOS CI at all.
 - **Gate**: build/test green macOS + Linux, **and iOS cross-build +
   `iostest.sh` green — the compiler's output must stay compatible with the
   device's fixed libc++ runtime**.
