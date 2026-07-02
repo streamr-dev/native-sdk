@@ -20,11 +20,10 @@ jobs:
   install-lint-test:
     strategy:
       # Let each platform report its true status: one platform's failure
-      # must not cancel the others (the macOS legs are expected to fail
-      # until the Phase 1.2 compiler upgrade lands; Linux is the gate).
+      # must not cancel the others.
       fail-fast: false
       matrix:
-        os: [macos-14, macos-13, ubuntu-24.04, linux-arm64-runner]
+        os: [macos-latest, ubuntu-latest, linux-arm64-runner]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

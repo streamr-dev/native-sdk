@@ -8,14 +8,14 @@ runs:
       id: cache-homedir
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir1-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir2-${{ hashFiles('./vcpkg.json') }}
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed
       id: cache-vcpkg-installed
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed1-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed2-${{ hashFiles('./vcpkg.json') }}
         path: |
           ./build/vcpkg_installed
     - name: install-prerequisities
@@ -52,7 +52,7 @@ runs:
       if: always()
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir1-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir2-${{ hashFiles('./vcpkg.json') }}
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed save
@@ -60,7 +60,7 @@ runs:
       if: always()
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed1-${{ hashFiles('./vcpkg.json') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed2-${{ hashFiles('./vcpkg.json') }}
         path: |
           ./build/vcpkg_installed
     #- name: Commit compiled binaries
