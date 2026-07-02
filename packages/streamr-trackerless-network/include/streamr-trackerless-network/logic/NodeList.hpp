@@ -169,8 +169,9 @@ public:
 
     void stop() {
         for (const auto& node : this->getAll()) {
-            this->remove(Identifiers::getNodeIdFromPeerDescriptor(
-                node->getPeerDescriptor()));
+            this->remove(
+                Identifiers::getNodeIdFromPeerDescriptor(
+                    node->getPeerDescriptor()));
         }
         this->removeAllListeners();
     }

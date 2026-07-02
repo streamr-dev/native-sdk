@@ -88,8 +88,8 @@ public:
                 Identifiers::getNodeIdFromPeerDescriptor(
                     this->remotePeerDescriptor) +
                 " PendingConnection onError calling errorCallback");
-            this->errorCallback.value()(
-                std::make_exception_ptr(std::runtime_error(
+            this->errorCallback.value()(std::make_exception_ptr(
+                std::runtime_error(
                     "PendingConnection closed while connecting")));
             this->errorCallbackCalled = true;
         }

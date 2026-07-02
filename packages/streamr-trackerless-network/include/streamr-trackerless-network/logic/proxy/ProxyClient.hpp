@@ -123,49 +123,55 @@ public:
               Identifiers::getNodeIdFromPeerDescriptor(
                   options.localPeerDescriptor),
               1000), // NOLINT
-          contentDeliveryRpcLocal(ContentDeliveryRpcLocalOptions{
-              .localPeerDescriptor = options.localPeerDescriptor,
-              .streamPartId = options.streamPartId,
-              .markAndCheckDuplicate =
-                  [this](const MessageID& msg, const MessageRef& prev) {
-                      return Utils::markAndCheckDuplicate(
-                          this->duplicateDetectors, msg, prev);
-                  },
-              .broadcast =
-                  [this](
-                      const StreamMessage& message,
-                      const DhtAddress& previousNode) {
-                      this->broadcast(message, previousNode);
-                  },
-              .onLeaveNotice =
-                  [this](const DhtAddress& remoteNodeId, bool /*isLeaving*/) {
-                      const auto contact = this->neighbors.get(remoteNodeId);
-                      if (contact.has_value()) {
-                          this->onNodeDisconnected(
-                              contact.value()->getPeerDescriptor());
-                      }
-                  },
+          contentDeliveryRpcLocal(
+              ContentDeliveryRpcLocalOptions{
+                  .localPeerDescriptor = options.localPeerDescriptor,
+                  .streamPartId = options.streamPartId,
+                  .markAndCheckDuplicate =
+                      [this](const MessageID& msg, const MessageRef& prev) {
+                          return Utils::markAndCheckDuplicate(
+                              this->duplicateDetectors, msg, prev);
+                      },
+                  .broadcast =
+                      [this](
+                          const StreamMessage& message,
+                          const DhtAddress& previousNode) {
+                          this->broadcast(message, previousNode);
+                      },
+                  .onLeaveNotice =
+                      [this](
+                          const DhtAddress& remoteNodeId, bool /*isLeaving*/) {
+                          const auto contact =
+                              this->neighbors.get(remoteNodeId);
+                          if (contact.has_value()) {
+                              this->onNodeDisconnected(
+                                  contact.value()->getPeerDescriptor());
+                          }
+                      },
 
-              .markForInspection = [](const DhtAddress& nodeId,
-                                      const MessageID& message) {},
-              .rpcCommunicator = this->rpcCommunicator}),
-          propagation(PropagationOptions{
-              .sendToNeighbor =
-                  [this](
-                      const DhtAddress& neighborId, const StreamMessage& msg) {
-                      const auto remote = this->neighbors.get(neighborId);
-                      if (remote.has_value()) {
-                          folly::coro::blockingWait(
-                              remote.value()->sendStreamMessage(msg));
-                      } else {
-                          throw std::runtime_error(
-                              "Propagation target not found");
-                      }
-                  },
-              .minPropagationTargets = options.minPropagationTargets.has_value()
-                  ? options.minPropagationTargets.value()
-                  : 2,
-          }),
+                  .markForInspection = [](const DhtAddress& nodeId,
+                                          const MessageID& message) {},
+                  .rpcCommunicator = this->rpcCommunicator}),
+          propagation(
+              PropagationOptions{
+                  .sendToNeighbor =
+                      [this](
+                          const DhtAddress& neighborId,
+                          const StreamMessage& msg) {
+                          const auto remote = this->neighbors.get(neighborId);
+                          if (remote.has_value()) {
+                              folly::coro::blockingWait(
+                                  remote.value()->sendStreamMessage(msg));
+                          } else {
+                              throw std::runtime_error(
+                                  "Propagation target not found");
+                          }
+                      },
+                  .minPropagationTargets =
+                      options.minPropagationTargets.has_value()
+                      ? options.minPropagationTargets.value()
+                      : 2,
+              }),
           options(std::move(options)) {}
 
 private:
@@ -426,10 +432,11 @@ public:
             this->options.connectionLocker.unlockConnection(
                 peerDescriptor, LockID{SERVICE_ID});
             this->removeConnection(peerDescriptor);
-            folly::coro::blockingWait(RetryUtils::constantRetry<void>(
-                [this]() -> void { this->updateConnections(); },
-                "updating proxy connections",
-                this->abortController));
+            folly::coro::blockingWait(
+                RetryUtils::constantRetry<void>(
+                    [this]() -> void { this->updateConnections(); },
+                    "updating proxy connections",
+                    this->abortController));
         }
     }
 

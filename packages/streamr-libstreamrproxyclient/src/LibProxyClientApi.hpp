@@ -392,8 +392,8 @@ public:
         auto fakeTransport =
             this->fakeEnvironment.createTransport(localPeerDescriptor);
 
-        auto connectionManager =
-            createConnectionManager(DefaultConnectorFacadeOptions{
+        auto connectionManager = createConnectionManager(
+            DefaultConnectorFacadeOptions{
                 .transport = *fakeTransport,
                 .createLocalPeerDescriptor =
                     [localPeerDescriptor](
@@ -507,23 +507,25 @@ public:
                     throw std::runtime_error("No original exception");
                 }
             } catch (const std::exception& e) {
-                errorsCpp.emplace_back(std::move(ErrorCpp(
-                    e.what(),
-                    ERROR_PROXY_CONNECTION_FAILED,
-                    ProxyCpp(
-                        "0x" +
-                            Identifiers::getNodeIdFromPeerDescriptor(
-                                error.getPeerDescriptor()),
-                        Connectivity::connectivityMethodToWebsocketUrl(
-                            error.getPeerDescriptor().websocket())))));
+                errorsCpp.emplace_back(
+                    std::move(ErrorCpp(
+                        e.what(),
+                        ERROR_PROXY_CONNECTION_FAILED,
+                        ProxyCpp(
+                            "0x" +
+                                Identifiers::getNodeIdFromPeerDescriptor(
+                                    error.getPeerDescriptor()),
+                            Connectivity::connectivityMethodToWebsocketUrl(
+                                error.getPeerDescriptor().websocket())))));
             }
         }
 
         for (const auto& proxy : successfullyConnected) {
-            successfullyConnectedCpp.emplace_back(std::move(ProxyCpp(
-                "0x" + Identifiers::getNodeIdFromPeerDescriptor(proxy),
-                Connectivity::connectivityMethodToWebsocketUrl(
-                    proxy.websocket()))));
+            successfullyConnectedCpp.emplace_back(
+                std::move(ProxyCpp(
+                    "0x" + Identifiers::getNodeIdFromPeerDescriptor(proxy),
+                    Connectivity::connectivityMethodToWebsocketUrl(
+                        proxy.websocket()))));
         }
 
         *proxyResult = addResult(errorsCpp, successfullyConnectedCpp);
@@ -559,8 +561,9 @@ public:
         messageId.set_sequencenumber(proxyClient->getNextSequenceNumber());
 
         auto streamPartID = proxyClient->getProxyClient()->getStreamPartID();
-        messageId.set_streampartition(static_cast<int32_t>(
-            StreamPartIDUtils::getStreamPartition(streamPartID).value()));
+        messageId.set_streampartition(
+            static_cast<int32_t>(
+                StreamPartIDUtils::getStreamPartition(streamPartID).value()));
         messageId.set_streamid(StreamPartIDUtils::getStreamID(streamPartID));
 
         message.mutable_messageid()->CopyFrom(messageId);
@@ -634,29 +637,32 @@ public:
                 proxyClient, content, contentLength, ethereumPrivateKey);
             auto result = proxyClient->getProxyClient()->broadcast(message);
             for (const auto& failedPeer : result.first) {
-                errorsCpp.emplace_back(std::move(ErrorCpp(
-                    "Failed to send message to proxy",
-                    ERROR_PROXY_BROADCAST_FAILED,
-                    ProxyCpp(
-                        "0x" +
-                            Identifiers::getNodeIdFromPeerDescriptor(
-                                failedPeer),
-                        Connectivity::connectivityMethodToWebsocketUrl(
-                            failedPeer.websocket())))));
+                errorsCpp.emplace_back(
+                    std::move(ErrorCpp(
+                        "Failed to send message to proxy",
+                        ERROR_PROXY_BROADCAST_FAILED,
+                        ProxyCpp(
+                            "0x" +
+                                Identifiers::getNodeIdFromPeerDescriptor(
+                                    failedPeer),
+                            Connectivity::connectivityMethodToWebsocketUrl(
+                                failedPeer.websocket())))));
             }
             for (const auto& proxy : result.second) {
-                successfullySentCpp.emplace_back(std::move(ProxyCpp(
-                    "0x" + Identifiers::getNodeIdFromPeerDescriptor(proxy),
-                    Connectivity::connectivityMethodToWebsocketUrl(
-                        proxy.websocket()))));
+                successfullySentCpp.emplace_back(
+                    std::move(ProxyCpp(
+                        "0x" + Identifiers::getNodeIdFromPeerDescriptor(proxy),
+                        Connectivity::connectivityMethodToWebsocketUrl(
+                            proxy.websocket()))));
             }
             *proxyResult = addResult(errorsCpp, successfullySentCpp);
             return successfullySentCpp.size();
         } catch (const std::exception& e) {
             SLogger::error(
                 "Exception in proxyClientPublish: " + std::string(e.what()));
-            errorsCpp.emplace_back(std::move(ErrorCpp(
-                e.what(), ERROR_PROXY_BROADCAST_FAILED, std::nullopt)));
+            errorsCpp.emplace_back(
+                std::move(ErrorCpp(
+                    e.what(), ERROR_PROXY_BROADCAST_FAILED, std::nullopt)));
             *proxyResult = addResult(errorsCpp, {});
             return 0;
         }

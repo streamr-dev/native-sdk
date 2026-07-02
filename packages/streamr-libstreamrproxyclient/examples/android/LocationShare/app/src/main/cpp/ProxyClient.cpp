@@ -2,12 +2,12 @@
 // Created by Santtu Rantanen on 28.8.2024.
 //
 
-#include "streamrproxyclient.h"
+#include <jni.h>
+#include <chrono>
 #include <iostream>
 #include <thread>
-#include <chrono>
-#include <jni.h>
 #include <android/log.h>
+#include "streamrproxyclient.h"
 
 #define LOG_TAG "YourTag"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -16,16 +16,18 @@
 
 extern "C" {
 
-
 JNIEXPORT jlong JNICALL
-Java_com_example_locationshare_ProxyClientJNI_proxyClientNew(JNIEnv *env, jclass, jstring jOwnEthereumAddress, jstring jStreamPartId) {
-    const char* ownEthereumAddress = env->GetStringUTFChars(jOwnEthereumAddress, 0);
+Java_com_example_locationshare_ProxyClientJNI_proxyClientNew(
+    JNIEnv* env, jclass, jstring jOwnEthereumAddress, jstring jStreamPartId) {
+    const char* ownEthereumAddress =
+        env->GetStringUTFChars(jOwnEthereumAddress, 0);
     const char* streamPartId = env->GetStringUTFChars(jStreamPartId, 0);
 
     Error* errors = nullptr;
     uint64_t numErrors = 0;
 
-    uint64_t clientHandle = proxyClientNew(&errors, &numErrors, ownEthereumAddress, streamPartId);
+    uint64_t clientHandle =
+        proxyClientNew(&errors, &numErrors, ownEthereumAddress, streamPartId);
 
     env->ReleaseStringUTFChars(jOwnEthereumAddress, ownEthereumAddress);
     env->ReleaseStringUTFChars(jStreamPartId, streamPartId);
@@ -34,7 +36,8 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientNew(JNIEnv *env, jclass
         /*
         std::string errorMsg = errors[0].message;
         proxyClientFreeErrors(errors, numErrors);
-        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"), errorMsg.c_str());
+        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"),
+        errorMsg.c_str());
          */
         return 0;
     }
@@ -43,7 +46,8 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientNew(JNIEnv *env, jclass
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_locationshare_ProxyClientJNI_proxyClientDelete(JNIEnv *env, jclass, jlong clientHandle) {
+Java_com_example_locationshare_ProxyClientJNI_proxyClientDelete(
+    JNIEnv* env, jclass, jlong clientHandle) {
     Error* errors = nullptr;
     uint64_t numErrors = 0;
 
@@ -53,13 +57,15 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientDelete(JNIEnv *env, jcl
         /*
         std::string errorMsg = errors[0].message;
         proxyClientFreeErrors(errors, numErrors);
-        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"), errorMsg.c_str());
+        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"),
+        errorMsg.c_str());
          */
     }
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_example_locationshare_ProxyClientJNI_proxyClientConnect(JNIEnv *env, jclass, jlong clientHandle, jobjectArray jProxies) {
+Java_com_example_locationshare_ProxyClientJNI_proxyClientConnect(
+    JNIEnv* env, jclass, jlong clientHandle, jobjectArray jProxies) {
     jsize numProxies = env->GetArrayLength(jProxies);
     std::vector<Proxy> proxies(numProxies);
 
@@ -67,14 +73,19 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientConnect(JNIEnv *env, jc
         jobject jProxy = env->GetObjectArrayElement(jProxies, i);
         jclass proxyClass = env->GetObjectClass(jProxy);
 
-        jfieldID websocketUrlField = env->GetFieldID(proxyClass, "websocketUrl", "Ljava/lang/String;");
-        jfieldID ethereumAddressField = env->GetFieldID(proxyClass, "ethereumAddress", "Ljava/lang/String;");
+        jfieldID websocketUrlField =
+            env->GetFieldID(proxyClass, "websocketUrl", "Ljava/lang/String;");
+        jfieldID ethereumAddressField = env->GetFieldID(
+            proxyClass, "ethereumAddress", "Ljava/lang/String;");
 
-        jstring jWebsocketUrl = (jstring)env->GetObjectField(jProxy, websocketUrlField);
-        jstring jEthereumAddress = (jstring)env->GetObjectField(jProxy, ethereumAddressField);
+        jstring jWebsocketUrl =
+            (jstring)env->GetObjectField(jProxy, websocketUrlField);
+        jstring jEthereumAddress =
+            (jstring)env->GetObjectField(jProxy, ethereumAddressField);
 
         const char* websocketUrl = env->GetStringUTFChars(jWebsocketUrl, 0);
-        const char* ethereumAddress = env->GetStringUTFChars(jEthereumAddress, 0);
+        const char* ethereumAddress =
+            env->GetStringUTFChars(jEthereumAddress, 0);
 
         proxies[i] = {websocketUrl, ethereumAddress};
 
@@ -85,13 +96,19 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientConnect(JNIEnv *env, jc
     Error* errors = nullptr;
     uint64_t numErrors = 0;
 
-    uint64_t result = proxyClientConnect(&errors, &numErrors, static_cast<uint64_t>(clientHandle), proxies.data(), numProxies);
+    uint64_t result = proxyClientConnect(
+        &errors,
+        &numErrors,
+        static_cast<uint64_t>(clientHandle),
+        proxies.data(),
+        numProxies);
 
     if (numErrors > 0) {
         /*
         std::string errorMsg = errors[0].message;
         proxyClientFreeErrors(errors, numErrors);
-        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"), errorMsg.c_str());
+        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"),
+        errorMsg.c_str());
          */
         return 0;
     }
@@ -101,27 +118,33 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientConnect(JNIEnv *env, jc
 
 /*
 JNIEXPORT void JNICALL
-Java_com_example_locationshare_ProxyClientJNI_proxyClientDisconnect(JNIEnv *env, jclass, jlong clientHandle) {
-    Error* errors = nullptr;
-    uint64_t numErrors = 0;
+Java_com_example_locationshare_ProxyClientJNI_proxyClientDisconnect(JNIEnv *env,
+jclass, jlong clientHandle) { Error* errors = nullptr; uint64_t numErrors = 0;
 
-    proxyClientDisconnect(&errors, &numErrors, static_cast<uint64_t>(clientHandle));
+    proxyClientDisconnect(&errors, &numErrors,
+static_cast<uint64_t>(clientHandle));
 
     if (numErrors > 0) {
 
         std::string errorMsg = errors[0].message;
         proxyClientFreeErrors(errors, numErrors);
-        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"), errorMsg.c_str());
+        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"),
+errorMsg.c_str());
 
     }
 }
 */
 JNIEXPORT void JNICALL
-Java_com_example_locationshare_ProxyClientJNI_proxyClientPublish(JNIEnv *env, jclass, jlong clientHandle, jstring jContent, jstring jEthereumPrivateKey) {
-
+Java_com_example_locationshare_ProxyClientJNI_proxyClientPublish(
+    JNIEnv* env,
+    jclass,
+    jlong clientHandle,
+    jstring jContent,
+    jstring jEthereumPrivateKey) {
     const char* content = env->GetStringUTFChars(jContent, 0);
     uint64_t contentLength = strlen(content);
-    const char* ethereumPrivateKey = env->GetStringUTFChars(jEthereumPrivateKey, 0);
+    const char* ethereumPrivateKey =
+        env->GetStringUTFChars(jEthereumPrivateKey, 0);
     LOGI("proxyClientPublish clientHandle: %d", clientHandle);
 
     LOGI("proxyClientPublish content: %s", content);
@@ -130,7 +153,13 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientPublish(JNIEnv *env, jc
     Error* errors = nullptr;
     uint64_t numErrors = 0;
 
-    proxyClientPublish(&errors, &numErrors, static_cast<uint64_t>(clientHandle), content, contentLength, ethereumPrivateKey);
+    proxyClientPublish(
+        &errors,
+        &numErrors,
+        static_cast<uint64_t>(clientHandle),
+        content,
+        contentLength,
+        ethereumPrivateKey);
 
     env->ReleaseStringUTFChars(jContent, content);
 
@@ -139,12 +168,11 @@ Java_com_example_locationshare_ProxyClientJNI_proxyClientPublish(JNIEnv *env, jc
         /*
         std::string errorMsg = errors[0].message;
         proxyClientFreeErrors(errors, numErrors);
-        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"), errorMsg.c_str());
+        env->ThrowNew(env->FindClass("com/yourpackage/StreamrProxyClient$StreamrProxyException"),
+        errorMsg.c_str());
          */
-    }
-    else {
+    } else {
         LOGI("proxyClientPublish no error");
     }
 }
-
 }

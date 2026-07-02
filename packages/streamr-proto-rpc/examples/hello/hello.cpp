@@ -12,7 +12,8 @@ using streamr::protorpc::HelloRpcServiceClient;
 using streamr::protorpc::ProtoCallContext;
 using streamr::protorpc::RpcCommunicator;
 using streamr::protorpc::RpcMessage;
-using RpcCommunicatorType = streamr::protorpc::RpcCommunicator<ProtoCallContext>;
+using RpcCommunicatorType =
+    streamr::protorpc::RpcCommunicator<ProtoCallContext>;
 
 class HelloService : public HelloRpcService<ProtoCallContext> {
 public:

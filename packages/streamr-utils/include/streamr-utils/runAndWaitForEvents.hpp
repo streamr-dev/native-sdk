@@ -39,12 +39,13 @@ inline void runAndWaitForEvents(
 
     std::apply(
         [timeout, &operationTasks](auto&... eventEmitterWrapper) {
-            folly::coro::blockingWait(folly::coro::timeout(
-                folly::coro::collectAll(
-                    folly::coro::collectAllRange(std::move(operationTasks)),
-                    waitForEvent<typename BoundEventTypes::EventType>(
-                        eventEmitterWrapper.get(), timeout)...),
-                timeout));
+            folly::coro::blockingWait(
+                folly::coro::timeout(
+                    folly::coro::collectAll(
+                        folly::coro::collectAllRange(std::move(operationTasks)),
+                        waitForEvent<typename BoundEventTypes::EventType>(
+                            eventEmitterWrapper.get(), timeout)...),
+                    timeout));
         },
         replayEventEmitterWrappers);
 }

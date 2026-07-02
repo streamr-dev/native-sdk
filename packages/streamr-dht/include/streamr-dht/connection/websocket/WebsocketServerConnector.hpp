@@ -37,6 +37,7 @@ using streamr::dht::types::TlsCertificateFiles;
 using streamr::utils::AbortController;
 using streamr::utils::Ipv4Helper;
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 namespace NatType = streamr::dht::types::NatType;
 
 struct WebsocketServerConnectorOptions {
@@ -74,8 +75,8 @@ public:
     explicit WebsocketServerConnector(WebsocketServerConnectorOptions&& options)
         : host(options.host), options(std::move(options)) {
         if (this->options.portRange.has_value()) {
-            this->websocketServer = std::make_unique<WebsocketServer>(
-                std::move(WebsocketServerConfig{
+            this->websocketServer = std::make_unique<WebsocketServer>(std::move(
+                WebsocketServerConfig{
                     .portRange = this->options.portRange.value(),
                     .enableTls = this->options.serverEnableTls.value_or(false),
                     .tlsCertificateFiles = this->options.tlsCertificateFiles,
@@ -109,9 +110,10 @@ public:
             this->websocketServer) {
             this->websocketServer->on<
                 websocketserverevents::
-                    Connected>([this](const std::shared_ptr<
-                                      WebsocketServerConnection>&
-                                          serverSocket) {
+                    Connected>([this](
+                                   const std::shared_ptr<
+                                       WebsocketServerConnection>&
+                                       serverSocket) {
                 const auto resourceUrl = serverSocket->getResourceURL();
                 const auto action = getActionFromUrl(resourceUrl);
                 SLogger::trace(

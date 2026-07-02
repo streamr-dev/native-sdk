@@ -25,10 +25,11 @@ private:
 
 public:
     PropagationTaskStore(std::chrono::milliseconds ttl, size_t maxTasks)
-        : tasks(FifoMapWithTtlOptions<MessageRef>{
-              .ttl = ttl,
-              .maxSize = maxTasks,
-          }) {}
+        : tasks(
+              FifoMapWithTtlOptions<MessageRef>{
+                  .ttl = ttl,
+                  .maxSize = maxTasks,
+              }) {}
 
     std::vector<PropagationTask> get() { return this->tasks.values(); }
 

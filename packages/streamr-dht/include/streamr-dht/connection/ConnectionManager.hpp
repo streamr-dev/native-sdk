@@ -132,26 +132,28 @@ public:
                   return this->send(message, sendOptions);
               },
               RpcCommunicatorOptions{.rpcRequestTimeout = 10s}), // NOLINT
-          connectionLockRpcLocal(ConnectionLockRpcLocalOptions{
-              .addRemoteLocked =
-                  [this](const DhtAddress& id, const LockID& lockId) {
-                      this->locks.addRemoteLocked(id, lockId);
-                  },
-              .removeRemoteLocked =
-                  [this](const DhtAddress& id, const LockID& lockId) {
-                      this->locks.removeRemoteLocked(id, lockId);
-                  },
-              .closeConnection =
-                  [this](
-                      const PeerDescriptor& peerDescriptor,
-                      bool gracefulLeave,
-                      const std::optional<std::string>& reason) {
-                      SLogger::debug("closeConnection() callback of RpcLocal");
-                      this->closeConnection(
-                          peerDescriptor, gracefulLeave, reason);
-                  },
-              .getLocalPeerDescriptor =
-                  [this]() { return this->getLocalPeerDescriptor(); }}) {
+          connectionLockRpcLocal(
+              ConnectionLockRpcLocalOptions{
+                  .addRemoteLocked =
+                      [this](const DhtAddress& id, const LockID& lockId) {
+                          this->locks.addRemoteLocked(id, lockId);
+                      },
+                  .removeRemoteLocked =
+                      [this](const DhtAddress& id, const LockID& lockId) {
+                          this->locks.removeRemoteLocked(id, lockId);
+                      },
+                  .closeConnection =
+                      [this](
+                          const PeerDescriptor& peerDescriptor,
+                          bool gracefulLeave,
+                          const std::optional<std::string>& reason) {
+                          SLogger::debug(
+                              "closeConnection() callback of RpcLocal");
+                          this->closeConnection(
+                              peerDescriptor, gracefulLeave, reason);
+                      },
+                  .getLocalPeerDescriptor =
+                      [this]() { return this->getLocalPeerDescriptor(); }}) {
         SLogger::debug("ConnectionManager constructor start");
         SLogger::info("ConnectionManager constructor");
         this->connectorFacade = this->options.createConnectorFacade();
@@ -583,27 +585,30 @@ private:
         if (endpoint->isConnected()) {
             try {
                 SLogger::debug("gracefullyDisconnect() calling blockingWait()");
-                folly::coro::blockingWait(folly::coro::co_invoke(
-                    [this,
-                     endpoint,
-                     targetDescriptor = std::move(targetDescriptor),
-                     disconnectMode]() -> folly::coro::Task<void> {
-                        co_await folly::coro::collectAll(
-                            waitForEvent<endpointevents::Disconnected>(
-                                endpoint.get(), 2000ms), // NOLINT
-                            folly::coro::co_invoke(
-                                [this,
-                                 endpoint,
-                                 targetDescriptor,
-                                 disconnectMode]() -> folly::coro::Task<void> {
-                                    auto debugString =
-                                        targetDescriptor.DebugString();
+                folly::coro::blockingWait(
+                    folly::coro::co_invoke(
+                        [this,
+                         endpoint,
+                         targetDescriptor = std::move(targetDescriptor),
+                         disconnectMode]() -> folly::coro::Task<void> {
+                            co_await folly::coro::collectAll(
+                                waitForEvent<endpointevents::Disconnected>(
+                                    endpoint.get(), 2000ms), // NOLINT
+                                folly::coro::co_invoke(
+                                    [this,
+                                     endpoint,
+                                     targetDescriptor,
+                                     disconnectMode]()
+                                        -> folly::coro::Task<void> {
+                                        auto debugString =
+                                            targetDescriptor.DebugString();
 
-                                    co_return co_await this
-                                        ->doGracefullyDisconnectAsync(
-                                            targetDescriptor, disconnectMode);
-                                }));
-                    }));
+                                        co_return co_await this
+                                            ->doGracefullyDisconnectAsync(
+                                                targetDescriptor,
+                                                disconnectMode);
+                                    }));
+                        }));
             } catch (const std::exception& err) {
                 SLogger::error(
                     "Caught exception in gracefullyDisconnect " +
