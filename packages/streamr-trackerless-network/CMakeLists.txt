@@ -145,11 +145,16 @@ if(NOT IOS)
          # gtest_discover_tests(streamr-trackerless-network-test-unit)
          #gtest_discover_tests(streamr-trackerless-network-test-integration)
      
-         add_test(
-            NAME ts-integration-test
-            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-integration-tests.sh"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-            )
+         # TEMPORARILY DISABLED: this test builds the whole streamr-dev/network
+         # TS monorepo at a 2024 commit (ts-integration/install.sh), which no
+         # longer works on current CI runners, and compiling the whole
+         # repository is not necessary anymore. Re-enable against a current,
+         # slimmer TS setup after the toolchain/modules modernization.
+         # add_test(
+         #    NAME ts-integration-test
+         #    COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-integration-tests.sh"
+         #    WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+         #    )
 
     endif()
 endif()
