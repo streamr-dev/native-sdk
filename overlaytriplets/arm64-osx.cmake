@@ -4,6 +4,10 @@ set(VCPKG_LIBRARY_LINKAGE static)
 
 set(VCPKG_CMAKE_SYSTEM_NAME Darwin)
 set(VCPKG_OSX_ARCHITECTURES arm64)
+# CMake 4 no longer defaults CMAKE_OSX_SYSROOT to the SDK path; the pinned
+# vcpkg scripts compose "-isysroot ${CMAKE_OSX_SYSROOT}" unconditionally,
+# which breaks with an empty value. Name the SDK explicitly.
+set(VCPKG_OSX_SYSROOT macosx)
 
 set(CMAKE_CXX_STANDARD 26)
 set(HOMEBREW_PREFIX $ENV{HOMEBREW_PREFIX})
