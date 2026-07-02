@@ -24,25 +24,23 @@ runs:
       shell: bash
     - name: install
       run: |
-        ./install.sh --prod ${ARCHFLAGS:-} || {
-          # Surface the most recent vcpkg buildtree logs as error
-          # annotations so failures are diagnosable from the Checks UI
-          # (raw step logs require authenticated access).
-          echo "::error title=install failed::see the vcpkg buildtree log annotations"
-          # Prefer recent logs that actually contain error text.
-          LOGS=$(ls -t vcpkg/buildtrees/*/*.log 2>/dev/null | head -16)
-          ERRLOGS=$(echo "$LOGS" | xargs grep -liE "(^|[^a-z])error[: ]" 2>/dev/null | head -3)
-          [ -z "$ERRLOGS" ] && ERRLOGS=$(echo "$LOGS" | head -3)
-          for log in $ERRLOGS; do
+        ./install.sh --prod ${ARCHFLAGS:-} 2>&1 | tee install-output.log
+        EXITCODE=${PIPESTATUS[0]}
+        if [ "$EXITCODE" -ne 0 ]; then
+          # Surface failure context as error annotations so failures are
+          # diagnosable from the Checks UI (raw step logs need auth).
+          set +e
+          MSG=$(tail -40 install-output.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=install.sh output tail::${MSG}"
+          for log in $(ls -t vcpkg/buildtrees/*/*.log 2>/dev/null | head -16 | xargs grep -liE "(^|[^a-z])error[: ]" 2>/dev/null | head -3); do
             echo "::group::${log}"
             tail -120 "$log"
             echo "::endgroup::"
             MSG=$(grep -B3 -A8 -iE "(^|[^a-z])error[: ]" "$log" | tail -30 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
-            [ -z "$MSG" ] && MSG=$(tail -25 "$log" | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
-            echo "::error title=${log}::${MSG}"
+            [ -n "$MSG" ] && echo "::error title=${log}::${MSG}"
           done
-          exit 1
-        }
+          exit "$EXITCODE"
+        fi
       shell: bash
     - name: cache homedir save
       id: cache-homedir-save
