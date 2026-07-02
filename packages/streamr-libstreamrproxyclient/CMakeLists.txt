@@ -119,17 +119,22 @@ if (NOT IOS)
         include(GoogleTest)
         gtest_discover_tests(streamr-streamrproxyclient-test-integration)
         gtest_discover_tests(streamrproxyclient-cpp-wrapper-test)
-        add_test(
-            NAME ts-end-to-end-test
-            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-tests.sh"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-            )
+        # TEMPORARILY DISABLED: these tests build the whole streamr-dev/network
+        # TS monorepo at a 2024 commit (ts-integration/install.sh), which no
+        # longer works on current CI runners, and compiling the whole
+        # repository is not necessary anymore. Re-enable against a current,
+        # slimmer TS setup after the toolchain/modules modernization.
+        # add_test(
+        #     NAME ts-end-to-end-test
+        #     COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-end-to-end-tests.sh"
+        #     WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+        #     )
 
-        add_test(
-            NAME ts-multiple-messages-test
-            COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-multiple-messages-test.sh"
-            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-            )
+        # add_test(
+        #     NAME ts-multiple-messages-test
+        #     COMMAND "${CMAKE_CURRENT_LIST_DIR}/run-ts-multiple-messages-test.sh"
+        #     WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+        #     )
     endif()
     # Install header to dist/target-triplet
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
