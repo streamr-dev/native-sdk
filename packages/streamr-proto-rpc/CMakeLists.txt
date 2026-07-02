@@ -50,7 +50,6 @@ target_link_libraries(streamr-proto-rpc
     INTERFACE streamr::streamr-eventemitter
     INTERFACE streamr::streamr-utils
     PRIVATE protobuf::libprotobuf
-    PRIVATE protobuf::libprotoc
     INTERFACE Boost::uuid
     PRIVATE magic_enum::magic_enum
     PUBLIC Folly::folly
