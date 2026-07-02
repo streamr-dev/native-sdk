@@ -10,6 +10,11 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# No C++ modules in the codebase yet: CMake >= 3.28 (CMP0155) would otherwise
+# scan all C++20+ sources for module imports, injecting GCC scanning flags
+# (-fmodules-ts, -fmodule-mapper, -fdeps-format) into compile_commands.json,
+# which clangd rejects. The modules migration will turn scanning back on.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 project(streamr-utils CXX)
 

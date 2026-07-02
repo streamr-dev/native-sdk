@@ -5,6 +5,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/homebrewClang.cmake)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# No C++ modules in the codebase yet: CMake >= 3.28 (CMP0155) would otherwise
+# scan all C++20+ sources for module imports, injecting GCC scanning flags
+# (-fmodules-ts, -fmodule-mapper, -fdeps-format) into compile_commands.json,
+# which clangd rejects. The modules migration will turn scanning back on.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # makes the current package a monorepo package
