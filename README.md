@@ -45,6 +45,8 @@ source install-prerequisities.sh
 
 This script will recognize the operating system type and install the prerequisities for the SDK. It will also create a `setenvs.sh` file in the root directory of the repository that you can use to set the correct environment variables for the SDK when you resume development in a new terminal.
 
+All builds use the [Ninja](https://ninja-build.org/) CMake generator (exported as `CMAKE_GENERATOR=Ninja` by `install-prerequisities.sh`/`setenvs.sh`). Ninja is faster than Makefiles and is required by CMake's C++ modules support. **If you have build directories configured with the previous Makefile generator, run `./clean.sh` once after updating.**
+
 ### Install all the dependencies and build the SDK for MacOS and Linux
 
 ```bash
@@ -55,8 +57,8 @@ The `install.sh` script supports an optional `--prod` parameter. When this param
 
 `install.sh` does the following:
 
-1. Loops through packages listed in `MonorepoPackages.cmake`, and builds each using `cmake` and `make`. This will trigger the fetching of dependencies using `vcpkg` and the building of each package in its own `build` directory.
-2. Builds the SDK in the root directory using `cmake` and `make`. This will trigger the building of the SDK in the `build` folder of the root directory. This is needed for VSCode and its extensions to work correctly.
+1. Loops through packages listed in `MonorepoPackages.cmake`, and builds each using `cmake` (Ninja generator). This will trigger the fetching of dependencies using `vcpkg` and the building of each package in its own `build` directory.
+2. Builds the SDK in the root directory using `cmake` (Ninja generator). This will trigger the building of the SDK in the `build` folder of the root directory. This is needed for VSCode and its extensions to work correctly.
 
 ### Install all the dependencies and build the SDK for iOS
 
@@ -124,8 +126,10 @@ The Streamr Native SDK monorepo has two GIT submodules at its root:
 
 #### CMake files
 * `MonorepoPackages.cmake` - a CMake file that lists all the packages in the monorepo. **The order of the packages in this file is important.** The packages are built in the order of the list and the dependencies between the packages are resolved based on the order of the packages in the list.
-* `homebrewClang.cmake` - a CMake file that takes the latest version of the Clang compiler and associated tools into use in the build on macOS.
+* `cmake/` - the canonical copies of the CMake helper files that every package carries a copy of (`homebrewClang.cmake`, `monorepoPackage.cmake`). Edit the files here and run `./sync-cmake-files.sh` to update the package copies; `lint.sh` and CI fail if the copies are out of sync. The per-package copies are intentional: they let a package be published as a standalone vcpkg package later.
+* `cmake/homebrewClang.cmake` - a CMake file that takes the latest version of the Clang compiler and associated tools into use in the build on macOS.
 * `CMakeLists.txt` - the main CMake file for the whole monorepo. Includes all the packages listed in `MonorepoPackages.cmake` into the build using `add_subdirectory()` of CMAKE.
+* `CMakePresets.json` - CMake configure/build presets (`host-debug`, `host-release`, `ios-debug/-release`, `android-debug/-release`) encoding the generator, triplet and toolchain combinations for IDEs and manual `cmake --preset` use.
 
 #### Scripts
 | Script       | Ts equivalent | Description                                                                 |
@@ -138,6 +142,7 @@ The Streamr Native SDK monorepo has two GIT submodules at its root:
 | `test.sh` | npm run test           | Run the tests of the whole monorepo. |
 | `clean.sh`   | npm run clean         | Clean the build folders of all the packages in the monorepo. |
 | `merge-dependencies.sh` | N/A       | A helper script called by install.sh to merge the VCPKG dependencies of the monorepo packages to the root vcpkg.json **must not be invoked by the user** |
+| `sync-cmake-files.sh` | N/A       | Copy the canonical CMake helper files from `cmake/` into every package (`--check` verifies without copying; run by `lint.sh` and CI). |
 | `iostest.sh`| N/A                   | Run selected unit tests in iOS Device (In MacOS by default). Unit tests can be selected by adding tests (Drag and drop) to the App iOSUnitTesting. |
 
 

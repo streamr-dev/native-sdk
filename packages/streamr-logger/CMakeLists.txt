@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.28...4.3)
 include(homebrewClang.cmake)
 
 set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)
 
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")

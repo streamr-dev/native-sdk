@@ -22,6 +22,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     brew uninstall llvm || true
     brew install llvm@17 || true
     brew install cmake || true
+    brew install ninja || true
     brew install pkg-config || true
    
     brew link --overwrite --force llvm@17
@@ -45,6 +46,15 @@ else
     fi
 fi
 
+# Use the Ninja generator for all CMake builds. Ninja is faster than
+# Makefiles and is required by CMake's C++ modules support (upcoming
+# modules migration). NOTE: build dirs configured with the old Makefile
+# generator must be cleaned once after this change (./clean.sh).
+export CMAKE_GENERATOR=Ninja
+if [[ -n "$GITHUB_ENV" ]]; then
+    echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
+fi
+TEMP_PROFILE_CONTENTS+="export CMAKE_GENERATOR=Ninja\n"
 
 cd clangd-tidy
 rm -f clang-tidy

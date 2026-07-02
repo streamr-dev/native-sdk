@@ -1,11 +1,12 @@
 #!/bin/bash
 
-cd build
-cmake ..
-make
-export LOG_LEVEL=trace
 export GTEST_COLOR=1
 export GTEST_BREAK_ON_FAILURE=1
+export LOG_LEVEL=trace
+
+cmake --build build || exit 1
+
+cd build
 
 if [ "$#" -gt 0 ]; then
     ctest -V -R "$@"

@@ -1,3 +1,9 @@
+# CANONICAL COPY — the per-package copies in packages/*/homebrewClang.cmake
+# are generated from this file by ./sync-cmake-files.sh. Edit THIS file and
+# run the sync script; do not edit the package copies directly.
+# (Each package carries its own copy so that it can be published as a
+# standalone vcpkg package later.)
+
 if (APPLE AND NOT (VCPKG_TARGET_TRIPLET MATCHES "android" OR VCPKG_TARGET_TRIPLET MATCHES "linux"))
     message(STATUS "APPLE is defined")
     set(HOMEBREW_PREFIX $ENV{HOMEBREW_PREFIX})

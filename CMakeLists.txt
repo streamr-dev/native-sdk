@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.28...4.3)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 set(VCPKG_MANIFEST_INSTALL OFF)
@@ -6,7 +6,8 @@ set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/build/vcpkg_installed)
 
 set (VCPKG_OVERLAY_TRIPLETS ENV{VCPKG_OVERLAY_TRIPLETS})
 set(CMAKE_CXX_STANDARD 26)
-include(homebrewClang.cmake)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+include(cmake/homebrewClang.cmake)
 
 enable_testing()
 

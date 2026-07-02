@@ -1,10 +1,10 @@
 #!/bin/bash
 
-cd build
-cmake ..
-make
-
 export GTEST_COLOR=1
+
+cmake --build build || exit 1
+
+cd build
 
 if [ "$#" -gt 0 ]; then
     ctest -V -R "$@"

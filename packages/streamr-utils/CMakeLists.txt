@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.28...4.3)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(homebrewClang.cmake)
@@ -9,6 +9,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/monorepoPackage.cmake)
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(streamr-utils CXX)
 
