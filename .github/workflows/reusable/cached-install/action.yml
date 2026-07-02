@@ -24,6 +24,9 @@ runs:
       shell: bash
     - name: install
       run: |
+        # Composite steps run under bash -e -o pipefail: disarm around the
+        # pipeline or a failure aborts the script before we can annotate.
+        set +e +o pipefail
         ./install.sh --prod ${ARCHFLAGS:-} 2>&1 | tee install-output.log
         EXITCODE=${PIPESTATUS[0]}
         if [ "$EXITCODE" -ne 0 ]; then
