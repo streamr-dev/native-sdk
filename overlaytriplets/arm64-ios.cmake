@@ -31,6 +31,24 @@ if(${PORT} MATCHES "usrsctp")
     set(VCPKG_C_FLAGS "${VCPKG_C_FLAGS} -D__APPLE_USE_RFC_2292")
 endif()
 
+if(${PORT} MATCHES "folly")
+    # folly's configure uses try_run() checks, which cannot execute when
+    # cross-compiling; preset their results (same approach as
+    # arm64-android.cmake). The values mirror what the checks detect when
+    # they actually run on an arm64 Apple host (arm64-osx build).
+    set(VCPKG_CMAKE_CONFIGURE_OPTIONS ${VCPKG_CMAKE_CONFIGURE_OPTIONS}
+        -DHAVE_VSNPRINTF_ERRORS_EXITCODE=1
+        -DHAVE_VSNPRINTF_ERRORS_EXITCODE__TRYRUN_OUTPUT=a
+        -DFOLLY_HAVE_WCHAR_SUPPORT_EXITCODE=0
+        -DFOLLY_HAVE_WCHAR_SUPPORT_EXITCODE__TRYRUN_OUTPUT=a
+        -DFOLLY_HAVE_LINUX_VDSO_EXITCODE=1
+        -DFOLLY_HAVE_LINUX_VDSO_EXITCODE__TRYRUN_OUTPUT=a
+        -DFOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE=0
+        -DFOLLY_HAVE_UNALIGNED_ACCESS_EXITCODE__TRYRUN_OUTPUT=a
+        -DFOLLY_HAVE_WEAK_SYMBOLS_EXITCODE=1
+        -DFOLLY_HAVE_WEAK_SYMBOLS_EXITCODE__TRYRUN_OUTPUT=a)
+endif()
+
 set(ENV{VCPKG_CXX_FLAGS} "${VCPKG_CXX_FLAGS}")
 set(ENV{VCPKG_C_FLAGS} "${VCPKG_C_FLAGS}")
 
