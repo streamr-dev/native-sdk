@@ -12,6 +12,13 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     PROFILE_FILE=./setenvs.sh
     
     xcode-select --install || true
+
+    # iOS builds target deployment target 26.0 and need the iOS 26 SDK.
+    XCODE_MAJOR=$(xcodebuild -version 2>/dev/null | awk 'NR==1{print int($2)}')
+    if [ -n "$XCODE_MAJOR" ] && [ "$XCODE_MAJOR" -lt 26 ]; then
+        echo "WARNING: Xcode $XCODE_MAJOR found; Xcode 26 or newer is required for iOS builds."
+    fi
+
     export HOMEBREW_PREFIX=$(brew --prefix)
     if [[ -n "$GITHUB_ENV" ]]; then
         echo "HOMEBREW_PREFIX=$(brew --prefix)" >> $GITHUB_ENV

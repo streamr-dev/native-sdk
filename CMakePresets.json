@@ -26,7 +26,8 @@
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "arm64-ios",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/overlaytriplets/arm64-ios.cmake",
-        "PLATFORM": "OS64"
+        "PLATFORM": "OS64",
+        "DEPLOYMENT_TARGET": "26.0"
       }
     },
     {
