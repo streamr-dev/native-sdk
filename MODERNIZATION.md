@@ -110,7 +110,7 @@ Android NDK r28+.
   (all three run fully against a local `--local` subscriber on
   127.0.0.1:44211).
 
-## Phase 1.2 — Compiler upgrades + CI image modernization (PR #23, in review)
+## Phase 1.2 — Compiler upgrades + CI image modernization ✅ (PR #23, merged)
 - macOS: dead `llvm@17` → latest keg-only Homebrew `llvm` (22.x), located via
   `LLVM_PREFIX` (exported by `install-prerequisities.sh`, fallback
   `$HOMEBREW_PREFIX/opt/llvm`); hardcoded `/opt/homebrew/...` libc++ paths
@@ -174,7 +174,7 @@ Android NDK r28+.
   `iostest.sh` green — the compiler's output must stay compatible with the
   device's fixed libc++ runtime**.
 
-## Phase 1.3 — vcpkg baseline bump + dependency wave (PR pending)
+## Phase 1.3 — vcpkg baseline bump + dependency wave ✅ (PR #24, merged)
 Baseline: vcpkg tag **2026.06.24** (`builtin-baseline` now pinned in
 `vcpkg.json`; the jq-based merge-dependencies.sh preserves the key — and
 because the cache keys hash `vcpkg.json`, baseline bumps bust CI caches
@@ -225,24 +225,49 @@ the triplet FILE as the chainload toolchain; the triplet then points
 `VCPKG_CHAINLOAD_TOOLCHAIN_FILE` at ios.toolchain.cmake for ports) — fragile;
 document/replace in 1.4.
 
-## Phase 1.4 — iOS refresh
-- Replace `toolchains/ios.toolchain.cmake` with latest leetal/ios-cmake
-  verbatim (keep vendored & unmodified).
-- **Fix the libc++ header/runtime mismatch properly** in
-  `overlaytriplets/arm64-ios.cmake`: compile with `-nostdinc++ -isystem
-  <iphoneos-sdk>/usr/include/c++/v1` (SDK path via `xcrun`), link SDK libc++
-  normally. Delete the Homebrew-libc++ `-isystem`, the
-  `_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION=0` define and `-lc++abi`.
-  SDK headers carry availability annotations consistent with the deployment
-  target — this kills the whole hack class. (Trade-off, accepted: iOS library
-  features track the SDK libc++, not Homebrew's; language features
-  unaffected.)
-- Set `DEPLOYMENT_TARGET=17.0` explicitly (preset + install.sh). Re-validate
-  each folly define in `VCPKG_CMAKE_CONFIGURE_OPTIONS`; keep
-  `-D__APPLE_USE_RFC_2292` (usrsctp).
-- Document/guard the Xcode requirement in `install-prerequisities.sh`.
-- **Gate**: `./install.sh --ios` → XCFramework; `./iostest.sh` green; Android
-  sanity build (`--android`, NDK r28+).
+## Phase 1.4 — iOS refresh (PR #25, in review)
+- **Deployment target: 26.0** (product decision, 2026-07: iPhones keep
+  themselves up to date; supporting old iOS runtimes is unnecessary). Set in
+  the triplet and the CMake presets; verified in the artifact
+  (`minos 26.0`). Xcode 26+ requirement guarded in
+  `install-prerequisities.sh`.
+- **SDK libc++ arrangement landed**: iOS builds compile with `-nostdinc++
+  -isystem <iphoneos-sdk>/usr/include/c++/v1` (SDK path via `xcrun`) — SDK
+  headers with the SDK runtime, availability-consistent with the deployment
+  target. The Homebrew-libc++ `-isystem`, the
+  `_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION=0` define and `-lc++abi`
+  are gone.
+- `toolchains/ios.toolchain.cmake` replaced with **pristine** leetal 4.5.0.
+  Discovery: the previously vendored copy had been locally modified — glue
+  at its top read `ENV{VCPKG_*_FLAGS}`, paired with env exports in the
+  triplet; replacing the file silently broke ALL triplet flag flow (vcpkg's
+  chainload replaces its own flag-applying toolchain). The glue now lives in
+  a documented wrapper, `toolchains/streamr-ios.toolchain.cmake`, which
+  consumes `VCPKG_C/CXX/LINKER_FLAGS` and includes the pristine upstream
+  file — works for both port builds (cache vars) and package builds
+  (two-stage chainload).
+- **folly defines re-validated by experiment** (all five legacy globals
+  dropped, then failures re-added, now scoped to the folly port block with
+  documented reasons): `FOLLY_HAVE_MALLOC_USABLE_SIZE=0` (doesn't exist on
+  iOS; folly's link check false-positives against SDK stubs) and
+  `IS_AARCH64_ARCH=0` (the iOS toolchain reports `aarch64`, enabling folly's
+  ELF-only assembly memcpy that Mach-O rejects). `FOLLY_HAVE_CLOCK_GETTIME`,
+  `FOLLY_MOBILE`, `__APPLE__` stayed dropped. `-D__APPLE_USE_RFC_2292` kept
+  (usrsctp; iOS 26 SDK still gates IPV6_PKTINFO behind an RFC choice).
+- Verified: full iOS dependency set + packages + XCFramework green;
+  artifact `platform=iOS, minos=26.0`; flags confirmed flowing in port logs
+  and the package compile database.
+- `iostest.sh` gained signing/tooling fixes surfaced by the device run:
+  `IOS_DEVELOPMENT_TEAM` override (signs with a different team — e.g. a
+  Personal Team — via command-line build settings when organization
+  provisioning is unavailable; bundle IDs get a team-ID suffix because the
+  originals are App IDs registered to the organization team), and
+  `xcresulttool get object --legacy` (Xcode 16+ requires the flag for the
+  old JSON format — result processing previously failed after a green run).
+- **Gate**: `./install.sh --ios` → XCFramework ✓; `./iostest.sh --device`
+  ✓ — **GoogleTest suite passed on an iPhone 12 mini running iOS 26.4.2**
+  (deployment-target-26 / SDK-libc++ build, Personal Team signing);
+  Android sanity via CI keyword.
 
 ## Phase 1.5 — Lint stack remainder
 - clangd/clang-format 22 already landed in Phase 1.2 (forced by libc++ 22).
