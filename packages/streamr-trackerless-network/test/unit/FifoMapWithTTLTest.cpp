@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "streamr-trackerless-network/logic/propagation/FifoMapWithTTL.hpp"
+import streamr.trackerlessnetwork;
 
 using streamr::trackerlessnetwork::propagation::FifoMapWithTTL; // NOLINT
 

@@ -35,9 +35,21 @@ if(NOT TARGET Boost::uuid)
   set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 endif()
 
+# C++ modules support (guards, policies, helpers) — must come after
+# project() because it inspects the compiler id.
+include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
+
 add_library(streamr-trackerless-network)
 set_property(TARGET streamr-trackerless-network PROPERTY CXX_STANDARD 26)
 add_library(streamr::streamr-trackerless-network ALIAS streamr-trackerless-network)
+
+# Module façade (MODERNIZATION.md Part 2): :protos over the generated
+# NetworkRpc trio + one coarse :all partition over the public headers.
+streamr_target_module_sources(streamr-trackerless-network
+  FILES
+    modules/streamr.trackerlessnetwork.cppm
+    modules/streamr.trackerlessnetwork-protos.cppm
+    modules/streamr.trackerlessnetwork-all.cppm)
 target_include_directories(streamr-trackerless-network 
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>
@@ -52,22 +64,26 @@ target_sources(streamr-trackerless-network
 
 target_compile_options(streamr-trackerless-network PUBLIC -fPIC)
     
-target_link_libraries(streamr-trackerless-network 
-    INTERFACE streamr::streamr-logger
-    INTERFACE streamr::streamr-eventemitter
+# PUBLIC (was INTERFACE/PRIVATE): consumer build trees recompile the
+# module units from the export — every dependency the headers reach must
+# be an exported usage requirement.
+target_link_libraries(streamr-trackerless-network
+    PUBLIC streamr::streamr-logger
+    PUBLIC streamr::streamr-eventemitter
     PUBLIC streamr::streamr-proto-rpc
     PUBLIC streamr::streamr-dht
-    INTERFACE streamr::streamr-utils
-    INTERFACE Boost::algorithm
-    PRIVATE protobuf::libprotobuf
-    INTERFACE Boost::uuid
-    PRIVATE magic_enum::magic_enum
-    PRIVATE Folly::folly
+    PUBLIC streamr::streamr-utils
+    PUBLIC Boost::algorithm
+    PUBLIC protobuf::libprotobuf
+    PUBLIC Boost::uuid
+    PUBLIC magic_enum::magic_enum
+    PUBLIC Folly::folly
     )
 
-export(TARGETS streamr-trackerless-network 
+export(TARGETS streamr-trackerless-network
     NAMESPACE streamr::
-    FILE streamr-trackerless-network-config-in.cmake)
+    FILE streamr-trackerless-network-config-in.cmake
+    CXX_MODULES_DIRECTORY streamr-trackerless-network-modules)
   
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-trackerless-network-config.cmake" 
     "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
@@ -120,9 +136,12 @@ if(NOT IOS)
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
         )
 
-    target_link_libraries(streamr-trackerless-network-test-unit 
+    # The tests import streamr.trackerlessnetwork, so their sources need
+    # module dependency scanning.
+    streamr_enable_imports(streamr-trackerless-network-test-unit)
+    target_link_libraries(streamr-trackerless-network-test-unit
         PUBLIC streamr-trackerless-network
-        INTERFACE streamr::streamr-logger
+        PUBLIC streamr::streamr-logger
         PUBLIC GTest::gtest
         streamr-trackerless-network-test-main
         PUBLIC Folly::folly

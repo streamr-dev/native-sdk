@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "streamr-trackerless-network/logic/proxy/ProxyConnectionRpcLocal.hpp"
+import streamr.trackerlessnetwork;
 
 using streamr::trackerlessnetwork::proxy::ProxyConnectionRpcLocal; // NOLINT
 
