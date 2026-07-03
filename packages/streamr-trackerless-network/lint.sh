@@ -27,3 +27,12 @@ clangd-tidy -p ./build $INCLUDEFILES
 
 echo "Running clang-format --dry-run on $INCLUDEFILES"
 ../../run-clang-format.py $INCLUDEFILES
+
+# Module interface units: format check only. clangd-tidy is not run on
+# .cppm files (headers remain the fully linted source of truth during the
+# façade migration; clangd modules support is still experimental).
+MODULE_FILES=$(find ./modules -type f -name "*.cppm" 2>/dev/null | xargs echo)
+if [ -n "$MODULE_FILES" ]; then
+    echo "Running clang-format --dry-run on $MODULE_FILES"
+    ../../run-clang-format.py $MODULE_FILES
+fi

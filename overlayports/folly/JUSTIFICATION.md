@@ -36,3 +36,12 @@ the protobuf `VarintParseSlowArm` overlay patch (anonymous-namespace /
 static definitions in headers are incompatible with GMF+textual mixing).
 
 Delete when upstream folly stops using anonymous namespaces in headers.
+
+## supports expression relaxed for Android (added Phase 2.5)
+
+The upstream 2026 port marks Android unsupported (`!android`), which
+broke `./install.sh --android` outright at dependency-install time. This
+monorepo built folly for arm64-android with the pre-2026 baseline, and the
+Android build is a supported product target (Kotlin wrapper) — the overlay
+removes `!android` so vcpkg attempts the build. If folly-on-NDK regresses
+in a future baseline, this is the first place to look.

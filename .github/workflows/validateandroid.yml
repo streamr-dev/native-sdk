@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  install-lint:
+  install:
     if: contains(github.event.head_commit.message, 'androidbuild') || contains(github.event.pull_request.title, 'androidbuild') || github.event_name == 'workflow_dispatch'
     runs-on: macos-26
     steps:
@@ -26,7 +26,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: install
         uses: ./.github/workflows/reusable/cached-install
-      - name: lint
-        run:
-          ./lint.sh
-        shell: bash
+      # No lint step: linting is host-independent and runs on the
+      # validate.yml legs. On an Android tree the import-using test files
+      # have no compile commands (tests are not built on Android — see
+      # StreamrModules.cmake), so clangd produces spurious diagnostics.

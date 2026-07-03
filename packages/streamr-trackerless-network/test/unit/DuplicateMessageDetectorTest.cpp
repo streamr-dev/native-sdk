@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "streamr-trackerless-network/logic/DuplicateMessageDetector.hpp"
+import streamr.trackerlessnetwork;
 
 using streamr::trackerlessnetwork::DuplicateMessageDetector; // NOLINT
 

@@ -42,7 +42,9 @@ set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 26)
 
 add_library(streamr::streamr-logger ALIAS streamr-logger)
 
-if(NOT IOS)
+# Test/example targets import the modules — skip them where modules are
+# unsupported (Android; they are never executed there anyway).
+if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
   add_executable(env_category_tests test/unit/LoggerEnvTest.cpp)
   streamr_enable_imports(env_category_tests)
   target_link_libraries(env_category_tests PRIVATE streamr-logger)
@@ -95,7 +97,9 @@ export(TARGETS streamr-logger
   "find_package(streamr-json CONFIG REQUIRED)\n"
   "include(${CMAKE_BINARY_DIR}/streamr-logger-config-in.cmake)\n")
 
-if(NOT IOS)
+# Test/example targets import the modules — skip them where modules are
+# unsupported (Android; they are never executed there anyway).
+if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
   enable_testing()
   find_package(GTest CONFIG REQUIRED)
 

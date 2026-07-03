@@ -575,7 +575,7 @@ The first `:protos` partition — the pattern rehearsal for 2.4/2.5.
   generated client/server pb stubs), both examples build; downstream
   dht/tn standalone builds unchanged; root tree 307/307; full lint.
 
-## Phase 2.4 — streamr-dht + THE BENCH CHECKPOINT (PR pending)
+## Phase 2.4 — streamr-dht + THE BENCH CHECKPOINT ✅ (PR #32, merged)
 The biggest package migrated, and the checkpoint did exactly what it was
 designed for: **it caught an architecture flaw by measurement and forced a
 (good) design change.**
@@ -631,6 +631,43 @@ before any consolidation gains.
 - Verified: dht 81/81 + utils 49/49 (all suites re-run) through import;
   trackerless-network + proxyclient downstream builds unchanged; root
   tree 307/307; full lint green.
+
+## Phase 2.5 — trackerless-network + proxyclient, FINAL METRICS (PR pending)
+The migration surface is complete: every C++ package that exports an API
+now ships a module.
+- **streamr-trackerless-network**: `:protos` over the NetworkRpc trio
+  (22 messages + 4 enums in the GLOBAL namespace — NetworkRpc.proto
+  declares no package, so the partition uses plain `export using ::X;` —
+  plus 6+6 generated stubs, which the protoc plugin emits in
+  `streamr::protorpc`) + coarse `:all` over the 13 public headers. All 12
+  test TUs flipped to `import streamr.trackerlessnetwork` with ZERO
+  fallout (first package to flip cleanly on the first build).
+- **streamr-libstreamrproxyclient**: deliberately NO module. Its C header
+  `streamrproxyclient.h` is the permanent public ABI; the implementation
+  TU keeps textual includes until consolidation (its internal
+  `LibProxyClientApi.hpp` dies there anyway, and mixing import with an
+  internal header that reaches every stack would re-trigger the clangd
+  false-ODR issue). Verified unchanged: 15/15 tests.
+- New standing gate applied (2.4 lesson): a LOCAL RELEASE build+test of
+  the migrated package (caught nothing this time — the folly/protobuf
+  overlay patches hold).
+
+### FINAL FAÇADE-STAGE METRICS (vs Phase 2.0 baselines, macOS, idle)
+| Metric | Baseline | Final (7 packages migrated) | Target | Verdict |
+|---|---|---|---|---|
+| Clean root build | 102 s | **78 s (−24%)** | −25% | ✅ effectively met (78–88 s across repeats) |
+| `SLogger.hpp` touch | 62–70 s | 58 s (−6…−12%) | −40% | ❌ not yet — consolidation work |
+| `StreamID.hpp` touch | 19 s | 32 s (+68%) | −40% | ❌ regression — BMI-chain latency |
+
+**Honest reading**: the clean-build target is effectively met already at
+the façade stage (test TUs load BMIs instead of re-parsing header
+stacks). The incremental targets are NOT met and cannot be met by the
+façade alone: while headers remain the textual source of truth inside the
+`:all` GMFs, ANY header touch invalidates the package BMI and cascades
+down the module DAG. Consolidation (2.6) is where the incremental wins
+must come from — code moves into partitions, headers disappear, and a
+one-partition edit stops invalidating whole packages. That was always the
+sequencing; the numbers now quantify exactly why consolidation matters.
 
 ## Lint/IDE survival
 - During the façade stage, headers remain the fully-linted source of truth

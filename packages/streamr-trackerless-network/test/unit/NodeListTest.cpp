@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "streamr-trackerless-network/logic/NodeList.hpp"
+import streamr.trackerlessnetwork;
 
 using streamr::trackerlessnetwork::NodeList; // NOLINT
 

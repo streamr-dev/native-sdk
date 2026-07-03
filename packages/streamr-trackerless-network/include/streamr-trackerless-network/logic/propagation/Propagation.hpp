@@ -22,9 +22,10 @@ struct PropagationOptions {
     std::optional<size_t> maxMessages;
 };
 
-constexpr size_t DEFAULT_MAX_MESSAGES = 150; // NOLINT
+inline constexpr size_t DEFAULT_MAX_MESSAGES = 150; // NOLINT
 // NOLINTNEXTLINE
-constexpr std::chrono::milliseconds DEFAULT_TTL = std::chrono::seconds(10);
+inline constexpr std::chrono::milliseconds DEFAULT_TTL =
+    std::chrono::seconds(10);
 
 /**
  * Message propagation logic of a node. Given a message, this class will

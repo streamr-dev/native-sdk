@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "streamr-trackerless-network/logic/ContentDeliveryRpcLocal.hpp"
+import streamr.trackerlessnetwork;
 
 using streamr::trackerlessnetwork::ContentDeliveryRpcLocal; // NOLINT
 
