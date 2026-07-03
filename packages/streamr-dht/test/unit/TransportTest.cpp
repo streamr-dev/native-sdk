@@ -1,5 +1,6 @@
-#include "streamr-dht/transport/Transport.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::transport::Transport; // NOLINT
 

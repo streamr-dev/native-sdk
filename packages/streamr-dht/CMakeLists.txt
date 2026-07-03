@@ -40,9 +40,19 @@ if(NOT TARGET Boost::uuid)
   set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 endif()
 
+# C++ modules support (guards, policies, helpers) — must come after
+# project() because it inspects the compiler id.
+include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
+
 add_library(streamr-dht)
 set_property(TARGET streamr-dht PROPERTY CXX_STANDARD 26)
 add_library(streamr::streamr-dht ALIAS streamr-dht)
+
+# Module façade (MODERNIZATION.md Part 2): 45 partitions mirroring the
+# header tree + :protos over the generated DhtRpc trio.
+file(GLOB STREAMR_DHT_MODULE_UNITS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.cppm)
+streamr_target_module_sources(streamr-dht FILES ${STREAMR_DHT_MODULE_UNITS})
 target_include_directories(streamr-dht 
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>
@@ -54,24 +64,29 @@ target_sources(streamr-dht
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc
     )
 
-target_link_libraries(streamr-dht 
-    INTERFACE streamr::streamr-logger
-    INTERFACE streamr::streamr-eventemitter
+# PUBLIC (was INTERFACE/PRIVATE): the module interface units compile the
+# public headers in their global module fragments, and consumer build
+# trees recompile those units from the export — every dependency the
+# headers reach must be an exported usage requirement.
+target_link_libraries(streamr-dht
+    PUBLIC streamr::streamr-logger
+    PUBLIC streamr::streamr-eventemitter
     PUBLIC streamr::streamr-proto-rpc
-    INTERFACE streamr::streamr-utils
-    PRIVATE protobuf::libprotobuf
-    INTERFACE Boost::uuid
-    INTERFACE Boost::algorithm
-    PRIVATE magic_enum::magic_enum
-    PRIVATE Folly::folly
-    PRIVATE OpenSSL::Crypto
-    PRIVATE LibDataChannel::LibDataChannel
-    INTERFACE ipaddress::ipaddress
+    PUBLIC streamr::streamr-utils
+    PUBLIC protobuf::libprotobuf
+    PUBLIC Boost::uuid
+    PUBLIC Boost::algorithm
+    PUBLIC magic_enum::magic_enum
+    PUBLIC Folly::folly
+    PUBLIC OpenSSL::Crypto
+    PUBLIC LibDataChannel::LibDataChannel
+    PUBLIC ipaddress::ipaddress
     )
 
-export(TARGETS streamr-dht 
+export(TARGETS streamr-dht
     NAMESPACE streamr::
-    FILE streamr-dht-config-in.cmake)
+    FILE streamr-dht-config-in.cmake
+    CXX_MODULES_DIRECTORY streamr-dht-modules)
   
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-dht-config.cmake" 
     "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
@@ -153,13 +168,20 @@ if(NOT IOS)
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
         )
 
-    target_link_libraries(streamr-dht-test-unit 
+    # The tests import streamr.dht (+ sibling modules), so their sources
+    # need module dependency scanning, and imported modules must be linked
+    # directly (BMI usability does not ride transitive linkage).
+    streamr_enable_imports(streamr-dht-test-unit)
+    target_link_libraries(streamr-dht-test-unit
         PUBLIC streamr-dht
-        INTERFACE streamr::streamr-logger
+        PUBLIC streamr::streamr-logger
+        PUBLIC streamr::streamr-eventemitter
+        PUBLIC streamr::streamr-utils
+        PUBLIC streamr::streamr-proto-rpc
         PUBLIC GTest::gtest
         PUBLIC streamr-dht-test-main
         PUBLIC Folly::folly
-        PUBLIC GTest::gmock 
+        PUBLIC GTest::gmock
         PUBLIC GTest::gmock_main
     )
 
@@ -172,9 +194,13 @@ if(NOT IOS)
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
     )
 
-    target_link_libraries(streamr-dht-test-integration 
+    streamr_enable_imports(streamr-dht-test-integration)
+    target_link_libraries(streamr-dht-test-integration
         PUBLIC streamr-dht
-        INTERFACE streamr::streamr-logger
+        PUBLIC streamr::streamr-logger
+        PUBLIC streamr::streamr-eventemitter
+        PUBLIC streamr::streamr-utils
+        PUBLIC streamr::streamr-proto-rpc
         PUBLIC GTest::gtest
         PUBLIC streamr-dht-test-main
     )

@@ -1,6 +1,7 @@
-#include "streamr-dht/helpers/CertificateHelper.hpp"
 #include <gtest/gtest.h>
-#include "streamr-logger/SLogger.hpp"
+
+import streamr.dht;
+import streamr.logger;
 
 using streamr::dht::helpers::CertificateHelper;
 using streamr::logger::SLogger;

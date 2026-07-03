@@ -16,7 +16,7 @@ using streamr::dht::connection::connectionevents::Error;
 using streamr::logger::SLogger;
 using streamr::utils::EnableSharedFromThis;
 
-constexpr size_t maxMessageSize = 1048576;
+inline constexpr size_t maxMessageSize = 1048576;
 
 class WebsocketConnection : public Connection, public EnableSharedFromThis {
 private:

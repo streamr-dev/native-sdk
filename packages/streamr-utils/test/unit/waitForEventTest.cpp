@@ -1,6 +1,5 @@
 #include <tuple>
 #include <gtest/gtest.h>
-#include <streamr-eventemitter/EventEmitter.hpp>
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/Invoke.h>
@@ -8,6 +7,7 @@
 #include <folly/experimental/coro/Timeout.h>
 
 import streamr.utils;
+import streamr.eventemitter;
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;

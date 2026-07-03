@@ -1,5 +1,6 @@
-#include "streamr-dht/connection/IncomingHandshaker.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::connection::IncomingHandshaker; // NOLINT
 

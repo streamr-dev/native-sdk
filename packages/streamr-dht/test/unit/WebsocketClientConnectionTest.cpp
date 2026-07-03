@@ -1,6 +1,6 @@
-#include "streamr-dht/connection/websocket/WebsocketClientConnection.hpp"
 #include <gtest/gtest.h>
-#include <streamr-dht/helpers/Errors.hpp>
+
+import streamr.dht;
 
 using streamr::dht::connection::websocket::WebsocketClientConnection;
 

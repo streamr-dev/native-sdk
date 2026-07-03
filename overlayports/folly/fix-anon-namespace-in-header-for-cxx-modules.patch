@@ -1,0 +1,25 @@
+--- a/folly/fibers/FiberManagerInternal-inl.h
++++ b/folly/fibers/FiberManagerInternal-inl.h
+@@ -33,7 +33,11 @@
+ namespace folly {
+ namespace fibers {
+ 
+-namespace {
++// Named (was anonymous) namespace: internal-linkage function templates in a
++// header collide at codegen ("definition with same mangled name") when the
++// header is reached both through a C++ module's global module fragment and
++// textually in an importing translation unit.
++namespace fiber_manager_internal_detail {
+ 
+ inline FiberManager::Options preprocessOptions(FiberManager::Options opts) {
+   /**
+@@ -55,7 +59,8 @@
+   folly::tryEmplaceWith(result, std::forward<F>(func));
+ }
+ 
+-} // namespace
++} // namespace fiber_manager_internal_detail
++using namespace fiber_manager_internal_detail;
+ 
+ inline void FiberManager::ensureLoopScheduled() {
+   if (isLoopScheduled_) {

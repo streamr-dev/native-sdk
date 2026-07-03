@@ -1,5 +1,6 @@
-#include "streamr-dht/helpers/Offerer.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::helpers::Offerer; // NOLINT
 

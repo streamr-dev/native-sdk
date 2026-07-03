@@ -1,9 +1,13 @@
-#include "streamr-dht/connection/PendingConnection.hpp"
 #include <chrono>
 #include <gtest/gtest.h>
-#include <folly/coro/BlockingWait.h>
-#include "streamr-dht/connection/Connection.hpp"
-#include "streamr-utils/waitForCondition.hpp"
+// Same include path as the module GMFs (the experimental shim): mixing the
+// folly/coro/... and folly/experimental/coro/... spellings of this header
+// between an importing TU and the imported BMIs makes clang see duplicate
+// (unmergeable) definitions with identical mangled names in Release.
+#include <folly/experimental/coro/BlockingWait.h>
+
+import streamr.dht;
+import streamr.utils;
 
 using ::dht::PeerDescriptor;
 using streamr::dht::connection::Connection;

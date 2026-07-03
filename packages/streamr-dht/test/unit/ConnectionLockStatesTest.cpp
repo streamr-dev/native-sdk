@@ -1,5 +1,6 @@
-#include "streamr-dht/connection/ConnectionLockStates.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::connection::ConnectionLockStates; // NOLINT
 

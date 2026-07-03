@@ -45,7 +45,7 @@ struct Connected : Event<std::shared_ptr<WebsocketServerConnection>> {};
 
 using WebsocketServerEvents = std::tuple<websocketserverevents::Connected>;
 
-constexpr size_t defaultMaxMessageSize = 1048576;
+inline constexpr size_t defaultMaxMessageSize = 1048576;
 
 class WebsocketServer : public EventEmitter<WebsocketServerEvents> {
 private:

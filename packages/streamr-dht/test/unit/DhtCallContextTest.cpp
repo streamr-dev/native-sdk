@@ -1,5 +1,6 @@
-#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::rpcprotocol::DhtCallContext; // NOLINT
 

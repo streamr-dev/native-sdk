@@ -22,7 +22,7 @@ struct TlsCertificate {
     std::string cert;
 };
 
-constexpr int rsaKeyLength = 2048;
+inline constexpr int rsaKeyLength = 2048;
 using BIO_ptr = std::unique_ptr<BIO, decltype(&BIO_free)>;
 using X509_ptr = std::unique_ptr<X509, decltype(&X509_free)>;
 using ASN1_TIME_ptr = std::unique_ptr<ASN1_TIME, decltype(&ASN1_STRING_free)>;

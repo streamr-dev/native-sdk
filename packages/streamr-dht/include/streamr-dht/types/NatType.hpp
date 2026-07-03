@@ -4,8 +4,8 @@
 // NOLINTBEGIN
 namespace streamr::dht::types::NatType {
 
-constexpr auto OPEN_INTERNET = "open_internet";
-constexpr auto UNKNOWN = "unknown";
+inline constexpr auto OPEN_INTERNET = "open_internet";
+inline constexpr auto UNKNOWN = "unknown";
 
 } // namespace streamr::dht::types::NatType
 // NOLINTEND

@@ -1,11 +1,8 @@
-#include "streamr-dht/connection/websocket/WebsocketClientConnector.hpp"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
-#include "streamr-dht/Identifiers.hpp"
-#include "streamr-dht/connection/IPendingConnection.hpp"
-#include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
-#include "streamr-dht/transport/Transport.hpp"
+
+import streamr.dht;
 
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;

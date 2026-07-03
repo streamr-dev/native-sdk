@@ -48,27 +48,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
 streamr_add_module_library(streamr-utils
   FILES
     modules/streamr.utils.cppm
-    modules/streamr.utils-AbortController.cppm
-    modules/streamr.utils-AbortableTimers.cppm
-    modules/streamr.utils-BinaryUtils.cppm
-    modules/streamr.utils-Branded.cppm
-    modules/streamr.utils-ENSName.cppm
-    modules/streamr.utils-EnableSharedFromThis.cppm
-    modules/streamr.utils-EthereumAddress.cppm
-    modules/streamr.utils-Ipv4Helper.cppm
-    modules/streamr.utils-ReplayEventEmitterWrapper.cppm
-    modules/streamr.utils-RetryUtils.cppm
-    modules/streamr.utils-SigningUtils.cppm
-    modules/streamr.utils-StreamID.cppm
-    modules/streamr.utils-StreamPartID.cppm
-    modules/streamr.utils-Uuid.cppm
-    modules/streamr.utils-collect.cppm
-    modules/streamr.utils-partition.cppm
-    modules/streamr.utils-runAndWaitForEvents.cppm
-    modules/streamr.utils-toCoroTask.cppm
-    modules/streamr.utils-toEthereumAddressOrENSName.cppm
-    modules/streamr.utils-waitForCondition.cppm
-    modules/streamr.utils-waitForEvent.cppm)
+    modules/streamr.utils-all.cppm)
 add_library(streamr::streamr-utils ALIAS streamr-utils)
 
 target_include_directories(
@@ -156,11 +136,13 @@ if(NOT IOS)
     test/unit/BinaryUtilsTest.cpp
   )
 
-  # The tests import streamr.utils, so their sources need module
-  # dependency scanning.
+  # The tests import streamr.utils (+ streamr.eventemitter), so their
+  # sources need module dependency scanning, and imported modules must be
+  # linked directly (BMI usability does not ride transitive linkage).
   streamr_enable_imports(streamr-utils-test-unit)
   target_link_libraries(streamr-utils-test-unit
     PUBLIC streamr-utils
+    PUBLIC streamr::streamr-eventemitter
     PUBLIC GTest::gtest
     PUBLIC streamr-utils-test-main
   )

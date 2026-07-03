@@ -539,7 +539,7 @@ folly enters the global module fragment; utils is the folly::coro canary.
   when those packages flip (2.4/2.5) and their test TUs load BMIs instead
   of re-parsing the header stack.
 
-## Phase 2.3 — streamr-proto-rpc (PR pending)
+## Phase 2.3 — streamr-proto-rpc ✅ (PR #31, merged)
 The first `:protos` partition — the pattern rehearsal for 2.4/2.5.
 - 9 units: primary + `:protos` (wraps generated `ProtoRpc.pb.h`, exports
   `::protorpc::RpcMessage`/`RpcErrorType` + enumerators via `using enum`)
@@ -574,6 +574,63 @@ The first `:protos` partition — the pattern rehearsal for 2.4/2.5.
 - Verified: 26/26 tests through import (unit + integration incl. the
   generated client/server pb stubs), both examples build; downstream
   dht/tn standalone builds unchanged; root tree 307/307; full lint.
+
+## Phase 2.4 — streamr-dht + THE BENCH CHECKPOINT (PR pending)
+The biggest package migrated, and the checkpoint did exactly what it was
+designed for: **it caught an architecture flaw by measurement and forced a
+(good) design change.**
+
+### What the checkpoint found
+The original per-header façade design (45 dht partitions, each
+GMF-including its header) MULTIPLIED compile costs instead of cutting
+them — every partition re-parsed the folly/protobuf stack, and the BMI
+dependency chain amplified incremental cascades:
+
+| Metric (macOS, idle) | 2.0 baseline | per-header partitions | **coarse partitions (adopted)** |
+|---|---|---|---|
+| Clean root build | 102 s / 108 TUs | 238 s / 197 TUs ❌ | **83 s / ~160 TUs (−19%)** ✅ |
+| `SLogger.hpp` touch | 62–70 s / 48 TUs | 336 s / 117 TUs ❌ | **59 s** ✅ |
+| `StreamID.hpp` touch | 19 s / 10 TUs | 54 s | 28 s (BMI-chain latency; honest regression, small in absolute terms) |
+
+### The design change (applies to ALL packages, done in this phase)
+**Coarse façade partitions**: each package exposes ONE `:all` partition
+(GMF-includes every public header, exports all public names) plus
+`:protos` where generated code exists. dht = `:protos` + `:all`;
+proto-rpc likewise; utils/logger/json collapsed from 21/4/3 partitions to
+one each. The import interface (`import streamr.<pkg>;`) is unchanged.
+Per-header granularity was only ever needed for consolidation-stage code
+placement — it returns then (per package, measured); at the façade stage
+it is pure parse-cost multiplication. The 2.0 plan's architecture
+decision #1 ("one partition per public header") is REVISED accordingly.
+
+With the coarse layout the clean build is already **19% below baseline at
+the façade stage** (test TUs load BMIs instead of parsing header stacks),
+before any consolidation gains.
+
+### Other findings
+- The connection/endpoint include-cycle risk was a NON-ISSUE at the
+  façade stage (partitions don't reference each other); the DAG question
+  moves to consolidation, as planned.
+- The 43-TU dht test flip produced exactly THREE one-line fixes — the
+  fully-qualified using-decl house style matches partition exports well.
+- `:protos` exports the full DhtRpc surface (35 messages, 6 enums via
+  `using enum`, 9+9 generated client/server stubs); the 2.3 protobuf
+  overlay patch held for the 12k-line header.
+- **Host-environment hazard fixed**: `homebrewClang.cmake` injected
+  `$HOMEBREW_PREFIX/include` as standard include dirs into every target;
+  exported module targets baked them in, and consumer-side synthesized
+  BMI compiles ordered them FIRST — a brew-installed folly/fmt silently
+  shadowed the vcpkg ones. The global include dirs are removed (keg clang
+  finds its own headers; all deps come from vcpkg).
+- **Rule hardened**: an import-using TU must not also textually include
+  sibling-package headers that reach the same third-party stacks —
+  clangd's experimental modules support reports false ODR violations
+  (folly) when preamble and BMI views overlap. Flipping the remaining
+  sibling includes to imports fixed all cases; NO new lint exclusions.
+- 6 more constants → `inline constexpr`.
+- Verified: dht 81/81 + utils 49/49 (all suites re-run) through import;
+  trackerless-network + proxyclient downstream builds unchanged; root
+  tree 307/307; full lint green.
 
 ## Lint/IDE survival
 - During the façade stage, headers remain the fully-linted source of truth

@@ -1,10 +1,8 @@
-#include "streamr-dht/connection/Handshaker.hpp"
 #include <memory>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "streamr-dht/connection/Connection.hpp"
-#include "streamr-dht/connection/IPendingConnection.hpp"
-#include "streamr-dht/connection/OutgoingHandshaker.hpp"
+
+import streamr.dht;
 
 using ::dht::HandshakeError;
 using ::dht::PeerDescriptor;

@@ -1,11 +1,11 @@
-#include "streamr-dht/connection/websocket/WebsocketServer.hpp"
 #include <gtest/gtest.h>
-#include "streamr-dht/helpers/Errors.hpp"
 
-using streamr::dht::connection::websocket::TlsCertificateFiles;
+import streamr.dht;
+
 using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketServerConfig;
 using streamr::dht::helpers::WebsocketServerStartError;
+using streamr::dht::types::TlsCertificateFiles;
 
 TEST(WebsocketServerTest, TestStartAndStopServer) {
     WebsocketServerConfig config{

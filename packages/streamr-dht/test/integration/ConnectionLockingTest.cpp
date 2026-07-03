@@ -5,13 +5,10 @@
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Promise.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
-#include "streamr-dht/Identifiers.hpp"
-#include "streamr-dht/connection/ConnectionManager.hpp"
-#include "streamr-dht/transport/FakeTransport.hpp"
-#include "streamr-dht/types/PortRange.hpp"
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-utils/collect.hpp"
-#include "streamr-utils/waitForCondition.hpp"
+
+import streamr.dht;
+import streamr.logger;
+import streamr.utils;
 
 using ::dht::ConnectivityResponse;
 // using ::dht::Message;

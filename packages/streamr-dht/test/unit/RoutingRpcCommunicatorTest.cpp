@@ -1,5 +1,6 @@
-#include "streamr-dht/transport/RoutingRpcCommunicator.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::transport::RoutingRpcCommunicator; // NOLINT
 

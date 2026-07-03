@@ -54,9 +54,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
 streamr_add_module_library(streamr-json
   FILES
     modules/streamr.json.cppm
-    modules/streamr.json-jsonConcepts.cppm
-    modules/streamr.json-toJson.cppm
-    modules/streamr.json-toString.cppm)
+    modules/streamr.json-all.cppm)
 add_library(streamr::streamr-json ALIAS streamr-json)
 
 target_include_directories(
