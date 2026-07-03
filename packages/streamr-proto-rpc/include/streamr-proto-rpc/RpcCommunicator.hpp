@@ -28,7 +28,7 @@ using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 using folly::coro::Task;
 
-constexpr std::chrono::milliseconds defaultRpcRequestTimeout = 5000ms;
+inline constexpr std::chrono::milliseconds defaultRpcRequestTimeout = 5000ms;
 
 // NOLINTBEGIN
 enum class StatusCode { OK, STOPPED, DEADLINE_EXCEEDED, SERVER_ERROR };

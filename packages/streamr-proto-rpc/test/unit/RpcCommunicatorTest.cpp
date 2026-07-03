@@ -2,37 +2,32 @@
 #include <exception>
 #include <thread>
 #include <gtest/gtest.h>
-#include <streamr-proto-rpc/RpcCommunicator.hpp>
 // #include <folly/Portability.h>
 // #include <folly/executors/CPUThreadPoolExecutor.h>
 // #include <folly/executors/ManualExecutor.h>
 // #include <folly/coro/Baton.h>
+#include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/experimental/coro/BlockingWait.h>
-// #include <folly/coro/Collect.h>
-// #include <folly/coro/CurrentExecutor.h>
-// #include <folly/coro/Generator.h>
-// #include <folly/coro/GtestHelpers.h>
-// #include <folly/coro/Mutex.h>
-// #include <folly/coro/Sleep.h>
-// #include <folly/coro/Task.h>
-// #include <folly/io/async/Request.h>
 #include "HelloRpc.pb.h"
-#include "streamr-proto-rpc/Errors.hpp"
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
-#include "streamr-proto-rpc/ServerRegistry.hpp"
+
+import streamr.protorpc;
+import streamr.logger;
 
 namespace streamr::protorpc {
 
 using namespace std::chrono_literals;
+using streamr::logger::SLogger;
 using RpcCommunicatorType = RpcCommunicator<ProtoCallContext>;
 class RpcCommunicatorTest : public ::testing::Test {
 public:
     RpcCommunicatorTest()
         : executor(folly::CPUThreadPoolExecutor(threadPoolSize)) {} // NOLINT
 
-    ~RpcCommunicatorTest() override {
+    ~RpcCommunicatorTest() override try {
         SLogger::warn("Deleting executor of RpcCommunicatorTest");
         SLogger::warn("RpcCommunicatorTypeTest executor deleted");
+    } catch (...) { // NOLINT(bugprone-empty-catch) dtor must not throw;
+                    // body is logging only
     }
 
 protected:
@@ -386,10 +381,19 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
             const RpcMessage& message,
             const std::string& /* requestId */,
             const ProtoCallContext& context) -> void {
+            // The lambda body is fully wrapped in try/catch; the residual
+            // exception-escape finding is a clangd-modules analysis
+            // artifact.
             thread = std::make_shared<std::thread>(
+                // NOLINTNEXTLINE(bugprone-exception-escape)
                 [&communicator1, message, context]() {
-                    SLogger::info("Starting thread for server");
-                    communicator1.handleIncomingMessage(message, context);
+                    try {
+                        SLogger::info("Starting thread for server");
+                        communicator1.handleIncomingMessage(message, context);
+                    } catch (...) { // NOLINT(bugprone-empty-catch) an
+                                    // exception escaping a thread body
+                                    // would std::terminate
+                    }
                 });
         });
     communicator1.setOutgoingMessageCallback(

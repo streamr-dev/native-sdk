@@ -78,6 +78,26 @@ function(streamr_add_module_library TARGET)
     target_compile_features(${TARGET} PUBLIC cxx_std_26)
 endfunction()
 
+# streamr_target_module_sources(<target> FILES <unit.cppm>...)
+#
+# Adds C++ module interface units to an EXISTING library target (used by
+# packages that already compile ordinary sources, e.g. generated protobuf
+# .cc files). Same effect as streamr_add_module_library() minus the
+# add_library().
+function(streamr_target_module_sources TARGET)
+    cmake_parse_arguments(ARG "" "" "FILES" ${ARGN})
+    if(NOT ARG_FILES)
+        message(FATAL_ERROR "streamr_target_module_sources(${TARGET}): FILES is required")
+    endif()
+    target_sources(${TARGET}
+        PUBLIC
+        FILE_SET CXX_MODULES
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/modules
+        FILES ${ARG_FILES})
+    set_target_properties(${TARGET} PROPERTIES CXX_SCAN_FOR_MODULES ON)
+    target_compile_features(${TARGET} PUBLIC cxx_std_26)
+endfunction()
+
 # streamr_enable_imports(<target>)
 #
 # Enables module scanning on an existing target whose ordinary .cpp sources
