@@ -409,6 +409,53 @@ document/replace in 1.4.
 | 2.5 | streamr-trackerless-network, streamr-libstreamrproxyclient | tn `:protos` over NetworkRpc; proxyclient imports only, C header untouched; full iOS XCFramework + Android smoke. **Final metrics** |
 | 2.6 | Consolidation (MANDATORY, interleaved) | Per package, once its last dependent is module-based: move declarations into module purview, delete the package's `include/` tree (grep-enforced). End state: no internal headers anywhere; `#include` only for third-party, generated proto, and the C API header. Finalize lint posture; docs |
 
+## Phase 2.0 — Scaffolding + baselines (PR pending)
+- `cmake/StreamrModules.cmake` (canonical, synced to all packages): Ninja +
+  non-AppleClang guards, CMP0155 NEW, `streamr_add_module_library()`
+  (STATIC + `FILE_SET CXX_MODULES` rooted at `modules/`),
+  `streamr_enable_imports()` for import-using targets, and the
+  `STREAMR_IMPORT_STD` opt-in (OFF; requires the CMake-version-specific
+  experimental UUID to be supplied explicitly). Module scanning stays
+  globally OFF — targets opt in via the helpers, so clangd's compile
+  commands stay clean for non-migrated code.
+- `bench.sh`: `clean` / `incremental [header]` / `trace` modes measuring the
+  root single-tree build; prints host/compiler/parallelism with every run.
+  `trace` uses a separate `build-bench-trace/` tree (shares
+  `build/vcpkg_installed`) + ClangBuildAnalyzer if installed.
+
+### Baseline (macOS, 2026-07-03)
+Apple Silicon dev machine, 10 cores used, Homebrew clang 22.1.8, CMake 4.3,
+Debug, Ninja; root single tree (108 TUs: all tests + generated proto +
+proxyclient). Single runs on an idle machine.
+
+| Metric | Baseline |
+|---|---|
+| Clean build | configure 8 s + build **102 s** |
+| Incremental: touch `streamr-utils/StreamID.hpp` | 10 TUs, **19 s** |
+| Incremental: touch `streamr-logger/SLogger.hpp` | 48 TUs, **62–70 s** |
+| Compile CPU split (`-ftime-trace`) | frontend parse **859 s** vs backend codegen **61 s** → **93% parsing** |
+
+ClangBuildAnalyzer expensive headers (cumulative parse, count):
+1. `DhtRpc.pb.h` **96.0 s** (33×, avg 2.9 s) — becomes `streamr.dht:protos`
+2. `gtest/gtest.h` 84.3 s (87×) — stays `#include` (macros)
+3. `SLogger.hpp` **80.8 s** (47×) — becomes a `streamr.logger` partition
+4. `Logger.hpp` 66.4 s (50×) — ditto
+5. `ConnectionManager.hpp` 38.2 s (4×, **avg 9.5 s per inclusion**)
+6. `RpcCommunicator.hpp` 34.7 s (21×)
+7. `Identifiers.hpp` 31.2 s (31×)
+
+Top template-instantiation sets (nlohmann parse ~22 s, `std::format` ~13 s,
+magic_enum ~13 s) — instantiation cost that modules will NOT move (recorded
+so post-migration numbers are read fairly).
+
+The data confirms the plan's premise: >90% of compile CPU is repeated
+header parsing, and the top of the expensive list is exactly the
+`.pb.h`/streamr-header stack the partitions wrap.
+
+- Linux and iOS baselines: not yet captured (macOS dev iteration is the
+  primary metric). Capture the Linux numbers on the self-hosted arm64 box
+  and an iOS build-only timing before the Phase 2.4 checkpoint.
+
 ## Lint/IDE survival
 - During the façade stage, headers remain the fully-linted source of truth
   (`lint.sh` globs only `*.hpp/*.cpp`); `.cppm` added to clang-format only.

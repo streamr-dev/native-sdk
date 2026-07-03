@@ -13,7 +13,7 @@
 set -e
 cd "$(dirname "$0")"
 
-SYNCED_FILES="homebrewClang.cmake monorepoPackage.cmake"
+SYNCED_FILES="homebrewClang.cmake monorepoPackage.cmake StreamrModules.cmake"
 
 MODE_CHECK=false
 if [ "$1" = "--check" ]; then
