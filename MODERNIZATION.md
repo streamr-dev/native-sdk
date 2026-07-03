@@ -305,11 +305,11 @@ document/replace in 1.4.
   which the iOS deployment target requires (`macos-latest` still maps to
   macOS 15). `ubuntu-26.04` is still a preview image → Linux stays on
   `ubuntu-latest` (24.04); revisit when GA.
-- **Scheduled iOS build**: validateios.yml gains a weekly cron (Mon 05:00
-  UTC) + `workflow_dispatch`, so the iOS toolchain path cannot silently rot
-  between keyword-triggered runs (runner image, SDK and Homebrew LLVM all
-  move underneath us). The XCFramework is uploaded as a build artifact
-  (30-day retention). validateandroid.yml gains `workflow_dispatch`.
+- **iOS/Android manual triggers**: validateios.yml and validateandroid.yml
+  gain `workflow_dispatch` (manual run without commit-message keywords).
+  No scheduled/timed runs (owner decision, 2026-07: no cron jobs in this
+  repo). The iOS XCFramework is uploaded as a build artifact (30-day
+  retention) on every iOS workflow run.
 - **README**: Xcode 26 requirement stated in prerequisites; new
   per-platform C++26 feature-availability section (Homebrew/apt libc++ 22
   on macOS/Linux vs iOS SDK libc++ availability-gated by the deployment
