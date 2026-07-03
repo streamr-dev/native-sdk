@@ -20,9 +20,14 @@ fi
 
 SIGNING_OVERRIDES=()
 if [ -n "$IOS_DEVELOPMENT_TEAM" ]; then
+    # The project's bundle identifiers are App IDs registered to the
+    # organization team, so another team cannot register them — suffix them
+    # with the team ID to get identifiers the override team can claim.
+    # $(inherited) resolves per target, keeping app and test bundle unique.
     SIGNING_OVERRIDES=(
         "DEVELOPMENT_TEAM=$IOS_DEVELOPMENT_TEAM"
         "CODE_SIGN_STYLE=Automatic"
+        "PRODUCT_BUNDLE_IDENTIFIER=\$(inherited).$IOS_DEVELOPMENT_TEAM"
         "-allowProvisioningDeviceRegistration"
     )
 fi
@@ -41,7 +46,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Process results
-RESULT=$(xcrun xcresulttool get --format json --path build/ios/TestResults.xcresult)
+# --legacy: Xcode 16+ requires it for the old object/JSON output format
+RESULT=$(xcrun xcresulttool get object --legacy --format json --path build/ios/TestResults.xcresult)
 
 # Check if xcresulttool was successful
 if [ $? -ne 0 ]; then
