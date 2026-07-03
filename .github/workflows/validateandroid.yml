@@ -33,7 +33,9 @@ jobs:
           echo "ANDROID_NDK=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
-          "$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/darwin-arm64/bin/clang" --version | head -1
+          # NB: the prebuilt dir is named darwin-x86_64 even on ARM Macs
+          # (universal binaries under the legacy name).
+          "$ANDROID_NDK_LATEST_HOME"/toolchains/llvm/prebuilt/darwin-*/bin/clang --version | head -1
         shell: bash
       - name: install
         uses: ./.github/workflows/reusable/cached-install
