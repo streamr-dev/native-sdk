@@ -657,21 +657,20 @@ now ships a module.
      `supports` expression → `./install.sh --android` failed outright at
      dependency install. The folly overlay re-allows Android
      (JUSTIFICATION.md updated); **folly 2026 builds fine on the NDK**.
-  2. **The NDK's clang (18/19) cannot build our modules** — observed:
-     `import streamr.json` fails to provide the `toJson` overload set
-     (known pre-clang-19/20 `export using` overload bugs). Resolution:
-     `STREAMR_MODULES_SUPPORTED=OFF` on Android in StreamrModules.cmake —
-     Android builds libraries textually from headers (the façade keeps
-     them as source of truth), module units are skipped
-     (`streamr_add_module_library` falls back to STATIC + stub source so
-     PUBLIC usage requirements stay identical), and test/example targets
-     (which import, and are never executed on Android) are not built.
-     The Android workflow also stops running lint (host-independent;
-     covered by validate.yml; import-using test files have no compile
-     commands on an Android tree).
-     UPDATE (2.6): the failing NDK was the CI runner's default r27
-     (clang 18.0.2); the gate is now version-based and Android CI uses
-     NDK r29 (clang 21) — see the 2.6 memo.
+  2. **`import streamr.json` failed on Android** — every imported name
+     reported as undeclared (the `toJson` overload set etc.). Diagnosed
+     AT THE TIME as NDK-clang `export using` overload bugs; resolved by
+     forcing `STREAMR_MODULES_SUPPORTED=OFF` on Android (libraries built
+     textually from headers, module units skipped via the STATIC +
+     stub-source fallback so PUBLIC usage requirements stay identical,
+     import-using test/example targets not built). The Android workflow
+     also stopped running lint (host-independent; covered by
+     validate.yml; import-using test files have no compile commands on
+     an Android tree).
+     CORRECTED in 2.6: the compiler was never the problem — the real
+     cause was a `-pthread` BMI configuration mismatch (see the 2.6
+     memo). Android now builds the modules on NDK r27+ (clang >= 18);
+     the textual fallback remains only for older NDKs.
 
 ### FINAL FAÇADE-STAGE METRICS (vs Phase 2.0 baselines, macOS, idle)
 | Metric | Baseline | Final (7 packages migrated) | Target | Verdict |
@@ -707,20 +706,30 @@ generated proto, and the C API header. Consolidation is what delivers the
 so-far-unmet incremental-rebuild targets (a partition edit stops
 invalidating whole-package BMIs).
 
-**Consolidation is currently BLOCKED by a platform constraint discovered
-at the 2.5 Android gate**: the NDK's clang cannot build the modules, so
-Android compiles the libraries textually FROM THE HEADERS that
-consolidation would delete. Deleting internal headers breaks the Android
-build outright — including the shipping artifact (proxyclient `.so` /
-Kotlin wrapper).
+**The 2.5 Android blocker is RESOLVED (2.6).** The Phase 2.5 failure
+(`import streamr.json` → every imported name "undeclared") was NOT an
+NDK-clang capability gap. Root cause, found by reproducing the CI
+failure locally and bisecting against NDK r27/r28/r29: the import-using
+test TUs compile with `-pthread` (inherited from GTest's
+`Threads::Threads`) while the module libraries' BMIs were compiled
+without it; on Android `-pthread` toggles a language option that clang
+validates when loading a module file
+(`-Wmodule-file-config-mismatch` — the FIRST error in the log; the
+"undeclared identifier" flood is its cascade), so the BMI silently
+fails to load. The raw NDK compilers (clang 18, 19 and 21) all compile
+and import the façade modules correctly when invoked by hand. Fix: the
+module-library helpers in StreamrModules.cmake make `-pthread` a PUBLIC
+compile option on Android, so the BMI and every importer always agree.
+Android CI keeps using the runner's latest stable NDK (r29, clang 21);
+`STREAMR_MODULES_SUPPORTED` keeps a version floor at the oldest
+verified NDK clang (18 = r27), with the textual fallback below it.
 
 ### Preconditions for starting consolidation
-1. **A modules-capable NDK clang on Android.** The 2.5 failure was on the
-   CI runner's default NDK r27 (clang 18.0.2). NDK r29 (latest stable,
-   Oct 2025) ships clang 21 — the Android CI now uses r29 and
-   StreamrModules.cmake gates Android modules on NDK clang >= 21
-   (validated on the Phase 2.6 PR's androidbuild leg). Older NDKs fall
-   back to the textual build automatically.
+1. ~~A modules-capable NDK on Android~~ **RESOLVED (2.6)** — the 2.5
+   failure was the `-pthread` BMI mismatch above, not the compiler.
+   Android builds the façade modules on NDK r27+ (verified locally on
+   r27 and r29 for streamr-json + streamr-eventemitter, and on the
+   Phase 2.6 PR's androidbuild leg for the full monorepo).
 2. clangd modules support matures enough to lint purview code (today it
    mis-unifies preamble/BMI types; with code in partitions there is no
    header fallback for the linter — coverage would regress from "full"
@@ -743,9 +752,10 @@ per-package with a grep-enforced "nothing includes them" gate.
 ### Interim posture (adopted now)
 The façade stage is COMPLETE and delivers: uniform `import streamr.<pkg>`
 consumption, −24% clean builds, 250+ tests through import, and module
-infrastructure exercised on macOS/Linux/iOS. Headers remain the linted
-source of truth; Android remains textual. This is a stable resting point
-— nothing rots by waiting for the NDK.
+infrastructure exercised on macOS/Linux/iOS/Android. Headers remain the
+linted source of truth. With the Android blocker resolved, consolidation
+is gated only by preconditions 2 (clangd lint coverage of purview code)
+and 3 (dht partition DAG). This is a stable resting point.
 
 ## Success metrics (measured macOS + Linux, end of Phase 2.5)
 - ≥25% clean-build wall-clock reduction (dev build with tests).

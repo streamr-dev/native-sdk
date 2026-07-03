@@ -24,10 +24,11 @@ jobs:
           fetch-depth: 0
           submodules: true
           token: ${{ secrets.GITHUB_TOKEN }}
-      # The runner's default ANDROID_NDK is an older LTS (r27 = clang 18,
-      # whose C++ modules support is too immature). Use the latest stable
-      # NDK preinstalled on the image (r29 = clang 21) — StreamrModules.cmake
-      # enables the modules on Android when the NDK clang is >= 21.
+      # The runner's default ANDROID_NDK is an older LTS (r27). Use the
+      # latest stable NDK preinstalled on the image (r29 = clang 21).
+      # Modules build on r27+ too (StreamrModules.cmake floors at NDK
+      # clang 18) — building with the latest stable is hygiene, not a
+      # modules requirement.
       - name: use latest stable NDK
         run: |
           echo "ANDROID_NDK=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
