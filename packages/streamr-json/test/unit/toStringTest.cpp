@@ -7,10 +7,10 @@
 #include <vector>
 #include <gtest/gtest.h>
 
-#include "streamr-json/toString.hpp"
-
 #include "TestClass.hpp"
 #include "WeatherData.hpp"
+
+import streamr.json;
 
 using streamr::json::toString;
 

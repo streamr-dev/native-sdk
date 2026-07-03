@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include "streamr-json/toJson.hpp"
+
+import streamr.json;
 
 using streamr::json::toJson; // NOLINT
 

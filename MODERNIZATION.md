@@ -409,7 +409,7 @@ document/replace in 1.4.
 | 2.5 | streamr-trackerless-network, streamr-libstreamrproxyclient | tn `:protos` over NetworkRpc; proxyclient imports only, C header untouched; full iOS XCFramework + Android smoke. **Final metrics** |
 | 2.6 | Consolidation (MANDATORY, interleaved) | Per package, once its last dependent is module-based: move declarations into module purview, delete the package's `include/` tree (grep-enforced). End state: no internal headers anywhere; `#include` only for third-party, generated proto, and the C API header. Finalize lint posture; docs |
 
-## Phase 2.0 — Scaffolding + baselines (PR pending)
+## Phase 2.0 — Scaffolding + baselines ✅ (PR #28, merged)
 - `cmake/StreamrModules.cmake` (canonical, synced to all packages): Ninja +
   non-AppleClang guards, CMP0155 NEW, `streamr_add_module_library()`
   (STATIC + `FILE_SET CXX_MODULES` rooted at `modules/`),
@@ -455,6 +455,41 @@ header parsing, and the top of the expensive list is exactly the
 - Linux and iOS baselines: not yet captured (macOS dev iteration is the
   primary metric). Capture the Linux numbers on the self-hosted arm64 box
   and an iOS build-only timing before the Phase 2.4 checkpoint.
+
+## Phase 2.1 — Canary: streamr-eventemitter + streamr-json (PR pending)
+First real modules. Both packages carry the designed façade shape: one
+`.cppm` partition per public header (header `#include`d in the global
+module fragment, public names re-exported with `export using`), a primary
+interface unit `export import`ing the partitions, INTERFACE→STATIC via
+`streamr_add_module_library()`, package tests + example flipped to
+`import streamr.<pkg>;`.
+- **All gates passed on macOS:**
+  - Standalone package builds produce BMIs + archives; `export(TARGETS …
+    CXX_MODULES_DIRECTORY …)` generates the module-consumption info
+    (smoke-test gate — no fallback needed).
+  - Downstream `find_package` + `#include` consumers (streamr-utils
+    standalone) build unchanged — the GMF façade is ODR-safe as designed.
+  - Root tree: full build + **307/307 tests** (16 eventemitter + 57 json of
+    them now run through `import`).
+  - **clangd canary came out BETTER than planned**: clangd 22 lints
+    import-using `.cpp` files through the CMake-generated module maps —
+    no experimental flag, no lint exclusions. The planned fallback
+    (excluding import-using files) was not needed.
+- **Findings for the next phases:**
+  - `import` does not leak transitive std includes the way textual
+    inclusion did — flipped TUs must include what they use (test needed
+    `<list>`/`<tuple>`; the example needed `<string>`). Expect a small
+    include-adding pass with every package flip.
+  - One genuine clangd-modules quirk: the *constrained*
+    `std::string(std::string_view)` constructor template is not resolved
+    in import-using files (plain constructors are fine; the compiler
+    accepts either). Worked around in the example; watch for recurrence.
+  - clangd's diagnostics in import-using files can carry module-expanded
+    line numbers in secondary notes — primary locations are correct.
+- Lint posture per plan: `.cppm` files get clang-format only (package
+  lint.sh extended); headers remain the fully-linted source of truth.
+- iOS gate via the PR's `iosbuild` keyword (module lib builds; tests are
+  host-only). Android modules validation lands with its phase-2.5 gate.
 
 ## Lint/IDE survival
 - During the façade stage, headers remain the fully-linted source of truth

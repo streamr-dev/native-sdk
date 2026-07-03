@@ -23,12 +23,22 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 project(streamr-eventemitter CXX)
 
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-      
-add_library(streamr-eventemitter INTERFACE)
+
+# C++ modules support (guards, policies, helpers) — must come after
+# project() because it inspects the compiler id.
+include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
+
+# Module façade (MODERNIZATION.md Part 2): the package is now a STATIC
+# library whose module interface units re-export the public headers.
+# #include consumers are unaffected; import consumers get the BMIs.
+streamr_add_module_library(streamr-eventemitter
+  FILES
+    modules/streamr.eventemitter.cppm
+    modules/streamr.eventemitter-EventEmitter.cppm)
 add_library(streamr::streamr-eventemitter ALIAS streamr-eventemitter)
 
 target_include_directories(
-  streamr-eventemitter INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  streamr-eventemitter PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
 # TODO: Is there a better way to do this?
@@ -36,9 +46,13 @@ target_include_directories(
 # - At least parse the deps from the vcpkg.eventemitter file and use them to find_package() in this file and to add the
 # find_package() calls to the wrapper
 
+# CXX_MODULES_DIRECTORY: the export now also carries the C++ module
+# interface information so that a standalone downstream build can compile
+# BMIs from this build tree (Phase 2.1 smoke-test gate).
 export(TARGETS streamr-eventemitter
   NAMESPACE streamr::
-  FILE streamr-eventemitter-config-in.cmake)
+  FILE streamr-eventemitter-config-in.cmake
+  CXX_MODULES_DIRECTORY streamr-eventemitter-modules)
 
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-eventemitter-config.cmake" 
   "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
@@ -48,7 +62,10 @@ if(NOT IOS)
   find_package(GTest CONFIG REQUIRED)
 
   add_executable(streamr-eventemitter-test-unit test/unit/EventEmitterTest.cpp)
-  target_link_libraries(streamr-eventemitter-test-unit 
+  # The test imports streamr.eventemitter, so its sources need module
+  # dependency scanning.
+  streamr_enable_imports(streamr-eventemitter-test-unit)
+  target_link_libraries(streamr-eventemitter-test-unit
     PUBLIC streamr-eventemitter
     PUBLIC GTest::gtest 
     PUBLIC GTest::gtest_main 
