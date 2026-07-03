@@ -32,9 +32,28 @@ if(NOT TARGET Boost::uuid)
   set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 endif()
 
+# C++ modules support (guards, policies, helpers) — must come after
+# project() because it inspects the compiler id.
+include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
+
 add_library(streamr-proto-rpc)
 set_property(TARGET streamr-proto-rpc PROPERTY CXX_STANDARD 26)
 add_library(streamr::streamr-proto-rpc ALIAS streamr-proto-rpc)
+
+# Module façade (MODERNIZATION.md Part 2), added to the existing library
+# (it also compiles the generated ProtoRpc.pb.cc). :protos wraps the
+# generated header; the other partitions mirror the public headers.
+streamr_target_module_sources(streamr-proto-rpc
+  FILES
+    modules/streamr.protorpc.cppm
+    modules/streamr.protorpc-protos.cppm
+    modules/streamr.protorpc-Errors.cppm
+    modules/streamr.protorpc-ProtoCallContext.cppm
+    modules/streamr.protorpc-RpcCommunicator.cppm
+    modules/streamr.protorpc-RpcCommunicatorClientApi.cppm
+    modules/streamr.protorpc-RpcCommunicatorServerApi.cppm
+    modules/streamr.protorpc-ServerRegistry.cppm
+    modules/streamr.protorpc-StreamPrinter.cppm)
 target_include_directories(streamr-proto-rpc 
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>
@@ -45,19 +64,24 @@ target_include_directories(streamr-proto-rpc
 target_sources(streamr-proto-rpc 
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc)
 
-target_link_libraries(streamr-proto-rpc 
-    INTERFACE streamr::streamr-logger
-    INTERFACE streamr::streamr-eventemitter
-    INTERFACE streamr::streamr-utils
-    PRIVATE protobuf::libprotobuf
-    INTERFACE Boost::uuid
-    PRIVATE magic_enum::magic_enum
+# PUBLIC (was INTERFACE/PRIVATE): the module interface units compile the
+# public headers in their global module fragments, and consumer build
+# trees recompile those units from the export — every dependency the
+# headers reach must be an exported usage requirement.
+target_link_libraries(streamr-proto-rpc
+    PUBLIC streamr::streamr-logger
+    PUBLIC streamr::streamr-eventemitter
+    PUBLIC streamr::streamr-utils
+    PUBLIC protobuf::libprotobuf
+    PUBLIC Boost::uuid
+    PUBLIC magic_enum::magic_enum
     PUBLIC Folly::folly
     )
 
-export(TARGETS streamr-proto-rpc 
+export(TARGETS streamr-proto-rpc
     NAMESPACE streamr::
-    FILE streamr-proto-rpc-config-in.cmake)
+    FILE streamr-proto-rpc-config-in.cmake
+    CXX_MODULES_DIRECTORY streamr-proto-rpc-modules)
   
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-proto-rpc-config.cmake" 
     "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
@@ -104,15 +128,20 @@ if(NOT IOS)
         test/unit/RpcCommunicatorTest.cpp
     )
 
-    target_include_directories(streamr-proto-rpc-test-unit 
+    streamr_enable_imports(streamr-proto-rpc-test-unit)
+    target_include_directories(streamr-proto-rpc-test-unit
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/proto>
     )
 
-    target_link_libraries(streamr-proto-rpc-test-unit 
+    target_link_libraries(streamr-proto-rpc-test-unit
         PUBLIC streamr-proto-rpc
-        PUBLIC GTest::gtest 
+        # Imported modules are usable only by DIRECT consumers: a target
+        # whose sources `import streamr.logger;` must link the imported
+        # target itself (transitive linkage does not propagate BMIs).
+        PUBLIC streamr::streamr-logger
+        PUBLIC GTest::gtest
         PUBLIC streamr-proto-rpc-test-main
-        PUBLIC GTest::gmock 
+        PUBLIC GTest::gmock
         PUBLIC Folly::folly
     )
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
@@ -128,15 +157,19 @@ if(NOT IOS)
         test/integration/ProtoRpcTest.cpp
     )
 
-    target_include_directories(streamr-proto-rpc-test-integration 
+    streamr_enable_imports(streamr-proto-rpc-test-integration)
+    target_include_directories(streamr-proto-rpc-test-integration
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/proto>
     )
 
-    target_link_libraries(streamr-proto-rpc-test-integration 
+    target_link_libraries(streamr-proto-rpc-test-integration
         PUBLIC streamr-proto-rpc
-        PUBLIC GTest::gtest 
-        PUBLIC streamr-proto-rpc-test-main 
-        PUBLIC GTest::gmock 
+        # Direct links for directly-imported modules (see the unit test).
+        PUBLIC streamr::streamr-logger
+        PUBLIC streamr::streamr-eventemitter
+        PUBLIC GTest::gtest
+        PUBLIC streamr-proto-rpc-test-main
+        PUBLIC GTest::gmock
         PUBLIC Folly::folly
     )
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
@@ -154,7 +187,8 @@ if(NOT IOS)
         PUBLIC Folly::folly
     )
 
-    target_include_directories(streamr-proto-rpc-example-hello 
+    streamr_enable_imports(streamr-proto-rpc-example-hello)
+    target_include_directories(streamr-proto-rpc-example-hello
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/examples/hello/proto>
     )
 
@@ -168,6 +202,7 @@ if(NOT IOS)
         PUBLIC Folly::folly
     )
 
+    streamr_enable_imports(streamr-proto-rpc-example-routed-hello)
     target_include_directories(streamr-proto-rpc-example-routed-hello
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/examples/routed-hello/proto>
     )

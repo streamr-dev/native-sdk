@@ -491,7 +491,7 @@ interface unit `export import`ing the partitions, INTERFACE→STATIC via
 - iOS gate via the PR's `iosbuild` keyword (module lib builds; tests are
   host-only). Android modules validation lands with its phase-2.5 gate.
 
-## Phase 2.2 — streamr-logger + streamr-utils (PR pending)
+## Phase 2.2 — streamr-logger + streamr-utils ✅ (PR #30, merged)
 folly enters the global module fragment; utils is the folly::coro canary.
 - **streamr-logger**: 4 partitions (Logger, LoggerImpl, SLogger,
   StreamrLogLevel) + primary unit. folly logging machinery in the GMF
@@ -538,6 +538,42 @@ folly enters the global module fragment; utils is the folly::coro canary.
   trackerless-network) still `#include` them; the measured win arrives
   when those packages flip (2.4/2.5) and their test TUs load BMIs instead
   of re-parsing the header stack.
+
+## Phase 2.3 — streamr-proto-rpc (PR pending)
+The first `:protos` partition — the pattern rehearsal for 2.4/2.5.
+- 9 units: primary + `:protos` (wraps generated `ProtoRpc.pb.h`, exports
+  `::protorpc::RpcMessage`/`RpcErrorType` + enumerators via `using enum`)
+  + 7 partitions mirroring the public headers. The module surface is
+  added to the EXISTING static library (it also compiles the generated
+  `.pb.cc`) via the new `streamr_target_module_sources()` helper.
+- **protobuf is not GMF-clean — overlay patch required**: any protobuf
+  header in a global module fragment fails on arm64 under Clang 22
+  ("no matching function for call to 'VarintParseSlowArm'"): the helper
+  overloads are `static` (TU-local), and implicit template instantiation
+  in module units happens in purview context where TU-local GMF entities
+  are unusable. Fixed with a one-word overlay patch (`static` →
+  `inline`, ODR-safe) — `overlayports/protobuf/` with JUSTIFICATION.md;
+  first overlay added since the 1.3 cleanup (now 4). Found via minimal
+  repro at the cheapest possible phase — dht's three big pb.h files
+  would have hit the same wall in 2.4.
+- **Imported-target modules are usable only by DIRECT consumers**: a
+  target whose sources `import streamr.logger;` must link
+  `streamr::streamr-logger` itself — BMI usability does not propagate
+  through a native target's transitive linkage. (Good hygiene anyway:
+  direct dependency for direct import.)
+- **Export-alias rule established**: partitions re-export aliases the
+  package declares for types in its API signatures (`RpcMessage`,
+  `RpcErrorType`, `Any`, `Empty`); incidental convenience aliases
+  (`SLogger`, `Task`) are NOT exported — importing TUs import the owning
+  module instead.
+- Library deps flipped INTERFACE/PRIVATE → PUBLIC (consumer-side BMI
+  compilation needs the full usage requirements, including protobuf and
+  magic_enum include dirs). 2 more constants → `inline constexpr`.
+- The plan's "extern C test export" gate: no `extern "C"` exists in this
+  package's sources (stale plan note; verified by grep).
+- Verified: 26/26 tests through import (unit + integration incl. the
+  generated client/server pb stubs), both examples build; downstream
+  dht/tn standalone builds unchanged; root tree 307/307; full lint.
 
 ## Lint/IDE survival
 - During the façade stage, headers remain the fully-linted source of truth

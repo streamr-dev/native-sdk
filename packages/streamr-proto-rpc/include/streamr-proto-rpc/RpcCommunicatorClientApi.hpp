@@ -23,7 +23,7 @@ using folly::coro::Task;
 using streamr::utils::Branded;
 using streamr::utils::Uuid;
 
-constexpr size_t threadPoolSize = 20;
+inline constexpr size_t threadPoolSize = 20;
 
 template <typename CallContextType, typename OutgoingMessageCallbackType>
 class RpcCommunicatorClientApi {

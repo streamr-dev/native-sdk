@@ -5,8 +5,8 @@
 #include "RoutedHelloRpc.client.pb.h"
 #include "RoutedHelloRpc.pb.h"
 #include "RoutedHelloRpc.server.pb.h"
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
-#include "streamr-proto-rpc/RpcCommunicator.hpp"
+
+import streamr.protorpc;
 
 using ::RoutedHelloResponse;
 using streamr::protorpc::ProtoCallContext;

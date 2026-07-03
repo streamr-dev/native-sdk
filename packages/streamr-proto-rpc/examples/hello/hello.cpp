@@ -4,8 +4,8 @@
 #include "HelloRpc.client.pb.h"
 #include "HelloRpc.pb.h"
 #include "HelloRpc.server.pb.h"
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
-#include "streamr-proto-rpc/RpcCommunicator.hpp"
+
+import streamr.protorpc;
 
 using streamr::protorpc::HelloRpcService;
 using streamr::protorpc::HelloRpcServiceClient;

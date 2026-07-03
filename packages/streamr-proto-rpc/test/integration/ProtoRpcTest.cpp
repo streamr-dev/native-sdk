@@ -1,27 +1,19 @@
+#include <future>
+#include <string>
 #include <gtest/gtest.h>
-#include <streamr-proto-rpc/RpcCommunicator.hpp>
-// #include <folly/Portability.h>
-// #include <folly/executors/CPUThreadPoolExecutor.h>
-// #include <folly/executors/ManualExecutor.h>
-// #include <folly/coro/Baton.h>
 #include <folly/experimental/coro/BlockingWait.h>
-// #include <folly/coro/Collect.h>
-// #include <folly/coro/CurrentExecutor.h>
-// #include <folly/coro/Generator.h>
-// #include <folly/coro/GtestHelpers.h>
-// #include <folly/coro/Mutex.h>
-// #include <folly/coro/Sleep.h>
-// #include <folly/coro/Task.h>
-// #include <folly/io/async/Request.h>
 #include "HelloRpc.client.pb.h"
 #include "TestProtos.client.pb.h"
 #include "WakeUpRpc.client.pb.h"
 #include "WakeUpRpc.server.pb.h"
-#include "streamr-eventemitter/EventEmitter.hpp"
-#include "streamr-proto-rpc/ProtoCallContext.hpp"
+
+import streamr.protorpc;
+import streamr.logger;
+import streamr.eventemitter;
 
 namespace streamr::protorpc {
 
+using streamr::logger::SLogger;
 using RpcCommunicatorType = RpcCommunicator<ProtoCallContext>;
 
 template <typename T>
