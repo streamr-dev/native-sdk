@@ -1,10 +1,11 @@
-#include "streamr-utils/runAndWaitForEvents.hpp"
 #include <chrono>
 #include <thread>
 #include <tuple>
 #include <gtest/gtest.h>
 #include <folly/experimental/coro/Timeout.h>
 #include "streamr-eventemitter/EventEmitter.hpp"
+
+import streamr.utils;
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;

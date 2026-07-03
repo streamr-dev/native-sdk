@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "streamr-utils/StreamID.hpp"
+import streamr.utils;
 
 using streamr::utils::StreamID; // NOLINT
 

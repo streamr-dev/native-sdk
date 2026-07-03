@@ -1,5 +1,8 @@
+#include <string>
+#include <variant>
 #include <gtest/gtest.h>
-#include <streamr-utils/toEthereumAddressOrENSName.hpp>
+
+import streamr.utils;
 
 using streamr::utils::EthereumAddress;
 using streamr::utils::toEthereumAddressOrENSName;
@@ -8,16 +11,12 @@ TEST(toEthereumAddressOrENSNameTest, shouldReturnEthereumAddress) {
     const std::string ethereumAddress =
         "0x1234567890123456789012345678901234567890";
     const auto expected = EthereumAddress{ethereumAddress};
-    std::visit(
-        [&](const auto& result) {
-            if constexpr (
-                std::is_same_v<
-                    std::decay_t<decltype(result)>,
-                    EthereumAddress>) {
-                EXPECT_EQ(result, expected);
-            } else {
-                FAIL() << "Expected EthereumAddress, but got ENSName";
-            }
-        },
-        toEthereumAddressOrENSName(ethereumAddress));
+    // holds_alternative/get instead of std::visit with a generic lambda:
+    // clangd's (still experimental) modules support misjudges generic-lambda
+    // visitors as non-exhaustive in import-using files (the compiler is
+    // fine with either form).
+    const auto result = toEthereumAddressOrENSName(ethereumAddress);
+    ASSERT_TRUE(std::holds_alternative<EthereumAddress>(result))
+        << "Expected EthereumAddress, but got ENSName";
+    EXPECT_EQ(std::get<EthereumAddress>(result), expected);
 }

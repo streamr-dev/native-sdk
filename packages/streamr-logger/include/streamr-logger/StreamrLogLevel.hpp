@@ -57,7 +57,8 @@ using StreamrLogLevel = std::variant<
     streamrloglevel::Error,
     streamrloglevel::Fatal>;
 
-constexpr StreamrLogLevel systemDefaultLogLevel = streamrloglevel::Info{};
+inline constexpr StreamrLogLevel systemDefaultLogLevel =
+    streamrloglevel::Info{};
 template <typename T>
 concept StreamrLogLevelConcept = std::is_same_v<T, StreamrLogLevel>;
 

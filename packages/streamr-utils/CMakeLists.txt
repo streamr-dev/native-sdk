@@ -38,11 +38,41 @@ if(NOT TARGET Boost::endian)
 endif()
 
 
-add_library(streamr-utils INTERFACE)
+# C++ modules support (guards, policies, helpers) — must come after
+# project() because it inspects the compiler id.
+include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
+
+# Module façade (MODERNIZATION.md Part 2): the package is now a STATIC
+# library whose module interface units re-export the public headers.
+# #include consumers are unaffected; import consumers get the BMIs.
+streamr_add_module_library(streamr-utils
+  FILES
+    modules/streamr.utils.cppm
+    modules/streamr.utils-AbortController.cppm
+    modules/streamr.utils-AbortableTimers.cppm
+    modules/streamr.utils-BinaryUtils.cppm
+    modules/streamr.utils-Branded.cppm
+    modules/streamr.utils-ENSName.cppm
+    modules/streamr.utils-EnableSharedFromThis.cppm
+    modules/streamr.utils-EthereumAddress.cppm
+    modules/streamr.utils-Ipv4Helper.cppm
+    modules/streamr.utils-ReplayEventEmitterWrapper.cppm
+    modules/streamr.utils-RetryUtils.cppm
+    modules/streamr.utils-SigningUtils.cppm
+    modules/streamr.utils-StreamID.cppm
+    modules/streamr.utils-StreamPartID.cppm
+    modules/streamr.utils-Uuid.cppm
+    modules/streamr.utils-collect.cppm
+    modules/streamr.utils-partition.cppm
+    modules/streamr.utils-runAndWaitForEvents.cppm
+    modules/streamr.utils-toCoroTask.cppm
+    modules/streamr.utils-toEthereumAddressOrENSName.cppm
+    modules/streamr.utils-waitForCondition.cppm
+    modules/streamr.utils-waitForEvent.cppm)
 add_library(streamr::streamr-utils ALIAS streamr-utils)
 
 target_include_directories(
-  streamr-utils INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  streamr-utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
 find_library(SECP256K1_LIBRARY secp256k1)
@@ -54,21 +84,24 @@ if(NOT SECP256K1_LIBRARY_PRECOMPUTED)
 endif()
 
 message(STATUS "SECP256K1_LIBRARY_PRECOMPUTED: ${SECP256K1_LIBRARY_PRECOMPUTED}")
+# PUBLIC (was INTERFACE): the module interface units compile against these
+# in their global module fragments.
 target_link_libraries(streamr-utils
-    INTERFACE Folly::folly
-    INTERFACE streamr::streamr-eventemitter
-    INTERFACE streamr::streamr-logger
-    INTERFACE Boost::uuid
-    INTERFACE Boost::endian
-    INTERFACE Boost::algorithm
-    INTERFACE cryptopp::cryptopp
-    INTERFACE ${SECP256K1_LIBRARY}
-    INTERFACE ${SECP256K1_LIBRARY_PRECOMPUTED}
+    PUBLIC Folly::folly
+    PUBLIC streamr::streamr-eventemitter
+    PUBLIC streamr::streamr-logger
+    PUBLIC Boost::uuid
+    PUBLIC Boost::endian
+    PUBLIC Boost::algorithm
+    PUBLIC cryptopp::cryptopp
+    PUBLIC ${SECP256K1_LIBRARY}
+    PUBLIC ${SECP256K1_LIBRARY_PRECOMPUTED}
 )
 
 export(TARGETS streamr-utils
     NAMESPACE streamr::
-    FILE streamr-utils-config-in.cmake)
+    FILE streamr-utils-config-in.cmake
+    CXX_MODULES_DIRECTORY streamr-utils-modules)
   
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-utils-config.cmake" 
     "list(APPEND CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH})\n"
@@ -123,10 +156,13 @@ if(NOT IOS)
     test/unit/BinaryUtilsTest.cpp
   )
 
-  target_link_libraries(streamr-utils-test-unit 
+  # The tests import streamr.utils, so their sources need module
+  # dependency scanning.
+  streamr_enable_imports(streamr-utils-test-unit)
+  target_link_libraries(streamr-utils-test-unit
     PUBLIC streamr-utils
-    PUBLIC GTest::gtest 
-    PUBLIC streamr-utils-test-main 
+    PUBLIC GTest::gtest
+    PUBLIC streamr-utils-test-main
   )
   
   if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))

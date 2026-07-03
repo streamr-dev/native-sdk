@@ -1,6 +1,7 @@
-#include "streamr-utils/waitForCondition.hpp"
 #include <gtest/gtest.h>
 #include <folly/experimental/coro/BlockingWait.h>
+
+import streamr.utils;
 
 using streamr::utils::AbortController;
 using streamr::utils::waitForCondition;

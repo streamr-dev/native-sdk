@@ -9,7 +9,7 @@
 
 namespace streamr::utils {
 
-constexpr auto DELIMITER = "#"; // NOLINT
+inline constexpr auto DELIMITER = "#"; // NOLINT
 
 using StreamPartID = Branded<std::string, struct StreamPartIDBrand>;
 

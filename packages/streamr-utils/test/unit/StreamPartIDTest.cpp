@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include <streamr-utils/StreamPartID.hpp>
+
+import streamr.utils;
 
 using streamr::utils::StreamID;
 using streamr::utils::StreamPartID;

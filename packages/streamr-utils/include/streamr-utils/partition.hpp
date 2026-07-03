@@ -8,7 +8,7 @@
 
 namespace streamr::utils {
 
-constexpr auto MAX_PARTITION_COUNT = 100; // NOLINT
+inline constexpr auto MAX_PARTITION_COUNT = 100; // NOLINT
 
 inline void ensureValidStreamPartitionIndex(
     std::optional<uint32_t> streamPartition) {

@@ -1,7 +1,8 @@
-#include "streamr-utils/BinaryUtils.hpp"
 #include <iostream>
 #include <string>
 #include "gtest/gtest.h"
+
+import streamr.utils;
 
 using streamr::utils::BinaryUtils;
 

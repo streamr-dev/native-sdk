@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include <streamr-utils/AbortController.hpp>
+
+import streamr.utils;
 
 using streamr::utils::AbortController;
 

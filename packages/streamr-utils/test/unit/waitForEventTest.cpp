@@ -1,13 +1,13 @@
 #include <tuple>
 #include <gtest/gtest.h>
 #include <streamr-eventemitter/EventEmitter.hpp>
-#include <streamr-utils/AbortController.hpp>
-#include <streamr-utils/waitForEvent.hpp>
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/Invoke.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/experimental/coro/Timeout.h>
+
+import streamr.utils;
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;

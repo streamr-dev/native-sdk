@@ -71,6 +71,11 @@ function(streamr_add_module_library TARGET)
         BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/modules
         FILES ${ARG_FILES})
     set_target_properties(${TARGET} PROPERTIES CXX_SCAN_FOR_MODULES ON)
+    # PUBLIC compile feature (not just CMAKE_CXX_STANDARD): when another
+    # build tree imports this target from its export, CMake synthesizes a
+    # BMI-compiling target on the consumer side and requires the standard
+    # level to be part of the exported usage requirements.
+    target_compile_features(${TARGET} PUBLIC cxx_std_26)
 endfunction()
 
 # streamr_enable_imports(<target>)

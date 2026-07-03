@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include <streamr-utils/RetryUtils.hpp>
+
+import streamr.utils;
 
 using streamr::utils::RetryUtils; // NOLINT
 

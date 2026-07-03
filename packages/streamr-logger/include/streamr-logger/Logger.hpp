@@ -16,7 +16,7 @@ using streamr::json::toJson;
 
 // const char* (not string_view): passed to getenv(), which needs a
 // null-terminated string.
-constexpr const char* envLogLevelName = "LOG_LEVEL";
+inline constexpr const char* envLogLevelName = "LOG_LEVEL";
 class Logger {
 private:
     std::shared_ptr<LoggerImpl> mLoggerImpl;
