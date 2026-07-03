@@ -11,11 +11,12 @@ on:
   pull_request:
     branches:
       - '*'
+  workflow_dispatch:
 
 jobs:
   install-lint:
-    if: contains(github.event.head_commit.message, 'iosbuild') || contains(github.event.pull_request.title, 'iosbuild')
-    runs-on: macos-latest
+    if: contains(github.event.head_commit.message, 'iosbuild') || contains(github.event.pull_request.title, 'iosbuild') || github.event_name == 'workflow_dispatch'
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,3 +26,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: install
         uses: ./.github/workflows/reusable/cached-install
+      - name: upload xcframework
+        uses: actions/upload-artifact@v4
+        with:
+          name: streamr-xcframework
+          path: dist/ios/streamr.xcframework
+          retention-days: 30

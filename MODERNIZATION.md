@@ -269,7 +269,7 @@ document/replace in 1.4.
   (deployment-target-26 / SDK-libc++ build, Personal Team signing);
   Android sanity via CI keyword.
 
-## Phase 1.5 — Lint stack remainder (PR pending)
+## Phase 1.5 — Lint stack remainder ✅ (PR #26, merged)
 - clangd/clang-format 22 already landed in Phase 1.2 (forced by libc++ 22).
 - **clangd-tidy: submodule → PyPI**. The submodule pinned tag 0.2.1 (a
   single-script era); upstream 1.x is a Python package with dependencies
@@ -299,13 +299,24 @@ document/replace in 1.4.
 - **Gate**: `./lint.sh` green both platforms; full test suite green
   (several fixes touch runtime code paths); format at fixed point.
 
-## Phase 1.6 — CI/docs closeout
-- Revisit preview runner images (macos-26 / ubuntu-26.04) once GA; consider a
-  scheduled iOS build job (build-only, no signing; upload XCFramework
-  artifact).
-- README: per-platform C++26 feature-availability note (Homebrew libc++ vs
-  iOS SDK libc++ at the deployment target vs NDK libc++), baseline-bump
-  procedure.
+## Phase 1.6 — CI/docs closeout (PR pending)
+- **Runner images** (checked 2026-07): `macos-26` arm64 is GA → all macOS
+  legs (validate matrix, iOS, Android) moved to it — it ships Xcode 26,
+  which the iOS deployment target requires (`macos-latest` still maps to
+  macOS 15). `ubuntu-26.04` is still a preview image → Linux stays on
+  `ubuntu-latest` (24.04); revisit when GA.
+- **iOS/Android manual triggers**: validateios.yml and validateandroid.yml
+  gain `workflow_dispatch` (manual run without commit-message keywords).
+  No scheduled/timed runs (owner decision, 2026-07: no cron jobs in this
+  repo). The iOS XCFramework is uploaded as a build artifact (30-day
+  retention) on every iOS workflow run.
+- **README**: Xcode 26 requirement stated in prerequisites; new
+  per-platform C++26 feature-availability section (Homebrew/apt libc++ 22
+  on macOS/Linux vs iOS SDK libc++ availability-gated by the deployment
+  target vs NDK libc++; practical header-only-vs-runtime rule). The
+  baseline-bump procedure was already documented in 1.3.
+- **Gate**: CI green on the new images; iOS workflow runs via the PR
+  keyword (validates the edited workflow file end to end).
 
 ---
 

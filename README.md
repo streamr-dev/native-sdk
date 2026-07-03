@@ -49,9 +49,19 @@ The compiler toolchain is the latest LLVM/Clang on every platform:
 
 * **macOS**: Homebrew `llvm` (keg-only — the build locates it through the `LLVM_PREFIX` environment variable exported by `install-prerequisities.sh`/`setenvs.sh`).
 * **Linux**: `clang-22` + `libc++` from [apt.llvm.org](https://apt.llvm.org/). libc++ (instead of libstdc++) keeps the standard library uniform across macOS, iOS, Android and Linux.
-* **iOS/Android**: cross-compiled with the same LLVM (iOS) or the Android NDK's clang.
+* **iOS/Android**: cross-compiled with the same LLVM (iOS) or the Android NDK's clang. **iOS builds require Xcode 26 or newer** (the deployment target is iOS 26, so the iOS 26 SDK is needed; `install-prerequisities.sh` warns if an older Xcode is selected).
 
 All builds use the [Ninja](https://ninja-build.org/) CMake generator (exported as `CMAKE_GENERATOR=Ninja` by `install-prerequisities.sh`/`setenvs.sh`). Ninja is faster than Makefiles and is required by CMake's C++ modules support. **If you have build directories configured with the previous Makefile generator, run `./clean.sh` once after updating.**
+
+#### C++26 feature availability per platform
+
+The codebase is built as C++26 (`CMAKE_CXX_STANDARD 26`, required) everywhere, but the *standard library* differs per platform, so library-feature availability is bounded by the oldest libc++ in play:
+
+* **macOS / Linux**: Homebrew / apt.llvm.org libc++ 22 — the full feature set of the current LLVM release, including everything behind runtime-library support.
+* **iOS**: compiled against the **iPhoneOS SDK's libc++ headers** and linked against the **device's system libc++** (the runtime that ships with iOS and cannot be updated separately). The SDK headers carry availability annotations tied to the deployment target (currently iOS 26), so using a library feature whose runtime support is newer than the deployment target is a compile error rather than a crash on device — this is the intended guardrail. Language features are unaffected (they depend only on the compiler).
+* **Android**: the NDK's libc++ (follows the NDK's LLVM version, currently close to but typically one release behind Homebrew's).
+
+Practical rule: header-only features (ranges, `contains`, concepts, formatting of standard types, etc.) work everywhere; features needing runtime-library symbols (e.g. new locale facets, some `std::print`/filesystem edges) are gated by the iOS deployment target — the iOS build will tell you.
 
 ### Install all the dependencies and build the SDK for MacOS and Linux
 

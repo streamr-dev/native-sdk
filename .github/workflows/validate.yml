@@ -23,7 +23,11 @@ jobs:
       # must not cancel the others.
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, linux-arm64-runner]
+        # macos-26: current GA arm64 image, ships Xcode 26 (required for the
+        # iOS deployment target 26 SDK; macos-latest still maps to macOS 15).
+        # ubuntu-latest = 24.04: ubuntu-26.04 is still a preview image —
+        # revisit when GA.
+        os: [macos-26, ubuntu-latest, linux-arm64-runner]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
