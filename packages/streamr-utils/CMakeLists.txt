@@ -46,7 +46,12 @@ target_include_directories(
            $<INSTALL_INTERFACE:include>)
 
 find_library(SECP256K1_LIBRARY secp256k1)
+# secp256k1 >= 0.7 links the precomputed tables into the main library; the
+# separate secp256k1_precomputed archive no longer exists.
 find_library(SECP256K1_LIBRARY_PRECOMPUTED secp256k1_precomputed)
+if(NOT SECP256K1_LIBRARY_PRECOMPUTED)
+    set(SECP256K1_LIBRARY_PRECOMPUTED "")
+endif()
 
 message(STATUS "SECP256K1_LIBRARY_PRECOMPUTED: ${SECP256K1_LIBRARY_PRECOMPUTED}")
 target_link_libraries(streamr-utils
@@ -72,6 +77,9 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-utils-config.cmake"
     "find_package(cryptopp CONFIG REQUIRED)\n"
     "find_library(SECP256K1_LIBRARY secp256k1)\n"
     "find_library(SECP256K1_LIBRARY_PRECOMPUTED secp256k1_precomputed)\n"
+    "if(NOT SECP256K1_LIBRARY_PRECOMPUTED)\n"
+    "    set(SECP256K1_LIBRARY_PRECOMPUTED \"\")\n"
+    "endif()\n"
     "if(NOT TARGET Boost::uuid)\n"
     "    add_library(Boost::uuid INTERFACE IMPORTED)\n"
     "    set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"

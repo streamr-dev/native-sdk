@@ -55,7 +55,8 @@ else
     # between macOS and Linux or the format check flip-flops.
     sudo apt-get install -y build-essential cmake ninja-build jq \
         clang-22 lld-22 clang-tools-22 clangd-22 libc++-22-dev libc++abi-22-dev \
-        clang-format-22
+        clang-format-22 \
+        autoconf autoconf-archive automake libtool
     sudo rm -f /usr/bin/clang-format
     sudo rm -f /usr/bin/clangd
     sudo ln -s /usr/bin/clang-format-22 /usr/bin/clang-format

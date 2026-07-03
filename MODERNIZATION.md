@@ -174,31 +174,46 @@ Android NDK r28+.
   `iostest.sh` green — the compiler's output must stay compatible with the
   device's fixed libc++ runtime**.
 
-## Phase 1.3 — vcpkg baseline bump + dependency wave (highest-risk phase)
-- Bump vcpkg submodule to latest tag; add `"builtin-baseline"` to root
-  `vcpkg.json` (enables per-port `"overrides"` for pinning/rollback; verify
-  `merge-dependencies.sh` preserves the key). Document the bump procedure.
-- **Overlay ports**: delete `overlayports/magic-enum/` (byte-identical to
-  upstream) and `overlayports/fmt/` (Phase 1.2 stopgap). Rebuild
-  `overlayports/folly/` from the new upstream port with **zero patches**,
-  re-adding only what provably fails. Rebase `overlayports/usrsctp/` and
-  `overlayports/libdatachannel/` (or drop, if upstream 0.24 works). Drop the
-  `CMAKE_POLICY_VERSION_MINIMUM` and `VCPKG_OSX_SYSROOT` stopgaps if the new
-  baseline handles CMake 4 itself.
-- **Protobuf 25→33** (major): fix the codegen plugin against new libprotoc
-  (expect `absl::string_view`/`io::Printer` churn); fix `packages/*/proto.sh`
-  (hardcoded `arm64-osx` protoc path; drop
-  `--experimental_allow_proto3_optional`); regenerate + commit all checked-in
-  generated proto sources. Note abseil static libs now flow into the
-  XCFramework `libtool` glob — verify symbol completeness in the iOS test
-  app.
-- Fix API churn fallout (boost, libdatachannel 0.24, openssl 3.6). Remove
-  `-fpermissive` from `packages/streamr-proto-rpc/CMakeLists.txt` (GCC-only
-  flag; meaningless once all-clang).
-- CI cache keys: include the vcpkg submodule SHA (currently keyed only on
-  `vcpkg.json`, which misses submodule bumps).
+## Phase 1.3 — vcpkg baseline bump + dependency wave (PR pending)
+Baseline: vcpkg tag **2026.06.24** (`builtin-baseline` now pinned in
+`vcpkg.json`; the jq-based merge-dependencies.sh preserves the key — and
+because the cache keys hash `vcpkg.json`, baseline bumps bust CI caches
+automatically). Port versions: protobuf 6.33.4, folly 2026.02.23, boost
+1.91, openssl 3.6.3, libdatachannel 0.24.5, fmt 12.2, secp256k1 0.7.1.
+- **All five old overlays deleted**; the CMake-4 stopgaps
+  (`CMAKE_POLICY_VERSION_MINIMUM`, `VCPKG_OSX_SYSROOT`) removed — the new
+  vcpkg scripts/ports handle CMake 4 themselves. Three minimal overlays
+  returned, each with a JUSTIFICATION.md:
+  - **folly**: missing `<exception>` include in `result/rich_error_code.h`
+    (libc++ 22 hard error), and `-DFOLLY_NO_EXCEPTION_TRACER=ON` — folly
+    2026's exception tracer interposes `__cxa_throw` and now activates on
+    macOS (the 2024 tracer was glibc-only), breaking
+    `std::current_exception()` process-wide and aborting every coro error
+    path. Found via minimal repro after 18 error-path tests aborted.
+  - **secp256k1**: enable the recovery module (upstream default-off;
+    SigningUtils needs `secp256k1_recovery.h`). The separate
+    `secp256k1_precomputed` archive no longer exists (merged into the main
+    lib in 0.7) — its find_library is now optional.
+  - **usrsctp**: the two pre-2026 iOS patches (no `<net/route.h>` /
+    `<ifaddrs.h>` in the iPhoneOS SDK) — verified still required.
+- **Protobuf 25→33**: all checked-in generated code regenerated (protoc
+  33.4); codegen plugin ported to the `absl::string_view` descriptor API;
+  `proto.sh` scripts detect the protoc triplet dir and drop the removed
+  `--experimental_allow_proto3_optional` flag. `DebugString()`-based test
+  assertions replaced with field comparisons (6.33 prefixes a
+  `goo.gle/debugproto` marker; the format was never stable).
+- **folly 2026 API migration**: the seven `scheduleOn(exec)` call sites →
+  `co_withExecutor(exec, task)` (deprecated, warnings-as-errors in lint).
+- magic-enum 0.9.8 headers moved under `magic_enum/`; libdatachannel 0.24
+  target renamed to `LibDataChannel::LibDataChannel`; `protobuf::libprotoc`
+  removed from library targets (only the host codegen plugin needs it — the
+  new port doesn't export it for cross triplets); `-fpermissive` removed.
+- **Verified**: macOS full build + 307/307 tests + full lint; iOS
+  cross-build green with XCFramework at `platform=iOS, minos=13.0` and no
+  post-deployment-target runtime symbols.
 - **Gate**: build/test green macOS + Linux; regenerated proto diff reviewed;
-  folly overlay patch count documented (target 0–2).
+  folly overlay patch count documented (achieved: 1 patch + 1 configure
+  option).
 
 **Lesson from 1.2 (feeds the Part 2 install-flow rework):** switching target
 triplets (host↔iOS↔Android) in the SAME package build dirs silently produces

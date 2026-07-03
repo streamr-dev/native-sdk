@@ -60,13 +60,12 @@ target_link_libraries(streamr-dht
     PUBLIC streamr::streamr-proto-rpc
     INTERFACE streamr::streamr-utils
     PRIVATE protobuf::libprotobuf
-    PRIVATE protobuf::libprotoc
     INTERFACE Boost::uuid
     INTERFACE Boost::algorithm
     PRIVATE magic_enum::magic_enum
     PRIVATE Folly::folly
     PRIVATE OpenSSL::Crypto
-    PRIVATE LibDataChannel::LibDataChannelStatic
+    PRIVATE LibDataChannel::LibDataChannel
     INTERFACE ipaddress::ipaddress
     )
 

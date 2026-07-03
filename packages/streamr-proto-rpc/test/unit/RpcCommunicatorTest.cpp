@@ -142,10 +142,10 @@ auto sendHelloRequest(
     HelloRequest request;
     request.set_myname("Test");
     return folly::coro::blockingWait(
-        sender
-            .request<HelloResponse, HelloRequest>(
-                "testFunction", request, ProtoCallContext())
-            .scheduleOn(executor));
+        folly::coro::co_withExecutor(
+            executor,
+            sender.request<HelloResponse, HelloRequest>(
+                "testFunction", request, ProtoCallContext())));
 }
 
 auto sendHelloNotification(
@@ -153,8 +153,10 @@ auto sendHelloNotification(
     HelloRequest request;
     request.set_myname("Test");
     folly::coro::blockingWait(
-        sender.notify<HelloRequest>("testFunction", request, ProtoCallContext())
-            .scheduleOn(executor));
+        folly::coro::co_withExecutor(
+            executor,
+            sender.notify<HelloRequest>(
+                "testFunction", request, ProtoCallContext())));
 }
 
 void verifyClientError(
@@ -308,10 +310,10 @@ TEST_F(RpcCommunicatorTest, TestCannotify) {
         "testFunction",
         [&requestMsg](
             const HelloRequest& request, const ProtoCallContext& /* context */)
-            -> void { requestMsg = request.DebugString(); });
+            -> void { requestMsg = request.myname(); });
     setCallbacks(false);
     sendHelloNotification(communicator2, &executor);
-    EXPECT_EQ(requestMsg, "myName: \"Test\"\n");
+    EXPECT_EQ(requestMsg, "Test");
 }
 
 TEST_F(RpcCommunicatorTest, TestnotifyClientThrowsRuntimeError) {
@@ -357,13 +359,14 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
     request.set_myname("Test");
 
     try {
-        folly::coro::blockingWait(communicator2
-                                      .request<HelloResponse, HelloRequest>(
-                                          "testFunction",
-                                          request,
-                                          ProtoCallContext(),
-                                          50ms) // NOLINT
-                                      .scheduleOn(&executor));
+        folly::coro::blockingWait(
+            folly::coro::co_withExecutor(
+                &executor,
+                communicator2.request<HelloResponse, HelloRequest>(
+                    "testFunction",
+                    request,
+                    ProtoCallContext(),
+                    50ms))); // NOLINT
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {
@@ -402,14 +405,14 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
     HelloRequest request;
     request.set_myname("Test");
     try {
-        auto result =
-            folly::coro::blockingWait(communicator2
-                                          .request<HelloResponse, HelloRequest>(
-                                              "testFunction",
-                                              request,
-                                              ProtoCallContext(),
-                                              50ms) // NOLINT
-                                          .scheduleOn(&executor));
+        auto result = folly::coro::blockingWait(
+            folly::coro::co_withExecutor(
+                &executor,
+                communicator2.request<HelloResponse, HelloRequest>(
+                    "testFunction",
+                    request,
+                    ProtoCallContext(),
+                    50ms))); // NOLINT
         EXPECT_EQ(true, false);
     } catch (const RpcTimeout& ex) {
         SLogger::info(
@@ -428,7 +431,7 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
         "testFunction",
         [&requestMsg](
             const HelloRequest& request, const ProtoCallContext& /* context */)
-            -> void { requestMsg = request.DebugString(); });
+            -> void { requestMsg = request.myname(); });
 
     HelloRequest request;
     request.set_myname("Test");
@@ -447,13 +450,14 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
 
         std::cout << "Calling notify() from thread id: "
                   << std::this_thread::get_id() << "\n";
-        folly::coro::blockingWait(communicator2
-                                      .notify<HelloRequest>(
-                                          "testFunction",
-                                          request,
-                                          ProtoCallContext(),
-                                          50ms) // NOLINT
-                                      .scheduleOn(&executor));
+        folly::coro::blockingWait(
+            folly::coro::co_withExecutor(
+                &executor,
+                communicator2.notify<HelloRequest>(
+                    "testFunction",
+                    request,
+                    ProtoCallContext(),
+                    50ms))); // NOLINT
         // Test fails here
         EXPECT_TRUE(false);
     } catch (const RpcTimeout& ex) {

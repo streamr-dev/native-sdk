@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <variant>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 namespace streamr::dht::helpers {
 

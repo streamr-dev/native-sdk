@@ -1,0 +1,16 @@
+folly/result/rich_error_code.h uses std::exception_ptr without including
+<exception>; libc++ 22 no longer provides it transitively through the other
+includes. Compile error under clang-22 + libc++-22:
+  "no type named 'exception_ptr' in namespace 'std'"
+--- a/folly/result/rich_error_code.h
++++ b/folly/result/rich_error_code.h
+@@ -14,8 +14,9 @@
+  * limitations under the License.
+  */
+
+ #pragma once
+
++#include <exception>
+ #include <optional>
+ #include <fmt/format.h>
+

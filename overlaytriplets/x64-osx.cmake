@@ -4,10 +4,6 @@ set(VCPKG_LIBRARY_LINKAGE static)
 
 set(VCPKG_CMAKE_SYSTEM_NAME Darwin)
 set(VCPKG_OSX_ARCHITECTURES x86_64)
-# CMake 4 no longer defaults CMAKE_OSX_SYSROOT to the SDK path; the pinned
-# vcpkg scripts compose "-isysroot ${CMAKE_OSX_SYSROOT}" unconditionally,
-# which breaks with an empty value. Name the SDK explicitly.
-set(VCPKG_OSX_SYSROOT macosx)
 
 set(CMAKE_CXX_STANDARD 26)
 set(HOMEBREW_PREFIX $ENV{HOMEBREW_PREFIX})
@@ -23,7 +19,7 @@ set(CMAKE_CXX_COMPILER "${LLVM_PREFIX}/bin/clang++")
 set(ENV{CC} "${CMAKE_C_COMPILER}")
 set(ENV{CXX} "${CMAKE_CXX_COMPILER}")
 
-set(VCPKG_CMAKE_CONFIGURE_OPTIONS -DCMAKE_C_COMPILER=${LLVM_PREFIX}/bin/clang -DCMAKE_CXX_COMPILER=${LLVM_PREFIX}/bin/clang++ -DCMAKE_CXX_STANDARD=26 -DCMAKE_POLICY_VERSION_MINIMUM=3.5)
+set(VCPKG_CMAKE_CONFIGURE_OPTIONS -DCMAKE_C_COMPILER=${LLVM_PREFIX}/bin/clang -DCMAKE_CXX_COMPILER=${LLVM_PREFIX}/bin/clang++ -DCMAKE_CXX_STANDARD=26)
 
 set(VCPKG_CXX_FLAGS "-isystem ${LLVM_PREFIX}/include/c++/v1")
 set(VCPKG_C_FLAGS "-isystem ${LLVM_PREFIX}/include/c++/v1")

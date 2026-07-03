@@ -60,7 +60,6 @@ target_link_libraries(streamr-trackerless-network
     INTERFACE streamr::streamr-utils
     INTERFACE Boost::algorithm
     PRIVATE protobuf::libprotobuf
-    PRIVATE protobuf::libprotoc
     INTERFACE Boost::uuid
     PRIVATE magic_enum::magic_enum
     PRIVATE Folly::folly
