@@ -37,10 +37,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
 streamr_add_module_library(streamr-logger
   FILES
     modules/streamr.logger.cppm
-    modules/streamr.logger-Logger.cppm
-    modules/streamr.logger-LoggerImpl.cppm
-    modules/streamr.logger-SLogger.cppm
-    modules/streamr.logger-StreamrLogLevel.cppm)
+    modules/streamr.logger-all.cppm)
 set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 26)
 
 add_library(streamr::streamr-logger ALIAS streamr-logger)

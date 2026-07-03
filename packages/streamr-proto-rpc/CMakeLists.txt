@@ -47,13 +47,7 @@ streamr_target_module_sources(streamr-proto-rpc
   FILES
     modules/streamr.protorpc.cppm
     modules/streamr.protorpc-protos.cppm
-    modules/streamr.protorpc-Errors.cppm
-    modules/streamr.protorpc-ProtoCallContext.cppm
-    modules/streamr.protorpc-RpcCommunicator.cppm
-    modules/streamr.protorpc-RpcCommunicatorClientApi.cppm
-    modules/streamr.protorpc-RpcCommunicatorServerApi.cppm
-    modules/streamr.protorpc-ServerRegistry.cppm
-    modules/streamr.protorpc-StreamPrinter.cppm)
+    modules/streamr.protorpc-all.cppm)
 target_include_directories(streamr-proto-rpc 
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PUBLIC $<INSTALL_INTERFACE:include>

@@ -30,9 +30,12 @@ if (APPLE AND NOT (VCPKG_TARGET_TRIPLET MATCHES "android" OR VCPKG_TARGET_TRIPLE
         "${HOMEBREW_PREFIX}"
     )
 
-    list(TRANSFORM CMAKE_PREFIX_PATH APPEND "/include"
-         OUTPUT_VARIABLE CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES)
-    set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}")
+    # NOTE: deliberately NO CMAKE_*_STANDARD_INCLUDE_DIRECTORIES pointing at
+    # ${HOMEBREW_PREFIX}/include: the keg clang finds its own libc++ headers,
+    # all third-party dependencies come from vcpkg, and a global Homebrew
+    # include dir gets baked into exported C++ module targets where it can
+    # shadow the vcpkg headers (observed: a brew-installed folly/fmt
+    # hijacking the synthesized BMI compiles of importing build trees).
 
     if (NOT (VCPKG_TARGET_TRIPLET MATCHES "ios"))
         set(CMAKE_FIND_FRAMEWORK LAST)

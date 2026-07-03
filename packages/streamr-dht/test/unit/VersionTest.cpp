@@ -1,6 +1,7 @@
 
-#include "streamr-dht/helpers/Version.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::helpers::Version;
 

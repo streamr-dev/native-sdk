@@ -17,7 +17,7 @@ using DhtAddressRaw =
 
 using ServiceID = streamr::utils::Branded<std::string, struct ServiceIDBrand>;
 
-constexpr size_t kademliaIdLengthInBytes = 20;
+inline constexpr size_t kademliaIdLengthInBytes = 20;
 
 struct Identifiers {
     using PeerDescriptor = ::dht::PeerDescriptor;

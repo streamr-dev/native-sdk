@@ -1,8 +1,7 @@
-#include "streamr-dht/connection/websocket/WebsocketClientConnectorRpcLocal.hpp"
 #include <gtest/gtest.h>
-#include "streamr-dht/connection/IPendingConnection.hpp"
-#include "streamr-dht/connection/PendingConnection.hpp"
-#include "streamr-utils/AbortController.hpp"
+
+import streamr.dht;
+import streamr.utils;
 
 using ::dht::PeerDescriptor;
 using streamr::dht::DhtAddress;

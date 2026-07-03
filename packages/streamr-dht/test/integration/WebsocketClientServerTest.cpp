@@ -1,10 +1,9 @@
 #include <string_view>
 #include <gtest/gtest.h>
 #include <rtc/global.hpp>
-#include <streamr-dht/connection/websocket/WebsocketClientConnection.hpp>
-#include <streamr-dht/connection/websocket/WebsocketServer.hpp>
-#include <streamr-dht/connection/websocket/WebsocketServerConnection.hpp>
-#include <streamr-logger/SLogger.hpp>
+
+import streamr.dht;
+import streamr.logger;
 
 using streamr::dht::connection::connectionevents::Connected;
 using streamr::dht::connection::connectionevents::Data;

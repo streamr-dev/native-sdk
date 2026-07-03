@@ -1,10 +1,10 @@
-#include "streamr-dht/connection/websocket/WebsocketServerConnection.hpp"
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "rtc/rtc.hpp"
 
-using streamr::dht::connection::websocket::WebsocketServerConnection;
+import streamr.dht;
 
-#include <gmock/gmock.h>
+using streamr::dht::connection::websocket::WebsocketServerConnection;
 
 TEST(WebsocketServerConnection, TestCanBeCreated) {
     auto connection = WebsocketServerConnection::newInstance();

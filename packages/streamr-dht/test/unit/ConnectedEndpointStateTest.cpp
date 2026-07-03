@@ -1,5 +1,6 @@
-#include "streamr-dht/connection/endpoint/ConnectedEndpointState.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::connection::endpoint::ConnectedEndpointState; // NOLINT
 

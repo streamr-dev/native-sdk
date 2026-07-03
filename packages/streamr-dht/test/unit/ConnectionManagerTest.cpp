@@ -1,4 +1,3 @@
-#include "streamr-dht/connection/ConnectionManager.hpp"
 #include <memory>
 #include <string>
 #include <gtest/gtest.h>
@@ -8,11 +7,9 @@
 #include <folly/experimental/coro/Promise.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
-#include "streamr-dht/helpers/Errors.hpp"
-#include "streamr-dht/transport/FakeTransport.hpp"
-#include "streamr-dht/transport/Transport.hpp"
-#include "streamr-dht/types/PortRange.hpp"
-#include "streamr-logger/SLogger.hpp"
+
+import streamr.dht;
+import streamr.logger;
 
 using ::dht::ConnectivityResponse;
 using ::dht::Message;

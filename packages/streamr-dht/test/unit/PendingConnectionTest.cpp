@@ -1,9 +1,9 @@
-#include "streamr-dht/connection/PendingConnection.hpp"
 #include <chrono>
 #include <gtest/gtest.h>
 #include <folly/coro/BlockingWait.h>
-#include "streamr-dht/connection/Connection.hpp"
-#include "streamr-utils/waitForCondition.hpp"
+
+import streamr.dht;
+import streamr.utils;
 
 using ::dht::PeerDescriptor;
 using streamr::dht::connection::Connection;

@@ -1,5 +1,6 @@
-#include "streamr-dht/connection/websocket/WebsocketConnection.hpp"
 #include <gtest/gtest.h>
+
+import streamr.dht;
 
 using streamr::dht::connection::websocket::WebsocketConnection; // NOLINT
 
