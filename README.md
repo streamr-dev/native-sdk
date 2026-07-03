@@ -88,9 +88,9 @@ Rules of thumb when writing import-using code:
 * A target whose sources `import` a module must link that module's target
   directly (`streamr::streamr-<pkg>`) and call
   `streamr_enable_imports(<target>)` — see `cmake/StreamrModules.cmake`.
-* **Android builds do not use modules** (the NDK's clang is too old):
-  libraries build textually from the headers and test targets are
-  skipped there. Handled automatically by `STREAMR_MODULES_SUPPORTED`
+* **Android needs NDK r29+** (clang 21) for the modules. With an older
+  NDK the libraries build textually from the headers and test targets
+  are skipped — handled automatically by `STREAMR_MODULES_SUPPORTED`
   in `StreamrModules.cmake`.
 
 The plan for consolidating code out of headers into the module units

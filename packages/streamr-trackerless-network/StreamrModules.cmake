@@ -10,16 +10,24 @@
 # OFF globally (clean compile commands for clangd), and the helpers below
 # re-enable scanning per target.
 
-# Android builds use the NDK's clang (18/19), whose C++ modules support is
-# too immature for the façade modules (known `export using` overload-set
-# bugs — observed: `import streamr.json;` fails to provide the toJson
-# overloads). Android consumes the ordinary headers instead (they remain the
-# source of truth during the façade stage), the module units are skipped,
-# and packages must not build their import-using test targets
-# (STREAMR_MODULES_SUPPORTED below guards them). Revisit when the NDK ships
-# clang >= 22 — consolidation (2.6) requires it, as headers disappear then.
+# Android builds use the NDK's clang, and modules support depends on its
+# version: NDK r27 ships clang 18, whose C++ modules support is too
+# immature for the façade modules (known `export using` overload-set bugs —
+# observed: `import streamr.json;` failed to provide the toJson overloads).
+# NDK r29 ships clang 21, which is expected to handle them. Gate on the
+# compiler version: with an older NDK, Android consumes the ordinary
+# headers instead (they remain the source of truth during the façade
+# stage), the module units are skipped, and import-using test/example
+# targets are not built (STREAMR_MODULES_SUPPORTED guards them).
 if(VCPKG_TARGET_TRIPLET MATCHES "android" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
-    set(STREAMR_MODULES_SUPPORTED OFF)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 21)
+        set(STREAMR_MODULES_SUPPORTED ON)
+    else()
+        set(STREAMR_MODULES_SUPPORTED OFF)
+        message(STATUS
+            "C++ modules disabled: NDK clang ${CMAKE_CXX_COMPILER_VERSION} "
+            "< 21 (use NDK r29+ for modules on Android)")
+    endif()
 else()
     set(STREAMR_MODULES_SUPPORTED ON)
 endif()

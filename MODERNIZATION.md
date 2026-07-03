@@ -669,8 +669,9 @@ now ships a module.
      The Android workflow also stops running lint (host-independent;
      covered by validate.yml; import-using test files have no compile
      commands on an Android tree).
-  **⇒ Android now has a hard dependency on headers — see the Phase 2.6
-  decision memo below.**
+     UPDATE (2.6): the failing NDK was the CI runner's default r27
+     (clang 18.0.2); the gate is now version-based and Android CI uses
+     NDK r29 (clang 21) — see the 2.6 memo.
 
 ### FINAL FAÇADE-STAGE METRICS (vs Phase 2.0 baselines, macOS, idle)
 | Metric | Baseline | Final (7 packages migrated) | Target | Verdict |
@@ -714,8 +715,12 @@ build outright — including the shipping artifact (proxyclient `.so` /
 Kotlin wrapper).
 
 ### Preconditions for starting consolidation
-1. **NDK ships a modules-capable clang** (>= 22, matching the rest of the
-   toolchain), or Android support is explicitly parked/dropped.
+1. **A modules-capable NDK clang on Android.** The 2.5 failure was on the
+   CI runner's default NDK r27 (clang 18.0.2). NDK r29 (latest stable,
+   Oct 2025) ships clang 21 — the Android CI now uses r29 and
+   StreamrModules.cmake gates Android modules on NDK clang >= 21
+   (validated on the Phase 2.6 PR's androidbuild leg). Older NDKs fall
+   back to the textual build automatically.
 2. clangd modules support matures enough to lint purview code (today it
    mis-unifies preamble/BMI types; with code in partitions there is no
    header fallback for the linter — coverage would regress from "full"
