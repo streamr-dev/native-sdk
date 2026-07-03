@@ -42,7 +42,8 @@ TEST(WebsocketServerTest, TestCanThrowIfCertificateNotFound) {
         .portRange = {10000, 10001}, // NOLINT
         .enableTls = false,
         .tlsCertificateFiles =
-            std::optional<TlsCertificateFiles>{TlsCertificateFiles{"", ""}},
+            std::optional<TlsCertificateFiles>{TlsCertificateFiles{
+                .privateKeyFileName = "", .certFileName = ""}},
         .maxMessageSize = std::nullopt};
     WebsocketServer server(std::move(config));
     EXPECT_THROW(server.start(), WebsocketServerStartError); // NOLINT
@@ -57,7 +58,8 @@ TEST(
         .enableTls = false,
         .tlsCertificateFiles =
             std::optional<TlsCertificateFiles>{TlsCertificateFiles{
-                "../test/unit/example.key", "../test/unit/example.crt"}},
+                .privateKeyFileName = "../test/unit/example.key",
+                .certFileName = "../test/unit/example.crt"}},
         .maxMessageSize = std::nullopt};
     WebsocketServer server(std::move(config));
     server.start();
@@ -70,7 +72,8 @@ TEST(WebsocketServerTest, DISABLED_UpdateCertificate) {
         .enableTls = true,
         .tlsCertificateFiles =
             std::optional<TlsCertificateFiles>{TlsCertificateFiles{
-                "../test/unit/example.key", "../test/unit/example.crt"}},
+                .privateKeyFileName = "../test/unit/example.key",
+                .certFileName = "../test/unit/example.crt"}},
         .maxMessageSize = std::nullopt};
 
     WebsocketServer server(std::move(config));
@@ -135,7 +138,8 @@ TEST(WebsocketServerTest, DISABLED_UpdateCertificateWithInvalidCertificate) {
         .enableTls = true,
         .tlsCertificateFiles =
             std::optional<TlsCertificateFiles>{TlsCertificateFiles{
-                "../test/unit/example.key", "../test/unit/example.crt"}},
+                .privateKeyFileName = "../test/unit/example.key",
+                .certFileName = "../test/unit/example.crt"}},
         .maxMessageSize = std::nullopt};
 
     WebsocketServer server(std::move(config));

@@ -55,7 +55,8 @@ TEST_F(StreamrProxyClientCppWrapperTest, InvalidProxyUrlCpp) {
         validEthereumAddress, validPrivateKey, validStreamPartId);
 
     std::vector<StreamrProxyAddress> proxies = {
-        {invalidProxyUrl, validEthereumAddress}};
+        {.websocketUrl = invalidProxyUrl,
+         .ethereumAddress = validEthereumAddress}};
 
     auto result = client.connect(proxies);
     EXPECT_EQ(result.successful.size(), 0);
@@ -82,9 +83,12 @@ TEST_F(StreamrProxyClientCppWrapperTest, ThreeProxyConnectionsFailedCpp) {
         goodEthereumAddress, validPrivateKey, validStreamPartId);
 
     std::vector<StreamrProxyAddress> proxies = {
-        {nonExistentProxyUrl0, validEthereumAddress},
-        {nonExistentProxyUrl1, validEthereumAddress2},
-        {nonExistentProxyUrl2, validEthereumAddress3}};
+        {.websocketUrl = nonExistentProxyUrl0,
+         .ethereumAddress = validEthereumAddress},
+        {.websocketUrl = nonExistentProxyUrl1,
+         .ethereumAddress = validEthereumAddress2},
+        {.websocketUrl = nonExistentProxyUrl2,
+         .ethereumAddress = validEthereumAddress3}};
 
     auto result = client.connect(proxies);
 

@@ -14,7 +14,9 @@ namespace streamr::logger {
 using streamr::json::StreamrJsonInitializerList;
 using streamr::json::toJson;
 
-constexpr std::string_view envLogLevelName = "LOG_LEVEL";
+// const char* (not string_view): passed to getenv(), which needs a
+// null-terminated string.
+constexpr const char* envLogLevelName = "LOG_LEVEL";
 class Logger {
 private:
     std::shared_ptr<LoggerImpl> mLoggerImpl;
@@ -46,7 +48,7 @@ public:
         // use it as the default log level for this logger.
         // Otherwise, use the defaultLogLevel.
 
-        char* val = getenv(envLogLevelName.data());
+        char* val = getenv(envLogLevelName);
         if (val) {
             mLoggerLogLevel = getStreamrLogLevelByName(val, defaultLogLevel);
         } else {

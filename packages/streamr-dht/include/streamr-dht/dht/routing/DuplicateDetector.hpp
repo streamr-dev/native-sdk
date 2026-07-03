@@ -34,7 +34,7 @@ public:
 
     [[nodiscard]] bool isMostLikelyDuplicate(const std::string& value) {
         std::scoped_lock lock(this->valuesMutex);
-        return this->values.find(value) != this->values.end();
+        return this->values.contains(value);
     }
 
     [[nodiscard]] size_t size() {

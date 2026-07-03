@@ -16,7 +16,9 @@ namespace streamr::logger::detail {
 
 namespace constants {
 
-constexpr std::string_view logColorsEnvVar = "LOG_COLORS";
+// const char* (not string_view): passed to getenv(), which needs a
+// null-terminated string.
+constexpr const char* logColorsEnvVar = "LOG_COLORS";
 
 // If you change MaxFileNameAndLineNumberLength, then please change it in
 // nonTruncatedFormatterPart too
@@ -66,11 +68,11 @@ public:
         const folly::LogMessage& message,
         const folly::LogCategory* /* handlerCategory */) override {
         return formatMessageInStreamrStyle(
-            {message.getTimestamp(),
-             message.getFileBaseName(),
-             message.getLineNumber(),
-             message.getLevel(),
-             message.getMessage()});
+            {.timestamp = message.getTimestamp(),
+             .fileBasename = message.getFileBaseName(),
+             .lineNumber = message.getLineNumber(),
+             .logLevel = message.getLevel(),
+             .logMessage = message.getMessage()});
     }
     struct LogLevelNameAndColor {
         std::string_view logLevelName;
@@ -100,11 +102,11 @@ public:
             },
             streamrLevel);
 
-        return {logLevelName, color};
+        return {.logLevelName = logLevelName, .color = color};
     }
 
     static bool getColorsSettingFromEnv() {
-        const auto* const env = std::getenv(constants::logColorsEnvVar.data());
+        const auto* const env = std::getenv(constants::logColorsEnvVar);
         return (env == nullptr || std::string_view(env) != "false");
     }
 

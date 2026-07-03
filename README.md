@@ -121,10 +121,13 @@ On the other hand,
 The root directory of the monorepo has the following structure:
 
 #### GIT submodules
-The Streamr Native SDK monorepo has two GIT submodules at its root:
+The Streamr Native SDK monorepo has one GIT submodule at its root:
 
 * `vcpkg` - [vcpkg package manager by Microsoft](https://github.com/microsoft/vcpkg) (installing as a submodule is the recommended way of installation)
-* `clangd-tidy` - [clangd-tidy](https://github.com/lljbash/clangd-tidy) A fast variant of the clang-tidy linter for C++. (not available as a brew or apt package)
+
+The [clangd-tidy](https://github.com/lljbash/clangd-tidy) linter (a fast
+variant of clang-tidy) is installed from PyPI by
+`install-prerequisities.sh` (`pipx install clangd-tidy==<pinned version>`).
 
 #### Directories
 * `build` - the main build directory for the whole monorepo.

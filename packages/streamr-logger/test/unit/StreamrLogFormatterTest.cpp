@@ -25,7 +25,11 @@ protected:
 
 TEST_F(StreamrLogFormatterTest, traceNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        getTp(), "Filename.cpp", lineNumber2, folly::LogLevel::DBG, "Message"};
+        .timestamp = getTp(),
+        .fileBasename = "Filename.cpp",
+        .lineNumber = lineNumber2,
+        .logLevel = folly::LogLevel::DBG,
+        .logMessage = "Message"};
 
     EXPECT_THAT(
         getFormatter().formatMessageInStreamrStyle(msg),
@@ -35,11 +39,11 @@ TEST_F(StreamrLogFormatterTest, traceNoTruncate) {
 
 TEST_F(StreamrLogFormatterTest, traceTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        getTp(),
-        "1234567890123456789012345678901234567890.cpp",
-        lineNumber2,
-        folly::LogLevel::DBG,
-        "Message"};
+        .timestamp = getTp(),
+        .fileBasename = "1234567890123456789012345678901234567890.cpp",
+        .lineNumber = lineNumber2,
+        .logLevel = folly::LogLevel::DBG,
+        .logMessage = "Message"};
 
     EXPECT_THAT(
         getFormatter().formatMessageInStreamrStyle(msg),
@@ -49,7 +53,11 @@ TEST_F(StreamrLogFormatterTest, traceTruncate) {
 
 TEST_F(StreamrLogFormatterTest, debugNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        getTp(), "Filename.cpp", lineNumber, folly::LogLevel::DBG0, "Message"};
+        .timestamp = getTp(),
+        .fileBasename = "Filename.cpp",
+        .lineNumber = lineNumber,
+        .logLevel = folly::LogLevel::DBG0,
+        .logMessage = "Message"};
 
     EXPECT_THAT(
         getFormatter().formatMessageInStreamrStyle(msg),
@@ -59,7 +67,11 @@ TEST_F(StreamrLogFormatterTest, debugNoTruncate) {
 
 TEST_F(StreamrLogFormatterTest, infoNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        getTp(), "Filename.cpp", lineNumber, folly::LogLevel::INFO, "Message"};
+        .timestamp = getTp(),
+        .fileBasename = "Filename.cpp",
+        .lineNumber = lineNumber,
+        .logLevel = folly::LogLevel::INFO,
+        .logMessage = "Message"};
 
     EXPECT_THAT(
         getFormatter().formatMessageInStreamrStyle(msg),
@@ -69,7 +81,11 @@ TEST_F(StreamrLogFormatterTest, infoNoTruncate) {
 
 TEST_F(StreamrLogFormatterTest, warnoNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        getTp(), "Filename.cpp", lineNumber, folly::LogLevel::WARN, "Message"};
+        .timestamp = getTp(),
+        .fileBasename = "Filename.cpp",
+        .lineNumber = lineNumber,
+        .logLevel = folly::LogLevel::WARN,
+        .logMessage = "Message"};
 
     EXPECT_THAT(
         getFormatter().formatMessageInStreamrStyle(msg),
@@ -79,7 +95,11 @@ TEST_F(StreamrLogFormatterTest, warnoNoTruncate) {
 
 TEST_F(StreamrLogFormatterTest, errorNoTruncate) {
     StreamrLogFormatter::StreamrLogMessage msg = {
-        getTp(), "Filename.cpp", lineNumber, folly::LogLevel::ERR, "Message"};
+        .timestamp = getTp(),
+        .fileBasename = "Filename.cpp",
+        .lineNumber = lineNumber,
+        .logLevel = folly::LogLevel::ERR,
+        .logMessage = "Message"};
 
     EXPECT_THAT(
         getFormatter().formatMessageInStreamrStyle(msg),
@@ -91,11 +111,11 @@ TEST_F(StreamrLogFormatterTest, fatalNoTruncate) {
     // Cannot use FATAL in Folly because it aborts, CRITICAL is converted to
     // FATAL
     StreamrLogFormatter::StreamrLogMessage msg = {
-        getTp(),
-        "Filename.cpp",
-        lineNumber,
-        folly::LogLevel::CRITICAL,
-        "Message"};
+        .timestamp = getTp(),
+        .fileBasename = "Filename.cpp",
+        .lineNumber = lineNumber,
+        .logLevel = folly::LogLevel::CRITICAL,
+        .logMessage = "Message"};
 
     EXPECT_THAT(
         getFormatter().formatMessageInStreamrStyle(msg),

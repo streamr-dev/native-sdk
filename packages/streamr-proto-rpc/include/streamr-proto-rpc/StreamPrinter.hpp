@@ -1,6 +1,7 @@
 #ifndef STREAMER_PROTORPC_PLUGIN_STREAM_PRINTER_HPP
 #define STREAMER_PROTORPC_PLUGIN_STREAM_PRINTER_HPP
 
+#include <algorithm>
 #include <google/protobuf/io/zero_copy_stream.h>
 
 namespace streamr::protorpc {
@@ -27,10 +28,8 @@ public:
 
             if (buffer && bufferSize > 0) {
                 // compute dumpsize
-                int64_t dumpSize = iLength - dumpIndex;
-                if (dumpSize > bufferSize) {
-                    dumpSize = bufferSize;
-                }
+                const int64_t dumpSize =
+                    std::min<int64_t>(iLength - dumpIndex, bufferSize);
 
                 // dump
                 const unsigned char* dumpData = &iValue[dumpIndex];

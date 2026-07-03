@@ -132,7 +132,7 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
         "wakeUp",
         [&wakeUpService](
             const WakeUpRequest& request, const ProtoCallContext& context) {
-            return wakeUpService.wakeUp(request, context);
+            wakeUpService.wakeUp(request, context);
         });
     setCallbacks(false);
     std::promise<std::string> promise;

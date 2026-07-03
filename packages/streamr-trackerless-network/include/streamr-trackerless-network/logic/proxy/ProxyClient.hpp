@@ -313,7 +313,9 @@ public:
                 peerDescriptor, LockID{SERVICE_ID});
 
             this->connections.emplace(
-                nodeId, ProxyConnection{peerDescriptor, direction});
+                nodeId,
+                ProxyConnection{
+                    .peerDescriptor = peerDescriptor, .direction = direction});
 
             ContentDeliveryRpcClient client{this->rpcCommunicator};
             const auto remote = std::make_shared<ContentDeliveryRpcRemote>(
@@ -337,11 +339,10 @@ public:
 
     void closeRandomConnections(size_t connectionCount) {
         std::vector<std::pair<DhtAddress, ProxyConnection>> proxiesToDisconnect;
-        std::sample(
-            this->connections.begin(),
-            this->connections.end(),
+        std::ranges::sample(
+            this->connections,
             std::back_inserter(proxiesToDisconnect),
-            connectionCount,
+            static_cast<std::ptrdiff_t>(connectionCount),
             std::mt19937{std::random_device{}()});
 
         for (const auto& nodeId : proxiesToDisconnect) {

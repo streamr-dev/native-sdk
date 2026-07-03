@@ -27,7 +27,6 @@ TEST(SigninUtilsTest, hash) {
     const auto hash = BinaryUtils::binaryStringToHex(
         SigningUtils::hash(BinaryUtils::hexToBinaryString(payloadHex)));
     std::string lowerCaseHash;
-    std::transform(
-        hash.begin(), hash.end(), std::back_inserter(lowerCaseHash), ::tolower);
+    std::ranges::transform(hash, std::back_inserter(lowerCaseHash), ::tolower);
     EXPECT_EQ(hash, expectedHash);
 }
