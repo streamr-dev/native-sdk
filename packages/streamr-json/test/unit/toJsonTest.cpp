@@ -10,7 +10,7 @@
 
 #include "TestClass.hpp"
 #include "WeatherData.hpp"
-#include "streamr-json/toJson.hpp"
+import streamr.json;
 
 using streamr::json::toJson;
 

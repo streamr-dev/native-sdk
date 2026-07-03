@@ -44,21 +44,38 @@ if(NOT TARGET Boost::pfr)
   set_target_properties(Boost::pfr PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 endif()
 
-add_library(streamr-json INTERFACE)
+# C++ modules support (guards, policies, helpers) — must come after
+# project() because it inspects the compiler id.
+include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
+
+# Module façade (MODERNIZATION.md Part 2): the package is now a STATIC
+# library whose module interface units re-export the public headers.
+# #include consumers are unaffected; import consumers get the BMIs.
+streamr_add_module_library(streamr-json
+  FILES
+    modules/streamr.json.cppm
+    modules/streamr.json-jsonConcepts.cppm
+    modules/streamr.json-toJson.cppm
+    modules/streamr.json-toString.cppm)
 add_library(streamr::streamr-json ALIAS streamr-json)
 
 target_include_directories(
-  streamr-json INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  streamr-json PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(streamr-json INTERFACE Boost::pfr)
-target_link_libraries(streamr-json INTERFACE nlohmann_json::nlohmann_json)
+# PUBLIC (was INTERFACE): the module interface units themselves compile
+# against boost-pfr/nlohmann in their global module fragments.
+target_link_libraries(streamr-json PUBLIC Boost::pfr)
+target_link_libraries(streamr-json PUBLIC nlohmann_json::nlohmann_json)
 
 if(NOT IOS)
   enable_testing()
 
   add_executable(streamr-json-test-unit test/unit/TestJsonConcepts.cpp test/unit/toStringTest.cpp test/unit/toJsonTest.cpp)
-  target_link_libraries(streamr-json-test-unit 
+  # The tests import streamr.json, so their sources need module dependency
+  # scanning.
+  streamr_enable_imports(streamr-json-test-unit)
+  target_link_libraries(streamr-json-test-unit
     PRIVATE streamr-json
     PRIVATE GTest::gtest 
     PRIVATE GTest::gtest_main 
@@ -71,6 +88,7 @@ if(NOT IOS)
   endif()
   
   add_executable(streamr-json-example src/examples/JsonExample.cpp)
+  streamr_enable_imports(streamr-json-example)
   target_link_libraries(streamr-json-example PRIVATE streamr-json)
 
 endif()
@@ -80,9 +98,13 @@ endif()
 # - At least parse the deps from the vcpkg.json file and use them to find_package() in this file and to add the
 # find_package() calls to the wrapper
 
+# CXX_MODULES_DIRECTORY: the export now also carries the C++ module
+# interface information so that a standalone downstream build can compile
+# BMIs from this build tree (Phase 2.1 smoke-test gate).
 export(TARGETS streamr-json
   NAMESPACE streamr::
-  FILE streamr-json-config-in.cmake)
+  FILE streamr-json-config-in.cmake
+  CXX_MODULES_DIRECTORY streamr-json-modules)
 
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-json-config.cmake" 
   "list(APPEND CMAKE_FIND_ROOT_PATH \"${CMAKE_FIND_ROOT_PATH}\")\n"

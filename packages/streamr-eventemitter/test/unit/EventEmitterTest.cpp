@@ -2,11 +2,13 @@
 #include <cstddef>
 #include <future>
 #include <iostream>
+#include <list>
 #include <string_view>
 #include <thread>
+#include <tuple>
 #include <gtest/gtest.h>
 
-#include "streamr-eventemitter/EventEmitter.hpp"
+import streamr.eventemitter;
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;

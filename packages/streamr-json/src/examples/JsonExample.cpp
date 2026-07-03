@@ -1,7 +1,10 @@
+#include <exception>
 #include <iostream>
-#include <string_view>
-#include "streamr-json/toJson.hpp"
-#include "streamr-json/toString.hpp"
+#include <string>
+#include <utility>
+#include <nlohmann/json.hpp>
+
+import streamr.json;
 
 using streamr::json::StreamrJsonInitializerList;
 using streamr::json::toJson;
@@ -34,8 +37,12 @@ private:
     std::string name;
 
 public:
-    ClassWithPrivateSection(int data, std::string_view name)
-        : data(data), name(name) {}
+    // NB: takes std::string by value instead of std::string_view: clangd's
+    // (still experimental) modules support cannot resolve the constrained
+    // std::string(string_view) constructor template in import-using files,
+    // and this is an example — not worth a lint exclusion.
+    ClassWithPrivateSection(int data, std::string name)
+        : data(data), name(std::move(name)) {}
 
     // We need to provide a toJson()/toString() methods to be able
     // to serialize the class because it has private sections
@@ -46,7 +53,7 @@ public:
     [[nodiscard]] std::string toString() const { return (toJson()).dump(); }
 };
 
-int main() {
+int main() try {
     MyStruct s{.x = 1, .y = "hello"};
 
     // Converting a struct to a json object
@@ -85,4 +92,7 @@ int main() {
     std::cout << str2 << '\n';
 
     return 0;
+} catch (const std::exception& e) {
+    std::cerr << "Example failed: " << e.what() << '\n';
+    return 1;
 }
