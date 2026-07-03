@@ -269,13 +269,35 @@ document/replace in 1.4.
   (deployment-target-26 / SDK-libc++ build, Personal Team signing);
   Android sanity via CI keyword.
 
-## Phase 1.5 — Lint stack remainder
+## Phase 1.5 — Lint stack remainder (PR pending)
 - clangd/clang-format 22 already landed in Phase 1.2 (forced by libc++ 22).
-  Remaining: bump the `clangd-tidy` submodule; triage the `.clang-tidy`
-  suppressions added in 1.2 (enable checks where cheap to satisfy, keep
-  suppressed with justification where not).
-- **Gate**: `./lint.sh` green both platforms; any format-only diff committed
-  separately.
+- **clangd-tidy: submodule → PyPI**. The submodule pinned tag 0.2.1 (a
+  single-script era); upstream 1.x is a Python package with dependencies
+  (attrs/cattrs/typing-extensions), so a bare checkout is no longer
+  runnable. The submodule is gone; `install-prerequisities.sh` does
+  `pipx install clangd-tidy==1.1.1` (version-pinned) on both platforms and
+  puts `~/.local/bin` on PATH; the 10 lint.sh call sites invoke it from
+  PATH. The unused `clang-tidy` symlink alias went with it. Gained since
+  0.2.1: `--line-filter` clang-tidy parity, diagnostic formatter fixes,
+  `clangd-tidy-diff`.
+- **All 11 post-18 check suppressions from Phase 1.2 removed — zero kept.**
+  The full-monorepo sweep fired 77 findings (plus 7 more exposed by also
+  dropping the nested test configs' suppressions, and 1 narrowing warning
+  introduced by the ranges conversion itself), all fixed in code:
+  readability-container-contains (26; includes two C++23
+  `std::string::contains` substring cases), modernize-use-designated-
+  initializers (22, incl. the two nested test configs' copies — also
+  removed), modernize-use-ranges (8), readability-avoid-return-with-void-
+  value (6, `return voidFn()` in void lambdas), bugprone-suspicious-
+  stringview-data-usage (4, string_view constants passed to `getenv()` →
+  now `const char*`), readability-redundant-casting (3, self-casts of
+  `const DhtCallContext&`), bugprone-unused-local-non-trivial-variable
+  (3 dead `debugString` debug leftovers deleted), performance-enum-size
+  (2 enums → `std::uint8_t`), bugprone-optional-value-conversion (1,
+  optional→value→optional round-trip in WebsocketServer), readability-
+  use-std-min-max (1), modernize-use-starts-ends-with (1).
+- **Gate**: `./lint.sh` green both platforms; full test suite green
+  (several fixes touch runtime code paths); format at fixed point.
 
 ## Phase 1.6 — CI/docs closeout
 - Revisit preview runner images (macos-26 / ubuntu-26.04) once GA; consider a

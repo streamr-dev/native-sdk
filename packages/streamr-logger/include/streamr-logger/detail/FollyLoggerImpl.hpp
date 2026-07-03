@@ -24,8 +24,10 @@ namespace streamr::logger::detail {
 using LoggerImpl = streamr::logger::LoggerImpl;
 
 constexpr std::string_view envCategoryLogLevelName = "LOG_LEVEL_";
-constexpr std::string_view envThreadIdName = "LOG_THREAD_ID";
-constexpr std::string_view envFunctionName = "LOG_FUNCTION_NAME";
+// const char* (not string_view): passed to getenv(), which needs
+// null-terminated strings.
+constexpr const char* envThreadIdName = "LOG_THREAD_ID";
+constexpr const char* envFunctionName = "LOG_FUNCTION_NAME";
 
 class FollyLoggerImpl : public LoggerImpl {
 private:
@@ -44,8 +46,8 @@ public:
         mLogHandlerFactory =
             std::make_unique<StreamrHandlerFactory>(mWriterFactory.get());
 
-        mLogThreadId = getenv(envThreadIdName.data()) != nullptr;
-        mLogFunctionName = getenv(envFunctionName.data()) != nullptr;
+        mLogThreadId = getenv(envThreadIdName) != nullptr;
+        mLogFunctionName = getenv(envFunctionName) != nullptr;
     }
 
     void init(const streamr::logger::StreamrLogLevel logLevel) override {
@@ -96,7 +98,7 @@ private:
         for (char** env = environ; *env != nullptr; ++env) {
             const std::string envVar = *env;
 
-            if (envVar.find(envCategoryLogLevelName) == 0) {
+            if (envVar.starts_with(envCategoryLogLevelName)) {
                 std::string envCategory = envVar.substr(
                     envCategoryLogLevelName.size(),
                     envVar.find('=') - envCategoryLogLevelName.size());

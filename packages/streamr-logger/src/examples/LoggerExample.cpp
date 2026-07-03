@@ -43,7 +43,7 @@ public:
                 i);
         }
 
-        auto data = MyDataStruct{"count", loopCount};
+        auto data = MyDataStruct{.name = "count", .value = loopCount};
 
         Logger localLogger3(data, streamrloglevel::Info{});
         for (int i = 0; i < loopCount; i++) {

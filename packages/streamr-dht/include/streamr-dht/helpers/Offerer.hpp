@@ -1,6 +1,7 @@
 #ifndef STREAMR_DHT_OFFERER_HPP
 #define STREAMR_DHT_OFFERER_HPP
 
+#include <cstdint>
 #include <string>
 #include <boost/endian/conversion.hpp>
 #include <boost/uuid/detail/md5.hpp>
@@ -10,7 +11,7 @@ namespace streamr::dht::helpers {
 
 using streamr::dht::DhtAddress;
 
-enum class Offerer { LOCAL, REMOTE };
+enum class Offerer : std::uint8_t { LOCAL, REMOTE };
 
 class OffererHelper {
 public:

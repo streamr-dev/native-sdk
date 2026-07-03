@@ -1,6 +1,7 @@
 #ifndef STREAMR_DHT_CONNECTION_CONNECTIONMANAGER_HPP
 #define STREAMR_DHT_CONNECTION_CONNECTIONMANAGER_HPP
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -52,7 +53,12 @@ namespace endpointevents = streamr::dht::connection::endpoint::endpointevents;
 
 using namespace std::chrono_literals;
 
-enum class ConnectionManagerState { IDLE, RUNNING, STOPPING, STOPPED };
+enum class ConnectionManagerState : std::uint8_t {
+    IDLE,
+    RUNNING,
+    STOPPING,
+    STOPPED
+};
 
 struct ConnectionManagerOptions {
     size_t maxConnections;
@@ -89,7 +95,7 @@ private:
                         "Trying to acquire mutex lock in endpoint callback");
                     std::scoped_lock lock(this->endpointsMutex);
                     SLogger::debug("Acquired mutex lock in endpoint callback");
-                    if (this->endpoints.find(nodeId) != this->endpoints.end()) {
+                    if (this->endpoints.contains(nodeId)) {
                         this->endpoints.erase(nodeId);
                     }
                 }
@@ -129,7 +135,7 @@ public:
               [this](const Message& message, const SendOptions& sendOptions) {
                   SLogger::trace(
                       "outgoingmessagecallback() of rpcCommunicator");
-                  return this->send(message, sendOptions);
+                  this->send(message, sendOptions);
               },
               RpcCommunicatorOptions{.rpcRequestTimeout = 10s}), // NOLINT
           connectionLockRpcLocal(
@@ -166,13 +172,12 @@ public:
         this->rpcCommunicator.registerRpcNotification<UnlockRequest>(
             "unlockRequest",
             [this](const UnlockRequest& req, const DhtCallContext& context) {
-                return this->connectionLockRpcLocal.unlockRequest(req, context);
+                this->connectionLockRpcLocal.unlockRequest(req, context);
             });
         this->rpcCommunicator.registerRpcNotification<DisconnectNotice>(
             "gracefulDisconnect",
             [this](const DisconnectNotice& req, const DhtCallContext& context) {
-                return this->connectionLockRpcLocal.gracefulDisconnect(
-                    req, context);
+                this->connectionLockRpcLocal.gracefulDisconnect(req, context);
             });
         SLogger::debug("ConnectionManager constructor end");
     }
@@ -292,7 +297,7 @@ public:
             std::scoped_lock lock(this->endpointsMutex);
             SLogger::debug("Acquired mutex lock in send");
 
-            if (this->endpoints.find(nodeId) == this->endpoints.end()) {
+            if (!this->endpoints.contains(nodeId)) {
                 SLogger::debug("Node ID not found in endpoints");
                 if (sendOptions.connect) {
                     SLogger::debug("Creating new connection");
@@ -302,7 +307,7 @@ public:
                     SLogger::debug("Created new connection");
                     this->onNewConnection(connection);
                     SLogger::debug("Handled new connection");
-                    if (this->endpoints.find(nodeId) == this->endpoints.end()) {
+                    if (!this->endpoints.contains(nodeId)) {
                         SLogger::debug(
                             "Node ID not found in endpoints after creating new connection, this means that the connection failed");
                         throw SendFailed(
@@ -424,7 +429,7 @@ public:
             SLogger::debug("Trying to acquire mutex lock in unlockConnection");
             std::scoped_lock lock(this->endpointsMutex);
             SLogger::debug("Acquired mutex lock in unlockConnection");
-            if (this->endpoints.find(nodeId) == this->endpoints.end()) {
+            if (!this->endpoints.contains(nodeId)) {
                 SLogger::debug("Node ID not found in endpoints");
                 return;
             }
@@ -512,7 +517,7 @@ private:
             std::scoped_lock lock(this->endpointsMutex);
             SLogger::debug("Acquired mutex lock in acceptNewConnection");
 
-            if (this->endpoints.find(nodeId) != this->endpoints.end()) {
+            if (this->endpoints.contains(nodeId)) {
                 if (OffererHelper::getOfferer(
                         Identifiers::getNodeIdFromPeerDescriptor(
                             this->getLocalPeerDescriptor()),
@@ -580,8 +585,6 @@ private:
                 "gracefullyDisconnected() tried on a non-existing connection");
             return;
         }
-        auto debugString = targetDescriptor.DebugString();
-
         if (endpoint->isConnected()) {
             try {
                 SLogger::debug("gracefullyDisconnect() calling blockingWait()");
@@ -600,9 +603,6 @@ private:
                                      targetDescriptor,
                                      disconnectMode]()
                                         -> folly::coro::Task<void> {
-                                        auto debugString =
-                                            targetDescriptor.DebugString();
-
                                         co_return co_await this
                                             ->doGracefullyDisconnectAsync(
                                                 targetDescriptor,

@@ -77,9 +77,8 @@ public:
                 return port;
             } catch (const WebsocketServerStartError& err) {
                 if (err.originalErrorInfo.has_value() &&
-                    err.originalErrorInfo.value().find(
-                        "TCP server socket binding failed") !=
-                        std::string::npos) {
+                    err.originalErrorInfo.value().contains(
+                        "TCP server socket binding failed")) {
                     SLogger::warn(
                         "failed to start WebSocket server on port: " +
                         std::to_string(port) + " reattempting on next port");
@@ -193,7 +192,7 @@ private:
         if (mConfig.maxMessageSize.has_value() &&
             mConfig.maxMessageSize.value() > 0) {
             webSocketServerConfiguration.maxMessageSize =
-                mConfig.maxMessageSize.value();
+                mConfig.maxMessageSize;
         }
 
         if (certs || mConfig.tlsCertificateFiles || tls) {

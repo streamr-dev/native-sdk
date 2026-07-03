@@ -243,8 +243,7 @@ TEST_F(RpcCommunicatorTest, TestrequestServerThrowsRuntimeError) {
         EXPECT_TRUE(false);
     } catch (const RpcServerError& ex) {
         EXPECT_EQ(ex.code, ErrorCode::RPC_SERVER_ERROR);
-        EXPECT_TRUE(
-            ex.errorClassName.find("runtime_error") != std::string::npos);
+        EXPECT_TRUE(ex.errorClassName.contains("runtime_error"));
         EXPECT_EQ(ex.message, "TestException");
     } catch (...) {
         EXPECT_TRUE(false);
@@ -286,8 +285,7 @@ TEST_F(RpcCommunicatorTest, TestrequestServerThrowsFailedToParse) {
     } catch (const RpcServerError& ex) {
         EXPECT_EQ(ex.code, ErrorCode::RPC_SERVER_ERROR);
         EXPECT_EQ(ex.errorCode, "FAILED_TO_PARSE");
-        EXPECT_TRUE(
-            ex.errorClassName.find("FailedToParse") != std::string::npos);
+        EXPECT_TRUE(ex.errorClassName.contains("FailedToParse"));
     } catch (...) {
         EXPECT_TRUE(false);
     }

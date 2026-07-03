@@ -43,9 +43,7 @@ public:
     LockResponse lockRequest(
         const LockRequest& request,
         const DhtCallContext& callContext) override {
-        const auto senderPeerDescriptor =
-            static_cast<const DhtCallContext&>(callContext)
-                .incomingSourceDescriptor;
+        const auto senderPeerDescriptor = callContext.incomingSourceDescriptor;
 
         if (Identifiers::areEqualPeerDescriptors(
                 senderPeerDescriptor.value(),
@@ -67,9 +65,7 @@ public:
     void unlockRequest(
         const UnlockRequest& request,
         const DhtCallContext& callContext) override {
-        const auto senderPeerDescriptor =
-            static_cast<const DhtCallContext&>(callContext)
-                .incomingSourceDescriptor;
+        const auto senderPeerDescriptor = callContext.incomingSourceDescriptor;
         const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
             senderPeerDescriptor.value());
         this->options.removeRemoteLocked(nodeId, LockID{request.lockid()});
@@ -78,9 +74,7 @@ public:
     void gracefulDisconnect(
         const DisconnectNotice& request,
         const DhtCallContext& callContext) override {
-        const auto senderPeerDescriptor =
-            static_cast<const DhtCallContext&>(callContext)
-                .incomingSourceDescriptor;
+        const auto senderPeerDescriptor = callContext.incomingSourceDescriptor;
         SLogger::trace(
             Identifiers::getNodeIdFromPeerDescriptor(
                 senderPeerDescriptor.value()) +

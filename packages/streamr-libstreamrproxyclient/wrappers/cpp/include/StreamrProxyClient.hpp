@@ -80,8 +80,8 @@ struct StreamrProxyAddress {
 
     static StreamrProxyAddress fromCProxy(const Proxy* proxy) {
         return StreamrProxyAddress{
-            std::string(proxy->websocketUrl),
-            std::string(proxy->ethereumAddress)};
+            .websocketUrl = std::string(proxy->websocketUrl),
+            .ethereumAddress = std::string(proxy->ethereumAddress)};
     }
 };
 
@@ -210,7 +210,8 @@ public:
         cProxies.reserve(proxies.size());
         for (const auto& proxy : proxies) {
             cProxies.push_back(
-                {proxy.websocketUrl.c_str(), proxy.ethereumAddress.c_str()});
+                {.websocketUrl = proxy.websocketUrl.c_str(),
+                 .ethereumAddress = proxy.ethereumAddress.c_str()});
         }
         proxyClientConnect(
             &result, this->proxyClientHandle, cProxies.data(), cProxies.size());

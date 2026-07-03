@@ -26,6 +26,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     TEMP_PROFILE_CONTENTS+="export HOMEBREW_PREFIX=$(brew --prefix)\n"
 
     brew install jq || true
+    brew install pipx || true
     # Latest LLVM (keg-only: not linked into $HOMEBREW_PREFIX/bin; the build
     # finds it via the LLVM_PREFIX environment variable exported below).
     brew install llvm || true
@@ -60,7 +61,7 @@ else
     # come from the same LLVM version on every platform: clangd must be able
     # to parse libc++ 22 headers, and clang-format versions must not diverge
     # between macOS and Linux or the format check flip-flops.
-    sudo apt-get install -y build-essential cmake ninja-build jq \
+    sudo apt-get install -y build-essential cmake ninja-build jq pipx \
         clang-22 lld-22 clang-tools-22 clangd-22 libc++-22-dev libc++abi-22-dev \
         clang-format-22 \
         autoconf autoconf-archive automake libtool
@@ -88,20 +89,21 @@ if [[ -n "$GITHUB_ENV" ]]; then
 fi
 TEMP_PROFILE_CONTENTS+="export CMAKE_GENERATOR=Ninja\n"
 
-cd clangd-tidy
-rm -f clang-tidy
-ln -s clangd-tidy clang-tidy
-cd ..
+# clangd-tidy (the lint driver) comes from PyPI, version-pinned. It used to
+# be a git submodule, but since 1.x upstream ships it as a Python package
+# with dependencies, so a bare checkout is no longer runnable.
+# --force makes reruns of this script idempotent (pipx errors on an
+# already-installed package otherwise).
+pipx install --force "clangd-tidy==1.1.1"
 
-TEMP_PROFILE_CONTENTS+="export PATH=$(pwd)/clangd-tidy:\$PATH\n"
-
-CLANGD_TIDY_PATH="$(pwd)/clangd-tidy"
-
-if [[ ":$PATH:" != *":$CLANGD_TIDY_PATH:"* ]]; then
-    export PATH="$CLANGD_TIDY_PATH:$PATH"
-    if [[ -n "$GITHUB_PATH" ]]; then
-        echo "$CLANGD_TIDY_PATH" >> $GITHUB_PATH
-    fi
+# pipx installs into ~/.local/bin, which is not on PATH everywhere.
+PIPX_BIN_DIR="$HOME/.local/bin"
+TEMP_PROFILE_CONTENTS+="export PATH=$PIPX_BIN_DIR:\$PATH\n"
+if [[ ":$PATH:" != *":$PIPX_BIN_DIR:"* ]]; then
+    export PATH="$PIPX_BIN_DIR:$PATH"
+fi
+if [[ -n "$GITHUB_PATH" ]]; then
+    echo "$PIPX_BIN_DIR" >> $GITHUB_PATH
 fi
 
 cd vcpkg

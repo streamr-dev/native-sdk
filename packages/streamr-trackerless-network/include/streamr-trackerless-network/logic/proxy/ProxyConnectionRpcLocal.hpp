@@ -96,7 +96,7 @@ public:
     }
 
     bool hasConnection(const DhtAddress& nodeId) const {
-        return this->connections.find(nodeId) != this->connections.end();
+        return this->connections.contains(nodeId);
     }
 
     void removeConnection(const DhtAddress& nodeId) {

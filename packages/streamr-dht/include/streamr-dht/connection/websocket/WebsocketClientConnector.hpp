@@ -55,8 +55,7 @@ public:
                   },
                   .hasConnection = [this](const DhtAddress& nodeId) -> bool {
                       std::scoped_lock lock(this->mutex);
-                      return this->connectingHandshakers.find(nodeId) !=
-                          this->connectingHandshakers.end() ||
+                      return this->connectingHandshakers.contains(nodeId) ||
                           this->options.hasConnection(nodeId);
                   },
                   .onNewConnection =
@@ -76,7 +75,7 @@ public:
                     if (this->abortController.getSignal().aborted) {
                         return;
                     }
-                    return this->rpcLocal.requestConnection(req, context);
+                    this->rpcLocal.requestConnection(req, context);
                 });
     }
 
@@ -122,8 +121,7 @@ public:
         outgoingHandshaker->on<handshakerevents::HandshakerStopped>(
             [this, nodeId]() {
                 std::scoped_lock lock(this->mutex);
-                if (this->connectingHandshakers.find(nodeId) !=
-                    this->connectingHandshakers.end()) {
+                if (this->connectingHandshakers.contains(nodeId)) {
                     this->connectingHandshakers.erase(nodeId);
                 }
             });

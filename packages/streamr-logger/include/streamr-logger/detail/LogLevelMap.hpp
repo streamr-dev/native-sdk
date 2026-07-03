@@ -45,8 +45,8 @@ struct LogLevelMap {
 
     [[nodiscard]] constexpr folly::LogLevel streamrLevelToFollyLevel(
         const StreamrLogLevel& key) const {
-        const auto* const itr = std::find_if(
-            begin(mData), end(mData), [&key](const Mapping& mapping) {
+        const auto* const itr =
+            std::ranges::find_if(mData, [&key](const Mapping& mapping) {
                 return mapping.first.index() == key.index();
             });
         if (itr != end(mData)) {
@@ -57,10 +57,9 @@ struct LogLevelMap {
 
     [[nodiscard]] constexpr StreamrLogLevel follyLevelToStreamrLevel(
         const folly::LogLevel& key) const {
-        const auto* const itr = std::find_if(
-            begin(mData), end(mData), [&key](const Mapping& mapping) {
-                return mapping.second == key;
-            });
+        const auto* const itr = std::ranges::find_if(
+            mData,
+            [&key](const Mapping& mapping) { return mapping.second == key; });
         if (itr != end(mData)) {
             return itr->first;
         }
@@ -69,8 +68,8 @@ struct LogLevelMap {
 
     [[nodiscard]] constexpr folly::LogLevel streamrLevelNameToFollyLevel(
         const std::string_view& name) const {
-        const auto* const itr = std::find_if(
-            begin(mData), end(mData), [&name](const Mapping& mapping) {
+        const auto* const itr =
+            std::ranges::find_if(mData, [&name](const Mapping& mapping) {
                 return std::visit(
                     [&name](const auto& v) { return v.name == name; },
                     mapping.first);

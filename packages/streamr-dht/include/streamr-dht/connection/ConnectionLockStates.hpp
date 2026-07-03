@@ -45,11 +45,10 @@ public:
         const std::optional<LockID>& lockId = std::nullopt) {
         std::scoped_lock lock(this->localLocksMutex);
         if (!lockId.has_value()) {
-            return this->localLocks.find(id) != this->localLocks.end();
+            return this->localLocks.contains(id);
         }
-        return this->localLocks.find(id) != this->localLocks.end() &&
-            this->localLocks.at(id).find(lockId.value()) !=
-            this->localLocks.at(id).end();
+        return this->localLocks.contains(id) &&
+            this->localLocks.at(id).contains(lockId.value());
     }
 
     [[nodiscard]] bool isRemoteLocked(
@@ -57,16 +56,15 @@ public:
         const std::optional<LockID>& lockId = std::nullopt) {
         std::scoped_lock lock(this->remoteLocksMutex);
         if (!lockId.has_value()) {
-            return this->remoteLocks.find(id) != this->remoteLocks.end();
+            return this->remoteLocks.contains(id);
         }
-        return this->remoteLocks.find(id) != this->remoteLocks.end() &&
-            this->remoteLocks.at(id).find(lockId.value()) !=
-            this->remoteLocks.at(id).end();
+        return this->remoteLocks.contains(id) &&
+            this->remoteLocks.at(id).contains(lockId.value());
     }
 
     [[nodiscard]] bool isWeakLocked(const DhtAddress& id) {
         std::scoped_lock lock(this->weakLocksMutex);
-        return this->weakLocks.find(id) != this->weakLocks.end();
+        return this->weakLocks.contains(id);
     }
 
     [[nodiscard]] bool isLocked(const DhtAddress& id) {
@@ -80,7 +78,7 @@ public:
 
     void addLocalLocked(const DhtAddress& id, const LockID& lockId) {
         std::scoped_lock lock(this->localLocksMutex);
-        if (this->localLocks.find(id) == this->localLocks.end()) {
+        if (!this->localLocks.contains(id)) {
             this->localLocks[id] = std::set<LockID>();
         }
         this->localLocks[id].insert(lockId);
@@ -88,7 +86,7 @@ public:
 
     void addRemoteLocked(const DhtAddress& id, const LockID& lockId) {
         std::scoped_lock lock(this->remoteLocksMutex);
-        if (this->remoteLocks.find(id) == this->remoteLocks.end()) {
+        if (!this->remoteLocks.contains(id)) {
             this->remoteLocks[id] = std::set<LockID>();
         }
         this->remoteLocks[id].insert(lockId);
@@ -96,7 +94,7 @@ public:
 
     void addWeakLocked(const DhtAddress& id, const LockID& lockId) {
         std::scoped_lock lock(this->weakLocksMutex);
-        if (this->weakLocks.find(id) == this->weakLocks.end()) {
+        if (!this->weakLocks.contains(id)) {
             this->weakLocks[id] = std::set<LockID>();
         }
         this->weakLocks[id].insert(lockId);
@@ -104,7 +102,7 @@ public:
 
     void removeLocalLocked(const DhtAddress& id, const LockID& lockId) {
         std::scoped_lock lock(this->localLocksMutex);
-        if (this->localLocks.find(id) != this->localLocks.end()) {
+        if (this->localLocks.contains(id)) {
             this->localLocks[id].erase(lockId);
             if (this->localLocks[id].empty()) {
                 this->localLocks.erase(id);
@@ -114,7 +112,7 @@ public:
 
     void removeRemoteLocked(const DhtAddress& id, const LockID& lockId) {
         std::scoped_lock lock(this->remoteLocksMutex);
-        if (this->remoteLocks.find(id) != this->remoteLocks.end()) {
+        if (this->remoteLocks.contains(id)) {
             this->remoteLocks[id].erase(lockId);
             if (this->remoteLocks[id].empty()) {
                 this->remoteLocks.erase(id);
@@ -124,7 +122,7 @@ public:
 
     void removeWeakLocked(const DhtAddress& id, const LockID& lockId) {
         std::scoped_lock lock(this->weakLocksMutex);
-        if (this->weakLocks.find(id) != this->weakLocks.end()) {
+        if (this->weakLocks.contains(id)) {
             this->weakLocks[id].erase(lockId);
             if (this->weakLocks[id].empty()) {
                 this->weakLocks.erase(id);

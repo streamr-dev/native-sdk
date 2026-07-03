@@ -152,7 +152,6 @@ private:
             auto self = this->sharedFromThis<Handshaker>();
             Message message;
             message.ParseFromArray(data.data(), static_cast<int>(data.size()));
-            const auto debugString = message.DebugString();
             SLogger::trace(
                 "Handshaker::onData() handshake message received " +
                 message.DebugString());

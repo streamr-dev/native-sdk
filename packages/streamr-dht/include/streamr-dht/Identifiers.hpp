@@ -44,7 +44,7 @@ struct Identifiers {
     static DhtAddress createRandomDhtAddress() {
         return getDhtAddressFromRaw(DhtAddressRaw{[&]() {
             std::vector<uint8_t> randomBytes(kademliaIdLengthInBytes);
-            std::generate(randomBytes.begin(), randomBytes.end(), []() {
+            std::ranges::generate(randomBytes, []() {
                 return static_cast<uint8_t>(std::rand() % 256); // NOLINT
             });
             return std::string(randomBytes.begin(), randomBytes.end());

@@ -265,15 +265,19 @@ TEST_F(ToJsonTest, TestWeatherDataSmartPointersToJson) {
 
     auto finlandDataSample = std::make_shared<DataSample>();
     finlandDataSample->locality = "Helsinki";
-    finlandDataSample->temperatures.push_back({23.4, 1});
-    finlandDataSample->temperatures.push_back({24.5, 1000});
+    finlandDataSample->temperatures.push_back(
+        {.temperature = 23.4, .timestamp = 1});
+    finlandDataSample->temperatures.push_back(
+        {.temperature = 24.5, .timestamp = 1000});
     weatherDataSmartPointers.dataByCountry["Finland"].push_back(
         finlandDataSample);
 
     auto swedenDataSample = std::make_shared<DataSample>();
     swedenDataSample->locality = "Stockholm";
-    swedenDataSample->temperatures.push_back({22.0, 1});
-    swedenDataSample->temperatures.push_back({21.6, 1000});
+    swedenDataSample->temperatures.push_back(
+        {.temperature = 22.0, .timestamp = 1});
+    swedenDataSample->temperatures.push_back(
+        {.temperature = 21.6, .timestamp = 1000});
     weatherDataSmartPointers.dataByCountry["Sweden"].push_back(
         swedenDataSample);
 
@@ -286,15 +290,18 @@ TEST_F(ToJsonTest, TestWeatherDataRegularPointersToJson) {
     weatherDataRegularPointers.dataLabel = new std::string("Test data");
     auto* finlandSample = new DataSample;
     finlandSample->locality = "Helsinki";
-    finlandSample->temperatures.push_back({23.4, 1});
-    finlandSample->temperatures.push_back({24.5, 1000});
+    finlandSample->temperatures.push_back(
+        {.temperature = 23.4, .timestamp = 1});
+    finlandSample->temperatures.push_back(
+        {.temperature = 24.5, .timestamp = 1000});
     weatherDataRegularPointers.dataByCountry["Finland"].push_back(
         finlandSample);
 
     auto* swedenSample = new DataSample;
     swedenSample->locality = "Stockholm";
-    swedenSample->temperatures.push_back({22.0, 1});
-    swedenSample->temperatures.push_back({21.6, 1000});
+    swedenSample->temperatures.push_back({.temperature = 22.0, .timestamp = 1});
+    swedenSample->temperatures.push_back(
+        {.temperature = 21.6, .timestamp = 1000});
     weatherDataRegularPointers.dataByCountry["Sweden"].push_back(swedenSample);
     json expectedJson = R"(
         {

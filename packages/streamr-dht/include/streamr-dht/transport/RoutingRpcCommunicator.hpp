@@ -98,7 +98,7 @@ public:
                 }
             }
             SLogger::debug("Calling sendFn with message and sendOpts");
-            return this->sendFn(message, sendOpts);
+            this->sendFn(message, sendOpts);
         });
     }
     void handleMessageFromPeer(const Message& message) {
