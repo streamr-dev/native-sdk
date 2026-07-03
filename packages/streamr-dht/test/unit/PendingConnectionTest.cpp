@@ -1,6 +1,10 @@
 #include <chrono>
 #include <gtest/gtest.h>
-#include <folly/coro/BlockingWait.h>
+// Same include path as the module GMFs (the experimental shim): mixing the
+// folly/coro/... and folly/experimental/coro/... spellings of this header
+// between an importing TU and the imported BMIs makes clang see duplicate
+// (unmergeable) definitions with identical mangled names in Release.
+#include <folly/experimental/coro/BlockingWait.h>
 
 import streamr.dht;
 import streamr.utils;

@@ -15,6 +15,7 @@ vcpkg_from_github(
         fix-perf_scoped-target.patch
         fix-fmt-header.patch
         fix-missing-exception-include.patch
+        fix-anon-namespace-in-header-for-cxx-modules.patch
 )
 file(REMOVE "${SOURCE_PATH}/CMake/FindFastFloat.cmake")
 file(REMOVE "${SOURCE_PATH}/CMake/FindFmt.cmake")
