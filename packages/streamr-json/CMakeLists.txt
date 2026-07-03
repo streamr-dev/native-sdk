@@ -66,7 +66,9 @@ target_include_directories(
 target_link_libraries(streamr-json PUBLIC Boost::pfr)
 target_link_libraries(streamr-json PUBLIC nlohmann_json::nlohmann_json)
 
-if(NOT IOS)
+# Test/example targets import the modules — skip them where modules are
+# unsupported (Android; they are never executed there anyway).
+if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
   enable_testing()
 
   add_executable(streamr-json-test-unit test/unit/TestJsonConcepts.cpp test/unit/toStringTest.cpp test/unit/toJsonTest.cpp)

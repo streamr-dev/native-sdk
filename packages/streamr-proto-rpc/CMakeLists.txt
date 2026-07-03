@@ -91,7 +91,9 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-proto-rpc-config.cmake"
     "endif()\n"
     "include(${CMAKE_BINARY_DIR}/streamr-proto-rpc-config-in.cmake)\n")
 
-if(NOT IOS)
+# Test/example targets import the modules — skip them where modules are
+# unsupported (Android; they are never executed there anyway).
+if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp include/streamr-proto-rpc/PluginCodeGenerator.hpp)
 
     target_include_directories(

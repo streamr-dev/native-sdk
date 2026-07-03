@@ -57,7 +57,9 @@ export(TARGETS streamr-eventemitter
 file(WRITE "${CMAKE_BINARY_DIR}/streamr-eventemitter-config.cmake" 
   "list(APPEND CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})\n"
   "include(${CMAKE_BINARY_DIR}/streamr-eventemitter-config-in.cmake)\n")
-if(NOT IOS)
+# Test/example targets import the modules — skip them where modules are
+# unsupported (Android; they are never executed there anyway).
+if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
   enable_testing()
   find_package(GTest CONFIG REQUIRED)
 
