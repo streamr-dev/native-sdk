@@ -632,7 +632,7 @@ before any consolidation gains.
   trackerless-network + proxyclient downstream builds unchanged; root
   tree 307/307; full lint green.
 
-## Phase 2.5 — trackerless-network + proxyclient, FINAL METRICS (PR pending)
+## Phase 2.5 — trackerless-network + proxyclient, FINAL METRICS ✅ (PR #33, merged)
 The migration surface is complete: every C++ package that exports an API
 now ships a module.
 - **streamr-trackerless-network**: `:protos` over the NetworkRpc trio
@@ -651,6 +651,26 @@ now ships a module.
 - New standing gate applied (2.4 lesson): a LOCAL RELEASE build+test of
   the migrated package (caught nothing this time — the folly/protobuf
   overlay patches hold).
+- **The Android smoke gate (first Android build since the 1.3 dependency
+  wave) earned its keep twice**:
+  1. Upstream's 2026 folly port silently dropped Android from its
+     `supports` expression → `./install.sh --android` failed outright at
+     dependency install. The folly overlay re-allows Android
+     (JUSTIFICATION.md updated); **folly 2026 builds fine on the NDK**.
+  2. **The NDK's clang (18/19) cannot build our modules** — observed:
+     `import streamr.json` fails to provide the `toJson` overload set
+     (known pre-clang-19/20 `export using` overload bugs). Resolution:
+     `STREAMR_MODULES_SUPPORTED=OFF` on Android in StreamrModules.cmake —
+     Android builds libraries textually from headers (the façade keeps
+     them as source of truth), module units are skipped
+     (`streamr_add_module_library` falls back to STATIC + stub source so
+     PUBLIC usage requirements stay identical), and test/example targets
+     (which import, and are never executed on Android) are not built.
+     The Android workflow also stops running lint (host-independent;
+     covered by validate.yml; import-using test files have no compile
+     commands on an Android tree).
+  **⇒ Android now has a hard dependency on headers — see the Phase 2.6
+  decision memo below.**
 
 ### FINAL FAÇADE-STAGE METRICS (vs Phase 2.0 baselines, macOS, idle)
 | Metric | Baseline | Final (7 packages migrated) | Target | Verdict |
@@ -658,6 +678,8 @@ now ships a module.
 | Clean root build | 102 s | **78 s (−24%)** | −25% | ✅ effectively met (78–88 s across repeats) |
 | `SLogger.hpp` touch | 62–70 s | 58 s (−6…−12%) | −40% | ❌ not yet — consolidation work |
 | `StreamID.hpp` touch | 19 s | 32 s (+68%) | −40% | ❌ regression — BMI-chain latency |
+| Expensive headers (ClangBuildAnalyzer) | `DhtRpc.pb.h` #1 (96 s, 33×); SLogger/Logger top-4 | `DhtRpc.pb.h` #9 (15.7 s, 6×); SLogger/Logger GONE from list; #1 = `gtest.h` (stays `#include` by design) | pb.h/folly leave the top | ✅ met |
+| Total frontend parse CPU | 859 s | 723 s (−16%, incl. the module units) | — | ✅ |
 
 **Honest reading**: the clean-build target is effectively met already at
 the façade stage (test TUs load BMIs instead of re-parsing header
@@ -676,6 +698,49 @@ sequencing; the numbers now quantify exactly why consolidation matters.
   clangd's `--experimental-modules-support` — canary in 2.1; fallback:
   exclude import-using files from clangd-tidy until clangd modules support
   stabilizes.
+
+## Phase 2.6 — Consolidation: DECISION MEMO (owner decision required)
+The planned end state (user-confirmed 2026-07): NO internal headers —
+all code in `.cppm` module units, `#include` only for third-party,
+generated proto, and the C API header. Consolidation is what delivers the
+so-far-unmet incremental-rebuild targets (a partition edit stops
+invalidating whole-package BMIs).
+
+**Consolidation is currently BLOCKED by a platform constraint discovered
+at the 2.5 Android gate**: the NDK's clang cannot build the modules, so
+Android compiles the libraries textually FROM THE HEADERS that
+consolidation would delete. Deleting internal headers breaks the Android
+build outright — including the shipping artifact (proxyclient `.so` /
+Kotlin wrapper).
+
+### Preconditions for starting consolidation
+1. **NDK ships a modules-capable clang** (>= 22, matching the rest of the
+   toolchain), or Android support is explicitly parked/dropped.
+2. clangd modules support matures enough to lint purview code (today it
+   mis-unifies preamble/BMI types; with code in partitions there is no
+   header fallback for the linter — coverage would regress from "full"
+   to "none" for consolidated code).
+3. The dht intra-package include cycles (connection/endpoint cluster)
+   must become a partition DAG — untangle or use coarse per-cluster
+   partitions (deferred from 2.4 by design).
+
+### What consolidation buys (quantified at the 2.4/2.5 checkpoints)
+- The −40% incremental-rebuild targets (currently: SLogger touch −6…−12%,
+  StreamID touch REGRESSED +68% from BMI-chain invalidation).
+- The final IWYU/ODR hygiene of the no-headers end state.
+
+### Recommended path (when unblocked)
+Leaf-first and interleaved as originally planned — eventemitter as the
+consolidation canary, one package per PR, `bench.sh` measured at every
+step (the 2.4 lesson: measure before generalizing), headers deleted
+per-package with a grep-enforced "nothing includes them" gate.
+
+### Interim posture (adopted now)
+The façade stage is COMPLETE and delivers: uniform `import streamr.<pkg>`
+consumption, −24% clean builds, 250+ tests through import, and module
+infrastructure exercised on macOS/Linux/iOS. Headers remain the linted
+source of truth; Android remains textual. This is a stable resting point
+— nothing rots by waiting for the NDK.
 
 ## Success metrics (measured macOS + Linux, end of Phase 2.5)
 - ≥25% clean-build wall-clock reduction (dev build with tests).

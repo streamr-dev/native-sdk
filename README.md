@@ -63,6 +63,40 @@ The codebase is built as C++26 (`CMAKE_CXX_STANDARD 26`, required) everywhere, b
 
 Practical rule: header-only features (ranges, `contains`, concepts, formatting of standard types, etc.) work everywhere; features needing runtime-library symbols (e.g. new locale facets, some `std::print`/filesystem edges) are gated by the iOS deployment target — the iOS build will tell you.
 
+#### C++ named modules
+
+Every API-exporting package ships a C++ named module (`streamr.json`,
+`streamr.logger`, `streamr.eventemitter`, `streamr.utils`,
+`streamr.protorpc`, `streamr.dht`, `streamr.trackerlessnetwork`). The
+package test suites consume them with a single `import streamr.<pkg>;`.
+
+The modules are currently *façades*: each package's `modules/` directory
+holds a coarse `:all` interface unit that includes the public headers in
+its global module fragment and re-exports the public names (plus a
+`:protos` unit over generated protobuf code where applicable). The
+headers remain the source of truth — `#include` and `import` consumers
+can be mixed freely.
+
+Rules of thumb when writing import-using code:
+
+* Include what you use: `import` does not leak transitive std/third-party
+  headers the way textual inclusion did.
+* Third-party libraries (folly, boost, gtest, protobuf) stay `#include`.
+* Do **not** also textually include monorepo headers that reach the same
+  third-party stacks in an import-using file — import the sibling module
+  instead (clangd's experimental modules support mis-diagnoses the mix).
+* A target whose sources `import` a module must link that module's target
+  directly (`streamr::streamr-<pkg>`) and call
+  `streamr_enable_imports(<target>)` — see `cmake/StreamrModules.cmake`.
+* **Android builds do not use modules** (the NDK's clang is too old):
+  libraries build textually from the headers and test targets are
+  skipped there. Handled automatically by `STREAMR_MODULES_SUPPORTED`
+  in `StreamrModules.cmake`.
+
+The plan for consolidating code out of headers into the module units
+(and the platform preconditions for it) is in
+[MODERNIZATION.md](MODERNIZATION.md).
+
 ### Install all the dependencies and build the SDK for MacOS and Linux
 
 ```bash
