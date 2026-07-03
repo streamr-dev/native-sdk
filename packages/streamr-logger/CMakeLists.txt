@@ -25,13 +25,29 @@ find_package(folly CONFIG REQUIRED)
 find_package(streamr-json CONFIG REQUIRED)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-add_library(streamr-logger INTERFACE)
+
+# C++ modules support (guards, policies, helpers) — must come after
+# project() because it inspects the compiler id.
+include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
+
+# Module façade (MODERNIZATION.md Part 2): the package is now a STATIC
+# library whose module interface units re-export the public headers.
+# #include consumers are unaffected; import consumers get the BMIs.
+# detail/ headers stay internal (no partitions).
+streamr_add_module_library(streamr-logger
+  FILES
+    modules/streamr.logger.cppm
+    modules/streamr.logger-Logger.cppm
+    modules/streamr.logger-LoggerImpl.cppm
+    modules/streamr.logger-SLogger.cppm
+    modules/streamr.logger-StreamrLogLevel.cppm)
 set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 26)
 
 add_library(streamr::streamr-logger ALIAS streamr-logger)
 
 if(NOT IOS)
   add_executable(env_category_tests test/unit/LoggerEnvTest.cpp)
+  streamr_enable_imports(env_category_tests)
   target_link_libraries(env_category_tests PRIVATE streamr-logger)
   enable_testing()
   add_test(
@@ -60,18 +76,21 @@ if(NOT IOS)
 endif()
 
 target_include_directories(
-  streamr-logger INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  streamr-logger PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(streamr-logger INTERFACE Folly::folly INTERFACE streamr::streamr-json)
+# PUBLIC (was INTERFACE): the module interface units compile against folly
+# and streamr-json in their global module fragments.
+target_link_libraries(streamr-logger PUBLIC Folly::folly PUBLIC streamr::streamr-json)
 # TODO: Is there a better way to do this?
 # - Apparently not: https://gitlab.kitware.com/cmake/cmake/-/issues/20511
 # - At least parse the deps from the vcpkg.json file and use them to find_package() in this file and to add the
 # find_package() calls to the wrapper
 
-export(TARGETS streamr-logger 
+export(TARGETS streamr-logger
   NAMESPACE streamr::
-  FILE streamr-logger-config-in.cmake)
+  FILE streamr-logger-config-in.cmake
+  CXX_MODULES_DIRECTORY streamr-logger-modules)
 
   file(WRITE "${CMAKE_BINARY_DIR}/streamr-logger-config.cmake" 
   "list(APPEND CMAKE_FIND_ROOT_PATH \"${CMAKE_FIND_ROOT_PATH}\")\n"
@@ -84,8 +103,11 @@ if(NOT IOS)
   find_package(GTest CONFIG REQUIRED)
 
   add_executable(streamr-logger-test-unit test/unit/LoggerTest.cpp test/unit/StreamrLogFormatterTest.cpp)
+  # LoggerTest imports streamr.logger (StreamrLogFormatterTest keeps
+  # #include — it tests a detail/ header that has no partition).
+  streamr_enable_imports(streamr-logger-test-unit)
 
-  target_link_libraries(streamr-logger-test-unit 
+  target_link_libraries(streamr-logger-test-unit
     PRIVATE streamr-logger
     PRIVATE GTest::gtest 
     PRIVATE GTest::gtest_main 
@@ -98,5 +120,6 @@ if(NOT IOS)
   endif()
 
   add_executable(streamr-logger-example src/examples/LoggerExample.cpp)
+  streamr_enable_imports(streamr-logger-example)
   target_link_libraries(streamr-logger-example PRIVATE streamr-logger)
 endif()

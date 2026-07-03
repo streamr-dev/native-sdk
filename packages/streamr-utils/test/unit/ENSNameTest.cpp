@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include <streamr-utils/ENSName.hpp>
+
+import streamr.utils;
 
 using streamr::utils::ENSName;
 

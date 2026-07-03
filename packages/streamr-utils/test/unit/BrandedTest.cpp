@@ -1,5 +1,6 @@
-#include "streamr-utils/Branded.hpp"
 #include <gtest/gtest.h>
+
+import streamr.utils;
 
 using streamr::utils::Branded;
 using streamr::utils::operator""_brand; // NOLINT(misc-unused-using-decls)

@@ -20,7 +20,7 @@ struct remove_pointer<T*> {
     using type = typename remove_pointer<T>::type;
 };
 
-constexpr auto defaultTimeout = std::chrono::milliseconds(5000);
+inline constexpr auto defaultTimeout = std::chrono::milliseconds(5000);
 
 // Disable default specialization
 template <typename T>

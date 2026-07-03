@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "streamr-utils/EthereumAddress.hpp"
+import streamr.utils;
 
 using streamr::utils::EthereumAddress; // NOLINT
 

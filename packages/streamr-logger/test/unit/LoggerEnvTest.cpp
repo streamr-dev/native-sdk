@@ -1,5 +1,9 @@
-#include "streamr-logger/Logger.hpp"
-#include "streamr-logger/StreamrLogLevel.hpp"
+// Tests detail-level machinery, so the detail header stays #included (no
+// module partition exists for detail/ headers); mixing with import is safe.
+#include "streamr-logger/detail/FollyLoggerImpl.hpp"
+
+import streamr.logger;
+
 using Logger = streamr::logger::Logger;
 namespace streamrloglevel = streamr::logger::streamrloglevel;
 using FollyLoggerImpl = streamr::logger::detail::FollyLoggerImpl;
@@ -56,7 +60,7 @@ public:
     }
 };
 
-int main(int /* argc */, char* argv[]) {
+int main(int /* argc */, char* argv[]) try {
     LoggerEnvTest loggerEnvTest;
     if (argv[1] == std::string("1")) {
         return static_cast<int>(loggerEnvTest.testInfoLogWritten());
@@ -71,5 +75,7 @@ int main(int /* argc */, char* argv[]) {
         return static_cast<int>(
             loggerEnvTest.testInfoLogWrittenWhenDefaultLogLevelIsWarn());
     }
+    return 1;
+} catch (const std::exception&) {
     return 1;
 }

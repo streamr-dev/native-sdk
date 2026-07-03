@@ -14,7 +14,8 @@ namespace streamr::utils {
 using streamr::eventemitter::Event;
 using streamr::eventemitter::ReplayEventEmitter;
 
-constexpr auto defaultRetryInterval = std::chrono::milliseconds(100); // NOLINT
+inline constexpr auto defaultRetryInterval =
+    std::chrono::milliseconds(100); // NOLINT
 
 struct ConditionMet : public Event<> {};
 

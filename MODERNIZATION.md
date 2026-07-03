@@ -456,7 +456,7 @@ header parsing, and the top of the expensive list is exactly the
   primary metric). Capture the Linux numbers on the self-hosted arm64 box
   and an iOS build-only timing before the Phase 2.4 checkpoint.
 
-## Phase 2.1 — Canary: streamr-eventemitter + streamr-json (PR pending)
+## Phase 2.1 — Canary: streamr-eventemitter + streamr-json ✅ (PR #29, merged)
 First real modules. Both packages carry the designed façade shape: one
 `.cppm` partition per public header (header `#include`d in the global
 module fragment, public names re-exported with `export using`), a primary
@@ -490,6 +490,54 @@ interface unit `export import`ing the partitions, INTERFACE→STATIC via
   lint.sh extended); headers remain the fully-linted source of truth.
 - iOS gate via the PR's `iosbuild` keyword (module lib builds; tests are
   host-only). Android modules validation lands with its phase-2.5 gate.
+
+## Phase 2.2 — streamr-logger + streamr-utils (PR pending)
+folly enters the global module fragment; utils is the folly::coro canary.
+- **streamr-logger**: 4 partitions (Logger, LoggerImpl, SLogger,
+  StreamrLogLevel) + primary unit. folly logging machinery in the GMF
+  compiled without incident. `detail/` headers get no partitions (internal
+  API); LoggerEnvTest, which tests detail machinery, keeps its detail
+  `#include` alongside `import streamr.logger` — mixing is the designed
+  property of the façade.
+- **streamr-utils**: 21 partitions + primary. **The folly::coro coroutine
+  canary passed with zero compiler workarounds** — waitForEvent,
+  waitForCondition, collect, toCoroTask (coro Tasks in GMF, coroutine
+  code re-exported) all build and run under Clang 22. The per-header
+  opt-out budget went unused.
+- **New mechanism discovered (now in `streamr_add_module_library()`)**:
+  exported module targets need `target_compile_features(… PUBLIC
+  cxx_std_26)`. When another build tree imports the target from its
+  export file, CMake synthesizes a consumer-side BMI-compiling target and
+  hard-errors if the standard level is not part of the exported usage
+  requirements. (First surfaced when streamr-logger consumed
+  streamr-json's export.)
+- **Language rule fallout**: namespace-scope `constexpr` variables have
+  internal linkage and cannot be re-exported — 7 header constants across
+  both packages became `inline constexpr` (the correct C++17+ idiom for
+  header constants regardless of modules).
+- 20 test files + both examples flipped to `import`; the
+  include-what-you-use pass stayed small (`<thread>`, `<chrono>`,
+  `<string>`).
+- **clangd-modules root cause identified**: the 2.1 quirks (constrained
+  `string(string_view)` ctor, and now generic-lambda `std::visit`
+  exhaustiveness + plain `std::string` overload failures) share one
+  mechanism — clangd fails to unify std types between its own preamble
+  and the types reached through module BMIs. It only bites where std
+  types cross the module boundary in an import-using file. One test file
+  (`toEthereumAddressOrENSNameTest.cpp` — its whole API is std types in
+  Branded wrappers) needed the planned lint-exclusion fallback: first and
+  only use so far; the compiler still typechecks it on every build.
+  `bugprone-exception-escape` also surfaces on `main()` in import-using
+  files (clangd sees deeper through BMIs) — legitimate findings, fixed
+  with function-try-blocks.
+- Verified: logger 63/63, utils 49/49 through import; downstream
+  proto-rpc/dht standalone builds unchanged; root tree 307/307; full lint
+  (one documented exclusion).
+- **Honest bench note**: no incremental-rebuild improvement is expected
+  yet — the heavy consumers of SLogger/utils headers (dht,
+  trackerless-network) still `#include` them; the measured win arrives
+  when those packages flip (2.4/2.5) and their test TUs load BMIs instead
+  of re-parsing the header stack.
 
 ## Lint/IDE survival
 - During the façade stage, headers remain the fully-linted source of truth

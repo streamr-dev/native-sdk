@@ -1,6 +1,8 @@
-#include "streamr-logger/Logger.hpp"
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-logger/StreamrLogLevel.hpp"
+#include <exception>
+#include <iostream>
+#include <string>
+
+import streamr.logger;
 
 using Logger = streamr::logger::Logger;
 using SLogger = streamr::logger::SLogger;
@@ -69,8 +71,11 @@ public:
     }
 };
 
-int main() {
+int main() try {
     LoggerExample loggerExample;
     loggerExample.doSomething();
     return 0;
+} catch (const std::exception& e) {
+    std::cerr << "Example failed: " << e.what() << '\n';
+    return 1;
 }

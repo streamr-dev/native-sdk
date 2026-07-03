@@ -13,7 +13,7 @@ using streamr::eventemitter::EventEmitter;
 using streamr::eventemitter::HandlerToken;
 using streamr::utils::waitForEvent;
 
-constexpr std::chrono::milliseconds runAndWaitForEventsDefaultTimeout =
+inline constexpr std::chrono::milliseconds runAndWaitForEventsDefaultTimeout =
     std::chrono::milliseconds(5000);
 
 template <typename... BoundEventTypes>

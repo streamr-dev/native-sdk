@@ -1,7 +1,9 @@
-#include "streamr-utils/AbortableTimers.hpp"
+#include <chrono>
 #include <future>
+#include <thread>
 #include <gtest/gtest.h>
-#include "streamr-utils/AbortController.hpp"
+
+import streamr.utils;
 
 using streamr::utils::AbortableTimers;
 using streamr::utils::AbortController;

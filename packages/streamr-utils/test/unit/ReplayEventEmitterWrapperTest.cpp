@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "streamr-utils/ReplayEventEmitterWrapper.hpp"
+import streamr.utils;
 
 using streamr::utils::ReplayEventEmitterWrapper; // NOLINT
 
