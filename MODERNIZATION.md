@@ -110,7 +110,7 @@ Android NDK r28+.
   (all three run fully against a local `--local` subscriber on
   127.0.0.1:44211).
 
-## Phase 1.2 — Compiler upgrades + CI image modernization (PR #23, in review)
+## Phase 1.2 — Compiler upgrades + CI image modernization ✅ (PR #23, merged)
 - macOS: dead `llvm@17` → latest keg-only Homebrew `llvm` (22.x), located via
   `LLVM_PREFIX` (exported by `install-prerequisities.sh`, fallback
   `$HOMEBREW_PREFIX/opt/llvm`); hardcoded `/opt/homebrew/...` libc++ paths
@@ -174,7 +174,7 @@ Android NDK r28+.
   `iostest.sh` green — the compiler's output must stay compatible with the
   device's fixed libc++ runtime**.
 
-## Phase 1.3 — vcpkg baseline bump + dependency wave (PR pending)
+## Phase 1.3 — vcpkg baseline bump + dependency wave ✅ (PR #24, merged)
 Baseline: vcpkg tag **2026.06.24** (`builtin-baseline` now pinned in
 `vcpkg.json`; the jq-based merge-dependencies.sh preserves the key — and
 because the cache keys hash `vcpkg.json`, baseline bumps bust CI caches
@@ -225,7 +225,7 @@ the triplet FILE as the chainload toolchain; the triplet then points
 `VCPKG_CHAINLOAD_TOOLCHAIN_FILE` at ios.toolchain.cmake for ports) — fragile;
 document/replace in 1.4.
 
-## Phase 1.4 — iOS refresh (PR pending)
+## Phase 1.4 — iOS refresh (PR #25, in review)
 - **Deployment target: 26.0** (product decision, 2026-07: iPhones keep
   themselves up to date; supporting old iOS runtimes is unnecessary). Set in
   the triplet and the CMake presets; verified in the artifact
@@ -257,9 +257,17 @@ document/replace in 1.4.
 - Verified: full iOS dependency set + packages + XCFramework green;
   artifact `platform=iOS, minos=26.0`; flags confirmed flowing in port logs
   and the package compile database.
+- `iostest.sh` gained signing/tooling fixes surfaced by the device run:
+  `IOS_DEVELOPMENT_TEAM` override (signs with a different team — e.g. a
+  Personal Team — via command-line build settings when organization
+  provisioning is unavailable; bundle IDs get a team-ID suffix because the
+  originals are App IDs registered to the organization team), and
+  `xcresulttool get object --legacy` (Xcode 16+ requires the flag for the
+  old JSON format — result processing previously failed after a green run).
 - **Gate**: `./install.sh --ios` → XCFramework ✓; `./iostest.sh --device`
-  (owner-side, needs Apple ID + device on iOS 26); Android sanity via CI
-  keyword.
+  ✓ — **GoogleTest suite passed on an iPhone 12 mini running iOS 26.4.2**
+  (deployment-target-26 / SDK-libc++ build, Personal Team signing);
+  Android sanity via CI keyword.
 
 ## Phase 1.5 — Lint stack remainder
 - clangd/clang-format 22 already landed in Phase 1.2 (forced by libc++ 22).
