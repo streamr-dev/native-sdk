@@ -96,7 +96,11 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-proto-rpc-config.cmake"
 # and the plugin runs on the developer machine anyway. (Previously this
 # sat inside the modules block below and was skipped on Android only as
 # a side effect of the modules gate being OFF there.)
-if(NOT CMAKE_CROSSCOMPILING)
+# NOTE the explicit IOS check: iOS package builds keep the host
+# CMAKE_SYSTEM_NAME (they use the Homebrew compiler and only swap the
+# SDK/sysroot — see homebrewClang.cmake), so CMAKE_CROSSCOMPILING is
+# FALSE there; IOS is set by toolchains/ios.toolchain.cmake.
+if(NOT IOS AND NOT CMAKE_CROSSCOMPILING)
     add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp include/streamr-proto-rpc/PluginCodeGenerator.hpp)
 
     target_include_directories(
