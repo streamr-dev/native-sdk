@@ -24,6 +24,20 @@ jobs:
           fetch-depth: 0
           submodules: true
           token: ${{ secrets.GITHUB_TOKEN }}
+      # The runner's default ANDROID_NDK is an older LTS (r27). Use the
+      # latest stable NDK preinstalled on the image (r29 = clang 21).
+      # Modules build on r27+ too (StreamrModules.cmake floors at NDK
+      # clang 18) — building with the latest stable is hygiene, not a
+      # modules requirement.
+      - name: use latest stable NDK
+        run: |
+          echo "ANDROID_NDK=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+          # NB: the prebuilt dir is named darwin-x86_64 even on ARM Macs
+          # (universal binaries under the legacy name).
+          "$ANDROID_NDK_LATEST_HOME"/toolchains/llvm/prebuilt/darwin-*/bin/clang --version | head -1
+        shell: bash
       - name: install
         uses: ./.github/workflows/reusable/cached-install
       # No lint step: linting is host-independent and runs on the

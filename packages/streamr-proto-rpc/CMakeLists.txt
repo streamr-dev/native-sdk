@@ -5,10 +5,9 @@ include(homebrewClang.cmake)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# No C++ modules in the codebase yet: CMake >= 3.28 (CMP0155) would otherwise
-# scan all C++20+ sources for module imports, injecting GCC scanning flags
-# (-fmodules-ts, -fmodule-mapper, -fdeps-format) into compile_commands.json,
-# which clangd rejects. The modules migration will turn scanning back on.
+# Module scanning stays OFF globally so that non-module TUs keep clean
+# compile commands for clangd; targets with module units or import-using
+# sources opt back in via the StreamrModules.cmake helpers.
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -91,19 +90,26 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-proto-rpc-config.cmake"
     "endif()\n"
     "include(${CMAKE_BINARY_DIR}/streamr-proto-rpc-config-in.cmake)\n")
 
-# Test/example targets import the modules — skip them where modules are
-# unsupported (Android; they are never executed there anyway).
-if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
+# The protoc codegen plugin is host tooling (invoked by proto.sh to
+# regenerate the checked-in *.pb.* files) — never built for cross
+# targets: vcpkg does not provide protobuf::libprotoc for Android/iOS
+# and the plugin runs on the developer machine anyway. (Previously this
+# sat inside the modules block below and was skipped on Android only as
+# a side effect of the modules gate being OFF there.)
+if(NOT CMAKE_CROSSCOMPILING)
     add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp include/streamr-proto-rpc/PluginCodeGenerator.hpp)
 
     target_include_directories(
         protobuf-streamr-plugin PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
 
-    target_link_libraries(protobuf-streamr-plugin 
+    target_link_libraries(protobuf-streamr-plugin
         PRIVATE protobuf::libprotobuf protobuf::libprotoc)
+endif()
 
-
+# Test/example targets import the modules — skip them where modules are
+# unsupported (they are never executed on Android anyway).
+if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     enable_testing()
     find_package(GTest CONFIG REQUIRED)
 

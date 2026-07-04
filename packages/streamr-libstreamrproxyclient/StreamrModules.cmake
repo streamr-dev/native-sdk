@@ -10,16 +10,23 @@
 # OFF globally (clean compile commands for clangd), and the helpers below
 # re-enable scanning per target.
 
-# Android builds use the NDK's clang (18/19), whose C++ modules support is
-# too immature for the façade modules (known `export using` overload-set
-# bugs — observed: `import streamr.json;` fails to provide the toJson
-# overloads). Android consumes the ordinary headers instead (they remain the
-# source of truth during the façade stage), the module units are skipped,
-# and packages must not build their import-using test targets
-# (STREAMR_MODULES_SUPPORTED below guards them). Revisit when the NDK ships
-# clang >= 22 — consolidation (2.6) requires it, as headers disappear then.
+# Android builds use the NDK's clang. The façade modules build correctly
+# with NDK r27+ (clang 18) — the failure previously attributed to compiler
+# immaturity was a -pthread BMI configuration mismatch, fixed in the
+# helpers below. Keep a version floor at the oldest verified NDK clang
+# (18 = r27): with an older NDK, Android consumes the ordinary headers
+# instead (they remain the source of truth during the façade stage), the
+# module units are skipped, and import-using test/example targets are not
+# built (STREAMR_MODULES_SUPPORTED guards them).
 if(VCPKG_TARGET_TRIPLET MATCHES "android" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
-    set(STREAMR_MODULES_SUPPORTED OFF)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 18)
+        set(STREAMR_MODULES_SUPPORTED ON)
+    else()
+        set(STREAMR_MODULES_SUPPORTED OFF)
+        message(STATUS
+            "C++ modules disabled: NDK clang ${CMAKE_CXX_COMPILER_VERSION} "
+            "< 18 (use NDK r27+ for modules on Android)")
+    endif()
 else()
     set(STREAMR_MODULES_SUPPORTED ON)
 endif()
@@ -104,6 +111,15 @@ function(streamr_add_module_library TARGET)
     # BMI-compiling target on the consumer side and requires the standard
     # level to be part of the exported usage requirements.
     target_compile_features(${TARGET} PUBLIC cxx_std_26)
+    # Importers must agree with the BMI on POSIX-thread support: clang
+    # validates language options when loading a module file. On Android,
+    # -pthread is not implied — test executables inherit it from GTest's
+    # Threads::Threads while library targets do not, so a BMI built
+    # without it cannot be loaded by an import-using test TU (observed:
+    # -Wmodule-file-config-mismatch, then every imported name reported as
+    # undeclared). Making the flag part of the PUBLIC interface keeps the
+    # BMI and every importer consistent. No-op on other platforms.
+    target_compile_options(${TARGET} PUBLIC $<$<PLATFORM_ID:Android>:-pthread>)
 endfunction()
 
 # streamr_target_module_sources(<target> FILES <unit.cppm>...)
@@ -127,6 +143,8 @@ function(streamr_target_module_sources TARGET)
         FILES ${ARG_FILES})
     set_target_properties(${TARGET} PROPERTIES CXX_SCAN_FOR_MODULES ON)
     target_compile_features(${TARGET} PUBLIC cxx_std_26)
+    # See streamr_add_module_library: BMI/importer -pthread consistency.
+    target_compile_options(${TARGET} PUBLIC $<$<PLATFORM_ID:Android>:-pthread>)
 endfunction()
 
 # streamr_enable_imports(<target>)
