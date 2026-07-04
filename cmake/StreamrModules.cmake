@@ -10,22 +10,22 @@
 # OFF globally (clean compile commands for clangd), and the helpers below
 # re-enable scanning per target.
 
-# Android builds use the NDK's clang. The façade modules build correctly
-# with NDK r27+ (clang 18) — the failure previously attributed to compiler
+# Android builds use the NDK's clang. The modules build correctly with
+# NDK r27+ (clang 18) — the failure previously attributed to compiler
 # immaturity was a -pthread BMI configuration mismatch, fixed in the
-# helpers below. Keep a version floor at the oldest verified NDK clang
-# (18 = r27): with an older NDK, Android consumes the ordinary headers
-# instead (they remain the source of truth during the façade stage), the
-# module units are skipped, and import-using test/example targets are not
-# built (STREAMR_MODULES_SUPPORTED guards them).
+# helpers below. Older NDKs are a hard error: the codebase is being
+# consolidated into C++ modules (MODERNIZATION.md Phase 2.6), so the
+# former fall-back of building textually from the internal headers no
+# longer exists.
 if(VCPKG_TARGET_TRIPLET MATCHES "android" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 18)
         set(STREAMR_MODULES_SUPPORTED ON)
     else()
-        set(STREAMR_MODULES_SUPPORTED OFF)
-        message(STATUS
-            "C++ modules disabled: NDK clang ${CMAKE_CXX_COMPILER_VERSION} "
-            "< 18 (use NDK r27+ for modules on Android)")
+        message(FATAL_ERROR
+            "NDK clang ${CMAKE_CXX_COMPILER_VERSION} is too old: building "
+            "this codebase requires C++ modules support (NDK r27+, "
+            "clang >= 18). The pre-consolidation textual fall-back no "
+            "longer exists (see MODERNIZATION.md Phase 2.6).")
     endif()
 else()
     set(STREAMR_MODULES_SUPPORTED ON)
