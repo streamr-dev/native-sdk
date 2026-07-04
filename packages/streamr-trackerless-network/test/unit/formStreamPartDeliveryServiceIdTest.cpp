@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.trackerlessnetwork;
+import streamr.trackerlessnetwork.formStreamPartDeliveryServiceId;
 
 using streamr::trackerlessnetwork::
     formStreamPartContentDeliveryServiceId; // NOLINT

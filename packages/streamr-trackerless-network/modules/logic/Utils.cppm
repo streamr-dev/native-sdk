@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:Utils
+// Module streamr.trackerlessnetwork.Utils
 // CONSOLIDATED from the former header logic/Utils.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -9,10 +9,10 @@ module;
 #include <boost/algorithm/hex.hpp>
 #include "packages/network/protos/NetworkRpc.pb.h"
 
-export module streamr.trackerlessnetwork:Utils;
+export module streamr.trackerlessnetwork.Utils;
 
-import streamr.dht;
-import :DuplicateMessageDetector;
+import streamr.dht.Identifiers;
+import streamr.trackerlessnetwork.DuplicateMessageDetector;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve

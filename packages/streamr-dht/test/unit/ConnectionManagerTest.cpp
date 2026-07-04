@@ -8,7 +8,13 @@
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
-import streamr.dht;
+import streamr.dht.ConnectionManager;
+import streamr.dht.ConnectorFacade;
+import streamr.dht.Errors;
+import streamr.dht.FakeTransport;
+import streamr.dht.PortRange;
+import streamr.dht.Transport;
+import streamr.dht.protos;
 import streamr.logger;
 
 using ::dht::ConnectivityResponse;

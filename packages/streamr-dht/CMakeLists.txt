@@ -47,14 +47,17 @@ add_library(streamr-dht)
 set_property(TARGET streamr-dht PROPERTY CXX_STANDARD 26)
 add_library(streamr::streamr-dht ALIAS streamr-dht)
 
-# Module façade (MODERNIZATION.md Part 2): 45 partitions mirroring the
-# header tree + :protos over the generated DhtRpc trio.
-file(GLOB STREAMR_DHT_MODULE_UNITS CONFIGURE_DEPENDS
+# CONSOLIDATED (MODERNIZATION.md Phase 2.6): one partition per former
+# public header, in the same directory tree the headers had (the
+# partition files are the source of truth), plus :protos over the
+# generated DhtRpc trio and the primary interface unit that re-exports
+# every partition.
+file(GLOB_RECURSE STREAMR_DHT_MODULE_UNITS CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.cppm)
 streamr_target_module_sources(streamr-dht FILES ${STREAMR_DHT_MODULE_UNITS})
-target_include_directories(streamr-dht 
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC $<INSTALL_INTERFACE:include>
+# Only the generated protobuf code remains a header consumers may need
+# textually.
+target_include_directories(streamr-dht
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
     )
 

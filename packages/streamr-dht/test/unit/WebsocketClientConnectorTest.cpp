@@ -2,7 +2,13 @@
 #include <gtest/gtest.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 
-import streamr.dht;
+import streamr.dht.Connection;
+import streamr.dht.IPendingConnection;
+import streamr.dht.Identifiers;
+import streamr.dht.ListeningRpcCommunicator;
+import streamr.dht.Transport;
+import streamr.dht.WebsocketClientConnector;
+import streamr.dht.protos;
 
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;

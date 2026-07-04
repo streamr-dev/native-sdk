@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.FakeTransport;
 
 using streamr::dht::transport::FakeTransport; // NOLINT
 

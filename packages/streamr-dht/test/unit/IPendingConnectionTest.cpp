@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.IPendingConnection;
 
 using streamr::dht::connection::IPendingConnection; // NOLINT
 

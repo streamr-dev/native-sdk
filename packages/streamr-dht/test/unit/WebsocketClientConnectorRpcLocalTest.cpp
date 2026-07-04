@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.IPendingConnection;
+import streamr.dht.Identifiers;
+import streamr.dht.PendingConnection;
+import streamr.dht.WebsocketClientConnectorRpcLocal;
+import streamr.dht.protos;
 import streamr.utils;
 
 using ::dht::PeerDescriptor;

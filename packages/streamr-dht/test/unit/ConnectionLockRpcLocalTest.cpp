@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.ConnectionLockRpcLocal;
 
 using streamr::dht::connection::ConnectionLockRpcLocal; // NOLINT
 

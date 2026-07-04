@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.ConnectorFacade;
 
 using streamr::dht::connection::ConnectorFacade; // NOLINT
 

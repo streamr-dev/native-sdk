@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.trackerlessnetwork;
+import streamr.trackerlessnetwork.NodeList;
 
 using streamr::trackerlessnetwork::NodeList; // NOLINT
 

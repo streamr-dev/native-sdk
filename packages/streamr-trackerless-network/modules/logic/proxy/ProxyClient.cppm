@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:ProxyClient
+// Module streamr.trackerlessnetwork.ProxyClient
 // CONSOLIDATED from the former header logic/proxy/ProxyClient.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -16,21 +16,27 @@ module;
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
-export module streamr.trackerlessnetwork:ProxyClient;
+export module streamr.trackerlessnetwork.ProxyClient;
 
-import streamr.dht;
+import streamr.dht.DhtCallContext;
+import streamr.dht.ListeningRpcCommunicator;
+import streamr.dht.ConnectionLockStates;
+import streamr.dht.ConnectionLocker;
+import streamr.dht.Identifiers;
+import streamr.dht.Transport;
+import streamr.dht.protos;
 import streamr.eventemitter;
 import streamr.logger;
 import streamr.utils;
-import :ContentDeliveryRpcLocal;
-import :ContentDeliveryRpcRemote;
-import :DuplicateMessageDetector;
-import :NodeList;
-import :Propagation;
-import :ProxyConnectionRpcLocal;
-import :ProxyConnectionRpcRemote;
-import :Utils;
-import :formStreamPartDeliveryServiceId;
+import streamr.trackerlessnetwork.ContentDeliveryRpcLocal;
+import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;
+import streamr.trackerlessnetwork.DuplicateMessageDetector;
+import streamr.trackerlessnetwork.NodeList;
+import streamr.trackerlessnetwork.Propagation;
+import streamr.trackerlessnetwork.ProxyConnectionRpcLocal;
+import streamr.trackerlessnetwork.ProxyConnectionRpcRemote;
+import streamr.trackerlessnetwork.Utils;
+import streamr.trackerlessnetwork.formStreamPartDeliveryServiceId;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve
@@ -38,6 +44,7 @@ import :formStreamPartDeliveryServiceId;
 using streamr::dht::DhtAddress;
 using streamr::dht::connection::ConnectionLocker;
 using streamr::dht::connection::LockID;
+using streamr::dht::transport::ListeningRpcCommunicator;
 using streamr::dht::transport::Transport;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
@@ -46,6 +53,10 @@ using streamr::utils::AbortController;
 using streamr::utils::EthereumAddress;
 using streamr::utils::RetryUtils;
 using streamr::utils::StreamPartID;
+
+using streamr::dht::Identifiers;
+using streamr::dht::rpcprotocol::DhtCallContext;
+
 export namespace streamr::trackerlessnetwork::proxy {
 
 using ::dht::PeerDescriptor;

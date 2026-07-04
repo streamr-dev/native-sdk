@@ -855,8 +855,60 @@ exactly that. So consolidation walks the dependency chain from the top:
    IMPROVED: clangd-tidy now runs on all 15 module units — full
    analysis coverage, zero suppressions. Verified: Release build, tn
    tests 12+1, proxyclient importer 15/15, standalone builds, lint
-   green.
-3. C-3 streamr-dht (the largest)
+   green. **RETROFITTED in the C-3 PR to the settled architecture:**
+   partitions became named sub-modules (`streamr.trackerlessnetwork.X`),
+   the primary/umbrella unit was deleted, tests and the proxyclient
+   import the individual sub-modules they use, and the MessageRef
+   ordering operator moved from FifoMapWithTTL to the (exported) protos
+   module — as a non-exported file-scope function it had module linkage
+   and was unreachable from other modules instantiating the map
+   templates. One more sub-module gotcha found here: a purview forward
+   declaration of another module's class (NodeList forward-declared
+   ContentDeliveryRpcRemote) attaches the name to the WRONG module and
+   conflicts with the defining one — the import replaces it.
+3. **C-3 streamr-dht** ✅ — the largest step, and where the module
+   ARCHITECTURE was settled through three owner directives measured
+   back to back:
+   **(i) One file per former header** — all 45 public headers
+   (5,013 lines) became per-header module units under `modules/` in the
+   old directory tree; include/ deleted.
+   **(ii) Named sub-modules, not partitions** (`streamr.dht.X`, not
+   `streamr.dht:X`): partitions cannot be imported by external
+   translation units, and the owner requires TESTS to import exactly
+   the sub-modules they test ("tests are internal to the module").
+   All 41 dht test files import their subjects directly.
+   **(iii) NO umbrella module** — a `streamr.dht` unit re-exporting
+   all sub-modules was built and measured, then DELETED: its compiled
+   interface depends on every sub-module, so anyone importing it
+   reinherits the edit-anything-rebuild-everything amplification.
+   Downstream consumers (11 trackerless-network module units, its
+   integration test, the proxyclient implementation) import the
+   individual dht sub-modules they use — module imports now mirror the
+   old header includes one to one. THE MEASUREMENTS (same mid-chain /
+   leaf sub-module touch, whole-tree Release rebuild): partitions with
+   a re-exporting primary ~480 s; named sub-modules behind an umbrella
+   418/546 s; **no umbrella 129/135 s**. The remaining cost is the true
+   dependency cone of central types plus the serial BMI chain; genuinely
+   narrow edits (tests, unimported leaves) rebuild in seconds.
+   Migration mechanics recorded for the remaining packages: sub-modules
+   are stricter about visibility than partitions — each unit must
+   DIRECTLY import what its code uses (the compiler names the missing
+   module explicitly: "declaration of 'X' must be imported from module
+   'M'"), and shorthand names inherited textually from neighboring
+   headers need the file's own using-declaration. The include-hygiene
+   gotcha from C-2 recurred (`<string>` for Branded-key containers ×16
+   units, `<functional>`, `<mutex>`, `<exception>`, folly `Collect.h`).
+   Incidental fixes: the dht standalone `install.sh` had hard-coded
+   `-fsanitize=address` into every configure (committed debugging
+   leftover, fatal once real code moved into module objects); removed.
+   PR #43's race fix (ReplayEventEmitter base of IPendingConnection)
+   ported into the sub-module during the rebase. One clangd-tidy
+   exclusion (ConnectionLockingTest.cpp, owner-approved selective
+   disabling — the analysis tool cannot resolve folly customization
+   points through module interfaces; the compiler accepts the file).
+   Verified: Release build, dht tests 83/83 (incl. the two new PR #43
+   race tests), tn 12+1, proxyclient 15/15, standalone builds of the
+   whole chain, lint green over all module units.
 4. C-4 streamr-proto-rpc
 5. C-5 streamr-utils
 6. C-6 streamr-logger
@@ -867,6 +919,65 @@ One package per PR, `bench.sh` measured at the dht step and at the end
 (the 2.4 lesson: measure before generalizing); headers deleted
 per-package — the compiler itself enforces that nothing still includes
 them.
+
+### `import std` verdict (investigated 2026-07-04, child session)
+Owner-requested experiment on the consolidated trackerless-network
+partition, with Android as the gate. Findings (full detail and a
+working conversion template on the `experiment/import-std` branch, file
+`import-std-findings.md` — NOT for merging):
+- Host (Homebrew LLVM 22.1.8): works, including the mixed mode the
+  codebase needs (third-party textual includes + `import std;` purview).
+  The existing `STREAMR_IMPORT_STD` scaffold worked unmodified; one
+  toolchain packaging defect requires passing
+  `-DCMAKE_CXX_STDLIB_MODULES_JSON=$LLVM_PREFIX/lib/c++/libc++.modules.json`.
+- **Android gate: FAILS for practical purposes.** NDK r29 is the first
+  NDK to ship the std module sources, but they do not compile against
+  Bionic as delivered (internal-linkage `ctype` inlines); making them
+  build requires overriding the undocumented `__BIONIC_CTYPE_INLINE`
+  macro, disabling `_FORTIFY_SOURCE` hardening, and hand-patching
+  CMake's cross-compilation stdlib detection. Not defensible.
+- **Decision: do not adopt (not even host-only — it would fork the
+  source style).** Re-test each NDK release with the one-line probe in
+  the findings file; adopt when the NDK's sources compile cleanly with
+  fortify enabled AND CMake's detection passes the toolchain target.
+- **NDK r30 beta 1 retest (owner-requested, 2026-07-04): still FAILS —
+  nothing gained by switching.** The blockers are in Bionic itself
+  (internal-linkage ctype functions AND the `_FORTIFY_SOURCE` stdio
+  wrappers, tested separately), textually unchanged in the pre-release.
+  One improvement found during the retest: CMake's broken
+  cross-compilation standard-library probe can be bypassed CLEANLY by
+  adding the Android `--target` to `CMAKE_CXX_FLAGS` (replaces the
+  indefensible hand-patching of generated files). The full minimal
+  adoption recipe for a future fixed NDK is recorded in
+  `import-std-findings.md` on the `experiment/import-std` branch; the
+  probe must include `-D_FORTIFY_SOURCE=2` or the second failure stays
+  hidden.
+
+### After the consolidation: CI speed (owner-approved, 2026-07-04)
+Even with the per-platform dependency caches fixed (Android ~30 → 9.6
+min, iOS ~35 → 4.6 min), each CI job still compiles the monorepo from
+scratch and runs the tests serially. Planned follow-up work, in payoff
+order — scheduled AFTER C-8 because every consolidation step changes
+the build structure the caches would key on:
+1. **Stop compiling the monorepo twice per job.** `install.sh` builds
+   every package standalone AND then the whole root tree. The
+   standalone-package check validates packaging structure, which does
+   not differ per platform — run it on ONE platform (macOS) only.
+2. **Cache the build directories per platform** (with restore-keys
+   fallbacks, like the dependency caches). Ninja then recompiles only
+   what a pull request touches — and the one-partition-per-header
+   structure is exactly what keeps the rebuild cascade small: editing
+   one partition rebuilds that partition, its importers and the links,
+   not whole packages. Watch the shared 10 GB actions-cache budget;
+   if build trees + five dependency caches start evicting each other,
+   move the dependency cache to a GitHub Packages NuGet feed
+   (documented option from the cache investigation, free for public
+   repositories) to reclaim the budget.
+3. **ccache as a complement** if build-dir caching proves fragile:
+   caches ordinary TUs (all test files — the bulk) but not module
+   BMI compiles (tooling support still poor).
+4. **Randomize test ports, then run ctest in parallel** — tests
+   currently use fixed ports and must run serially.
 
 ### Interim posture (adopted now)
 The façade stage is COMPLETE and delivers: uniform `import streamr.<pkg>`

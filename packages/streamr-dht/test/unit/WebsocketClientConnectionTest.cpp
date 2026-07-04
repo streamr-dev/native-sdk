@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.WebsocketClientConnection;
 
 using streamr::dht::connection::websocket::WebsocketClientConnection;
 

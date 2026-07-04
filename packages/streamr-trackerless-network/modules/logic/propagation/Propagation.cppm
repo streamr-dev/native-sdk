@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:Propagation
+// Module streamr.trackerlessnetwork.Propagation
 // CONSOLIDATED from the former header logic/propagation/Propagation.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -7,10 +7,11 @@ module;
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
-export module streamr.trackerlessnetwork:Propagation;
+export module streamr.trackerlessnetwork.Propagation;
 
-import streamr.dht;
-import :PropagationTaskStore;
+import streamr.dht.Identifiers;
+import streamr.dht.protos;
+import streamr.trackerlessnetwork.PropagationTaskStore;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve

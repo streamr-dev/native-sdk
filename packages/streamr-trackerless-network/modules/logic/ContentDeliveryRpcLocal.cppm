@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:ContentDeliveryRpcLocal
+// Module streamr.trackerlessnetwork.ContentDeliveryRpcLocal
 // CONSOLIDATED from the former header logic/ContentDeliveryRpcLocal.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -7,9 +7,12 @@ module;
 #include "packages/network/protos/NetworkRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.server.pb.h"
 
-export module streamr.trackerlessnetwork:ContentDeliveryRpcLocal;
+export module streamr.trackerlessnetwork.ContentDeliveryRpcLocal;
 
-import streamr.dht;
+import streamr.dht.DhtCallContext;
+import streamr.dht.Identifiers;
+import streamr.dht.ListeningRpcCommunicator;
+import streamr.dht.protos;
 import streamr.utils;
 
 // Hoisted from the former header (file scope, NOT exported);

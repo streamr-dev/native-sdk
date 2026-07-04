@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.OutgoingHandshaker;
 
 using streamr::dht::connection::OutgoingHandshaker; // NOLINT
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.ConnectionsView;
 
 using streamr::dht::connection::ConnectionsView; // NOLINT
 

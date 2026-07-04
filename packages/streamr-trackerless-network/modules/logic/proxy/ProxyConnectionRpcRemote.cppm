@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:ProxyConnectionRpcRemote
+// Module streamr.trackerlessnetwork.ProxyConnectionRpcRemote
 // CONSOLIDATED from the former header logic/proxy/ProxyConnectionRpcRemote.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -8,9 +8,11 @@ module;
 #include "packages/network/protos/NetworkRpc.client.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
-export module streamr.trackerlessnetwork:ProxyConnectionRpcRemote;
+export module streamr.trackerlessnetwork.ProxyConnectionRpcRemote;
 
-import streamr.dht;
+import streamr.dht.DhtCallContext;
+import streamr.dht.RpcRemote;
+import streamr.dht.protos;
 import streamr.logger;
 import streamr.utils;
 

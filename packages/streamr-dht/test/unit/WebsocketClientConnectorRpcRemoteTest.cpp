@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.DhtCallContext;
+import streamr.dht.WebsocketClientConnectorRpcRemote;
+import streamr.dht.protos;
 import streamr.protorpc;
 
 using ::dht::PeerDescriptor;

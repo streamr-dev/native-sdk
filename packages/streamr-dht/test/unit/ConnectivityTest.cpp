@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.Connection;
+import streamr.dht.Connectivity;
+import streamr.dht.protos;
 
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;

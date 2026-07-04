@@ -2,7 +2,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.Connection;
+import streamr.dht.Handshaker;
+import streamr.dht.IPendingConnection;
+import streamr.dht.OutgoingHandshaker;
+import streamr.dht.Transport;
+import streamr.dht.protos;
 
 using ::dht::HandshakeError;
 using ::dht::PeerDescriptor;

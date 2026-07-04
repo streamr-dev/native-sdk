@@ -21,9 +21,15 @@
 #include <vector>
 #include <folly/Singleton.h>
 
-import streamr.dht;
+import streamr.trackerlessnetwork.protos;
+import streamr.dht.ConnectionManager;
+import streamr.dht.Connectivity;
+import streamr.dht.ConnectorFacade;
+import streamr.dht.FakeTransport;
+import streamr.dht.Identifiers;
+import streamr.dht.protos;
 import streamr.logger;
-import streamr.trackerlessnetwork;
+import streamr.trackerlessnetwork.ProxyClient;
 import streamr.utils;
 
 namespace streamr::libstreamrproxyclient {

@@ -3,10 +3,21 @@
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
 #include <folly/experimental/coro/BlockingWait.h>
+// Collect.h textually: this TU instantiates streamr::utils::collect
+// (imported), whose body calls folly::coro::collectAll - the folly
+// machinery must be textually visible at the instantiation point.
+#include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/Promise.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 
-import streamr.dht;
+import streamr.dht.ConnectionLockStates;
+import streamr.dht.ConnectionManager;
+import streamr.dht.ConnectorFacade;
+import streamr.dht.FakeTransport;
+import streamr.dht.Identifiers;
+import streamr.dht.PortRange;
+import streamr.dht.Transport;
+import streamr.dht.protos;
 import streamr.logger;
 import streamr.utils;
 

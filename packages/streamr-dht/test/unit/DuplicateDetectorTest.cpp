@@ -1,7 +1,7 @@
 #include <format>
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.DuplicateDetector;
 
 using streamr::dht::routing::DuplicateDetector;
 
