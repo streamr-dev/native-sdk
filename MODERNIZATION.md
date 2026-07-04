@@ -794,11 +794,39 @@ verified NDK clang (18 = r27), with the textual fallback below it.
   StreamID touch REGRESSED +68% from BMI-chain invalidation).
 - The final IWYU/ODR hygiene of the no-headers end state.
 
-### Recommended path (when unblocked)
-Leaf-first and interleaved as originally planned — eventemitter as the
-consolidation canary, one package per PR, `bench.sh` measured at every
-step (the 2.4 lesson: measure before generalizing), headers deleted
-per-package with a grep-enforced "nothing includes them" gate.
+### DECISION (owner, 2026-07-04): consolidate NOW
+The owner decided to start consolidation immediately, accepting the
+clangd limitation: editor diagnostics may show false errors in the
+affected pattern, and linting is disabled selectively (per file, with a
+comment) where the clangd std-type-unification bug produces false
+errors. Test files are the expected main victims; the linter keeps
+running everywhere it is correct.
+
+**Order — consumers first, libraries last (reverses the old
+"leaf-first" idea, which was impossible):** a library's headers can
+only be deleted once no other package's headers still textually include
+them, and during the transition the downstream packages' headers do
+exactly that. So consolidation walks the dependency chain from the top:
+1. **C-1 streamr-libstreamrproxyclient** ✅ (this PR) — the internal
+   header `LibProxyClientApi.hpp` merged into `streamrproxyclient.cpp`,
+   which now imports the four sibling modules; the public C header is
+   untouched. The Android/NDK version gate became a hard configure
+   error (the textual fall-back no longer exists). Verified: Release
+   build + 15/15 tests, standalone package build, package lint green
+   (two bugprone-exception-escape suppressions — the checker cannot see
+   through imported module interfaces; known pattern).
+2. C-2 streamr-trackerless-network
+3. C-3 streamr-dht (the largest)
+4. C-4 streamr-proto-rpc
+5. C-5 streamr-utils
+6. C-6 streamr-logger
+7. C-7 streamr-json
+8. C-8 streamr-eventemitter (+ final bench.sh metrics and memo closure)
+
+One package per PR, `bench.sh` measured at the dht step and at the end
+(the 2.4 lesson: measure before generalizing); headers deleted
+per-package — the compiler itself enforces that nothing still includes
+them.
 
 ### Interim posture (adopted now)
 The façade stage is COMPLETE and delivers: uniform `import streamr.<pkg>`

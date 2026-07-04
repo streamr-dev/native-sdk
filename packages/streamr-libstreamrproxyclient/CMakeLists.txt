@@ -27,9 +27,18 @@ set (IOS_SWIFT_PACKAGE_VERSION ${STREAMRPROXYCLIENT_VERSION})
 set (ANDROID_LIBRARY_VERSION ${STREAMRPROXYCLIENT_VERSION})
 
 project(streamr-streamrproxyclient CXX)
+
+# C++ modules support (guards, policies, helpers) — must come after
+# project() because it inspects the compiler id.
+include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
+
 add_library(streamrproxyclient SHARED
             src/streamrproxyclient.cpp
 )
+# CONSOLIDATED: the implementation imports the sibling streamr modules
+# (the former internal header was merged into the .cpp), so the source
+# needs module dependency scanning.
+streamr_enable_imports(streamrproxyclient)
 
 set_target_properties(streamrproxyclient PROPERTIES VERSION ${SHAREDLIB_VERSION} SOVERSION ${SHAREDLIB_SOVERSION})
 find_package(streamr-trackerless-network CONFIG REQUIRED)
