@@ -6,28 +6,30 @@
 #include <vector>
 #include "streamr-dht/connection/Connection.hpp"
 #include "streamr-dht/connection/IPendingConnection.hpp"
-#include "streamr-dht/connection/endpoint/EndpointState.hpp"
 
 namespace streamr::dht::connection::endpoint {
 
 using streamr::dht::connection::Connection;
 using streamr::dht::connection::IPendingConnection;
 
-class Endpoint;
-class EndpointState;
-
+// Pure abstract callback interface through which the endpoint state
+// classes drive the state machine. Endpoint implements it. Keeping this
+// abstract — instead of the former concrete forwarder that held an
+// Endpoint& and had its member definitions at the bottom of
+// Endpoint.hpp — makes the endpoint header cluster acyclic: Endpoint
+// depends on the states and the states depend only on this interface.
+// (This was the only header cycle in the monorepo; the planned module
+// consolidation needs the header graph to be a DAG.)
 class EndpointStateInterface {
-private:
-    Endpoint& endpoint;
-
 public:
-    explicit EndpointStateInterface(Endpoint& ep);
-    void changeToConnectingState(
-        const std::shared_ptr<IPendingConnection>& pendingConnection);
-    void changeToConnectedState(const std::shared_ptr<Connection>& connection);
-    void emitData(const std::vector<std::byte>& data);
-    void handleDisconnect(bool gracefulLeave);
-    void handleConnected();
+    virtual ~EndpointStateInterface() = default;
+    virtual void changeToConnectingState(
+        const std::shared_ptr<IPendingConnection>& pendingConnection) = 0;
+    virtual void changeToConnectedState(
+        const std::shared_ptr<Connection>& connection) = 0;
+    virtual void emitData(const std::vector<std::byte>& data) = 0;
+    virtual void handleDisconnect(bool gracefulLeave) = 0;
+    virtual void handleConnected() = 0;
 };
 
 } // namespace streamr::dht::connection::endpoint
