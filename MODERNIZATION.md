@@ -743,9 +743,17 @@ verified NDK clang (18 = r27), with the textual fallback below it.
    mis-unifies preamble/BMI types; with code in partitions there is no
    header fallback for the linter — coverage would regress from "full"
    to "none" for consolidated code).
-3. The dht intra-package include cycles (connection/endpoint cluster)
-   must become a partition DAG — untangle or use coarse per-cluster
-   partitions (deferred from 2.4 by design).
+3. ~~The dht intra-package include cycles (connection/endpoint cluster)
+   must become a partition DAG~~ **RESOLVED (post-2.6)** — a monorepo-wide
+   analysis (include edges + forward-declaration edges, which are what
+   break cycles textually but still force cyclic imports between
+   partitions) found exactly ONE cycle in all seven packages: the
+   6-header dht endpoint state-machine cluster. Untangled by making
+   `EndpointStateInterface` a pure abstract interface that `Endpoint`
+   implements (previously a concrete forwarder holding `Endpoint&` with
+   its member definitions at the bottom of Endpoint.hpp). Every
+   package's header graph is now a verified DAG, enforced continuously
+   by `check-include-dag.py` in `lint.sh`.
 
 ### What consolidation buys (quantified at the 2.4/2.5 checkpoints)
 - The −40% incremental-rebuild targets (currently: SLogger touch −6…−12%,
@@ -762,9 +770,10 @@ per-package with a grep-enforced "nothing includes them" gate.
 The façade stage is COMPLETE and delivers: uniform `import streamr.<pkg>`
 consumption, −24% clean builds, 250+ tests through import, and module
 infrastructure exercised on macOS/Linux/iOS/Android. Headers remain the
-linted source of truth. With the Android blocker resolved, consolidation
-is gated only by preconditions 2 (clangd lint coverage of purview code)
-and 3 (dht partition DAG). This is a stable resting point.
+linted source of truth. With the Android blocker resolved (2.6) and the
+header graph a verified DAG (post-2.6), consolidation is gated only by
+precondition 2: clangd lint coverage of purview code. This is a stable
+resting point.
 
 ## Success metrics (measured macOS + Linux, end of Phase 2.5)
 - ≥25% clean-build wall-clock reduction (dev build with tests).

@@ -9,6 +9,14 @@ if ! ./sync-cmake-files.sh --check; then
     exit 1
 fi
 
+# Verify that every package's internal header graph is a DAG (including
+# forward-declaration edges) — the module consolidation maps headers onto
+# partitions and module imports must be acyclic. See check-include-dag.py.
+if ! python3 ./check-include-dag.py; then
+    echo "::error title=header dependency cycle::A package's internal headers form a cycle; see the check-include-dag.py output above."
+    exit 1
+fi
+
 # Parse MonorepoPackages.cmake and loop through them
 for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | grep -v ")"); do
     echo ""

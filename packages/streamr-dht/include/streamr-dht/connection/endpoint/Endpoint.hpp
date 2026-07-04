@@ -39,14 +39,19 @@ using EndpointEvents = std::tuple<
     endpointevents::Connected,
     endpointevents::Disconnected>;
 
+// Endpoint implements EndpointStateInterface (privately) so the state
+// classes can drive the machine through the abstract interface — see
+// EndpointStateInterface.hpp for why this replaces the former concrete
+// forwarder member.
 class Endpoint : public EventEmitter<EndpointEvents>,
-                 public EnableSharedFromThis {
+                 public EnableSharedFromThis,
+                 private EndpointStateInterface {
 private:
     std::function<void()> removeSelfFromContainer;
     EndpointState* state;
     std::recursive_mutex mutex;
 
-    void emitData(const std::vector<std::byte>& data) {
+    void emitData(const std::vector<std::byte>& data) override {
         SLogger::debug("Endpoint::emitData start");
         auto self = sharedFromThis<Endpoint>();
         std::scoped_lock lock(this->mutex);
@@ -54,7 +59,7 @@ private:
         SLogger::debug("Endpoint::emitData end");
     }
 
-    void handleDisconnect(bool /*gracefulLeave*/) {
+    void handleDisconnect(bool /*gracefulLeave*/) override {
         SLogger::debug("Endpoint::handleDisconnect start");
         auto self = sharedFromThis<Endpoint>();
         std::scoped_lock lock(this->mutex);
@@ -65,7 +70,8 @@ private:
         SLogger::debug("Endpoint::handleDisconnect end");
     }
 
-    void changeToConnectedState(const std::shared_ptr<Connection>& connection) {
+    void changeToConnectedState(
+        const std::shared_ptr<Connection>& connection) override {
         SLogger::debug("Endpoint::changeToConnectedState start");
         auto self = sharedFromThis<Endpoint>();
         std::scoped_lock lock(this->mutex);
@@ -74,7 +80,7 @@ private:
         SLogger::debug("Endpoint::changeToConnectedState end");
     }
 
-    void handleConnected() {
+    void handleConnected() override {
         SLogger::debug("Endpoint::handleConnected start");
         auto self = sharedFromThis<Endpoint>();
         std::scoped_lock lock(this->mutex);
@@ -82,9 +88,6 @@ private:
         SLogger::debug("Endpoint::handleConnected end");
     }
 
-    friend class EndpointStateInterface;
-
-    EndpointStateInterface stateInterface;
     std::shared_ptr<InitialEndpointState> initialState;
     std::shared_ptr<ConnectedEndpointState> connectedState;
     std::shared_ptr<ConnectingEndpointState> connectingState;
@@ -94,14 +97,10 @@ private:
     explicit Endpoint(
         PeerDescriptor peerDescriptor,
         std::function<void()>&& removeSelfFromContainer)
-        : stateInterface(*this),
-          connectedState(
-              ConnectedEndpointState::newInstance(this->stateInterface)),
-          connectingState(
-              ConnectingEndpointState::newInstance(this->stateInterface)),
-          disconnectedState(
-              DisconnectedEndpointState::newInstance(this->stateInterface)),
-          initialState(InitialEndpointState::newInstance(this->stateInterface)),
+        : connectedState(ConnectedEndpointState::newInstance(*this)),
+          connectingState(ConnectingEndpointState::newInstance(*this)),
+          disconnectedState(DisconnectedEndpointState::newInstance(*this)),
+          initialState(InitialEndpointState::newInstance(*this)),
           peerDescriptor(std::move(peerDescriptor)),
           removeSelfFromContainer(removeSelfFromContainer) {
         SLogger::debug("Endpoint constructor start");
@@ -128,7 +127,7 @@ public:
     ~Endpoint() override { SLogger::debug("Endpoint destructor"); }
 
     void changeToConnectingState(
-        const std::shared_ptr<IPendingConnection>& pendingConnection) {
+        const std::shared_ptr<IPendingConnection>& pendingConnection) override {
         SLogger::debug("Endpoint::changeToConnectingState start");
         auto self = sharedFromThis<Endpoint>();
         std::scoped_lock lock(this->mutex);
@@ -189,61 +188,6 @@ public:
         SLogger::debug("Endpoint::setConnected end");
     }
 };
-
-/*
-inline void ConnectedEndpointState::changeToConnectingState(
-    const std::shared_ptr<IPendingConnection>& pendingConnection) {
-    SLogger::debug("ConnectedEndpointState::changeToConnectingState start");
-    std::scoped_lock lock(this->connectedEndpointStateMutex);
-    this->connection->close(true);
-    this->removeEventHandlers();
-    this->stateInterface.changeToConnectingState(pendingConnection);
-    SLogger::debug("ConnectedEndpointState::changeToConnectingState end");
-}
-*/
-
-inline EndpointStateInterface::EndpointStateInterface(Endpoint& ep)
-    : endpoint(ep) {
-    SLogger::debug("EndpointStateInterface constructor");
-}
-
-inline void EndpointStateInterface::changeToConnectingState(
-    const std::shared_ptr<IPendingConnection>& pendingConnection) {
-    SLogger::debug("EndpointStateInterface::changeToConnectingState start");
-    this->endpoint.changeToConnectingState(pendingConnection);
-    SLogger::debug("EndpointStateInterface::changeToConnectingState end");
-}
-
-inline void EndpointStateInterface::changeToConnectedState(
-    const std::shared_ptr<Connection>& connection) {
-    SLogger::debug("EndpointStateInterface::changeToConnectedState start");
-    this->endpoint.changeToConnectedState(connection);
-    SLogger::debug("EndpointStateInterface::changeToConnectedState end");
-}
-
-inline void EndpointStateInterface::emitData(
-    const std::vector<std::byte>& data) {
-    SLogger::debug("EndpointStateInterface::emitData start");
-    this->endpoint.emitData(data);
-    SLogger::debug("EndpointStateInterface::emitData end");
-}
-
-inline void EndpointStateInterface::handleDisconnect(bool gracefulLeave) {
-    SLogger::debug("EndpointStateInterface::handleDisconnect start");
-    SLogger::debug(
-        "EndpointStateInterface::handleDisconnect acquiring scoped lock");
-    std::scoped_lock lock(this->endpoint.mutex);
-    SLogger::debug("EndpointStateInterface::handleDisconnect lock acquired");
-    this->endpoint.handleDisconnect(gracefulLeave);
-    SLogger::debug("EndpointStateInterface::handleDisconnect end");
-}
-
-inline void EndpointStateInterface::handleConnected() {
-    SLogger::debug("EndpointStateInterface::handleConnected start");
-
-    this->endpoint.handleConnected();
-    SLogger::debug("EndpointStateInterface::handleConnected end");
-}
 
 } // namespace streamr::dht::connection::endpoint
 
