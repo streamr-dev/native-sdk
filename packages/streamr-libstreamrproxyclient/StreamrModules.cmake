@@ -120,6 +120,13 @@ function(streamr_add_module_library TARGET)
     # undeclared). Making the flag part of the PUBLIC interface keeps the
     # BMI and every importer consistent. No-op on other platforms.
     target_compile_options(${TARGET} PUBLIC $<$<PLATFORM_ID:Android>:-pthread>)
+    # The module libraries' objects end up inside the shared
+    # libstreamrproxyclient, so they must be position-independent. macOS
+    # emits PIC by default; on Linux the ELF linker rejects the archive
+    # otherwise ("recompile with -fPIC" against the module vtable/thunk
+    # symbols — first seen when the consolidated code moved into module
+    # objects on the linux-arm64 leg).
+    set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endfunction()
 
 # streamr_target_module_sources(<target> FILES <unit.cppm>...)
@@ -143,8 +150,10 @@ function(streamr_target_module_sources TARGET)
         FILES ${ARG_FILES})
     set_target_properties(${TARGET} PROPERTIES CXX_SCAN_FOR_MODULES ON)
     target_compile_features(${TARGET} PUBLIC cxx_std_26)
-    # See streamr_add_module_library: BMI/importer -pthread consistency.
+    # See streamr_add_module_library: BMI/importer -pthread consistency
+    # and position independence for the shared-library link.
     target_compile_options(${TARGET} PUBLIC $<$<PLATFORM_ID:Android>:-pthread>)
+    set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endfunction()
 
 # streamr_enable_imports(<target>)
