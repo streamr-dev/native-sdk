@@ -109,6 +109,16 @@ Android NDK r28+.
   current, slimmer TS setup. Diagnosis ruled out external-server dependence
   (all three run fully against a local `--local` subscriber on
   127.0.0.1:44211).
+- **FINAL DISPOSITION (post-modernization, owner decision 2026-07):** the
+  tests stay disabled in this repository and the harness will NOT be
+  revived here. The streamr network TS packages have changed a lot since
+  2024, and the TS interop harness (currently the
+  `native-ts-integration` submodule) will be rewritten in a separate
+  project. The disabled `add_test` blocks in
+  `packages/streamr-trackerless-network/CMakeLists.txt` and
+  `packages/streamr-libstreamrproxyclient/CMakeLists.txt` and the
+  `run-ts-*`/`run-ts-integration-tests.sh` scripts remain as reference
+  for that rewrite.
 
 ## Phase 1.2 — Compiler upgrades + CI image modernization ✅ (PR #23, merged)
 - macOS: dead `llvm@17` → latest keg-only Homebrew `llvm` (22.x), located via
