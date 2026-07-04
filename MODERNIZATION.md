@@ -170,6 +170,15 @@ Android NDK r28+.
   `--repeat until-pass:2 --timeout 300`) keep hangs bounded and retries
   honest; the tests' timing/port assumptions need their own fix. This debt
   predates the modernization and was exposed by introducing macOS CI at all.
+  **RESOLVED post-modernization:** the flakes were two library races in
+  `WebsocketConnection`, not test timing/port assumptions — (1) incoming
+  frames emitted as Data events before the application could register a
+  listener (message silently dropped; fixed by deferring the rtc message
+  callback to `startReceiving()`), and (2) a lock-order inversion between
+  `mMutex` and rtc's callback mutex in `close()`/`destroy()` (teardown
+  deadlock; fixed by calling into rtc outside `mMutex`). Reproduced 3/200
+  resp. 2/100 locally before the fix; 0 failures in 925 stress runs
+  (Debug + Release) after.
 - **Gate**: build/test green macOS + Linux, **and iOS cross-build +
   `iostest.sh` green — the compiler's output must stay compatible with the
   device's fixed libc++ runtime**.

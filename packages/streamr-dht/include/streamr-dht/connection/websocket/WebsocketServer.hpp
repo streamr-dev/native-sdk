@@ -139,6 +139,14 @@ private:
             readyConnection->removeAllListeners();
 
             emit<websocketserverevents::Connected>(readyConnection);
+            // Only now — after the application has registered its
+            // listeners on the connection inside the emit above — attach
+            // the rtc message callback. Frames the peer sent before this
+            // point have been queuing inside libdatachannel and flush
+            // here; attaching any earlier would emit Data with no
+            // listeners and silently drop the messages (the cause of the
+            // flaky Websocket/ConnectionLocking integration tests).
+            readyConnection->startReceiving();
             SLogger::info("handleHalfReadySocket. Before erase");
             mHalfReadyConnections.erase(id);
         });
