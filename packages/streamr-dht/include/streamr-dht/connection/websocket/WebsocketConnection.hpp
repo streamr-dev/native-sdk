@@ -29,6 +29,7 @@ private:
 protected:
     std::shared_ptr<rtc::WebSocket> mSocket; // NOLINT
     std::atomic<bool> mDestroyed{false}; // NOLINT
+    std::atomic<bool> mConnectedEmitted{false}; // NOLINT
     std::recursive_mutex mMutex; // NOLINT
 
     // Only allow subclasses to be created
@@ -124,7 +125,8 @@ protected:
               if (!self->mDestroyed) {
                   if (self->mSocket &&
                       self->mSocket->readyState() ==
-                          rtc::WebSocket::State::Open) {
+                          rtc::WebSocket::State::Open &&
+                      !self->mConnectedEmitted.exchange(true)) {
                       SLogger::trace(
                           "onOpen() emitting Connected " +
                               getConnectionTypeString(),
@@ -144,12 +146,24 @@ protected:
 
         SLogger::trace("setSocket() after move " + getConnectionTypeString());
 
-        // Set socket callbacks
+        // Set socket callbacks. The message callback is deliberately NOT
+        // attached here — see startReceiving().
 
-        mSocket->onMessage(this->onMessage, this->onStringMessage);
         mSocket->onError(this->onError);
         mSocket->onClosed(this->onClosed);
         mSocket->onOpen(this->onOpen);
+
+        // rtc does not retro-fire the open callback: if the websocket
+        // handshake completed on the processor thread before the callback
+        // above was attached, onOpen would never run and Connected would
+        // never be emitted. Emit it here in that case (mConnectedEmitted
+        // keeps the two paths idempotent).
+        if (mSocket->readyState() == rtc::WebSocket::State::Open) {
+            SLogger::trace(
+                "setSocket() socket already open, emitting Connected " +
+                getConnectionTypeString());
+            this->onOpen();
+        }
 
         SLogger::trace("setSocket() end " + getConnectionTypeString());
     }
@@ -163,6 +177,24 @@ public:
             });
         destroy();
     };
+
+    // Attach the rtc message callback and deliver anything received so
+    // far. Deliberately separate from setSocket(): incoming frames queue
+    // inside libdatachannel until a message callback is attached (they
+    // flush synchronously at attach), while our Data event is
+    // fire-and-forget — a frame emitted before the application has
+    // registered its Data listener is silently lost. The owner therefore
+    // calls this only AFTER the application has had the opportunity to
+    // register listeners: the server after emitting Connected to the
+    // application, the client before open() (its listeners are
+    // registered before connect()).
+    void startReceiving() {
+        SLogger::trace("startReceiving() " + getConnectionTypeString());
+        std::scoped_lock lock(mMutex);
+        if (!mDestroyed && mSocket) {
+            mSocket->onMessage(this->onMessage, this->onStringMessage);
+        }
+    }
 
     void send(const std::vector<std::byte>& data) override {
         SLogger::trace(
@@ -195,20 +227,27 @@ public:
             "close()",
             {{"connectionType", getConnectionTypeString()},
              {"mDestroyed", mDestroyed.load()}});
-        SLogger::debug(
-            "close() trying to acquire mutex lock in close()" +
-            getConnectionTypeString());
-        std::scoped_lock lock(mMutex);
-        SLogger::debug(
-            "close() got mutex lock in close()" + getConnectionTypeString());
-        if (!mDestroyed) {
+        std::shared_ptr<rtc::WebSocket> socket;
+        {
+            std::scoped_lock lock(mMutex);
+            if (mDestroyed) {
+                SLogger::debug("close() on destroyed connection");
+                return;
+            }
             mDestroyed = true;
+            socket = mSocket;
+        }
+        // The rtc calls happen OUTSIDE mMutex: rtc holds its callback
+        // mutex while a callback is executing, so resetCallbacks() blocks
+        // until any in-flight callback returns — and our rtc callbacks
+        // lock mMutex. Calling into rtc while holding mMutex is therefore
+        // a lock-order inversion (main thread: mMutex -> callback mutex;
+        // rtc thread: callback mutex -> mMutex) that deadlocked test
+        // teardowns.
+        if (socket) {
             SLogger::debug("close() resetting callbacks");
-            mSocket->resetCallbacks();
-            mSocket->close();
-            // mSocket = nullptr;
-        } else {
-            SLogger::debug("close() on destroyed connection");
+            socket->resetCallbacks();
+            socket->close();
         }
         SLogger::trace(
             "close() end",
@@ -221,22 +260,20 @@ public:
             "destroy()",
             {{"connectionType", getConnectionTypeString()},
              {"mDestroyed", mDestroyed.load()}});
-        SLogger::debug("destroy() trying to acquire mutex lock");
-        std::scoped_lock lock(mMutex);
-        SLogger::debug("destroy() got mutex lock");
-        if (mDestroyed) {
-            SLogger::debug("destroy() on destroyed connection");
-            return;
+        std::shared_ptr<rtc::WebSocket> socket;
+        {
+            std::scoped_lock lock(mMutex);
+            if (mDestroyed) {
+                SLogger::debug("destroy() on destroyed connection");
+                return;
+            }
+            mDestroyed = true;
+            socket = mSocket;
         }
-
-        mDestroyed = true;
-        if (mSocket) {
-            SLogger::debug("destroy() trying to get mutex lock");
-            std::lock_guard<std::recursive_mutex> lock(mMutex);
-            SLogger::debug("destroy() got mutex lock");
-            mSocket->resetCallbacks();
-            mSocket->close();
-            // mSocket = nullptr;
+        // Outside mMutex for the same reason as in close().
+        if (socket) {
+            socket->resetCallbacks();
+            socket->close();
         }
     }
 };

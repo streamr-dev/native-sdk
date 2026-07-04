@@ -41,6 +41,10 @@ public:
 
         auto socket = std::make_shared<rtc::WebSocket>(webSocketConfig);
         setSocket(socket);
+        // The client's listeners are registered before connect(), so the
+        // message callback can be attached right away — before open(), as
+        // it always was (setSocket() no longer attaches it itself).
+        startReceiving();
         SLogger::trace("socket created");
         socket->open(address);
         SLogger::trace("connect() mSocket->open() called");
