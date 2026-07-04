@@ -93,6 +93,35 @@ TEST_F(PendingConnectionTest, EmitsConnected) {
     pendingConnection->onHandshakeCompleted(dummyConnection);
 }
 
+// Regression tests for the CanLockConnections stall on slow CI runners:
+// the connectors start socket I/O before ConnectionManager registers the
+// endpoint's listeners on the pending connection, so a fast handshake can
+// complete before registration. IPendingConnection must therefore replay
+// the latest emission to late listeners.
+
+TEST_F(PendingConnectionTest, ReplaysConnectedToLateListener) {
+    auto dummyConnection = std::make_shared<DummyConnection>();
+    // handshake completes before anyone listens
+    pendingConnection->onHandshakeCompleted(dummyConnection);
+    bool isEmitted = false;
+    pendingConnection->once<Connected>(
+        [&](const PeerDescriptor& /* peerDescriptor */,
+            std::shared_ptr<Connection> connection) { // NOLINT
+            isEmitted = true;
+            EXPECT_EQ(dummyConnection, connection);
+        });
+    EXPECT_TRUE(isEmitted);
+}
+
+TEST_F(PendingConnectionTest, ReplaysDisconnectedToLateListener) {
+    // connection fails before anyone listens
+    pendingConnection->close(false);
+    bool isEmitted = false;
+    pendingConnection->once<Disconnected>(
+        [&](bool /* gracefulLeave */) { isEmitted = true; });
+    EXPECT_TRUE(isEmitted);
+}
+
 TEST_F(PendingConnectionTest, DoesNotEmitConnectedIfReplaced) {
     bool isEmitted = false;
     pendingConnection->once<Connected>(

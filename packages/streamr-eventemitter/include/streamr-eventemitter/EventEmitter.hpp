@@ -287,13 +287,25 @@ public:
         MatchingEventType<EmitterEventType> EventType,
         typename... EventArgs>
     void emit(EventArgs... args) {
-        if constexpr (ReplayLatestEventToNewListeners) {
-            StoredEvent<typename EmitterEventType::ArgumentTypes> storedEvent(
-                (args)...);
-            mLatestEvent = std::move(storedEvent);
-        }
         std::lock_guard guard{mEmitLoopMutex};
-        createExecutingEmitLoopHandlersMap();
+        {
+            // The latest-event store and the handler snapshot must form one
+            // atomic step with respect to on(): on() checks mLatestEvent and
+            // registers the handler while holding mEventHandlersMutex, so a
+            // listener registered concurrently with this emit either makes
+            // it into the snapshot (live dispatch) or observes the stored
+            // event (replay) — never neither, never both. mEventHandlersMutex
+            // is only ever taken inside mEmitLoopMutex here, matching the
+            // once-handler removal below, so no new lock order is introduced.
+            std::lock_guard handlersGuard{mEventHandlersMutex};
+            if constexpr (ReplayLatestEventToNewListeners) {
+                StoredEvent<typename EmitterEventType::ArgumentTypes>
+                storedEvent((args)...);
+                std::lock_guard latestGuard{mLatestEventMutex};
+                mLatestEvent = std::move(storedEvent);
+            }
+            createExecutingEmitLoopHandlersMap();
+        }
 
         while (auto ret = popHandlerFromExecutingEmitLoopHandlersMap()) {
             auto handler = ret.value();

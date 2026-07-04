@@ -188,7 +188,26 @@ Android NDK r28+.
   `mMutex` and rtc's callback mutex in `close()`/`destroy()` (teardown
   deadlock; fixed by calling into rtc outside `mMutex`). Reproduced 3/200
   resp. 2/100 locally before the fix; 0 failures in 925 stress runs
-  (Debug + Release) after.
+  (Debug + Release) after. **A third, rarer mechanism** surfaced on 2-core
+  Linux runners (ConnectionLockingTest.CanLockConnections, PR #42 CI,
+  2026-07-04, twice in a row then pass; never reproduced in 100 stress runs
+  under 10x load on macOS): on the outgoing side the connector starts socket
+  I/O inside `createConnection()`, but the endpoint's listeners on the
+  returned `PendingConnection` are only registered afterwards
+  (`addEndpoint` -> `changeToConnectingState`). If the main thread is
+  descheduled in that window for longer than one localhost websocket +
+  streamr handshake round-trip — realistic only on a loaded 2-core box —
+  `onHandshakeCompleted()` runs first; it disarms the 15 s connect watchdog
+  and then emits `Connected` on a fire-and-forget emitter with zero
+  listeners. The emission is lost, no timeout remains armed, and the
+  endpoint sits in the connecting state forever with the lock-request RPC
+  buffered (signature: rpc FutureTimeout after 10 s, waitForCondition
+  timeout, `hasConnection() == false`). Fixed by making `IPendingConnection`
+  a `ReplayEventEmitter` (late listeners receive the latest
+  `Connected`/`Disconnected`) and by making `emit()`'s latest-event store +
+  handler snapshot atomic with respect to `on()` in the eventemitter, so a
+  concurrently registered listener gets exactly one of live dispatch or
+  replay.
 - **Gate**: build/test green macOS + Linux, **and iOS cross-build +
   `iostest.sh` green — the compiler's output must stay compatible with the
   device's fixed libc++ runtime**.

@@ -21,8 +21,18 @@ using PendingConnectionEvents = std::tuple<
     pendingconnectionevents::Connected,
     pendingconnectionevents::Disconnected>;
 
-class IPendingConnection
-    : public streamr::eventemitter::EventEmitter<PendingConnectionEvents> {
+// ReplayEventEmitter, not the fire-and-forget EventEmitter: the connectors
+// start socket I/O inside createConnection(), but the Connected/Disconnected
+// listeners are only registered afterwards, when ConnectionManager wraps the
+// returned pending connection in an Endpoint (addEndpoint ->
+// changeToConnectingState). On a loaded machine the entire websocket +
+// streamr handshake can win that race, and onHandshakeCompleted() disarms
+// the connect watchdog before emitting — with a fire-and-forget emitter the
+// emission is lost and the endpoint stays in the connecting state forever
+// (the CanLockConnections stall on 2-core CI runners). Replay delivers the
+// missed emission to the late listener instead.
+class IPendingConnection : public streamr::eventemitter::ReplayEventEmitter<
+                               PendingConnectionEvents> {
 public:
     ~IPendingConnection() override = default;
     virtual void onHandshakeCompleted(
