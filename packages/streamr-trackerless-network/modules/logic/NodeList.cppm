@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:NodeList
+// Module streamr.trackerlessnetwork.NodeList
 // CONSOLIDATED from the former header logic/NodeList.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -7,11 +7,11 @@ module;
 #include <ranges>
 #include <vector>
 
-export module streamr.trackerlessnetwork:NodeList;
+export module streamr.trackerlessnetwork.NodeList;
 
-import streamr.dht;
+import streamr.dht.Identifiers;
 import streamr.eventemitter;
-import :ContentDeliveryRpcRemote;
+import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve
@@ -22,7 +22,10 @@ using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
 export namespace streamr::trackerlessnetwork {
 
-class ContentDeliveryRpcRemote;
+// NOTE: the former header forward-declared ContentDeliveryRpcRemote
+// here; in the named-sub-module world a purview forward declaration
+// would attach the name to THIS module and conflict with the defining
+// module, so the import above provides the declaration instead.
 struct NodeAdded
     : Event<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> {};
 struct NodeRemoved

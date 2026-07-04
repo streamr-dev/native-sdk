@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.Errors;
+import streamr.dht.TlsCertificateFiles;
+import streamr.dht.WebsocketServer;
 
 using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketServerConfig;

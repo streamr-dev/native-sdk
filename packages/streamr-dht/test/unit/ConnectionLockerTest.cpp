@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.ConnectionLocker;
 
 using streamr::dht::connection::ConnectionLocker; // NOLINT
 

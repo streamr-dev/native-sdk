@@ -6,7 +6,11 @@
 // (unmergeable) definitions with identical mangled names in Release.
 #include <folly/experimental/coro/BlockingWait.h>
 
-import streamr.dht;
+import streamr.dht.IPendingConnection;
+import streamr.dht.Connection;
+import streamr.dht.PendingConnection;
+import streamr.dht.Transport;
+import streamr.dht.protos;
 import streamr.utils;
 
 using ::dht::PeerDescriptor;

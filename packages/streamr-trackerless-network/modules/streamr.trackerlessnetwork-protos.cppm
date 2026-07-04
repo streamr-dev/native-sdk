@@ -8,7 +8,7 @@ module;
 #include "packages/network/protos/NetworkRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.server.pb.h"
 
-export module streamr.trackerlessnetwork:protos;
+export module streamr.trackerlessnetwork.protos;
 
 // messages
 export using ::CloseTemporaryConnection;
@@ -58,3 +58,15 @@ using streamr::protorpc::TemporaryConnectionRpc;
 using streamr::protorpc::TemporaryConnectionRpcClient;
 
 } // namespace streamr::protorpc
+
+// Ordering for MessageRef (used as an ordered-container key across the
+// package). Exported here, next to the type's re-export, so every
+// importer of the protos module can order MessageRef values; the
+// operator lives in the global namespace like the generated type
+// itself, so argument-dependent lookup finds it.
+export inline bool operator<(const MessageRef& r1, const MessageRef& r2) {
+    if (r1.sequencenumber() != r2.sequencenumber()) {
+        return r1.sequencenumber() < r2.sequencenumber();
+    }
+    return r1.timestamp() < r2.timestamp();
+}

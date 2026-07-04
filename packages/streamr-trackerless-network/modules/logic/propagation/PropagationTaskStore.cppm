@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:PropagationTaskStore
+// Module streamr.trackerlessnetwork.PropagationTaskStore
 // CONSOLIDATED from the former header
 // logic/propagation/PropagationTaskStore.hpp (MODERNIZATION.md Phase 2.6): this
 // file is now the source of truth.
@@ -10,10 +10,10 @@ module;
 #include <string>
 #include "packages/network/protos/NetworkRpc.pb.h"
 
-export module streamr.trackerlessnetwork:PropagationTaskStore;
+export module streamr.trackerlessnetwork.PropagationTaskStore;
 
-import streamr.dht;
-import :FifoMapWithTTL;
+import streamr.dht.Identifiers;
+import streamr.trackerlessnetwork.FifoMapWithTTL;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve

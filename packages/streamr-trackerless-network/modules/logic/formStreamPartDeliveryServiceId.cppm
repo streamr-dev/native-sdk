@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:formStreamPartDeliveryServiceId
+// Module streamr.trackerlessnetwork.formStreamPartDeliveryServiceId
 // CONSOLIDATED from the former header logic/formStreamPartDeliveryServiceId.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -9,9 +9,9 @@ module;
 // <string> transitively from the sibling headers it included.)
 #include <string>
 
-export module streamr.trackerlessnetwork:formStreamPartDeliveryServiceId;
+export module streamr.trackerlessnetwork.formStreamPartDeliveryServiceId;
 
-import streamr.dht;
+import streamr.dht.Identifiers;
 import streamr.utils;
 
 // Hoisted from the former header (file scope, NOT exported);

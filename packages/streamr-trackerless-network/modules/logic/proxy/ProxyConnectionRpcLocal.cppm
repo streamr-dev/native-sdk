@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:ProxyConnectionRpcLocal
+// Module streamr.trackerlessnetwork.ProxyConnectionRpcLocal
 // CONSOLIDATED from the former header logic/proxy/ProxyConnectionRpcLocal.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -8,12 +8,16 @@ module;
 #include "packages/network/protos/NetworkRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.server.pb.h"
 
-export module streamr.trackerlessnetwork:ProxyConnectionRpcLocal;
+export module streamr.trackerlessnetwork.ProxyConnectionRpcLocal;
 
-import streamr.dht;
+import streamr.logger;
+import streamr.dht.DhtCallContext;
+import streamr.dht.Identifiers;
+import streamr.dht.ListeningRpcCommunicator;
+import streamr.dht.protos;
 import streamr.eventemitter;
 import streamr.utils;
-import :ContentDeliveryRpcRemote;
+import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve
@@ -24,10 +28,12 @@ using streamr::dht::rpcprotocol::DhtCallContext;
 using streamr::dht::transport::ListeningRpcCommunicator;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
+using streamr::logger::SLogger;
 using streamr::utils::BinaryUtils;
 using streamr::utils::EthereumAddress;
 using streamr::utils::StreamPartID;
 using streamr::utils::toEthereumAddress;
+
 export namespace streamr::trackerlessnetwork::proxy {
 
 using ::dht::PeerDescriptor;

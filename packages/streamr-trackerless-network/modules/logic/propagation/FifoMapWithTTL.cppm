@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:FifoMapWithTTL
+// Module streamr.trackerlessnetwork.FifoMapWithTTL
 // CONSOLIDATED from the former header logic/propagation/FifoMapWithTTL.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -11,15 +11,14 @@ module;
 #include <ranges>
 #include "packages/network/protos/NetworkRpc.pb.h"
 
-export module streamr.trackerlessnetwork:FifoMapWithTTL;
+export module streamr.trackerlessnetwork.FifoMapWithTTL;
 
-import :RandomAccessQueue;
-inline bool operator<(const MessageRef& r1, const MessageRef& r2) {
-    if (r1.sequencenumber() != r2.sequencenumber()) {
-        return r1.sequencenumber() < r2.sequencenumber();
-    }
-    return r1.timestamp() < r2.timestamp();
-}
+import streamr.trackerlessnetwork.RandomAccessQueue;
+// The MessageRef ordering operator moved to the
+// streamr.trackerlessnetwork.protos module (exported there): as a
+// non-exported file-scope function here it had module linkage and was
+// unreachable from other modules instantiating the map templates.
+import streamr.trackerlessnetwork.protos;
 
 export namespace streamr::trackerlessnetwork::propagation {
 

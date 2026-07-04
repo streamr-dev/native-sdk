@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.DisconnectedEndpointState;
 
 using streamr::dht::connection::endpoint::DisconnectedEndpointState; // NOLINT
 

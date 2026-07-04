@@ -10,7 +10,7 @@ module;
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/dht/protos/DhtRpc.server.pb.h"
 
-export module streamr.dht:protos;
+export module streamr.dht.protos;
 
 export namespace dht {
 

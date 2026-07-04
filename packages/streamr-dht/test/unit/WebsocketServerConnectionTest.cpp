@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include "rtc/rtc.hpp"
 
-import streamr.dht;
+import streamr.dht.WebsocketServerConnection;
 
 using streamr::dht::connection::websocket::WebsocketServerConnection;
 

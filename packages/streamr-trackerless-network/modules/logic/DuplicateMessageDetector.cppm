@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:DuplicateMessageDetector
+// Module streamr.trackerlessnetwork.DuplicateMessageDetector
 // CONSOLIDATED from the former header logic/DuplicateMessageDetector.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -9,7 +9,7 @@ module;
 #include <utility>
 #include <vector>
 
-export module streamr.trackerlessnetwork:DuplicateMessageDetector;
+export module streamr.trackerlessnetwork.DuplicateMessageDetector;
 
 import streamr.logger;
 

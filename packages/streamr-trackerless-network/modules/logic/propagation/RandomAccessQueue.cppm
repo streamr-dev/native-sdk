@@ -1,4 +1,4 @@
-// Module partition streamr.trackerlessnetwork:RandomAccessQueue
+// Module streamr.trackerlessnetwork.RandomAccessQueue
 // CONSOLIDATED from the former header logic/propagation/RandomAccessQueue.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
@@ -8,7 +8,7 @@ module;
 #include <mutex>
 #include <optional>
 
-export module streamr.trackerlessnetwork:RandomAccessQueue;
+export module streamr.trackerlessnetwork.RandomAccessQueue;
 export namespace streamr::trackerlessnetwork::propagation {
 
 class QueueToken {

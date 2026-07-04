@@ -2,7 +2,11 @@
 #include <gtest/gtest.h>
 #include <rtc/global.hpp>
 
-import streamr.dht;
+import streamr.dht.Connection;
+import streamr.dht.Transport;
+import streamr.dht.WebsocketClientConnection;
+import streamr.dht.WebsocketServer;
+import streamr.dht.WebsocketServerConnection;
 import streamr.logger;
 
 using streamr::dht::connection::connectionevents::Connected;

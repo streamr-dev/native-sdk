@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import streamr.dht;
+import streamr.dht.CertificateHelper;
 import streamr.logger;
 
 using streamr::dht::helpers::CertificateHelper;

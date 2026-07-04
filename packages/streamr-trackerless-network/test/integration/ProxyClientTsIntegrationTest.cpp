@@ -2,9 +2,13 @@
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
-import streamr.dht;
+import streamr.dht.ConnectionManager;
+import streamr.dht.ConnectorFacade;
+import streamr.dht.FakeTransport;
+import streamr.dht.protos;
 import streamr.logger;
-import streamr.trackerlessnetwork;
+import streamr.trackerlessnetwork.ProxyClient;
+import streamr.trackerlessnetwork.protos;
 import streamr.utils;
 
 using ::dht::ConnectivityMethod;
