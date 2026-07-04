@@ -1,19 +1,26 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_NODE_LIST_HPP
-#define STREAMR_TRACKERLESS_NETWORK_NODE_LIST_HPP
+// Module partition streamr.trackerlessnetwork:NodeList
+// CONSOLIDATED from the former header logic/NodeList.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <map>
 #include <ranges>
 #include <vector>
-#include "streamr-dht/Identifiers.hpp"
-#include "streamr-eventemitter/EventEmitter.hpp"
-#include "streamr-trackerless-network/logic/ContentDeliveryRpcRemote.hpp"
 
-namespace streamr::trackerlessnetwork {
+export module streamr.trackerlessnetwork:NodeList;
 
+import streamr.dht;
+import streamr.eventemitter;
+import :ContentDeliveryRpcRemote;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::DhtAddress;
 using streamr::dht::Identifiers;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
+export namespace streamr::trackerlessnetwork {
 
 class ContentDeliveryRpcRemote;
 struct NodeAdded
@@ -178,5 +185,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork
-
-#endif // STREAMR_TRACKERLESS_NETWORK_NODE_LIST_HPP

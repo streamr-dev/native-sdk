@@ -1,17 +1,25 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_PROPAGATION_HPP
-#define STREAMR_TRACKERLESS_NETWORK_PROPAGATION_HPP
+// Module partition streamr.trackerlessnetwork:Propagation
+// CONSOLIDATED from the former header logic/propagation/Propagation.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <vector>
-#include "PropagationTaskStore.hpp"
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "streamr-dht/Identifiers.hpp"
 
-namespace streamr::trackerlessnetwork::propagation {
+export module streamr.trackerlessnetwork:Propagation;
 
-using ::dht::PeerDescriptor;
+import streamr.dht;
+import :PropagationTaskStore;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::DhtAddress;
 using streamr::dht::Identifiers;
+export namespace streamr::trackerlessnetwork::propagation {
+
+using ::dht::PeerDescriptor;
 using SendToNeighborFn =
     std::function<void(const DhtAddress&, const StreamMessage&)>;
 
@@ -121,5 +129,3 @@ private:
 };
 
 } // namespace streamr::trackerlessnetwork::propagation
-
-#endif // STREAMR_TRACKERLESS_NETWORK_PROPAGATION_HPP

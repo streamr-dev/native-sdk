@@ -1,18 +1,25 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_UTILS_HPP
-#define STREAMR_TRACKERLESS_NETWORK_UTILS_HPP
+// Module partition streamr.trackerlessnetwork:Utils
+// CONSOLIDATED from the former header logic/Utils.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <map>
 #include <optional>
 #include <string>
 #include <boost/algorithm/hex.hpp>
-#include "DuplicateMessageDetector.hpp"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "streamr-dht/Identifiers.hpp"
 
-namespace streamr::trackerlessnetwork {
+export module streamr.trackerlessnetwork:Utils;
 
+import streamr.dht;
+import :DuplicateMessageDetector;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::DhtAddressRaw;
 using streamr::dht::Identifiers;
+export namespace streamr::trackerlessnetwork {
 
 class Utils {
 public:
@@ -44,5 +51,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork
-
-#endif // STREAMR_TRACKERLESS_NETWORK_UTILS_HPP

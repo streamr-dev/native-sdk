@@ -1,35 +1,40 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_PROXY_PROXY_CLIENT_HPP
-#define STREAMR_TRACKERLESS_NETWORK_PROXY_PROXY_CLIENT_HPP
+// Module partition streamr.trackerlessnetwork:ProxyClient
+// CONSOLIDATED from the former header logic/proxy/ProxyClient.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <exception>
 #include <map>
 #include <optional>
+#include <random>
 #include <string>
+// Textual: entities reached only through an imported module's global
+// module fragment are not reliably reachable; this unit's code calls
+// folly::coro::blockingWait and std::mt19937 directly. (The former
+// header received both transitively from the headers it included.)
+#include <folly/experimental/coro/BlockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "streamr-dht/Identifiers.hpp"
-#include "streamr-dht/connection/ConnectionLockStates.hpp"
-#include "streamr-dht/connection/ConnectionLocker.hpp"
-#include "streamr-dht/transport/Transport.hpp"
-#include "streamr-eventemitter/EventEmitter.hpp"
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-trackerless-network/logic/ContentDeliveryRpcLocal.hpp"
-#include "streamr-trackerless-network/logic/ContentDeliveryRpcRemote.hpp"
-#include "streamr-trackerless-network/logic/DuplicateMessageDetector.hpp"
-#include "streamr-trackerless-network/logic/NodeList.hpp"
-#include "streamr-trackerless-network/logic/Utils.hpp"
-#include "streamr-trackerless-network/logic/formStreamPartDeliveryServiceId.hpp"
-#include "streamr-trackerless-network/logic/propagation/Propagation.hpp"
-#include "streamr-trackerless-network/logic/proxy/ProxyConnectionRpcLocal.hpp"
-#include "streamr-trackerless-network/logic/proxy/ProxyConnectionRpcRemote.hpp"
-#include "streamr-utils/AbortController.hpp"
-#include "streamr-utils/EthereumAddress.hpp"
-#include "streamr-utils/RetryUtils.hpp"
-#include "streamr-utils/StreamPartID.hpp"
 
-namespace streamr::trackerlessnetwork::proxy {
+export module streamr.trackerlessnetwork:ProxyClient;
 
-using ::dht::PeerDescriptor;
+import streamr.dht;
+import streamr.eventemitter;
+import streamr.logger;
+import streamr.utils;
+import :ContentDeliveryRpcLocal;
+import :ContentDeliveryRpcRemote;
+import :DuplicateMessageDetector;
+import :NodeList;
+import :Propagation;
+import :ProxyConnectionRpcLocal;
+import :ProxyConnectionRpcRemote;
+import :Utils;
+import :formStreamPartDeliveryServiceId;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::DhtAddress;
 using streamr::dht::connection::ConnectionLocker;
 using streamr::dht::connection::LockID;
@@ -37,16 +42,19 @@ using streamr::dht::transport::Transport;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
 using streamr::logger::SLogger;
+using streamr::utils::AbortController;
+using streamr::utils::EthereumAddress;
+using streamr::utils::RetryUtils;
+using streamr::utils::StreamPartID;
+export namespace streamr::trackerlessnetwork::proxy {
+
+using ::dht::PeerDescriptor;
 using streamr::trackerlessnetwork::formStreamPartContentDeliveryServiceId;
 using streamr::trackerlessnetwork::Utils;
 using streamr::trackerlessnetwork::propagation::Propagation;
 using streamr::trackerlessnetwork::propagation::PropagationOptions;
 using streamr::trackerlessnetwork::proxy::ProxyConnectionRpcLocal;
 using streamr::trackerlessnetwork::proxy::ProxyConnectionRpcRemote;
-using streamr::utils::AbortController;
-using streamr::utils::EthereumAddress;
-using streamr::utils::RetryUtils;
-using streamr::utils::StreamPartID;
 
 struct ProxyClientOptions {
     Transport& transport;
@@ -476,5 +484,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork::proxy
-
-#endif // STREAMR_TRACKERLESS_NETWORK_PROXY_PROXY_CLIENT_HPP

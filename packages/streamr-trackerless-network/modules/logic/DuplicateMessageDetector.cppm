@@ -1,15 +1,23 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_DUPLICATE_MESSAGE_DETECTOR_HPP
-#define STREAMR_TRACKERLESS_NETWORK_DUPLICATE_MESSAGE_DETECTOR_HPP
+// Module partition streamr.trackerlessnetwork:DuplicateMessageDetector
+// CONSOLIDATED from the former header logic/DuplicateMessageDetector.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include "streamr-logger/SLogger.hpp"
-namespace streamr::trackerlessnetwork {
 
+export module streamr.trackerlessnetwork:DuplicateMessageDetector;
+
+import streamr.logger;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::logger::SLogger;
+export namespace streamr::trackerlessnetwork {
 
 /**
  * Represent a pair of numbers (a,b). Ordering between two pairs is defined as
@@ -215,5 +223,3 @@ private:
 };
 
 } // namespace streamr::trackerlessnetwork
-
-#endif // STREAMR_TRACKERLESS_NETWORK_DUPLICATE_MESSAGE_DETECTOR_HPP

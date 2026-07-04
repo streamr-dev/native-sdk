@@ -42,16 +42,19 @@ add_library(streamr-trackerless-network)
 set_property(TARGET streamr-trackerless-network PROPERTY CXX_STANDARD 26)
 add_library(streamr::streamr-trackerless-network ALIAS streamr-trackerless-network)
 
-# Module façade (MODERNIZATION.md Part 2): :protos over the generated
-# NetworkRpc trio + one coarse :all partition over the public headers.
+# CONSOLIDATED (MODERNIZATION.md Phase 2.6): one partition per former
+# public header, in the same directory tree the headers had (the
+# partition files are the source of truth), plus :protos over the
+# generated NetworkRpc trio and the primary interface unit that
+# re-exports every partition.
+file(GLOB_RECURSE TRACKERLESS_NETWORK_MODULE_UNITS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.cppm)
 streamr_target_module_sources(streamr-trackerless-network
-  FILES
-    modules/streamr.trackerlessnetwork.cppm
-    modules/streamr.trackerlessnetwork-protos.cppm
-    modules/streamr.trackerlessnetwork-all.cppm)
-target_include_directories(streamr-trackerless-network 
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC $<INSTALL_INTERFACE:include>
+  FILES ${TRACKERLESS_NETWORK_MODULE_UNITS})
+# CONSOLIDATED: the include/ tree is gone (the code lives in the module
+# units); only the generated protobuf code remains a header consumers
+# may need textually.
+target_include_directories(streamr-trackerless-network
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
     )
 
@@ -151,10 +154,16 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
      add_executable(streamr-trackerless-network-test-integration
          test/integration/ProxyClientTsIntegrationTest.cpp
      )
+     # The test imports modules, so its source needs module dependency
+     # scanning; imported modules are usable only by DIRECT consumers, so
+     # every directly-imported module is linked here.
+     streamr_enable_imports(streamr-trackerless-network-test-integration)
 
-     target_link_libraries(streamr-trackerless-network-test-integration 
+     target_link_libraries(streamr-trackerless-network-test-integration
          PUBLIC streamr-trackerless-network
-         INTERFACE streamr::streamr-logger
+         PUBLIC streamr::streamr-dht
+         PUBLIC streamr::streamr-logger
+         PUBLIC streamr::streamr-utils
          PUBLIC GTest::gtest
          PUBLIC streamr-trackerless-network-test-main
      )

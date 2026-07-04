@@ -1,33 +1,37 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_PROXY_PROXYCONNECTIONRPCCLIENT_HPP
-#define STREAMR_TRACKERLESS_NETWORK_PROXY_PROXYCONNECTIONRPCCLIENT_HPP
+// Module partition streamr.trackerlessnetwork:ProxyConnectionRpcLocal
+// CONSOLIDATED from the former header logic/proxy/ProxyConnectionRpcLocal.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <folly/experimental/coro/BlockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.server.pb.h"
-#include "streamr-dht/Identifiers.hpp"
-#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
-#include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
-#include "streamr-eventemitter/EventEmitter.hpp"
-#include "streamr-trackerless-network/logic/ContentDeliveryRpcRemote.hpp"
-#include "streamr-utils/BinaryUtils.hpp"
-#include "streamr-utils/EthereumAddress.hpp"
-#include "streamr-utils/StreamPartID.hpp"
 
-namespace streamr::trackerlessnetwork::proxy {
+export module streamr.trackerlessnetwork:ProxyConnectionRpcLocal;
 
-using ::dht::PeerDescriptor;
+import streamr.dht;
+import streamr.eventemitter;
+import streamr.utils;
+import :ContentDeliveryRpcRemote;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::DhtAddress;
 using streamr::dht::Identifiers;
 using streamr::dht::rpcprotocol::DhtCallContext;
 using streamr::dht::transport::ListeningRpcCommunicator;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
-using streamr::trackerlessnetwork::ContentDeliveryRpcRemote;
 using streamr::utils::BinaryUtils;
 using streamr::utils::EthereumAddress;
 using streamr::utils::StreamPartID;
 using streamr::utils::toEthereumAddress;
+export namespace streamr::trackerlessnetwork::proxy {
+
+using ::dht::PeerDescriptor;
+using streamr::trackerlessnetwork::ContentDeliveryRpcRemote;
 using ProxyConnectionRpc =
     streamr::protorpc::ProxyConnectionRpc<DhtCallContext>;
 
@@ -160,5 +164,3 @@ public:
     }
 };
 } // namespace streamr::trackerlessnetwork::proxy
-
-#endif // STREAMR_TRACKERLESS_NETWORK_PROXY_PROXYCONNECTIONRPCCLIENT_HPP
