@@ -1,16 +1,17 @@
 // Module partition streamr.trackerlessnetwork:DuplicateMessageDetector
 // CONSOLIDATED from the former header logic/DuplicateMessageDetector.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
-module;
-
-#include <optional>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <vector>
+//
+// EXPERIMENT (import-std-findings.md): this partition uses `import std;`
+// instead of textual standard-library includes. Requires configuring with
+// -DSTREAMR_IMPORT_STD=ON -DCMAKE_EXPERIMENTAL_CXX_IMPORT_STD=<uuid>.
+// Note: `import std;` does not provide the global-namespace C aliases
+// (::int64_t, ::size_t), so this file qualifies them as std::int64_t /
+// std::size_t (std.compat would be the alternative).
 
 export module streamr.trackerlessnetwork:DuplicateMessageDetector;
 
+import std;
 import streamr.logger;
 
 // Hoisted from the former header (file scope, NOT exported);
@@ -26,11 +27,11 @@ export namespace streamr::trackerlessnetwork {
  */
 class NumberPair {
 private:
-    int64_t a;
-    int64_t b;
+    std::int64_t a;
+    std::int64_t b;
 
 public:
-    NumberPair(int64_t a, int64_t b) : a(a), b(b) {} // NOLINT
+    NumberPair(std::int64_t a, std::int64_t b) : a(a), b(b) {} // NOLINT
 
     [[nodiscard]] bool greaterThanOrEqual(const NumberPair& otherPair) const {
         return this->greaterThan(otherPair) || this->equalTo(otherPair);
@@ -110,12 +111,12 @@ public:
 
 class DuplicateMessageDetector {
 private:
-    size_t maxGapCount;
+    std::size_t maxGapCount;
     std::vector<std::pair<NumberPair, NumberPair>> gaps;
 
 public:
     // NOLINTNEXTLINE
-    explicit DuplicateMessageDetector(size_t maxGapCount = 10000) {
+    explicit DuplicateMessageDetector(std::size_t maxGapCount = 10000) {
         this->maxGapCount = maxGapCount;
         this->gaps = {}; // ascending order of half-closed intervals (x,y]
                          // representing gaps that contain unseen message(s)
