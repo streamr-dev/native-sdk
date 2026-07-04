@@ -227,6 +227,79 @@ partition demonstrably importing the CMake-built `std.pcm` (31 MB, visible in
 the target's module map). The binaries were not executed (no device attached);
 Android tests are never executed in this repository's CI either.
 
+## NDK r30 beta 1 (retested 2026-07-04)
+
+The owner offered to switch the project to the NDK's latest pre-release if it
+unblocked Android. Retested everything against **NDK r30 beta 1**
+(`Pkg.Revision = 30.0.14904198-beta1`, clang 21.0.0 build r574158, from the
+official `android-ndk-r30-beta1-darwin.dmg`). Verdict up front: **r30 beta 1
+changes nothing that matters — both Bionic linkage blockers persist
+unchanged, so switching NDKs does not enable `import std;` on Android.**
+The retest did, however, produce one genuinely good piece of news about the
+CMake wiring that applies to r29 as well (item 1 below).
+
+Status of the four r29 workarounds on r30 beta 1:
+
+1. **Hand-patching generated CMake files — NO LONGER NEEDED (on any NDK).**
+   The CMake standard-library-detection defect is in CMake, unchanged — and a
+   plain `-DCMAKE_CXX_STANDARD_LIBRARY=libc++` cache preset does *not* work,
+   because `CMakeDetermineCompilerId.cmake` unconditionally overwrites the
+   variable before probing. But the probe's command line includes the user's
+   `CMAKE_CXX_FLAGS`, so adding the Android target there makes the probe
+   itself succeed:
+
+   ```
+   -DCMAKE_CXX_FLAGS="--target=aarch64-none-linux-android24 ..."
+   ```
+
+   With that one flag, `CMAKE-STDLIB-DETECT` returns `libc++`, CMake resolves
+   `libc++.modules.json` by itself through the NDK driver, and the whole
+   import-std configure/build completes **with zero editing of generated
+   files**. Verified end to end (std module built by CMake, `import std;`
+   consumer, aarch64 ELF binary) on both r30 beta 1 and r29. The duplicated
+   `--target` is harmless (identical value; the later occurrence wins). This
+   is a clean, automatable, cache-variable-only workaround — the remaining
+   CMake-side wish is only the upstream fix that would make even this flag
+   unnecessary.
+2. **`-D__BIONIC_CTYPE_INLINE=__inline` — STILL REQUIRED.** Bionic's
+   `ctype.h` in r30 beta 1 carries the identical `static __inline` pattern.
+   The out-of-the-box std module compile fails with the same 21 errors
+   (`using declaration referring to 'isalnum' with internal linkage cannot
+   be exported`, reported via `std/cctype.inc`). With the override, the std
+   module compiles (31.3 MB BMI) and the folly/boost mixing test plus a
+   linked aarch64 executable work exactly as on r29.
+3. **`-U_FORTIFY_SOURCE` — STILL REQUIRED.** With the ctype override plus an
+   explicit `-D_FORTIFY_SOURCE=2` (the NDK toolchain default), the compile
+   still fails — 19 errors of the same internal-linkage shape, this time
+   surfacing through the fortified stdio wrappers (`fgets`, `fread`,
+   `fwrite` via `std/cstdio.inc`).
+4. **Global `-pthread` — STILL REQUIRED.** Reproduced the identical
+   `POSIX thread support was disabled in AST file '...std.pcm' but is
+   currently enabled` error on r30 beta 1 with a minimal project whose
+   consumer target adds `-pthread`. As expected: this is CMake failing to
+   give its synthesized std-module target the importers' flags, independent
+   of the NDK version.
+
+Score: one of four workarounds eliminated — and that one is NDK-independent
+(it was a deficiency of the first experiment's bypass, not of the NDK). The
+two disqualifying Bionic overrides and the pthread flag remain. **There is
+nothing to gain by switching the project to r30 beta 1.** If a future NDK
+fixes Bionic's inline linkage, the minimal build-system changes for Android
+`import std;` would be, concretely:
+
+1. `STREAMR_IMPORT_STD=ON` plus the CMake-version UUID (already scaffolded in
+   `StreamrModules.cmake`).
+2. On Android, append `--target=aarch64-none-linux-android${ANDROID_PLATFORM}`
+   to `CMAKE_CXX_FLAGS` at configure time (until CMake's stdlib probe learns
+   to pass the toolchain target itself).
+3. On Android, make `-pthread` global (or otherwise ensure the std BMI is
+   compiled with the same thread mode as its importers) — the same class of
+   fix as the existing PUBLIC `-pthread` note in `StreamrModules.cmake`.
+4. On the macOS host, pass
+   `-DCMAKE_CXX_STDLIB_MODULES_JSON=$LLVM_PREFIX/lib/c++/libc++.modules.json`
+   on the first configure (until Homebrew LLVM's driver finds its own
+   manifest).
+
 ## Recommendation
 
 **Do not adopt `import std;` in the tree yet — not even host-only.**
@@ -236,10 +309,10 @@ Android tests are never executed in this repository's CI either.
   configuration; the first silently changes the linkage of libc functions for
   every TU, the second removes a hardening feature from shipped binaries.
   Shipping on top of that is not defensible today.
-- CMake cannot currently configure `import std` for the NDK toolchain at all
-  without hand-editing generated build files (the standard-library detection
-  probe runs without `--target`); that alone makes an Android rollout
-  impossible to automate honestly.
+- CMake's standard-library detection probe runs without `--target`; the
+  r30-beta-1 retest found a clean flags-only bypass (put the Android
+  `--target` into `CMAKE_CXX_FLAGS`), so this is no longer a hand-edit
+  blocker — but it is still an undocumented workaround for a CMake defect.
 - A host-only adoption behind `STREAMR_IMPORT_STD` would fork the source
   style: the same partition cannot say both `import std;` and keep its
   includes, so every converted file would need `#ifdef`-free dual paths (not
@@ -252,8 +325,9 @@ What would change the recommendation — watch for these events:
 
 1. An NDK release whose Bionic gives the ctype and fortify wrappers external
    linkage (or whose libc++ module sources are actually compile-tested
-   against Bionic, fortify included); the r29 changelog is silent about
-   modules, so test each new NDK with:
+   against Bionic, fortify included); the r29 and r30 beta 1 changelogs are
+   both silent about modules (and r30 beta 1 has been tested here — still
+   broken), so test each new NDK with:
    `$NDK/bin/clang++ --target=aarch64-linux-android24 -std=c++26
    -D_FORTIFY_SOURCE=2 --precompile $NDK/share/libc++/v1/std.cppm -o
    /dev/null` (the `-D_FORTIFY_SOURCE=2` matters — without it the fortify
