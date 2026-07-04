@@ -749,10 +749,34 @@ verified NDK clang (18 = r27), with the textual fallback below it.
    Android builds the façade modules on NDK r27+ (verified locally on
    r27 and r29 for streamr-json + streamr-eventemitter, and on the
    Phase 2.6 PR's androidbuild leg for the full monorepo).
-2. clangd modules support matures enough to lint purview code (today it
-   mis-unifies preamble/BMI types; with code in partitions there is no
-   header fallback for the linter — coverage would regress from "full"
-   to "none" for consolidated code).
+2. clangd modules support matures enough to lint purview code (with code
+   in partitions there is no header fallback for the linter).
+   **RE-CANARY 2026-07-04 (clangd 22.1.8) — much narrower than first
+   recorded:**
+   - Module interface units themselves (`clangd --check=<unit>.cppm
+     --compile-commands-dir=<pkg>/build`) lint CLEAN, including the
+     heavyweight folly/protobuf GMF units (`streamr.dht-all.cppm`). The
+     only diagnostics are `misc-unused-using-decls` false positives on
+     the `export using` re-export blocks — suppressible, and gone at
+     consolidation anyway (consolidated code lives in purview, no
+     re-export blocks).
+   - Import-using consumers (e.g. `toJsonTest.cpp`) lint CLEAN — clangd
+     loads the build tree's BMIs through the compile command's
+     `-fmodule-file=` flags; no experimental flag needed.
+   - **The ONE remaining failure class: preamble/BMI std-type
+     unification.** When a std type crosses the module boundary in an
+     API (e.g. `Branded<std::string>` = `EthereumAddress`), clangd
+     treats the preamble's textual `std::string` (from `<string>`/gtest
+     includes) and the BMI's `std::string` as distinct types → spurious
+     "no matching constructor/function" (the still-excluded
+     `toEthereumAddressOrENSNameTest.cpp`). Post-consolidation this
+     class would hit any consumer passing std types to imported APIs —
+     this is what still blocks consolidation.
+   - Re-canary each LLVM release; the only case to retest is the
+     std-unification one: `cd packages/streamr-utils && clangd
+     --check=test/unit/toEthereumAddressOrENSNameTest.cpp
+     --compile-commands-dir=build` — precondition met when it reports
+     no type-mismatch diagnostics.
 3. ~~The dht intra-package include cycles (connection/endpoint cluster)
    must become a partition DAG~~ **RESOLVED (post-2.6)** — a monorepo-wide
    analysis (include edges + forward-declaration edges, which are what
