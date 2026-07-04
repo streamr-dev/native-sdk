@@ -815,7 +815,28 @@ exactly that. So consolidation walks the dependency chain from the top:
    build + 15/15 tests, standalone package build, package lint green
    (two bugprone-exception-escape suppressions — the checker cannot see
    through imported module interfaces; known pattern).
-2. C-2 streamr-trackerless-network
+2. **C-2 streamr-trackerless-network** ✅ — **OWNER DIRECTIVE
+   (2026-07-04): one partition file per former header, never one merged
+   file.** Each of the 13 public headers (1,704 lines) became its own
+   partition `modules/streamr.trackerlessnetwork-<Name>.cppm`
+   (`export module streamr.trackerlessnetwork:<Name>;`), with only that
+   header's third-party/std/generated includes in its global module
+   fragment, `import :<Dep>;` for the old intra-package include edges,
+   `import streamr.<pkg>;` for sibling packages, and its content in
+   `export namespace` blocks (export-using of module-linkage entities
+   is ill-formed — declarations are exported directly). The coarse
+   `:all` partition is gone; the primary unit re-exports every
+   partition. The include/ tree is deleted. Gotcha found twice: a
+   partition must textually include what ITS code uses (std::operator+
+   from <string>, folly::coro::blockingWait) — the former headers
+   received these transitively from neighbors, and entities reached
+   only through an imported module's global module fragment are not
+   reliably reachable. The last textually-including test file
+   (ProxyClientTsIntegrationTest.cpp) flipped to imports. Lint posture
+   IMPROVED: clangd-tidy now runs on all 15 module units — full
+   analysis coverage, zero suppressions. Verified: Release build, tn
+   tests 12+1, proxyclient importer 15/15, standalone builds, lint
+   green.
 3. C-3 streamr-dht (the largest)
 4. C-4 streamr-proto-rpc
 5. C-5 streamr-utils

@@ -1,5 +1,7 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_FIFOMAPWITHTTL_HPP
-#define STREAMR_TRACKERLESS_NETWORK_FIFOMAPWITHTTL_HPP
+// Module partition streamr.trackerlessnetwork:FifoMapWithTTL
+// CONSOLIDATED from the former header logic/propagation/FifoMapWithTTL.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <chrono>
 #include <functional>
@@ -7,9 +9,11 @@
 #include <mutex>
 #include <optional>
 #include <ranges>
-#include "RandomAccessQueue.hpp"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
+export module streamr.trackerlessnetwork:FifoMapWithTTL;
+
+import :RandomAccessQueue;
 inline bool operator<(const MessageRef& r1, const MessageRef& r2) {
     if (r1.sequencenumber() != r2.sequencenumber()) {
         return r1.sequencenumber() < r2.sequencenumber();
@@ -17,7 +21,7 @@ inline bool operator<(const MessageRef& r1, const MessageRef& r2) {
     return r1.timestamp() < r2.timestamp();
 }
 
-namespace streamr::trackerlessnetwork::propagation {
+export namespace streamr::trackerlessnetwork::propagation {
 
 template <typename KeyType>
 struct FifoMapWithTtlOptions {
@@ -143,5 +147,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork::propagation
-
-#endif

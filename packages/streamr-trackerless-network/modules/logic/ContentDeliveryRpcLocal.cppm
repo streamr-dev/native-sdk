@@ -1,22 +1,28 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_CONTENT_DELIVERY_RPC_LOCAL_HPP
-#define STREAMR_TRACKERLESS_NETWORK_CONTENT_DELIVERY_RPC_LOCAL_HPP
+// Module partition streamr.trackerlessnetwork:ContentDeliveryRpcLocal
+// CONSOLIDATED from the former header logic/ContentDeliveryRpcLocal.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.server.pb.h"
-#include "streamr-dht/Identifiers.hpp"
-#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
-#include "streamr-dht/transport/ListeningRpcCommunicator.hpp"
-#include "streamr-utils/StreamPartID.hpp"
 
-namespace streamr::trackerlessnetwork {
+export module streamr.trackerlessnetwork:ContentDeliveryRpcLocal;
 
-using ::dht::PeerDescriptor;
+import streamr.dht;
+import streamr.utils;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::DhtAddress;
 using streamr::dht::Identifiers;
 using streamr::dht::rpcprotocol::DhtCallContext;
 using streamr::dht::transport::ListeningRpcCommunicator;
 using streamr::utils::StreamPartID;
+export namespace streamr::trackerlessnetwork {
+
+using ::dht::PeerDescriptor;
 using ContentDeliveryRpc =
     ::streamr::protorpc::ContentDeliveryRpc<DhtCallContext>;
 
@@ -64,5 +70,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork
-
-#endif // STREAMR_TRACKERLESS_NETWORK_CONTENT_DELIVERY_RPC_LOCAL_HPP

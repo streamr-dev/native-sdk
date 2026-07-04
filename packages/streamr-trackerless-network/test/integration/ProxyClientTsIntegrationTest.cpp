@@ -1,14 +1,11 @@
 #include <gtest/gtest.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "streamr-dht/connection/ConnectionManager.hpp"
-#include "streamr-dht/connection/ConnectorFacade.hpp"
-#include "streamr-dht/transport/FakeTransport.hpp"
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-trackerless-network/logic/proxy/ProxyClient.hpp"
-#include "streamr-utils/BinaryUtils.hpp"
-#include "streamr-utils/EthereumAddress.hpp"
-#include "streamr-utils/StreamPartID.hpp"
+
+import streamr.dht;
+import streamr.logger;
+import streamr.trackerlessnetwork;
+import streamr.utils;
 
 using ::dht::ConnectivityMethod;
 using ::dht::ConnectivityResponse;

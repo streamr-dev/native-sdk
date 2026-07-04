@@ -1,25 +1,32 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_CONTENT_DELIVERY_RPC_REMOTE_HPP
-#define STREAMR_TRACKERLESS_NETWORK_CONTENT_DELIVERY_RPC_REMOTE_HPP
+// Module partition streamr.trackerlessnetwork:ContentDeliveryRpcRemote
+// CONSOLIDATED from the former header logic/ContentDeliveryRpcRemote.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <string>
 #include <folly/experimental/coro/Task.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.client.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "streamr-dht/dht/contact/RpcRemote.hpp"
-#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-utils/StreamPartID.hpp"
 
-namespace streamr::trackerlessnetwork {
+export module streamr.trackerlessnetwork:ContentDeliveryRpcRemote;
 
-using ::dht::PeerDescriptor;
+import streamr.dht;
+import streamr.logger;
+import streamr.utils;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::contact::RpcRemote;
 using streamr::dht::rpcprotocol::DhtCallContext;
 using streamr::logger::SLogger;
+using streamr::utils::StreamPartID;
+export namespace streamr::trackerlessnetwork {
+
+using ::dht::PeerDescriptor;
 using ContentDeliveryRpcClient =
     streamr::protorpc::ContentDeliveryRpcClient<DhtCallContext>;
-using streamr::utils::StreamPartID;
 class ContentDeliveryRpcRemote : public RpcRemote<ContentDeliveryRpcClient> {
 public:
     ContentDeliveryRpcRemote(
@@ -62,5 +69,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork
-
-#endif

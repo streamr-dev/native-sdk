@@ -1,26 +1,32 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_PROXY_PROXYCONNECTIONRPCREMOTE_HPP
-#define STREAMR_TRACKERLESS_NETWORK_PROXY_PROXYCONNECTIONRPCREMOTE_HPP
+// Module partition streamr.trackerlessnetwork:ProxyConnectionRpcRemote
+// CONSOLIDATED from the former header logic/proxy/ProxyConnectionRpcRemote.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <folly/experimental/coro/Task.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.client.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "streamr-dht/dht/contact/RpcRemote.hpp"
-#include "streamr-dht/rpc-protocol/DhtCallContext.hpp"
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-utils/BinaryUtils.hpp"
-#include "streamr-utils/EthereumAddress.hpp"
 
-namespace streamr::trackerlessnetwork::proxy {
+export module streamr.trackerlessnetwork:ProxyConnectionRpcRemote;
 
-using streamr::dht::rpcprotocol::DhtCallContext;
-using ProxyConnectionRpcClient =
-    streamr::protorpc::ProxyConnectionRpcClient<DhtCallContext>;
-using ::dht::PeerDescriptor;
+import streamr.dht;
+import streamr.logger;
+import streamr.utils;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::contact::RpcRemote;
+using streamr::dht::rpcprotocol::DhtCallContext;
 using streamr::logger::SLogger;
 using streamr::utils::BinaryUtils;
 using streamr::utils::EthereumAddress;
+export namespace streamr::trackerlessnetwork::proxy {
+
+using ProxyConnectionRpcClient =
+    streamr::protorpc::ProxyConnectionRpcClient<DhtCallContext>;
+using ::dht::PeerDescriptor;
 
 class ProxyConnectionRpcRemote : public RpcRemote<ProxyConnectionRpcClient> {
 public:
@@ -52,5 +58,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork::proxy
-
-#endif // STREAMR_TRACKERLESS_NETWORK_PROXY_PROXYCONNECTIONRPCREMOTE_HPP

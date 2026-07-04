@@ -1,17 +1,25 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_PROPAGATIONTASKSTORE_HPP
-#define STREAMR_TRACKERLESS_NETWORK_PROPAGATIONTASKSTORE_HPP
+// Module partition streamr.trackerlessnetwork:PropagationTaskStore
+// CONSOLIDATED from the former header
+// logic/propagation/PropagationTaskStore.hpp (MODERNIZATION.md Phase 2.6): this
+// file is now the source of truth.
+module;
 
 #include <chrono>
 #include <optional>
 #include <set>
 #include <string>
-#include "FifoMapWithTTL.hpp"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "streamr-dht/Identifiers.hpp"
 
-namespace streamr::trackerlessnetwork::propagation {
+export module streamr.trackerlessnetwork:PropagationTaskStore;
 
+import streamr.dht;
+import :FifoMapWithTTL;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified because relative namespace names resolve
+// differently at file scope than inside the package namespace.
 using streamr::dht::DhtAddress;
+export namespace streamr::trackerlessnetwork::propagation {
 
 struct PropagationTask {
     StreamMessage message;
@@ -50,5 +58,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork::propagation
-
-#endif

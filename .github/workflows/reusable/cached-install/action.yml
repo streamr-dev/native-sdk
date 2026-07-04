@@ -4,43 +4,18 @@ description: "install dependencies, build and cache result, or restore from cach
 runs:
   using: "composite"
   steps:
-    # The cache keys must distinguish the TARGET platform, not just the
-    # runner: the macOS host build, the iOS build and the Android build
-    # all run on the same macos runner image, and GitHub's cache is
-    # write-once per key — with a shared key the first job to save owns
-    # the cache forever and the other platforms' saves fail ("Cache save
-    # failed."), so their dependencies were rebuilt from source on every
-    # run (~30 min Android, ~35 min iOS). ARCHFLAGS is the workflow-level
-    # platform selector (empty = host, --ios, --android). The vcpkg
-    # submodule commit is part of the key because the tool version
-    # changes what it builds; the restore-keys prefix fallback reuses the
-    # newest previous cache on any key miss — vcpkg's own per-package ABI
-    # hashing makes stale archive entries harmless (they are ignored) and
-    # `vcpkg install` reconciles a stale installed tree.
-    - name: compute cache keys
-      id: keys
-      run: |
-        echo "platform=${ARCHFLAGS:-host}" >> "$GITHUB_OUTPUT"
-        echo "vcpkg_sha=$(git rev-parse HEAD:vcpkg)" >> "$GITHUB_OUTPUT"
-      shell: bash
-    - name: cache vcpkg binary archives
+    - name: cache homedir
       id: cache-homedir
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
-        restore-keys: |
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-${{ steps.keys.outputs.vcpkg_sha }}-
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir2-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed
       id: cache-vcpkg-installed
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
-        restore-keys: |
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-${{ steps.keys.outputs.vcpkg_sha }}-
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed2-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ./build/vcpkg_installed
     - name: install-prerequisities
@@ -70,22 +45,30 @@ runs:
           exit "$EXITCODE"
         fi
       shell: bash
-    # Save even on failure (if: always()) so a partially built dependency
-    # set is reused by the retry. Saving is skipped when the exact key was
-    # already restored (nothing new to store).
-    - name: cache vcpkg binary archives save
+    - name: cache homedir save
       id: cache-homedir-save
-      if: always() && steps.cache-homedir.outputs.cache-hit != 'true'
+      if: always()
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-homedir2-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed save
       id: cache-vcpkg-installed-save
-      if: always() && steps.cache-vcpkg-installed.outputs.cache-hit != 'true'
+      if: always()
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-cache-vcpkg-installed2-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ./build/vcpkg_installed
+    #- name: Commit compiled binaries
+    #  run: |
+    #    git config --global user.name 'github-actions[bot]'
+    #    git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+    #    git add packages/streamr-libstreamrproxyclient/dist
+    #    git add packages/streamr-libstreamrproxyclient/wrappers/go
+    #    git commit -m "Automatically compiled binaries"
+    #    git pull --rebase --no-edit
+    #    git push --no-verify
+    #  shell: bash
+

@@ -1,12 +1,15 @@
-#ifndef STREAMR_TRACKERLESS_NETWORK_RANDOMACCESSQUEUE_HPP
-#define STREAMR_TRACKERLESS_NETWORK_RANDOMACCESSQUEUE_HPP
+// Module partition streamr.trackerlessnetwork:RandomAccessQueue
+// CONSOLIDATED from the former header logic/propagation/RandomAccessQueue.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <cstddef>
 #include <map>
 #include <mutex>
 #include <optional>
 
-namespace streamr::trackerlessnetwork::propagation {
+export module streamr.trackerlessnetwork:RandomAccessQueue;
+export namespace streamr::trackerlessnetwork::propagation {
 
 class QueueToken {
 private:
@@ -79,5 +82,3 @@ public:
 };
 
 } // namespace streamr::trackerlessnetwork::propagation
-
-#endif
