@@ -14,7 +14,7 @@ export module streamr.dht.ConnectorFacade;
 
 import streamr.dht.Identifiers;
 import streamr.logger;
-import streamr.protorpc;
+import streamr.protorpc.RpcCommunicator;
 import streamr.dht.IPendingConnection;
 import streamr.dht.ListeningRpcCommunicator;
 import streamr.dht.PendingConnection;

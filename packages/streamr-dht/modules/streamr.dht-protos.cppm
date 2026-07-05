@@ -1,14 +1,14 @@
-// :protos partition — wraps the GENERATED DhtRpc protobuf trio (messages,
-// enums, and the protoc-plugin-generated client/server stubs) in the
-// global module fragment and re-exports the types used across this
-// package's public APIs. Generated protobuf code stays #include-based
-// permanently; this partition is how importers see the types without
-// re-parsing the 12k-line header stack.
+// Wraps the GENERATED DhtRpc protobuf messages and enums in the global
+// module fragment and re-exports the types used across this package's
+// public APIs. Generated protobuf MESSAGE code stays #include-based
+// permanently; this module is how importers see the types without
+// re-parsing the 12k-line header stack. The RPC client/server stubs are
+// no longer here: the protoc plugin now emits them as their own module
+// units (streamr.dht.DhtRpcClient / streamr.dht.DhtRpcServer under
+// modules/gen/) — import those directly where the stubs are used.
 module;
 
-#include "packages/dht/protos/DhtRpc.client.pb.h"
 #include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/dht/protos/DhtRpc.server.pb.h"
 
 export module streamr.dht.protos;
 
@@ -64,27 +64,5 @@ using ::dht::RouteMessageError;
 using enum ::dht::RouteMessageError;
 using ::dht::RpcResponseError;
 using enum ::dht::RpcResponseError;
-
-// generated client stubs
-using ::dht::ConnectionLockRpcClient;
-using ::dht::DhtNodeRpcClient;
-using ::dht::ExternalApiRpcClient;
-using ::dht::RecursiveOperationRpcClient;
-using ::dht::RecursiveOperationSessionRpcClient;
-using ::dht::RouterRpcClient;
-using ::dht::StoreRpcClient;
-using ::dht::WebrtcConnectorRpcClient;
-using ::dht::WebsocketClientConnectorRpcClient;
-
-// generated server stubs
-using ::dht::ConnectionLockRpc;
-using ::dht::DhtNodeRpc;
-using ::dht::ExternalApiRpc;
-using ::dht::RecursiveOperationRpc;
-using ::dht::RecursiveOperationSessionRpc;
-using ::dht::RouterRpc;
-using ::dht::StoreRpc;
-using ::dht::WebrtcConnectorRpc;
-using ::dht::WebsocketClientConnectorRpc;
 
 } // namespace dht

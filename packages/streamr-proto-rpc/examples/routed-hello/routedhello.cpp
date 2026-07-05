@@ -2,11 +2,13 @@
 #include <map>
 #include <string_view>
 #include <folly/experimental/coro/BlockingWait.h>
-#include "RoutedHelloRpc.client.pb.h"
 #include "RoutedHelloRpc.pb.h"
-#include "RoutedHelloRpc.server.pb.h"
 
-import streamr.protorpc;
+import streamr.protorpc.ProtoCallContext;
+import streamr.protorpc.RpcCommunicator;
+import streamr.protorpc.protos;
+import streamr.protorpc.examples.routed.RoutedHelloRpcClient;
+import streamr.protorpc.examples.routed.RoutedHelloRpcServer;
 
 using ::RoutedHelloResponse;
 using streamr::protorpc::ProtoCallContext;

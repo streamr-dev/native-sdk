@@ -7,13 +7,13 @@ module;
 #include <chrono>
 #include <optional>
 #include <folly/experimental/coro/Task.h>
-#include "packages/dht/protos/DhtRpc.client.pb.h"
 #include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.ConnectionLockRpcRemote;
 
+import streamr.dht.DhtRpcClient;
 import streamr.logger;
 import streamr.dht.ConnectionLockStates;
 import streamr.dht.DhtCallContext;

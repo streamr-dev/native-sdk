@@ -39,19 +39,19 @@ add_library(streamr-proto-rpc)
 set_property(TARGET streamr-proto-rpc PROPERTY CXX_STANDARD 26)
 add_library(streamr::streamr-proto-rpc ALIAS streamr-proto-rpc)
 
-# Module façade (MODERNIZATION.md Part 2), added to the existing library
-# (it also compiles the generated ProtoRpc.pb.cc). :protos wraps the
-# generated header; the other partitions mirror the public headers.
+# CONSOLIDATED (MODERNIZATION.md Phase 2.6): one named sub-module per
+# former public header (settled architecture: no umbrella; consumers and
+# tests import the individual sub-modules), plus streamr.protorpc.protos
+# over the generated ProtoRpc types. The library also compiles the
+# generated ProtoRpc.pb.cc.
+file(GLOB_RECURSE STREAMR_PROTORPC_MODULE_UNITS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.cppm)
 streamr_target_module_sources(streamr-proto-rpc
-  FILES
-    modules/streamr.protorpc.cppm
-    modules/streamr.protorpc-protos.cppm
-    modules/streamr.protorpc-all.cppm)
-target_include_directories(streamr-proto-rpc 
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC $<INSTALL_INTERFACE:include>
+  FILES ${STREAMR_PROTORPC_MODULE_UNITS})
+# Only the generated protobuf code remains a header consumers may need
+# textually.
+target_include_directories(streamr-proto-rpc
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>
-    PUBLIC $<INSTALL_INTERFACE:include>
     )
 
 target_sources(streamr-proto-rpc 
@@ -101,7 +101,7 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-proto-rpc-config.cmake"
 # SDK/sysroot — see homebrewClang.cmake), so CMAKE_CROSSCOMPILING is
 # FALSE there; IOS is set by toolchains/ios.toolchain.cmake.
 if(NOT IOS AND NOT CMAKE_CROSSCOMPILING)
-    add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp include/streamr-proto-rpc/PluginCodeGenerator.hpp)
+    add_executable(protobuf-streamr-plugin src/PluginCodeGeneratorMain.cpp src/PluginCodeGenerator.hpp)
 
     target_include_directories(
         protobuf-streamr-plugin PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -157,13 +157,23 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
 
     add_executable(streamr-proto-rpc-test-integration
         test/proto/HelloRpc.pb.cc
-        test/proto/HelloRpc.client.pb.h
-        test/proto/TestProtos.pb.cc 
+        test/proto/TestProtos.pb.cc
         test/proto/WakeUpRpc.pb.cc
         test/integration/ProtoRpcTest.cpp
     )
 
     streamr_enable_imports(streamr-proto-rpc-test-integration)
+    # The protoc plugin emits the RPC stubs as module units next to the
+    # generated message code; the test imports them directly
+    # (streamr.protorpc.test.*). PRIVATE: test-only modules, not part of
+    # any export.
+    file(GLOB STREAMR_PROTORPC_TEST_STUB_UNITS CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/proto/*.cppm)
+    target_sources(streamr-proto-rpc-test-integration
+        PRIVATE
+        FILE_SET CXX_MODULES
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/test/proto
+        FILES ${STREAMR_PROTORPC_TEST_STUB_UNITS})
     target_include_directories(streamr-proto-rpc-test-integration
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/proto>
     )
@@ -194,6 +204,13 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     )
 
     streamr_enable_imports(streamr-proto-rpc-example-hello)
+    file(GLOB STREAMR_PROTORPC_HELLO_STUB_UNITS CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/hello/proto/*.cppm)
+    target_sources(streamr-proto-rpc-example-hello
+        PRIVATE
+        FILE_SET CXX_MODULES
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/examples/hello/proto
+        FILES ${STREAMR_PROTORPC_HELLO_STUB_UNITS})
     target_include_directories(streamr-proto-rpc-example-hello
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/examples/hello/proto>
     )
@@ -209,6 +226,13 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     )
 
     streamr_enable_imports(streamr-proto-rpc-example-routed-hello)
+    file(GLOB STREAMR_PROTORPC_ROUTED_STUB_UNITS CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/routed-hello/proto/*.cppm)
+    target_sources(streamr-proto-rpc-example-routed-hello
+        PRIVATE
+        FILE_SET CXX_MODULES
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/examples/routed-hello/proto
+        FILES ${STREAMR_PROTORPC_ROUTED_STUB_UNITS})
     target_include_directories(streamr-proto-rpc-example-routed-hello
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/examples/routed-hello/proto>
     )

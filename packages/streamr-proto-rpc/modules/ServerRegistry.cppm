@@ -1,13 +1,17 @@
-#ifndef STREAMR_PROTO_RPC_SERVER_REGISTRY_HPP
-#define STREAMR_PROTO_RPC_SERVER_REGISTRY_HPP
+// Module streamr.protorpc.ServerRegistry
+// CONSOLIDATED from the former header streamr-proto-rpc/ServerRegistry.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <google/protobuf/any.pb.h>
 #include <google/protobuf/empty.pb.h>
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-proto-rpc/Errors.hpp"
 
-namespace streamr::protorpc {
+export module streamr.protorpc.ServerRegistry;
+
+import streamr.logger;
+import streamr.protorpc.Errors;
+export namespace streamr::protorpc {
 
 using Any = google::protobuf::Any;
 using Empty = google::protobuf::Empty;
@@ -113,5 +117,3 @@ public:
 };
 
 } // namespace streamr::protorpc
-
-#endif // STREAMR_PROTO_RPC_SERVER_REGISTRY_HPP

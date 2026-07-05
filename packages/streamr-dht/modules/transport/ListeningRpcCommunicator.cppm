@@ -11,7 +11,8 @@ module;
 export module streamr.dht.ListeningRpcCommunicator;
 
 import streamr.eventemitter;
-import streamr.protorpc;
+import streamr.protorpc.Errors;
+import streamr.protorpc.RpcCommunicator;
 import streamr.dht.RoutingRpcCommunicator;
 import streamr.dht.Transport;
 

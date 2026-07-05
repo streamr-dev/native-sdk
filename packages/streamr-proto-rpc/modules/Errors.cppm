@@ -1,5 +1,7 @@
-#ifndef STREAMR_PROTO_RPC_ERRORS_HPP
-#define STREAMR_PROTO_RPC_ERRORS_HPP
+// Module streamr.protorpc.Errors
+// CONSOLIDATED from the former header streamr-proto-rpc/Errors.hpp
+// (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+module;
 
 #include <optional>
 #include <stdexcept>
@@ -7,7 +9,8 @@
 #include <variant>
 #include <magic_enum/magic_enum.hpp>
 
-namespace streamr::protorpc {
+export module streamr.protorpc.Errors;
+export namespace streamr::protorpc {
 
 // NOLINTBEGIN
 enum class ErrorCode {
@@ -173,5 +176,3 @@ super(ErrorCode.FAILED_TO_SERIALIZE, message, originalError) } }
 */
 
 } // namespace streamr::protorpc
-
-#endif // STREAMR_PROTO_RPC_ERRORS_HPP

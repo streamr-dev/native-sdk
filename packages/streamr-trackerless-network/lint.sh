@@ -25,7 +25,10 @@ echo "Running clang-format --dry-run on $TESTFILES"
 # with clangd-tidy as the source of truth (verified working with clangd
 # 22; the consolidated units carry no export-using re-export blocks,
 # which were the source of the earlier false positives).
-MODULE_FILES=$(find ./modules -type f -name "*.cppm" 2>/dev/null | xargs echo)
+# modules/gen/ holds protoc-plugin GENERATED module units (RPC stubs):
+# excluded from linting like all generated code (see the src/proto
+# exclusion above); the compiler builds them on every platform.
+MODULE_FILES=$(find ./modules -type f -name "*.cppm" ! -path './modules/gen/*' 2>/dev/null | xargs echo)
 if [ -n "$MODULE_FILES" ]; then
     echo "Running clangd-tidy on $MODULE_FILES"
     clangd-tidy -p ./build $MODULE_FILES

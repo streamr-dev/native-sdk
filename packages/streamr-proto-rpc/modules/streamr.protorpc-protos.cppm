@@ -7,7 +7,7 @@ module;
 
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
-export module streamr.protorpc:protos;
+export module streamr.protorpc.protos;
 
 export namespace protorpc {
 

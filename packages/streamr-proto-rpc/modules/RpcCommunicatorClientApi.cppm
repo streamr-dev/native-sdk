@@ -1,5 +1,8 @@
-#ifndef STREAMR_PROTO_RPC_RPC_COMMUNICATOR_CLIENT_API_HPP
-#define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_CLIENT_API_HPP
+// Module streamr.protorpc.RpcCommunicatorClientApi
+// CONSOLIDATED from the former header
+// streamr-proto-rpc/RpcCommunicatorClientApi.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <exception>
 #include <map>
@@ -8,20 +11,26 @@
 #include <folly/experimental/coro/Promise.h>
 #include <folly/experimental/coro/Task.h>
 #include <folly/experimental/coro/Timeout.h>
-#include "Errors.hpp"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-utils/Branded.hpp"
-#include "streamr-utils/Uuid.hpp"
-namespace streamr::protorpc {
 
+export module streamr.protorpc.RpcCommunicatorClientApi;
+
+import streamr.logger;
+import streamr.utils;
+import streamr.protorpc.Errors;
+
+// Hoisted from the former header (file scope, NOT exported);
+// fully qualified: relative namespace names resolve differently
+// at file scope than inside the package namespace.
+using folly::coro::Task;
 using google::protobuf::Any;
 using streamr::logger::SLogger;
-using RpcMessage = ::protorpc::RpcMessage;
-using RpcErrorType = ::protorpc::RpcErrorType;
-using folly::coro::Task;
 using streamr::utils::Branded;
 using streamr::utils::Uuid;
+export namespace streamr::protorpc {
+
+using RpcMessage = ::protorpc::RpcMessage;
+using RpcErrorType = ::protorpc::RpcErrorType;
 
 inline constexpr size_t threadPoolSize = 20;
 
@@ -397,4 +406,3 @@ private:
 };
 
 } // namespace streamr::protorpc
-#endif // STREAMR_PROTO_RPC_RPC_COMMUNICATOR_CLIENT_API_HPP

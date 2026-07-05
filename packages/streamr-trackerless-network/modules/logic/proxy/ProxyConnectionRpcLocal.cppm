@@ -6,10 +6,10 @@ module;
 #include <folly/experimental/coro/BlockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.server.pb.h"
 
 export module streamr.trackerlessnetwork.ProxyConnectionRpcLocal;
 
+import streamr.trackerlessnetwork.NetworkRpcServer;
 import streamr.logger;
 import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;

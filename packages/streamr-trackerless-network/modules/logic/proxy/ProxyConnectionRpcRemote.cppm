@@ -5,11 +5,11 @@ module;
 
 #include <folly/experimental/coro/Task.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.client.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.ProxyConnectionRpcRemote;
 
+import streamr.trackerlessnetwork.NetworkRpcClient;
 import streamr.dht.DhtCallContext;
 import streamr.dht.RpcRemote;
 import streamr.dht.protos;
