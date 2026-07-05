@@ -1135,6 +1135,23 @@ just cheaper per unit. Shrinking that cone needs the next lever
 CI caching step). rtc/rtc.hpp (4 dht units) is the remaining wrap
 candidate if more clean-build reduction is wanted.
 
+**CI incident during this PR (recorded for the caching step):** the
+first arm64-ios vcpkg cache entry saved after the C-7 key repair
+RESTORED CORRUPTLY on every later run — boost headers came back empty,
+producing "use of undeclared identifier 'boost'" in Uuid.cppm while the
+identical compile (same clang 22.1.8, same iPhoneOS 26.5 SDK) passed
+locally. actions/cache treats a partial extraction as a warning, not an
+error, and vcpkg's reconciliation trusts its status database without
+checking file contents, so the damage persisted across runs. Entries
+are immutable under their key; the fix was a generation bump (-v2- in
+the key names) forcing one clean rebuild+save per platform. Two
+diagnostics hardenings came out of it: a second CI annotation carrying
+only compiler-error context (GitHub caps annotations at 4096 chars and
+one module-compile command line can eat that alone), and this record.
+The repository cache being over the 10 GB limit (continuous LRU
+eviction) raises the odds of interrupted saves — relevant when the CI
+build-directory caching step adds more entries.
+
 ### `import std` verdict (investigated 2026-07-04, child session)
 Owner-requested experiment on the consolidated trackerless-network
 partition, with Android as the gate. Findings (full detail and a
