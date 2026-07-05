@@ -4,7 +4,8 @@
 #include <utility>
 #include <nlohmann/json.hpp>
 
-import streamr.json;
+import streamr.json.toJson;
+import streamr.json.toString;
 
 using streamr::json::StreamrJsonInitializerList;
 using streamr::json::toJson;

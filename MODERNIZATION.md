@@ -1011,7 +1011,31 @@ exactly that. So consolidation walks the dependency chain from the top:
    version accepts it — owner-approved selective disabling, compiler
    coverage unaffected (fourth exclusion overall; revisit each clangd
    release).
-7. C-7 streamr-json
+7. **C-7 streamr-json** ✅ — the 3 headers (jsonConcepts, toJson,
+   toString) became named sub-modules (`streamr.json.X`); façade and
+   include/ tree deleted; the 4 importers (json's own tests + example)
+   flipped to narrow imports, and the logger units' temporary TEXTUAL
+   `streamr-json/toJson.hpp` include from C-6 flipped to
+   `import streamr.json.toJson;`. First conversion with zero compile
+   errors on the first whole-tree build — the accumulated rules
+   (std-include pass, curated-name consumer flip, minimal imports,
+   inline-constexpr, GMF-only C declarations) now cover the whole
+   failure surface.
+   **The same PR repairs the CI dependency caching** (owner asked for it
+   to be folded in): the C-2 consolidation commit had accidentally
+   REVERTED PR #41's per-platform cache keys in
+   `.github/workflows/reusable/cached-install/action.yml` (a rebase
+   mishap — #41 and C-2 were in flight simultaneously). Since C-2 the
+   Android/iOS jobs shared one `ARM64-macOS-…` key with the host macOS
+   leg; the host job saved first and owned the write-once key, so the
+   cross builds restored a useless host cache and rebuilt every vcpkg
+   dependency from source — degrading as the old per-platform entries
+   were LRU-evicted (repo cache 11.7 GB > 10 GB cap): Android leg C-3
+   48 min → C-6 139/123 min. The #41 scheme (`${ARCHFLAGS:-host}`
+   platform component + vcpkg submodule SHA + restore-keys fallbacks +
+   skip-save-on-exact-hit) is restored verbatim; the first post-merge
+   run per platform repopulates the caches (slow once), after which
+   Android returns to ~10 min and iOS to ~5 min.
 8. C-8 streamr-eventemitter (+ final bench.sh metrics and memo closure)
 
 One package per PR, `bench.sh` measured at the dht step and at the end

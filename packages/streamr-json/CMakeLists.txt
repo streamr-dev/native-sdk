@@ -47,18 +47,15 @@ endif()
 # project() because it inspects the compiler id.
 include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
 
-# Module façade (MODERNIZATION.md Part 2): the package is now a STATIC
-# library whose module interface units re-export the public headers.
-# #include consumers are unaffected; import consumers get the BMIs.
+# CONSOLIDATED (MODERNIZATION.md Phase 2.6): one named sub-module per
+# former public header (settled architecture: no umbrella). The include/
+# tree is gone; the module interface units are the source of truth, so
+# the package no longer exports any include directory.
+file(GLOB_RECURSE STREAMR_JSON_MODULE_UNITS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.cppm)
 streamr_add_module_library(streamr-json
-  FILES
-    modules/streamr.json.cppm
-    modules/streamr.json-all.cppm)
+  FILES ${STREAMR_JSON_MODULE_UNITS})
 add_library(streamr::streamr-json ALIAS streamr-json)
-
-target_include_directories(
-  streamr-json PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-           $<INSTALL_INTERFACE:include>)
 
 # PUBLIC (was INTERFACE): the module interface units themselves compile
 # against boost-pfr/nlohmann in their global module fragments.

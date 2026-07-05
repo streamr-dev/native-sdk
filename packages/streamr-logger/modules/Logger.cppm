@@ -10,10 +10,10 @@ module;
 #include <string_view>
 #include <utility>
 #include <nlohmann/json.hpp>
-#include "streamr-json/toJson.hpp"
 
 export module streamr.logger.Logger;
 
+import streamr.json.toJson;
 import streamr.logger.FollyLoggerImpl;
 import streamr.logger.LoggerImpl;
 import streamr.logger.StreamrLogLevel;
