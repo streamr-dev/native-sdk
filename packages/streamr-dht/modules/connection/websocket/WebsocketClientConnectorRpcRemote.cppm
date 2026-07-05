@@ -5,10 +5,12 @@
 module;
 
 #include <folly/experimental/coro/Task.h>
-#include "packages/dht/protos/DhtRpc.client.pb.h"
+#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.WebsocketClientConnectorRpcRemote;
 
+import streamr.dht.DhtRpcClient;
+import streamr.protorpc.RpcCommunicator;
 import streamr.logger;
 import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;

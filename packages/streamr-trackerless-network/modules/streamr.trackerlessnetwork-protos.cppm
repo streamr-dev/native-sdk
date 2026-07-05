@@ -1,12 +1,14 @@
-// :protos partition — wraps the GENERATED NetworkRpc protobuf trio in the
+// Wraps the GENERATED NetworkRpc protobuf messages and enums in the
 // global module fragment and re-exports the types used in this package's
 // public APIs. NB: NetworkRpc.proto declares no package, so the generated
 // types live in the GLOBAL namespace — hence plain `export using ::X;`.
+// The RPC client/server stubs are no longer here: the protoc plugin now
+// emits them as their own module units
+// (streamr.trackerlessnetwork.NetworkRpcClient / ...NetworkRpcServer
+// under modules/gen/) — import those directly where the stubs are used.
 module;
 
-#include "packages/network/protos/NetworkRpc.client.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.server.pb.h"
 
 export module streamr.trackerlessnetwork.protos;
 
@@ -39,25 +41,6 @@ export using ::ContentType;
 export using ::EncryptionType;
 export using ::ProxyDirection;
 export using ::SignatureType;
-
-// generated client/server stubs (the protoc plugin emits them in
-// namespace streamr::protorpc)
-export namespace streamr::protorpc {
-
-using streamr::protorpc::ContentDeliveryRpc;
-using streamr::protorpc::ContentDeliveryRpcClient;
-using streamr::protorpc::HandshakeRpc;
-using streamr::protorpc::HandshakeRpcClient;
-using streamr::protorpc::NeighborUpdateRpc;
-using streamr::protorpc::NeighborUpdateRpcClient;
-using streamr::protorpc::NodeInfoRpc;
-using streamr::protorpc::NodeInfoRpcClient;
-using streamr::protorpc::ProxyConnectionRpc;
-using streamr::protorpc::ProxyConnectionRpcClient;
-using streamr::protorpc::TemporaryConnectionRpc;
-using streamr::protorpc::TemporaryConnectionRpcClient;
-
-} // namespace streamr::protorpc
 
 // Ordering for MessageRef (used as an ordered-container key across the
 // package). Exported here, next to the type's re-export, so every

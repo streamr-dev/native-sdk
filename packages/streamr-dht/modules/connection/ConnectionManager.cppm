@@ -19,7 +19,7 @@ module;
 
 export module streamr.dht.ConnectionManager;
 
-import streamr.protorpc;
+import streamr.protorpc.RpcCommunicator;
 import streamr.dht.ConnectionLockStates;
 import streamr.logger;
 import streamr.utils;

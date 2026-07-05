@@ -3,7 +3,8 @@
 import streamr.dht.DhtCallContext;
 import streamr.dht.WebsocketClientConnectorRpcRemote;
 import streamr.dht.protos;
-import streamr.protorpc;
+import streamr.dht.DhtRpcClient;
+import streamr.protorpc.RpcCommunicator;
 
 using ::dht::PeerDescriptor;
 using ::dht::WebsocketClientConnectorRpcClient;

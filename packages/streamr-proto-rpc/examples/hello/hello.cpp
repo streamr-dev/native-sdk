@@ -1,11 +1,13 @@
 #include <exception>
 #include <iostream>
 #include <folly/experimental/coro/BlockingWait.h>
-#include "HelloRpc.client.pb.h"
 #include "HelloRpc.pb.h"
-#include "HelloRpc.server.pb.h"
 
-import streamr.protorpc;
+import streamr.protorpc.ProtoCallContext;
+import streamr.protorpc.RpcCommunicator;
+import streamr.protorpc.protos;
+import streamr.protorpc.examples.HelloRpcClient;
+import streamr.protorpc.examples.HelloRpcServer;
 
 using streamr::protorpc::HelloRpcService;
 using streamr::protorpc::HelloRpcServiceClient;

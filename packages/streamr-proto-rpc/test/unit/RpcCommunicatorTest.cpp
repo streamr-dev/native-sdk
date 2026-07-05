@@ -10,7 +10,11 @@
 #include <folly/experimental/coro/BlockingWait.h>
 #include "HelloRpc.pb.h"
 
-import streamr.protorpc;
+import streamr.protorpc.Errors;
+import streamr.protorpc.ProtoCallContext;
+import streamr.protorpc.RpcCommunicator;
+import streamr.protorpc.RpcCommunicatorClientApi;
+import streamr.protorpc.protos;
 import streamr.logger;
 
 namespace streamr::protorpc {

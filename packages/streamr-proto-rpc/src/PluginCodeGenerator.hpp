@@ -9,7 +9,7 @@
 #include <google/protobuf/compiler/code_generator.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/io/zero_copy_stream.h>
-#include "streamr-proto-rpc/StreamPrinter.hpp"
+#include "StreamPrinter.hpp"
 
 namespace streamr::protorpc {
 
@@ -41,6 +41,27 @@ private:
         return result;
     }
 
+    // The plugin emits C++ module units (Phase 2.6 consolidation), so it
+    // must know which module family the generated units belong to. The
+    // consuming package passes it through protoc's plugin parameter:
+    //   --streamr_out=module_prefix=streamr.dht:<outdir>
+    [[nodiscard]] static std::string getModulePrefix(
+        const std::string& parameter, std::string* error) {
+        const std::string key = "module_prefix=";
+        size_t pos = parameter.find(key);
+        if (pos == std::string::npos) {
+            *error =
+                "the streamr plugin now generates C++ module units and "
+                "requires the module_prefix parameter, e.g. "
+                "--streamr_out=module_prefix=streamr.dht:<outdir>";
+            return "";
+        }
+        size_t start = pos + key.size();
+        size_t end = parameter.find(',', start);
+        return parameter.substr(
+            start, end == std::string::npos ? std::string::npos : end - start);
+    }
+
     [[nodiscard]] static std::string getFilenameWithoutExtension(
         const std::string& filepath) {
         // Find the last directory separator
@@ -55,19 +76,40 @@ private:
         return filename.substr(0, lastDot);
     }
 
+    // Include path for the generated message-types header: the full proto
+    // path with the extension swapped, NOT just the basename. The module
+    // units land under modules/gen/ (away from the .pb.h), so the include
+    // must resolve through the package's proto include root (src/proto),
+    // where protoc mirrors the proto file's directory structure.
+    [[nodiscard]] static std::string getPathWithoutExtension(
+        const std::string& filepath) {
+        size_t lastDot = filepath.find_last_of('.');
+        size_t lastSlash = filepath.find_last_of("/\\");
+        if (lastDot == std::string::npos ||
+            (lastSlash != std::string::npos && lastDot < lastSlash)) {
+            return filepath; // No extension found
+        }
+        return filepath.substr(0, lastDot);
+    }
+
     bool GenerateServerHeader( // NOLINT
         const google::protobuf::FileDescriptor* file,
-        const std::string& /* parameter */,
+        const std::string& parameter,
         google::protobuf::compiler::GeneratorContext* generatorContext,
-        std::string* /* error */) const {
+        std::string* error) const {
         bool emptyIncluded = false;
         const std::string protoFilename(file->name());
         const std::string protoFilenameWe =
             getFilenameWithoutExtension(protoFilename);
-        const std::string headerFilename = protoFilenameWe + ".server.pb.h";
-        const std::string typesFilename = protoFilenameWe + ".pb.h";
-        const std::string headerGuard =
-            "STREAMR_PROTORPC_" + toUpperCase(protoFilenameWe) + "_SERVER_PB_H";
+        const std::string modulePrefix = getModulePrefix(parameter, error);
+        if (modulePrefix.empty()) {
+            return false;
+        }
+        const std::string headerFilename = protoFilenameWe + ".server.cppm";
+        const std::string typesFilename =
+            getPathWithoutExtension(protoFilename) + ".pb.h";
+        const std::string moduleName =
+            modulePrefix + "." + protoFilenameWe + "Server";
 
         std::stringstream headerSs;
 
@@ -76,17 +118,17 @@ private:
         headerSs << "// Generated from protobuf file \"" << protoFilename
                  << "\"\n";
         headerSs << "\n";
-        headerSs << "#ifndef " << headerGuard << "\n";
-        headerSs << "#define " << headerGuard << "\n\n";
+        headerSs << "module;\n\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
         headerSs << "#include <folly/experimental/coro/Task.h>\n";
 
         std::stringstream sourceSs;
 
+        sourceSs << "export module " << moduleName << ";\n\n";
         if (file->package().empty()) {
-            sourceSs << "namespace streamr::protorpc {\n";
+            sourceSs << "export namespace streamr::protorpc {\n";
         } else {
-            sourceSs << "namespace " << file->package() << " {\n";
+            sourceSs << "export namespace " << file->package() << " {\n";
         }
         // for each services
         int numServices = file->service_count();
@@ -125,7 +167,8 @@ private:
                     methodInputName = "google::protobuf::Empty";
                 }
 
-                const std::string methodOutputFullname(methodOutput->full_name());
+                const std::string methodOutputFullname(
+                    methodOutput->full_name());
                 std::string methodOutputName(methodOutput->name());
 
                 if (methodOutputName == "Empty") {
@@ -146,9 +189,7 @@ private:
             sourceSs << "}; // namespace " << file->package() << "\n";
         }
 
-        sourceSs << "\n";
-        sourceSs << "#endif // " << headerGuard << "\n";
-        // output to header file
+        // output to the module unit file
         google::protobuf::io::ZeroCopyOutputStream* stream =
             generatorContext->Open(headerFilename);
         StreamPrinter printer(
@@ -167,17 +208,22 @@ private:
 
     bool GenerateClientHeader( // NOLINT
         const google::protobuf::FileDescriptor* file,
-        const std::string& /* parameter */,
+        const std::string& parameter,
         google::protobuf::compiler::GeneratorContext* generatorContext,
-        std::string* /* error */) const {
+        std::string* error) const {
         bool emptyIncluded = false;
         const std::string protoFilename(file->name());
         const std::string protoFilenameWe =
             getFilenameWithoutExtension(protoFilename);
-        const std::string headerFilename = protoFilenameWe + ".client.pb.h";
-        const std::string typesFilename = protoFilenameWe + ".pb.h";
-        const std::string headerGuard =
-            "STREAMR_PROTORPC_" + toUpperCase(protoFilenameWe) + "_CLIENT_PB_H";
+        const std::string modulePrefix = getModulePrefix(parameter, error);
+        if (modulePrefix.empty()) {
+            return false;
+        }
+        const std::string headerFilename = protoFilenameWe + ".client.cppm";
+        const std::string typesFilename =
+            getPathWithoutExtension(protoFilename) + ".pb.h";
+        const std::string moduleName =
+            modulePrefix + "." + protoFilenameWe + "Client";
 
         std::stringstream headerSs;
 
@@ -186,24 +232,27 @@ private:
         headerSs << "// generated from protobuf file \"" << protoFilename
                  << "\"\n";
         headerSs << "\n";
-        headerSs << "#ifndef " << headerGuard << "\n";
-        headerSs << "#define " << headerGuard << "\n\n";
+        headerSs << "module;\n\n";
         headerSs << "#include <folly/experimental/coro/Task.h>\n";
         headerSs << "#include <chrono>\n";
         headerSs << "#include <optional>\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
-        headerSs << "#include \"streamr-proto-rpc/RpcCommunicator.hpp\"\n";
 
         headerSs << "\n";
 
         std::stringstream sourceSs;
 
+        sourceSs << "export module " << moduleName << ";\n\n";
+        // RpcCommunicator is consumed as a module (the textual header no
+        // longer exists after the Phase 2.6 consolidation); the shorthand
+        // stays at file scope so it is not exported.
+        sourceSs << "import streamr.protorpc.RpcCommunicator;\n\n";
+        sourceSs << "using streamr::protorpc::RpcCommunicator;\n\n";
         if (file->package().empty()) {
-            sourceSs << "namespace streamr::protorpc {\n";
+            sourceSs << "export namespace streamr::protorpc {\n";
         } else {
-            sourceSs << "namespace " << file->package() << " {\n";
+            sourceSs << "export namespace " << file->package() << " {\n";
         }
-        sourceSs << "using streamr::protorpc::RpcCommunicator;\n";
 
         // for each services
         int numServices = file->service_count();
@@ -245,7 +294,8 @@ private:
                     methodInputName = "google::protobuf::Empty";
                 }
 
-                const std::string methodOutputFullname(methodOutput->full_name());
+                const std::string methodOutputFullname(
+                    methodOutput->full_name());
                 std::string methodOutputName(methodOutput->name());
 
                 if (methodOutputName == "Empty") {
@@ -277,9 +327,7 @@ private:
             sourceSs << "}; // namespace " << file->package() << "\n";
         }
 
-        sourceSs << "\n";
-        sourceSs << "#endif // " << headerGuard << "\n";
-        // output to header file
+        // output to the module unit file
         google::protobuf::io::ZeroCopyOutputStream* stream =
             generatorContext->Open(headerFilename);
         StreamPrinter printer(

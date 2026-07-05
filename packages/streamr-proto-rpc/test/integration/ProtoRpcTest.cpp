@@ -2,12 +2,18 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <folly/experimental/coro/BlockingWait.h>
-#include "HelloRpc.client.pb.h"
-#include "TestProtos.client.pb.h"
-#include "WakeUpRpc.client.pb.h"
-#include "WakeUpRpc.server.pb.h"
+#include "HelloRpc.pb.h"
+#include "TestProtos.pb.h"
+#include "WakeUpRpc.pb.h"
 
-import streamr.protorpc;
+import streamr.protorpc.Errors;
+import streamr.protorpc.ProtoCallContext;
+import streamr.protorpc.RpcCommunicator;
+import streamr.protorpc.protos;
+import streamr.protorpc.test.HelloRpcClient;
+import streamr.protorpc.test.TestProtosClient;
+import streamr.protorpc.test.WakeUpRpcClient;
+import streamr.protorpc.test.WakeUpRpcServer;
 import streamr.logger;
 import streamr.eventemitter;
 

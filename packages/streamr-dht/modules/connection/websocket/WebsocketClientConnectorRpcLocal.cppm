@@ -6,12 +6,12 @@ module;
 
 #include <functional>
 #include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/dht/protos/DhtRpc.server.pb.h"
 
 #include <string>
 
 export module streamr.dht.WebsocketClientConnectorRpcLocal;
 
+import streamr.dht.DhtRpcServer;
 import streamr.utils;
 import streamr.dht.DhtCallContext;
 import streamr.dht.IPendingConnection;

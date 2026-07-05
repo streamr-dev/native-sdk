@@ -1,11 +1,25 @@
-#ifndef STREAMR_PROTO_RPC_RPC_COMMUNICATOR_SERVER_API_HPP
-#define STREAMR_PROTO_RPC_RPC_COMMUNICATOR_SERVER_API_HPP
+// Module streamr.protorpc.RpcCommunicatorServerApi
+// CONSOLIDATED from the former header
+// streamr-proto-rpc/RpcCommunicatorServerApi.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <exception>
-#include "Errors.hpp"
-#include "ServerRegistry.hpp"
+#include <functional>
+#include <optional>
+#include <string>
+#include <type_traits>
+#include <typeinfo>
+#include <utility>
+#include <google/protobuf/any.pb.h>
+#include <magic_enum/magic_enum.hpp>
+#include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
-namespace streamr::protorpc {
+export module streamr.protorpc.RpcCommunicatorServerApi;
+
+import streamr.protorpc.Errors;
+import streamr.protorpc.ServerRegistry;
+export namespace streamr::protorpc {
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 
@@ -167,5 +181,3 @@ public:
 };
 
 } // namespace streamr::protorpc
-
-#endif // STREAMR_PROTO_RPC_RPC_COMMUNICATOR_SERVER_API_HPP

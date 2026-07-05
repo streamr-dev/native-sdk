@@ -12,7 +12,11 @@ mkdir -p protos/packages/proto-rpc/protos
 mkdir -p protos/packages/dht/protos
 cp -r ../streamr-proto-rpc/protos/* protos/packages/proto-rpc/protos
 cp protos/DhtRpc.proto protos/packages/dht/protos
-${PROTOC} --plugin=protoc-gen-streamr=${PLUGIN} --streamr_out=./src/proto/packages/dht/protos --proto_path=./protos --cpp_out=./src/proto packages/dht/protos/DhtRpc.proto
+mkdir -p ./modules/gen
+# The plugin emits C++ module units (Phase 2.6): module_prefix names the
+# module family; the units land under modules/gen so the module FILE_SET
+# glob picks them up.
+${PROTOC} --plugin=protoc-gen-streamr=${PLUGIN} "--streamr_out=module_prefix=streamr.dht:./modules/gen" --proto_path=./protos --cpp_out=./src/proto packages/dht/protos/DhtRpc.proto
 ${PROTOC} --proto_path=./protos --cpp_out=./src/proto packages/proto-rpc/protos/ProtoRpc.proto
 rm -rf protos/packages
 

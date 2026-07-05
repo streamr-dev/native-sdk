@@ -909,7 +909,41 @@ exactly that. So consolidation walks the dependency chain from the top:
    Verified: Release build, dht tests 83/83 (incl. the two new PR #43
    race tests), tn 12+1, proxyclient 15/15, standalone builds of the
    whole chain, lint green over all module units.
-4. C-4 streamr-proto-rpc
+4. **C-4 streamr-proto-rpc** ✅ — the step that removed the LAST textual
+   dependency chain in the tree: the protoc plugin's generated RPC stub
+   headers (`*.client.pb.h` / `*.server.pb.h`), which `#include`d
+   `RpcCommunicator.hpp` and thereby dragged the whole proto-rpc +
+   logger header web into every package that uses generated stubs.
+   **The plugin now emits C++ module units instead of headers**
+   (`PluginCodeGenerator.hpp` rewritten): for each proto service file it
+   generates `X.client.cppm` / `X.server.cppm`, named
+   `<prefix>.XClient` / `<prefix>.XServer` where the consuming package
+   passes its module family as a protoc plugin parameter
+   (`--streamr_out=module_prefix=streamr.dht:./modules/gen`). Server
+   stubs are pure interfaces (no proto-rpc dependency at all); client
+   stubs `import streamr.protorpc.RpcCommunicator;`. Generated units
+   land in `modules/gen/` (library packages — picked up by the existing
+   recursive module glob, excluded from linting like all generated
+   code) or next to the generated message code (proto-rpc tests and
+   examples). The six proto-rpc public headers became named sub-modules
+   under `modules/` per the settled architecture; include/ deleted; the
+   plugin's own sources moved to `src/` (host tooling, not a public
+   API). Two headers survive INTENTIONALLY, both generated message
+   code: `*.pb.h` stays textual (`#include` in global module fragments)
+   because protoc emits headers — exactly the end-state carve-out the
+   consolidation decision defined.
+   One duplicate-stub hazard removed: trackerless-network used to
+   REGENERATE the dht stubs into its own tree (harmless as textual
+   headers, an ODR violation as module-attached classes) — its proto.sh
+   now generates DhtRpc message types only, and dht's own stub modules
+   are the single definition. Tests and examples import the generated
+   stub modules directly (`streamr.protorpc.test.*`,
+   `streamr.protorpc.examples.*`), and the last `import
+   streamr.protorpc;` umbrella consumers (4 dht units, 5 proto-rpc
+   test/example files, 1 dht test) flipped to narrow imports.
+   Verified: whole-tree build, 309/309 tests, standalone chain
+   (proto-rpc → dht → trackerless-network → proxyclient), lint green
+   over the module units.
 5. C-5 streamr-utils
 6. C-6 streamr-logger
 7. C-7 streamr-json

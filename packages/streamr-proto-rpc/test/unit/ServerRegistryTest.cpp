@@ -3,7 +3,10 @@
 #include <google/protobuf/any.pb.h>
 #include "HelloRpc.pb.h"
 
-import streamr.protorpc;
+import streamr.protorpc.Errors;
+import streamr.protorpc.ProtoCallContext;
+import streamr.protorpc.ServerRegistry;
+import streamr.protorpc.protos;
 
 // BEGINNOLINT
 

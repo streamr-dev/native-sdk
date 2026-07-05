@@ -5,10 +5,10 @@ module;
 
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.server.pb.h"
 
 export module streamr.trackerlessnetwork.ContentDeliveryRpcLocal;
 
+import streamr.trackerlessnetwork.NetworkRpcServer;
 import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;
 import streamr.dht.ListeningRpcCommunicator;
