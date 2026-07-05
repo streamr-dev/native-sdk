@@ -1,9 +1,11 @@
 #include <iostream>
 #include <map>
 #include <string_view>
-#include <folly/experimental/coro/BlockingWait.h>
 #include "RoutedHelloRpc.pb.h"
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
 import streamr.protorpc.ProtoCallContext;
 import streamr.protorpc.RpcCommunicator;
 import streamr.protorpc.protos;
@@ -171,7 +173,7 @@ int main() {
     ProtoCallContext context;
     context["targetServerId"] = "2";
 
-    auto response = folly::coro::blockingWait(
+    auto response = streamr::utils::blockingWait(
         helloClient1.sayHello(std::move(request), std::move(context)));
 
     std::cout << "Client 1 (Alice) got message from server: " +
@@ -183,7 +185,7 @@ int main() {
     ProtoCallContext context2;
     context2["targetServerId"] = "1";
 
-    auto response2 = folly::coro::blockingWait(
+    auto response2 = streamr::utils::blockingWait(
         helloClient2.sayHello(std::move(request2), std::move(context2)));
 
     std::cout << "Client 2 (Bob) got message from server: " +

@@ -3,12 +3,17 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <folly/experimental/coro/BlockingWait.h>
+// std::coroutine_traits must be visible in every translation unit
+// that defines OR instantiates a coroutine; it cannot arrive through
+// an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.ProxyConnectionRpcLocal;
 
+import streamr.utils.CoroutineHelper;
 import streamr.trackerlessnetwork.NetworkRpcServer;
 import streamr.logger.SLogger;
 import streamr.dht.DhtCallContext;
@@ -117,7 +122,7 @@ public:
 
     void stop() {
         for (const auto& connection : this->connections) {
-            folly::coro::blockingWait(
+            streamr::utils::blockingWait(
                 connection.second->remote.leaveStreamPartNotice(
                     this->options.streamPartId, false));
         }

@@ -1,11 +1,13 @@
 #include <future>
 #include <string>
 #include <gtest/gtest.h>
-#include <folly/experimental/coro/BlockingWait.h>
 #include "HelloRpc.pb.h"
 #include "TestProtos.pb.h"
 #include "WakeUpRpc.pb.h"
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
 import streamr.protorpc.Errors;
 import streamr.protorpc.ProtoCallContext;
 import streamr.protorpc.RpcCommunicator;
@@ -119,7 +121,7 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCall) {
     HelloRpcServiceClient<ProtoCallContext> client(communicator2);
     HelloRequest request;
     request.set_myname("Test");
-    auto result = folly::coro::blockingWait(
+    auto result = streamr::utils::blockingWait(
         client.sayHello(std::move(request), ProtoCallContext()));
     EXPECT_EQ("Hello, Test", result.greeting());
 }
@@ -142,7 +144,7 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcNotification) {
     WakeUpRpcServiceClient<ProtoCallContext> client(communicator2);
     WakeUpRequest request;
     request.set_reason("School");
-    folly::coro::blockingWait(
+    streamr::utils::blockingWait(
         client.wakeUp(std::move(request), ProtoCallContext()));
     EXPECT_EQ("School", promise.get_future().get());
 }
@@ -153,7 +155,7 @@ TEST_F(ProtoRpcClientTest, TestCanMakeRpcCallWithOptionalFields) {
     OptionalServiceClient<ProtoCallContext> client(communicator2);
     OptionalRequest request;
     request.set_someoptionalfield("something");
-    auto result = folly::coro::blockingWait(
+    auto result = streamr::utils::blockingWait(
         client.getOptional(std::move(request), ProtoCallContext()));
     EXPECT_EQ(false, result.has_someoptionalfield());
 }
@@ -167,7 +169,7 @@ TEST_F(
     HelloRequest request;
     request.set_myname("Test");
     try {
-        folly::coro::blockingWait(
+        streamr::utils::blockingWait(
             client.sayHello(std::move(request), ProtoCallContext()));
         // Test fails here
         EXPECT_TRUE(false);

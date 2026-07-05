@@ -120,11 +120,11 @@ private:
         headerSs << "\n";
         headerSs << "module;\n\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
-        headerSs << "#include <folly/experimental/coro/Task.h>\n";
 
         std::stringstream sourceSs;
 
         sourceSs << "export module " << moduleName << ";\n\n";
+        sourceSs << "import streamr.utils.CoroutineHelper;\n\n";
         if (file->package().empty()) {
             sourceSs << "export namespace streamr::protorpc {\n";
         } else {
@@ -233,7 +233,7 @@ private:
                  << "\"\n";
         headerSs << "\n";
         headerSs << "module;\n\n";
-        headerSs << "#include <folly/experimental/coro/Task.h>\n";
+
         headerSs << "#include <chrono>\n";
         headerSs << "#include <optional>\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
@@ -243,6 +243,7 @@ private:
         std::stringstream sourceSs;
 
         sourceSs << "export module " << moduleName << ";\n\n";
+        sourceSs << "import streamr.utils.CoroutineHelper;\n\n";
         // RpcCommunicator is consumed as a module (the textual header no
         // longer exists after the Phase 2.6 consolidation); the shorthand
         // stays at file scope so it is not exported.

@@ -145,6 +145,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         # whose sources `import streamr.logger;` must link the imported
         # target itself (transitive linkage does not propagate BMIs).
         PUBLIC streamr::streamr-logger
+        PUBLIC streamr::streamr-utils
         PUBLIC GTest::gtest
         PUBLIC streamr-proto-rpc-test-main
         PUBLIC GTest::gmock
@@ -183,6 +184,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         # Direct links for directly-imported modules (see the unit test).
         PUBLIC streamr::streamr-logger
         PUBLIC streamr::streamr-eventemitter
+        PUBLIC streamr::streamr-utils
         PUBLIC GTest::gtest
         PUBLIC streamr-proto-rpc-test-main
         PUBLIC GTest::gmock
@@ -198,8 +200,11 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         examples/hello/proto/HelloRpc.pb.cc
     )
 
-    target_link_libraries(streamr-proto-rpc-example-hello 
+    target_link_libraries(streamr-proto-rpc-example-hello
         PUBLIC streamr-proto-rpc
+        # Direct link: the example and its generated stub modules import
+        # streamr.utils.CoroutineHelper (BMIs do not propagate transitively).
+        PUBLIC streamr::streamr-utils
         PUBLIC Folly::folly
     )
 
@@ -222,6 +227,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
 
     target_link_libraries(streamr-proto-rpc-example-routed-hello
         PUBLIC streamr-proto-rpc
+        # Direct link (see the hello example).
+        PUBLIC streamr::streamr-utils
         PUBLIC Folly::folly
     )
 

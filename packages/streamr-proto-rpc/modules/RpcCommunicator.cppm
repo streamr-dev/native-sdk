@@ -3,15 +3,20 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
+// std::coroutine_traits must be visible in every translation unit
+// that defines OR instantiates a coroutine; it cannot arrive through
+// an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <chrono>
 #include <optional>
 #include <google/protobuf/any.pb.h>
 #include <magic_enum/magic_enum.hpp>
-#include <folly/experimental/coro/Task.h>
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 export module streamr.protorpc.RpcCommunicator;
 
+import streamr.utils.CoroutineHelper;
 import streamr.logger.SLogger;
 import streamr.protorpc.Errors;
 import streamr.protorpc.RpcCommunicatorClientApi;
@@ -24,12 +29,6 @@ import streamr.protorpc.ServerRegistry;
 using folly::coro::Task;
 using google::protobuf::Any;
 using streamr::logger::SLogger;
-// #include <folly/coro/Collect.h>
-// #include <folly/coro/DetachOnCancel.h>
-// #include <folly/coro/Timeout.h>
-// #include <folly/coro/Promise.h>
-// #include <folly/coro/Sleep.h>
-
 export namespace streamr::protorpc {
 
 using namespace std::chrono_literals;

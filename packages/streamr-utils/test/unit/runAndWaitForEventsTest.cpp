@@ -2,8 +2,10 @@
 #include <thread>
 #include <tuple>
 #include <gtest/gtest.h>
-#include <folly/experimental/coro/Timeout.h>
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
 import streamr.utils.runAndWaitForEvents;
 import streamr.eventemitter.EventEmitter;
 

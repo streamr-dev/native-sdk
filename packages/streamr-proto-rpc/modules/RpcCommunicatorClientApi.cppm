@@ -4,17 +4,19 @@
 // this file is now the source of truth.
 module;
 
+// Coroutine definitions need std::coroutine_traits declared in THIS
+// translation unit; it cannot arrive through an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <exception>
 #include <map>
-#include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/experimental/coro/DetachOnCancel.h>
-#include <folly/experimental/coro/Promise.h>
-#include <folly/experimental/coro/Task.h>
-#include <folly/experimental/coro/Timeout.h>
+#include <mutex>
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 export module streamr.protorpc.RpcCommunicatorClientApi;
 
+import streamr.utils.CoroutineHelper;
+import streamr.utils.ExecutorHelper;
 import streamr.logger.SLogger;
 import streamr.utils.Branded;
 import streamr.utils.Uuid;
@@ -207,7 +209,7 @@ public:
                 try {
                     co_return co_await folly::coro::timeout(
                         folly::coro::detachOnCancel(
-                            folly::coro::co_withExecutor(
+                            streamr::utils::co_withExecutor(
                                 &mExecutor, std::move(callMakingTask))),
                         timeoutValue);
                 } catch (const folly::FutureTimeout& e) {
@@ -273,7 +275,7 @@ public:
                     }
                 });
             co_return co_await folly::coro::timeout(
-                folly::coro::co_withExecutor(
+                streamr::utils::co_withExecutor(
                     &mExecutor,
                     folly::coro::detachOnCancel(
                         std::move(promiseContract.second))),

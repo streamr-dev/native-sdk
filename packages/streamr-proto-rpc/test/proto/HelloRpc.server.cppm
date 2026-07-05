@@ -3,10 +3,16 @@
 
 module;
 
+// std::coroutine_traits must be visible in every translation unit
+// that defines OR instantiates a coroutine; it cannot arrive through
+// an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include "HelloRpc.pb.h" // NOLINT
-#include <folly/experimental/coro/Task.h>
 
 export module streamr.protorpc.test.HelloRpcServer;
+
+import streamr.utils.CoroutineHelper;
 
 export namespace streamr::protorpc {
 template <typename CallContextType>

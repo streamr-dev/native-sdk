@@ -9,10 +9,10 @@ module;
 #include <functional>
 #include <string>
 #include <utility>
-#include <folly/executors/FunctionScheduler.h>
 
 export module streamr.utils.AbortableTimers;
 
+import streamr.utils.ExecutorHelper;
 import streamr.utils.AbortController;
 
 export namespace streamr::utils {

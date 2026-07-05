@@ -2,14 +2,12 @@
 #include <exception>
 #include <thread>
 #include <gtest/gtest.h>
-// #include <folly/Portability.h>
-// #include <folly/executors/CPUThreadPoolExecutor.h>
-// #include <folly/executors/ManualExecutor.h>
-// #include <folly/coro/Baton.h>
-#include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/experimental/coro/BlockingWait.h>
 #include "HelloRpc.pb.h"
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
+import streamr.utils.ExecutorHelper;
 import streamr.protorpc.Errors;
 import streamr.protorpc.ProtoCallContext;
 import streamr.protorpc.RpcCommunicator;
@@ -140,8 +138,8 @@ auto sendHelloRequest(
     RpcCommunicatorType& sender, folly::CPUThreadPoolExecutor* executor) {
     HelloRequest request;
     request.set_myname("Test");
-    return folly::coro::blockingWait(
-        folly::coro::co_withExecutor(
+    return streamr::utils::blockingWait(
+        streamr::utils::co_withExecutor(
             executor,
             sender.request<HelloResponse, HelloRequest>(
                 "testFunction", request, ProtoCallContext())));
@@ -151,8 +149,8 @@ auto sendHelloNotification(
     RpcCommunicatorType& sender, folly::CPUThreadPoolExecutor* executor) {
     HelloRequest request;
     request.set_myname("Test");
-    folly::coro::blockingWait(
-        folly::coro::co_withExecutor(
+    streamr::utils::blockingWait(
+        streamr::utils::co_withExecutor(
             executor,
             sender.notify<HelloRequest>(
                 "testFunction", request, ProtoCallContext())));
@@ -356,8 +354,8 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSide) {
     request.set_myname("Test");
 
     try {
-        folly::coro::blockingWait(
-            folly::coro::co_withExecutor(
+        streamr::utils::blockingWait(
+            streamr::utils::co_withExecutor(
                 &executor,
                 communicator2.request<HelloResponse, HelloRequest>(
                     "testFunction",
@@ -411,8 +409,8 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnServerSide) {
     HelloRequest request;
     request.set_myname("Test");
     try {
-        auto result = folly::coro::blockingWait(
-            folly::coro::co_withExecutor(
+        auto result = streamr::utils::blockingWait(
+            streamr::utils::co_withExecutor(
                 &executor,
                 communicator2.request<HelloResponse, HelloRequest>(
                     "testFunction",
@@ -456,8 +454,8 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
 
         std::cout << "Calling notify() from thread id: "
                   << std::this_thread::get_id() << "\n";
-        folly::coro::blockingWait(
-            folly::coro::co_withExecutor(
+        streamr::utils::blockingWait(
+            streamr::utils::co_withExecutor(
                 &executor,
                 communicator2.notify<HelloRequest>(
                     "testFunction",
