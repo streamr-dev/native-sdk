@@ -15,7 +15,7 @@ module;
 
 export module streamr.utils.runAndWaitForEvents;
 
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.utils.ReplayEventEmitterWrapper;
 import streamr.utils.waitForEvent;
 

@@ -8,7 +8,7 @@
 
 import streamr.utils.AbortController;
 import streamr.utils.waitForEvent;
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;

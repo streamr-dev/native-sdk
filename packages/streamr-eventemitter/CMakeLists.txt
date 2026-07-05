@@ -27,18 +27,17 @@ message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 # project() because it inspects the compiler id.
 include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
 
-# Module façade (MODERNIZATION.md Part 2): the package is now a STATIC
-# library whose module interface units re-export the public headers.
-# #include consumers are unaffected; import consumers get the BMIs.
+# CONSOLIDATED (MODERNIZATION.md Phase 2.6): one named sub-module per
+# former public header — for this package that is the single
+# streamr.eventemitter.EventEmitter unit (settled architecture: no
+# umbrella). The include/ tree is gone; the module interface unit is the
+# source of truth, so the package no longer exports any include
+# directory.
+file(GLOB_RECURSE STREAMR_EVENTEMITTER_MODULE_UNITS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.cppm)
 streamr_add_module_library(streamr-eventemitter
-  FILES
-    modules/streamr.eventemitter.cppm
-    modules/streamr.eventemitter-EventEmitter.cppm)
+  FILES ${STREAMR_EVENTEMITTER_MODULE_UNITS})
 add_library(streamr::streamr-eventemitter ALIAS streamr-eventemitter)
-
-target_include_directories(
-  streamr-eventemitter PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-           $<INSTALL_INTERFACE:include>)
 
 # TODO: Is there a better way to do this?
 # - Apparently not: https://gitlab.kitware.com/cmake/cmake/-/issues/20511

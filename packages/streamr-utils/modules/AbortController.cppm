@@ -11,7 +11,7 @@ module;
 
 export module streamr.utils.AbortController;
 
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 
 export namespace streamr::utils {
 

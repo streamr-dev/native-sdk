@@ -10,7 +10,7 @@ module;
 export module streamr.dht.WebsocketServerConnection;
 
 import streamr.dht.Connection;
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;
 import streamr.dht.WebsocketConnection;
 

@@ -13,7 +13,7 @@ module;
 
 export module streamr.dht.ConnectedEndpointState;
 
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;
 import streamr.dht.Connection;
 import streamr.dht.EndpointState;

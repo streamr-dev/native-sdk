@@ -25,7 +25,7 @@ import streamr.dht.ConnectionLocker;
 import streamr.dht.Identifiers;
 import streamr.dht.Transport;
 import streamr.dht.protos;
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;
 import streamr.utils.AbortController;
 import streamr.utils.EthereumAddress;
