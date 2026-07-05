@@ -13,7 +13,7 @@ module;
 export module streamr.dht.OutgoingHandshaker;
 
 import streamr.dht.IPendingConnection;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.eventemitter;
 import streamr.dht.Connection;
 import streamr.dht.Handshaker;

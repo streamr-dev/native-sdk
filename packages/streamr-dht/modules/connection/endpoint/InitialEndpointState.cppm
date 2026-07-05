@@ -10,7 +10,7 @@ module;
 
 export module streamr.dht.InitialEndpointState;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.dht.Connection;
 import streamr.dht.EndpointState;
 import streamr.dht.EndpointStateInterface;

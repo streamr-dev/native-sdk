@@ -11,7 +11,7 @@ export module streamr.dht.WebsocketClientConnectorRpcRemote;
 
 import streamr.dht.DhtRpcClient;
 import streamr.protorpc.RpcCommunicator;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;
 import streamr.dht.RpcRemote;

@@ -7,7 +7,7 @@ import streamr.dht.Transport;
 import streamr.dht.WebsocketClientConnection;
 import streamr.dht.WebsocketServer;
 import streamr.dht.WebsocketServerConnection;
-import streamr.logger;
+import streamr.logger.SLogger;
 
 using streamr::dht::connection::connectionevents::Connected;
 using streamr::dht::connection::connectionevents::Data;

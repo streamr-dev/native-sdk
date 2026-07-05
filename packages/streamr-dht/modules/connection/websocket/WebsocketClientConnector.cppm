@@ -15,7 +15,7 @@ export module streamr.dht.WebsocketClientConnector;
 
 import streamr.dht.Handshaker;
 import streamr.dht.Connection;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.AbortController;
 import streamr.dht.Connectivity;
 import streamr.dht.IPendingConnection;

@@ -15,7 +15,7 @@ module;
 
 export module streamr.protorpc.RpcCommunicatorClientApi;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.Branded;
 import streamr.utils.Uuid;
 import streamr.protorpc.Errors;

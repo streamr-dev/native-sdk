@@ -1,6 +1,10 @@
+#include <chrono>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <streamr-logger/detail/StreamrLogFormatter.hpp>
+#include <folly/logging/LogLevel.h>
+#include <folly/logging/LogMessage.h>
+
+import streamr.logger.StreamrLogFormatter;
 
 using StreamrLogFormatter = streamr::logger::detail::StreamrLogFormatter;
 using namespace std::chrono_literals; // NOLINT short chrono literals y, d etc.

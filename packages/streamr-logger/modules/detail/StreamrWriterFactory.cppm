@@ -1,9 +1,16 @@
-#ifndef STREAMER_LOGGER_STREAMRWRITERFACTORY_HPP
-#define STREAMER_LOGGER_STREAMRWRITERFACTORY_HPP
+// Module streamr.logger.StreamrWriterFactory
+// CONSOLIDATED from the former header
+// streamr-logger/detail/StreamrWriterFactory.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <memory>
+#include <utility>
 #include <folly/logging/StreamHandlerFactory.h>
 
-namespace streamr::logger::detail {
+export module streamr.logger.StreamrWriterFactory;
+
+export namespace streamr::logger::detail {
 
 class StreamrWriterFactory : public folly::StreamHandlerFactory::WriterFactory {
 private:
@@ -24,5 +31,3 @@ public:
 };
 
 } // namespace streamr::logger::detail
-
-#endif

@@ -10,7 +10,7 @@ module;
 
 export module streamr.dht.ConnectingEndpointState;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.dht.Connection;
 import streamr.dht.IPendingConnection;
 import streamr.eventemitter;

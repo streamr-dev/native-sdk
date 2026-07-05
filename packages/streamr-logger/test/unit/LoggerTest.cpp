@@ -1,9 +1,14 @@
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "streamr-logger/detail/FollyLoggerImpl.hpp"
+#include <folly/Range.h>
+#include <folly/logging/LogWriter.h>
 
-import streamr.logger;
+import streamr.logger.FollyLoggerImpl;
+import streamr.logger.Logger;
+import streamr.logger.StreamrLogLevel;
 
 using streamr::logger::Logger;
 using streamr::logger::StreamrLogLevel;

@@ -13,7 +13,7 @@ module;
 export module streamr.dht.ConnectionLockRpcLocal;
 
 import streamr.dht.DhtRpcServer;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.dht.ConnectionLockStates;
 import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;

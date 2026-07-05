@@ -1,12 +1,18 @@
-#ifndef STREAMR_LOGGER_LOGGERIMPL_HPP
-#define STREAMR_LOGGER_LOGGERIMPL_HPP
+// Module streamr.logger.LoggerImpl
+// CONSOLIDATED from the former header
+// streamr-logger/LoggerImpl.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <source_location>
+#include <string>
 #include <string_view>
 
-#include "StreamrLogLevel.hpp"
+export module streamr.logger.LoggerImpl;
 
-namespace streamr::logger {
+import streamr.logger.StreamrLogLevel;
+
+export namespace streamr::logger {
 
 // Interface for the logger implementations
 
@@ -24,5 +30,3 @@ public:
 };
 
 } // namespace streamr::logger
-
-#endif // STREAMR_LOGGER_LOGGERIMPL_HPP

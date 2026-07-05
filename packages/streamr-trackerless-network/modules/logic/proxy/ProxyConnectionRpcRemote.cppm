@@ -13,7 +13,7 @@ import streamr.trackerlessnetwork.NetworkRpcClient;
 import streamr.dht.DhtCallContext;
 import streamr.dht.RpcRemote;
 import streamr.dht.protos;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.BinaryUtils;
 import streamr.utils.EthereumAddress;
 

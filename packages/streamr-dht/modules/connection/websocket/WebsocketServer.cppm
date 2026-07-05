@@ -17,7 +17,7 @@ export module streamr.dht.WebsocketServer;
 import streamr.eventemitter;
 import streamr.dht.Connection;
 import streamr.dht.WebsocketConnection;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.Uuid;
 import streamr.dht.CertificateHelper;
 import streamr.dht.Errors;

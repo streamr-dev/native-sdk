@@ -16,7 +16,7 @@ export module streamr.dht.PendingConnection;
 
 import streamr.utils.AbortController;
 import streamr.utils.AbortableTimers;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.dht.Connection;
 import streamr.dht.IPendingConnection;
 import streamr.dht.Identifiers;

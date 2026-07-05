@@ -1,18 +1,28 @@
-#ifndef STREAMER_LOGGER_STREAMRLOGFORMATTER_HPP
-#define STREAMER_LOGGER_STREAMRLOGFORMATTER_HPP
+// Module streamr.logger.StreamrLogFormatter
+// CONSOLIDATED from the former header
+// streamr-logger/detail/StreamrLogFormatter.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
+#include <iterator>
+#include <string>
 #include <string_view>
+#include <variant>
 #include <folly/Format.h>
 #include <folly/logging/LogCategory.h>
 #include <folly/logging/LogFormatter.h>
 #include <folly/logging/LogLevel.h>
 #include <folly/logging/LogMessage.h>
-#include "LogLevelMap.hpp"
-#include "StreamrLogColors.hpp"
 
-namespace streamr::logger::detail {
+export module streamr.logger.StreamrLogFormatter;
+
+import streamr.logger.LogLevelMap;
+import streamr.logger.StreamrLogColors;
+
+export namespace streamr::logger::detail {
 
 namespace constants {
 
@@ -177,5 +187,3 @@ public:
 };
 
 } // namespace streamr::logger::detail
-
-#endif

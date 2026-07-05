@@ -1,15 +1,24 @@
-#ifndef STREAMER_LOGGER_LOGGER_HPP
-#define STREAMER_LOGGER_LOGGER_HPP
+// Module streamr.logger.Logger
+// CONSOLIDATED from the former header
+// streamr-logger/Logger.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <memory>
 #include <source_location>
+#include <string>
 #include <string_view>
+#include <utility>
 #include <nlohmann/json.hpp>
 #include "streamr-json/toJson.hpp"
-#include "streamr-logger/LoggerImpl.hpp"
-#include "streamr-logger/StreamrLogLevel.hpp"
-#include "streamr-logger/detail/FollyLoggerImpl.hpp"
 
-namespace streamr::logger {
+export module streamr.logger.Logger;
+
+import streamr.logger.FollyLoggerImpl;
+import streamr.logger.LoggerImpl;
+import streamr.logger.StreamrLogLevel;
+
+export namespace streamr::logger {
 
 using streamr::json::StreamrJsonInitializerList;
 using streamr::json::toJson;
@@ -213,5 +222,3 @@ private:
 };
 
 }; // namespace streamr::logger
-
-#endif

@@ -12,7 +12,7 @@ module;
 
 export module streamr.protorpc.RpcCommunicator;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.protorpc.Errors;
 import streamr.protorpc.RpcCommunicatorClientApi;
 import streamr.protorpc.RpcCommunicatorServerApi;

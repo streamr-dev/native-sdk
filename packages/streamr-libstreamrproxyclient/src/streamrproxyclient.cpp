@@ -28,7 +28,7 @@ import streamr.dht.ConnectorFacade;
 import streamr.dht.FakeTransport;
 import streamr.dht.Identifiers;
 import streamr.dht.protos;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.trackerlessnetwork.ProxyClient;
 import streamr.utils.BinaryUtils;
 import streamr.utils.EthereumAddress;

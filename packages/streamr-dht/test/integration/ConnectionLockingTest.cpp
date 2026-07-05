@@ -18,7 +18,7 @@ import streamr.dht.Identifiers;
 import streamr.dht.PortRange;
 import streamr.dht.Transport;
 import streamr.dht.protos;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.collect;
 import streamr.utils.waitForCondition;
 

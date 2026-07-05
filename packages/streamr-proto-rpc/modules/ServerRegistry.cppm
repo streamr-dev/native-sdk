@@ -9,7 +9,7 @@ module;
 
 export module streamr.protorpc.ServerRegistry;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.protorpc.Errors;
 export namespace streamr::protorpc {
 
