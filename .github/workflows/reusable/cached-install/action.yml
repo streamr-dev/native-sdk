@@ -96,7 +96,7 @@ runs:
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed save
-      id: cache-vcpkg-installed-v2-save
+      id: cache-vcpkg-installed-save
       if: always() && steps.cache-vcpkg-installed.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
