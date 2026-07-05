@@ -4,6 +4,14 @@ description: "install dependencies, build and cache result, or restore from cach
 runs:
   using: "composite"
   steps:
+    # The v2 generation suffix in the key names: the first arm64-ios
+    # entry saved under the v1 keys restored CORRUPTLY on every later run
+    # (boost headers came back empty — "use of undeclared identifier
+    # 'boost'" in Uuid.cppm while the same file/flags/SDK compile cleanly
+    # elsewhere; actions/cache treats a partial extraction as a warning,
+    # not an error). Cache entries are immutable under their key, so a
+    # poisoned entry can only be retired by bumping the generation.
+    #
     # The cache keys must distinguish the TARGET platform, not just the
     # runner: the macOS host build, the iOS build and the Android build
     # all run on the same macos runner image, and GitHub's cache is
@@ -27,20 +35,20 @@ runs:
       id: cache-homedir
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-v2-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         restore-keys: |
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-${{ steps.keys.outputs.vcpkg_sha }}-
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-
+          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-v2-${{ steps.keys.outputs.vcpkg_sha }}-
+          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-v2-
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed
       id: cache-vcpkg-installed
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-v2-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         restore-keys: |
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-${{ steps.keys.outputs.vcpkg_sha }}-
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-
+          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-v2-${{ steps.keys.outputs.vcpkg_sha }}-
+          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-v2-
         path: |
           ./build/vcpkg_installed
     - name: install-prerequisities
@@ -84,14 +92,14 @@ runs:
       if: always() && steps.cache-homedir.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-archives-v2-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ~/.cache/vcpkg/archives
     - name: cache vcpkg installed save
-      id: cache-vcpkg-installed-save
+      id: cache-vcpkg-installed-v2-save
       if: always() && steps.cache-vcpkg-installed.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
+        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-v2-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ./build/vcpkg_installed
