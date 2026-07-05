@@ -12,7 +12,7 @@ module;
 export module streamr.trackerlessnetwork.formStreamPartDeliveryServiceId;
 
 import streamr.dht.Identifiers;
-import streamr.utils;
+import streamr.utils.StreamPartID;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve

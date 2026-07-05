@@ -1,12 +1,20 @@
-#ifndef STREAMR_UTILS_ENS_NAME_HPP
-#define STREAMR_UTILS_ENS_NAME_HPP
+// Module streamr.utils.ENSName
+// CONSOLIDATED from the former header
+// streamr-utils/ENSName.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <utility>
 
-#include "streamr-utils/Branded.hpp"
-namespace streamr::utils {
+export module streamr.utils.ENSName;
+
+import streamr.utils.Branded;
+
+export namespace streamr::utils {
 
 inline bool isENSNameFormatIgnoreCase(std::string_view str) {
     return str.contains('.');
@@ -26,4 +34,3 @@ inline ENSName toENSName(std::string_view str) {
     throw std::runtime_error("not a valid ENS name: " + std::string(str));
 }
 } // namespace streamr::utils
-#endif // STREAMR_UTILS_ENS_NAME_HPP

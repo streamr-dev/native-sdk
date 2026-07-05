@@ -41,18 +41,16 @@ endif()
 # project() because it inspects the compiler id.
 include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
 
-# Module façade (MODERNIZATION.md Part 2): the package is now a STATIC
-# library whose module interface units re-export the public headers.
-# #include consumers are unaffected; import consumers get the BMIs.
+# CONSOLIDATED (MODERNIZATION.md Phase 2.6): one named sub-module per
+# former public header (settled architecture: no umbrella; consumers and
+# tests import the individual sub-modules). The include/ tree is gone —
+# the module interface units are the source of truth, so the package no
+# longer exports any include directory.
+file(GLOB_RECURSE STREAMR_UTILS_MODULE_UNITS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.cppm)
 streamr_add_module_library(streamr-utils
-  FILES
-    modules/streamr.utils.cppm
-    modules/streamr.utils-all.cppm)
+  FILES ${STREAMR_UTILS_MODULE_UNITS})
 add_library(streamr::streamr-utils ALIAS streamr-utils)
-
-target_include_directories(
-  streamr-utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-           $<INSTALL_INTERFACE:include>)
 
 find_library(SECP256K1_LIBRARY secp256k1)
 # secp256k1 >= 0.7 links the precomputed tables into the main library; the

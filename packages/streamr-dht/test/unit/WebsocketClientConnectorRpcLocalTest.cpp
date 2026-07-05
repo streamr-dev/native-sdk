@@ -5,7 +5,7 @@ import streamr.dht.Identifiers;
 import streamr.dht.PendingConnection;
 import streamr.dht.WebsocketClientConnectorRpcLocal;
 import streamr.dht.protos;
-import streamr.utils;
+import streamr.utils.AbortController;
 
 using ::dht::PeerDescriptor;
 using streamr::dht::DhtAddress;

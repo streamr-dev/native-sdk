@@ -3,7 +3,7 @@
 #include <folly/experimental/coro/Promise.h>
 #include <folly/experimental/coro/Task.h>
 
-import streamr.utils;
+import streamr.utils.collect;
 
 using streamr::utils::collect;
 using streamr::utils::toCoroTask;

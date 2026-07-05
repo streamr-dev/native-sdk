@@ -12,7 +12,8 @@ export module streamr.dht.Handshaker;
 
 import streamr.eventemitter;
 import streamr.logger;
-import streamr.utils;
+import streamr.utils.EnableSharedFromThis;
+import streamr.utils.Uuid;
 import streamr.dht.Connection;
 import streamr.dht.Version;
 

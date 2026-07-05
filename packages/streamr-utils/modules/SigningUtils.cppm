@@ -1,10 +1,14 @@
-#ifndef STREAMR_UTILS_SIGNINGUTILS_HPP
-#define STREAMR_UTILS_SIGNINGUTILS_HPP
+// Module streamr.utils.SigningUtils
+// CONSOLIDATED from the former header
+// streamr-utils/SigningUtils.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <secp256k1.h>
 #include <secp256k1_ecdh.h>
 #include <secp256k1_recovery.h>
 #include <string>
+#include <string_view>
 #include <cryptopp/asn.h>
 #include <cryptopp/dsa.h>
 #include <cryptopp/eccrypto.h>
@@ -13,9 +17,12 @@
 #include <cryptopp/oids.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/sha.h>
-#include "streamr-utils/BinaryUtils.hpp"
 
-namespace streamr::utils {
+export module streamr.utils.SigningUtils;
+
+import streamr.utils.BinaryUtils;
+
+export namespace streamr::utils {
 
 using streamr::utils::BinaryUtils;
 
@@ -69,5 +76,3 @@ public:
 };
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_SIGNINGUTILS_HPP

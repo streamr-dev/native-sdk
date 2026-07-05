@@ -1,13 +1,22 @@
-#ifndef STREAMR_UTILS_STREAM_PART_ID_HPP
-#define STREAMR_UTILS_STREAM_PART_ID_HPP
+// Module streamr.utils.StreamPartID
+// CONSOLIDATED from the former header
+// streamr-utils/StreamPartID.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <cstdint>
+#include <optional>
+#include <stdexcept>
 #include <string>
-#include "streamr-utils/Branded.hpp"
-#include "streamr-utils/StreamID.hpp"
-#include "streamr-utils/partition.hpp"
+#include <utility>
 
-namespace streamr::utils {
+export module streamr.utils.StreamPartID;
+
+import streamr.utils.Branded;
+import streamr.utils.StreamID;
+import streamr.utils.partition;
+
+export namespace streamr::utils {
 
 inline constexpr auto DELIMITER = "#"; // NOLINT
 
@@ -59,5 +68,3 @@ public:
 };
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_STREAM_PART_ID_HPP

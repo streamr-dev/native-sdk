@@ -1,9 +1,14 @@
-#ifndef ENABLE_SHARED_FROM_THIS_HPP
-#define ENABLE_SHARED_FROM_THIS_HPP
+// Module streamr.utils.EnableSharedFromThis
+// CONSOLIDATED from the former header
+// streamr-utils/EnableSharedFromThis.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <memory>
 
-namespace streamr::utils {
+export module streamr.utils.EnableSharedFromThis;
+
+export namespace streamr::utils {
 
 // The base class is needed to allow multiple inheritance from
 // EnableSharedFromThis.
@@ -30,5 +35,3 @@ struct EnableSharedFromThis : virtual public EnableSharedFromThisBase {
 };
 
 } // namespace streamr::utils
-
-#endif

@@ -15,7 +15,8 @@ export module streamr.dht.Connection;
 
 import streamr.eventemitter;
 import streamr.logger;
-import streamr.utils;
+import streamr.utils.Branded;
+import streamr.utils.Uuid;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified: relative namespace names resolve differently

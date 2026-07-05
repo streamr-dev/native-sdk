@@ -1,14 +1,22 @@
-#ifndef STREAMR_UTILS_WAITFOREVENT_HPP
-#define STREAMR_UTILS_WAITFOREVENT_HPP
+// Module streamr.utils.waitForEvent
+// CONSOLIDATED from the former header
+// streamr-utils/waitForEvent.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <chrono>
 #include <functional>
 #include <tuple>
+#include <utility>
 #include <folly/experimental/coro/Promise.h>
 #include <folly/experimental/coro/Task.h>
 #include <folly/experimental/coro/Timeout.h>
-#include "streamr-utils/AbortController.hpp"
-namespace streamr::utils {
+
+export module streamr.utils.waitForEvent;
+
+import streamr.utils.AbortController;
+
+export namespace streamr::utils {
 
 template <typename T>
 struct remove_pointer { // NOLINT
@@ -64,4 +72,3 @@ waitForEvent(
 }
 
 } // namespace streamr::utils
-#endif

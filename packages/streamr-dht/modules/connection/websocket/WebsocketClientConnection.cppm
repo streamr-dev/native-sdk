@@ -13,7 +13,7 @@ export module streamr.dht.WebsocketClientConnection;
 
 import streamr.dht.Connection;
 import streamr.logger;
-import streamr.utils;
+import streamr.utils.waitForEvent;
 import streamr.dht.WebsocketConnection;
 
 // Hoisted from the former header (file scope, NOT exported);

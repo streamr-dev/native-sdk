@@ -10,7 +10,8 @@ module;
 
 export module streamr.dht.Identifiers;
 
-import streamr.utils;
+import streamr.utils.BinaryUtils;
+import streamr.utils.Branded;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified: relative namespace names resolve differently

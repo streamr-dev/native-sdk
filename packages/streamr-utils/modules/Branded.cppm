@@ -1,10 +1,16 @@
-#ifndef STREAMR_UTILS_BRANDED_HPP
-#define STREAMR_UTILS_BRANDED_HPP
+// Module streamr.utils.Branded
+// CONSOLIDATED from the former header
+// streamr-utils/Branded.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <cstdint>
 #include <type_traits>
 #include <utility>
 
-namespace streamr::utils {
+export module streamr.utils.Branded;
+
+export namespace streamr::utils {
 
 template <char... Chars>
 using BrandString = std::integer_sequence<char, Chars...>;
@@ -206,5 +212,3 @@ public:
 };
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_BRANDED_HPP

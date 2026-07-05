@@ -6,7 +6,8 @@
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/experimental/coro/Timeout.h>
 
-import streamr.utils;
+import streamr.utils.AbortController;
+import streamr.utils.waitForEvent;
 import streamr.eventemitter;
 
 using streamr::eventemitter::Event;

@@ -944,7 +944,44 @@ exactly that. So consolidation walks the dependency chain from the top:
    Verified: whole-tree build, 309/309 tests, standalone chain
    (proto-rpc → dht → trackerless-network → proxyclient), lint green
    over the module units.
-5. C-5 streamr-utils
+5. **C-5 streamr-utils** ✅ — plain application of the settled
+   architecture: the 21 public headers became named sub-modules
+   (`streamr.utils.X`) under `modules/`, one per former header (git mv,
+   history preserved); the coarse façade (`streamr.utils` +
+   `streamr.utils-all`) and the include/ tree deleted; all 45 repo-wide
+   `import streamr.utils;` consumers flipped to narrow imports; the
+   package no longer exports an include directory. One 2024 leftover
+   removed in passing: test/unit/SigninUtilsTest.cpp (typo-named,
+   byte-identical duplicate of SigningUtilsTest.cpp, never in any CMake
+   target — surfaced because clangd had been linting it with flags
+   borrowed from a neighboring file).
+   **IMPORTANT FINDING — a clang 22.1.8 modules miscompile, and the
+   rule that avoids it.** The first (script-driven) consumer flip
+   over-matched names and added spurious imports; among them,
+   `import streamr.utils.waitForCondition;` in
+   streamr.protorpc.RpcCommunicatorClientApi — a module unit that
+   textually includes folly's coroutine Promise/Timeout headers in its
+   own global module fragment and defines coroutine code. With that one
+   spurious import added, ALL 17 RpcCommunicator tests hang
+   deterministically: the response arrives, the promise is resolved,
+   and the awaiting coroutine never resumes (every thread idle-parked;
+   confirmed by stack traces). The imported BMI's global module
+   fragment carries overlapping folly-coroutine declarations
+   (waitForCondition's GMF also includes folly coro headers), and
+   merging them with the importer's own textual copies miscompiles the
+   promise-resumption path. Removing the unused import fixes it;
+   bisection pinned exactly this import (collect alone is fine, the
+   waitForCondition import alone hangs). CONSEQUENCE, now a hard rule
+   (it was already the architecture's intent): **a module unit imports
+   ONLY the modules whose names its code actually uses — never
+   speculative or convenience imports.** The flip tooling now prunes
+   against a curated per-module export-name list, and the compiler's
+   "declaration of 'X' must be imported from module 'M'" errors are the
+   ground truth for adding imports back.
+   Verified: whole-tree build, 309/309 tests (with per-test timeouts),
+   standalone chain (utils 49/49 → proto-rpc 26/26 → dht 83/83 →
+   trackerless-network → proxyclient 15/15), lint green in all five
+   touched packages (utils module units now clangd-tidy-linted).
 6. C-6 streamr-logger
 7. C-7 streamr-json
 8. C-8 streamr-eventemitter (+ final bench.sh metrics and memo closure)

@@ -2,7 +2,7 @@
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Task.h>
 
-import streamr.utils;
+import streamr.utils.toCoroTask;
 
 using streamr::utils::toCoroTask;
 

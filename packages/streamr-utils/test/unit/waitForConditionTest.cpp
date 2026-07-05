@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
 #include <folly/experimental/coro/BlockingWait.h>
 
-import streamr.utils;
+import streamr.utils.AbortController;
+import streamr.utils.waitForCondition;
 
 using streamr::utils::AbortController;
 using streamr::utils::waitForCondition;

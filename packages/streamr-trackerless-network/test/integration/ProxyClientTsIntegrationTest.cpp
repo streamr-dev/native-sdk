@@ -9,7 +9,9 @@ import streamr.dht.protos;
 import streamr.logger;
 import streamr.trackerlessnetwork.ProxyClient;
 import streamr.trackerlessnetwork.protos;
-import streamr.utils;
+import streamr.utils.BinaryUtils;
+import streamr.utils.EthereumAddress;
+import streamr.utils.StreamPartID;
 
 using ::dht::ConnectivityMethod;
 using ::dht::ConnectivityResponse;

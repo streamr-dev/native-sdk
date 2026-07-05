@@ -2,7 +2,9 @@
 #include <variant>
 #include <gtest/gtest.h>
 
-import streamr.utils;
+import streamr.utils.toEthereumAddressOrENSName;
+import streamr.utils.ENSName;
+import streamr.utils.EthereumAddress;
 
 using streamr::utils::EthereumAddress;
 using streamr::utils::toEthereumAddressOrENSName;

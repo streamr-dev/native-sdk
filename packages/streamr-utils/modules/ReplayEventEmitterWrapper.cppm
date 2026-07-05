@@ -1,14 +1,19 @@
-#ifndef STREAMR_UTILS_REPLAY_EVENT_EMITTER_WRAPPER_HPP
-#define STREAMR_UTILS_REPLAY_EVENT_EMITTER_WRAPPER_HPP
+// Module streamr.utils.ReplayEventEmitterWrapper
+// CONSOLIDATED from the former header
+// streamr-utils/ReplayEventEmitterWrapper.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <memory>
 #include <optional>
 #include <tuple>
 #include <vector>
 
-#include "streamr-eventemitter/EventEmitter.hpp"
+export module streamr.utils.ReplayEventEmitterWrapper;
 
-namespace streamr::utils {
+import streamr.eventemitter;
+
+export namespace streamr::utils {
 
 using streamr::eventemitter::BoundEvent;
 using streamr::eventemitter::EventEmitter;
@@ -117,5 +122,3 @@ makeReplayEventEmitterWrapper(EventEmitter<EventTypesTuple>& eventEmitter) {
 }
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_REPLAY_EVENT_EMITTER_WRAPPER_HPP
