@@ -11,7 +11,7 @@ module;
 
 export module streamr.dht.WebsocketConnection;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.EnableSharedFromThis;
 import streamr.dht.Connection;
 

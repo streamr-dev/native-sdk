@@ -11,7 +11,7 @@ module;
 
 export module streamr.dht.RoutingRpcCommunicator;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.protorpc.RpcCommunicator;
 import streamr.protorpc.protos;
 import streamr.utils.Uuid;

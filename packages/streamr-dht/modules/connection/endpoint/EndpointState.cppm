@@ -10,7 +10,7 @@ module;
 
 export module streamr.dht.EndpointState;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.EnableSharedFromThis;
 import streamr.dht.Connection;
 import streamr.dht.IPendingConnection;

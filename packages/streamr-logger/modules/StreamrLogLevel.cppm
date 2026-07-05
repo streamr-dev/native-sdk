@@ -1,12 +1,19 @@
-#ifndef STREAMR_LOGGER_STREAMR_LOG_LEVEL_HPP
-#define STREAMR_LOGGER_STREAMR_LOG_LEVEL_HPP
+// Module streamr.logger.StreamrLogLevel
+// CONSOLIDATED from the former header
+// streamr-logger/StreamrLogLevel.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <string>
 #include <string_view>
+#include <type_traits>
 #include <variant>
 
-#include "detail/StreamrLogColors.hpp"
+export module streamr.logger.StreamrLogLevel;
 
-namespace streamr::logger {
+import streamr.logger.StreamrLogColors;
+
+export namespace streamr::logger {
 
 namespace streamrloglevel {
 
@@ -90,5 +97,3 @@ template <StreamrLogLevelConcept T = StreamrLogLevel>
 }
 
 } // namespace streamr::logger
-
-#endif // STREAMR_LOGGER_STREAMR_LOG_LEVEL_HPP

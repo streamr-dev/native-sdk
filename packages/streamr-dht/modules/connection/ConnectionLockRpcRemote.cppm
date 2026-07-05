@@ -14,7 +14,7 @@ module;
 export module streamr.dht.ConnectionLockRpcRemote;
 
 import streamr.dht.DhtRpcClient;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.dht.ConnectionLockStates;
 import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;

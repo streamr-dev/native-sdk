@@ -1,10 +1,15 @@
-#ifndef STREAMR_LOGGER_DETAIL_FOLLY_LOGGER_IMPL_HPP
-#define STREAMR_LOGGER_DETAIL_FOLLY_LOGGER_IMPL_HPP
+// Module streamr.logger.FollyLoggerImpl
+// CONSOLIDATED from the former header
+// streamr-logger/detail/FollyLoggerImpl.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <unistd.h>
 #include <memory>
 #include <source_location>
+#include <string>
 #include <string_view>
+#include <utility>
 #include <folly/logging/LogCategoryConfig.h>
 #include <folly/logging/LogConfig.h>
 #include <folly/logging/LogLevel.h>
@@ -13,13 +18,20 @@
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/xlog.h>
 
-#include "LogLevelMap.hpp"
-#include "StreamrHandlerFactory.hpp"
-#include "StreamrWriterFactory.hpp"
-#include "streamr-logger/LoggerImpl.hpp"
+// The C symbol for the process environment: must be declared in the
+// global module fragment — declared in module purview it would get
+// module attachment and no longer match the libc symbol at link time.
+extern "C" char** environ; // NOLINT
 
-extern char** environ; // NOLINT (readability-redundant-declaration)
-namespace streamr::logger::detail {
+export module streamr.logger.FollyLoggerImpl;
+
+import streamr.logger.LogLevelMap;
+import streamr.logger.StreamrLogLevel;
+import streamr.logger.LoggerImpl;
+import streamr.logger.StreamrHandlerFactory;
+import streamr.logger.StreamrWriterFactory;
+
+export namespace streamr::logger::detail {
 
 using LoggerImpl = streamr::logger::LoggerImpl;
 
@@ -181,5 +193,3 @@ private:
 };
 
 } // namespace streamr::logger::detail
-
-#endif

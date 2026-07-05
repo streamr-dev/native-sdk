@@ -1,12 +1,20 @@
-#ifndef STREAMER_LOGGER_SLOGGER_HPP
-#define STREAMER_LOGGER_SLOGGER_HPP
+// Module streamr.logger.SLogger
+// CONSOLIDATED from the former header
+// streamr-logger/SLogger.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <source_location>
+#include <string>
 #include <string_view>
 #include <nlohmann/json.hpp>
-#include "streamr-logger/Logger.hpp"
+#include "streamr-json/toJson.hpp"
 
-namespace streamr::logger {
+export module streamr.logger.SLogger;
+
+import streamr.logger.Logger;
+
+export namespace streamr::logger {
 
 using streamr::json::StreamrJsonInitializerList;
 class SLogger {
@@ -108,5 +116,3 @@ public:
     }
 };
 }; // namespace streamr::logger
-
-#endif

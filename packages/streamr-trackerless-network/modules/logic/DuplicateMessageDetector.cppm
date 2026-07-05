@@ -11,7 +11,7 @@ module;
 
 export module streamr.trackerlessnetwork.DuplicateMessageDetector;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <gtest/gtest.h>
-#include "streamr-logger/SLogger.hpp"
+import streamr.logger.SLogger;
 
 using streamr::logger::SLogger;
 

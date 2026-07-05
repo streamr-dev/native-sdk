@@ -14,7 +14,7 @@ module;
 export module streamr.dht.Connection;
 
 import streamr.eventemitter;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.Branded;
 import streamr.utils.Uuid;
 

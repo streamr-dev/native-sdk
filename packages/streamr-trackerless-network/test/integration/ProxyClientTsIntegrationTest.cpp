@@ -6,7 +6,7 @@ import streamr.dht.ConnectionManager;
 import streamr.dht.ConnectorFacade;
 import streamr.dht.FakeTransport;
 import streamr.dht.protos;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.trackerlessnetwork.ProxyClient;
 import streamr.trackerlessnetwork.protos;
 import streamr.utils.BinaryUtils;

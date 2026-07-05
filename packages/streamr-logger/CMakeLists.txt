@@ -29,14 +29,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # project() because it inspects the compiler id.
 include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
 
-# Module façade (MODERNIZATION.md Part 2): the package is now a STATIC
-# library whose module interface units re-export the public headers.
-# #include consumers are unaffected; import consumers get the BMIs.
-# detail/ headers stay internal (no partitions).
+# CONSOLIDATED (MODERNIZATION.md Phase 2.6): one named sub-module per
+# former header (settled architecture: no umbrella; consumers and tests
+# import the individual sub-modules — external consumers virtually always
+# just streamr.logger.SLogger). The include/ tree is gone; the module
+# interface units are the source of truth.
+file(GLOB_RECURSE STREAMR_LOGGER_MODULE_UNITS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/*.cppm)
 streamr_add_module_library(streamr-logger
-  FILES
-    modules/streamr.logger.cppm
-    modules/streamr.logger-all.cppm)
+  FILES ${STREAMR_LOGGER_MODULE_UNITS})
 set_property(TARGET streamr-logger PROPERTY CXX_STANDARD 26)
 
 add_library(streamr::streamr-logger ALIAS streamr-logger)
@@ -72,10 +73,6 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
   )
   set_property(TEST env_category_wrongly_written_as_fatal_and_info_log_test PROPERTY ENVIRONMENT "LOG_LEVEL=\"\"")
 endif()
-
-target_include_directories(
-  streamr-logger PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-           $<INSTALL_INTERFACE:include>)
 
 # PUBLIC (was INTERFACE): the module interface units compile against folly
 # and streamr-json in their global module fragments.

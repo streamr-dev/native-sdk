@@ -17,7 +17,7 @@ module;
 
 export module streamr.utils.RetryUtils;
 
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.utils.AbortController;
 
 export namespace streamr::utils {

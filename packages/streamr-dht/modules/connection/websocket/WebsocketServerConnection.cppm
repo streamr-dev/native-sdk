@@ -11,7 +11,7 @@ export module streamr.dht.WebsocketServerConnection;
 
 import streamr.dht.Connection;
 import streamr.eventemitter;
-import streamr.logger;
+import streamr.logger.SLogger;
 import streamr.dht.WebsocketConnection;
 
 // Hoisted from the former header (file scope, NOT exported);

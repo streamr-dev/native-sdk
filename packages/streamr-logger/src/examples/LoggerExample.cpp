@@ -2,7 +2,9 @@
 #include <iostream>
 #include <string>
 
-import streamr.logger;
+import streamr.logger.StreamrLogLevel;
+import streamr.logger.Logger;
+import streamr.logger.SLogger;
 
 using Logger = streamr::logger::Logger;
 using SLogger = streamr::logger::SLogger;

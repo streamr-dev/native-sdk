@@ -982,7 +982,28 @@ exactly that. So consolidation walks the dependency chain from the top:
    standalone chain (utils 49/49 → proto-rpc 26/26 → dht 83/83 →
    trackerless-network → proxyclient 15/15), lint green in all five
    touched packages (utils module units now clangd-tidy-linted).
-6. C-6 streamr-logger
+6. **C-6 streamr-logger** ✅ — the 11 headers (4 public + 7 detail/)
+   became named sub-modules (`streamr.logger.X`, tree-mirroring
+   `modules/detail/` for the internals); façade and include/ tree
+   deleted; all 43 repo-wide `import streamr.logger;` consumers flipped
+   to narrow imports (virtually all of them just
+   `streamr.logger.SLogger`), plus one proxyclient test that still
+   included SLogger.hpp textually. streamr-json usage inside the logger
+   units stays a TEXTUAL global-module-fragment include until C-7
+   consolidates that package. Two new mechanical findings for the
+   remaining steps: (i) namespace-scope `static constexpr` constants
+   have internal linkage and cannot be exported — they become
+   `inline constexpr` when a header moves into module purview (the
+   detail color constants); (ii) a purview declaration of a C symbol
+   silently gets module attachment and no longer matches the libc
+   symbol at link time (`extern char** environ;` in FollyLoggerImpl —
+   undefined symbol `environ@streamr.logger.FollyLoggerImpl`); such
+   declarations belong in the global module fragment.
+   Verified: whole-tree build, 309/309 tests (per-test timeouts),
+   standalone chain (logger 63/63 → utils 49/49 → proto-rpc 26/26 →
+   dht 83/83 → trackerless-network → proxyclient 15/15), lint green in
+   all six touched packages (logger module units now
+   clangd-tidy-linted).
 7. C-7 streamr-json
 8. C-8 streamr-eventemitter (+ final bench.sh metrics and memo closure)
 

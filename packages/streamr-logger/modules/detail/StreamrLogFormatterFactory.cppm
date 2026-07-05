@@ -1,10 +1,17 @@
-#ifndef STREAMER_LOGGER_STANDARDLOGHANDLERFACTORY_HPP
-#define STREAMER_LOGGER_STANDARDLOGHANDLERFACTORY_HPP
+// Module streamr.logger.StreamrLogFormatterFactory
+// CONSOLIDATED from the former header
+// streamr-logger/detail/StreamrLogFormatterFactory.hpp (MODERNIZATION.md
+// Phase 2.6): this file is now the source of truth.
+module;
 
+#include <memory>
 #include <folly/logging/StandardLogHandlerFactory.h>
-#include "StreamrLogFormatter.hpp"
 
-namespace streamr::logger::detail {
+export module streamr.logger.StreamrLogFormatterFactory;
+
+import streamr.logger.StreamrLogFormatter;
+
+export namespace streamr::logger::detail {
 
 class StreamrLogFormatterFactory
     : public folly::StandardLogHandlerFactory::FormatterFactory {
@@ -22,5 +29,3 @@ public:
 };
 
 } // namespace streamr::logger::detail
-
-#endif

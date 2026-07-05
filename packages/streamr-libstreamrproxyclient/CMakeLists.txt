@@ -90,6 +90,9 @@ if (NOT IOS)
     find_package(folly CONFIG REQUIRED)
      
     add_executable(streamr-streamrproxyclient-test-integration test/integration/StreamrProxyClientTest.cpp)
+    # The test imports streamr.logger.SLogger (the former textual include
+    # died with the logger consolidation, MODERNIZATION.md Phase 2.6).
+    streamr_enable_imports(streamr-streamrproxyclient-test-integration)
     target_link_directories(streamr-streamrproxyclient-test-integration PUBLIC ${SHAREDLIB_OUTPUT_DIRECTORY})
     
     target_include_directories(streamr-streamrproxyclient-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)

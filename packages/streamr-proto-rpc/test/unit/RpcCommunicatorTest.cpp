@@ -15,7 +15,7 @@ import streamr.protorpc.ProtoCallContext;
 import streamr.protorpc.RpcCommunicator;
 import streamr.protorpc.RpcCommunicatorClientApi;
 import streamr.protorpc.protos;
-import streamr.logger;
+import streamr.logger.SLogger;
 
 namespace streamr::protorpc {
 

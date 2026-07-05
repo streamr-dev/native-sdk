@@ -1,8 +1,13 @@
-// Tests detail-level machinery, so the detail header stays #included (no
-// module partition exists for detail/ headers); mixing with import is safe.
-#include "streamr-logger/detail/FollyLoggerImpl.hpp"
 
-import streamr.logger;
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <folly/Range.h>
+#include <folly/logging/LogWriter.h>
+
+import streamr.logger.FollyLoggerImpl;
+import streamr.logger.Logger;
+import streamr.logger.StreamrLogLevel;
 
 using Logger = streamr::logger::Logger;
 namespace streamrloglevel = streamr::logger::streamrloglevel;

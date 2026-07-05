@@ -15,7 +15,7 @@ import streamr.dht.FakeTransport;
 import streamr.dht.PortRange;
 import streamr.dht.Transport;
 import streamr.dht.protos;
-import streamr.logger;
+import streamr.logger.SLogger;
 
 using ::dht::ConnectivityResponse;
 using ::dht::Message;

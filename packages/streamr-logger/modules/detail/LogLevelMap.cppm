@@ -1,15 +1,21 @@
-#ifndef STREAMR_LOGGER_LOG_LEVEL_MAP_HPP
-#define STREAMR_LOGGER_LOG_LEVEL_MAP_HPP
+// Module streamr.logger.LogLevelMap
+// CONSOLIDATED from the former header
+// streamr-logger/detail/LogLevelMap.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <algorithm>
 #include <array>
+#include <string>
 #include <string_view>
 #include <variant>
 #include <folly/logging/LogLevel.h>
 
-#include "streamr-logger/StreamrLogLevel.hpp"
+export module streamr.logger.LogLevelMap;
 
-namespace streamr::logger::detail {
+import streamr.logger.StreamrLogLevel;
+
+export namespace streamr::logger::detail {
 
 constexpr folly::LogLevel defaultFollyLogLevel = folly::LogLevel::INFO;
 constexpr StreamrLogLevel defaultStreamrLogLevel =
@@ -82,5 +88,3 @@ struct LogLevelMap {
 };
 
 } // namespace streamr::logger::detail
-
-#endif // STREAMR_LOGGER_LOG_LEVEL_MAP_HPP
