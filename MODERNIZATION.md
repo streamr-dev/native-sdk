@@ -1003,7 +1003,14 @@ exactly that. So consolidation walks the dependency chain from the top:
    standalone chain (logger 63/63 → utils 49/49 → proto-rpc 26/26 →
    dht 83/83 → trackerless-network → proxyclient 15/15), lint green in
    all six touched packages (logger module units now
-   clangd-tidy-linted).
+   clangd-tidy-linted). One more clangd-tidy exclusion added after the
+   linux-arm64 CI leg failed: proto-rpc's RpcCommunicatorTest.cpp trips
+   the known preamble/BMI std-type unification failure class on the
+   Linux clangd build (spurious std::string-vs-std::string mismatch on
+   every gtest assertion) while the macOS clangd of the same major
+   version accepts it — owner-approved selective disabling, compiler
+   coverage unaffected (fourth exclusion overall; revisit each clangd
+   release).
 7. C-7 streamr-json
 8. C-8 streamr-eventemitter (+ final bench.sh metrics and memo closure)
 
