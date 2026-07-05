@@ -1,9 +1,16 @@
-#ifndef STREAMR_JSON_TOJSON_HPP
-#define STREAMR_JSON_TOJSON_HPP
+// Module streamr.json.toJson
+// CONSOLIDATED from the former header
+// streamr-json/toJson.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <cstddef>
 #include <initializer_list>
+#include <map>
+#include <string>
 #include <string_view>
 #include <type_traits>
+#include <vector>
 #include <boost/pfr.hpp>
 #include <boost/pfr/core.hpp>
 #include <boost/pfr/core_name.hpp>
@@ -11,8 +18,11 @@
 #include <boost/pfr/tuple_size.hpp>
 #include <nlohmann/json.hpp>
 
-#include "streamr-json/jsonConcepts.hpp"
-namespace streamr::json {
+export module streamr.json.toJson;
+
+import streamr.json.jsonConcepts;
+
+export namespace streamr::json {
 using suppresslint::SuppressLint; // otherwise linter thinks jsonConcepts.hpp
                                   // is unused
 using json = nlohmann::json;
@@ -254,5 +264,3 @@ json toJson(const T& value) {
 using StreamrJsonInitializerList = std::initializer_list<JsonBuilder>;
 
 } // namespace streamr::json
-
-#endif

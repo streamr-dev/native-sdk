@@ -1,14 +1,22 @@
-#ifndef STREAMR_JSON_TOSTRING_HPP
-#define STREAMR_JSON_TOSTRING_HPP
+// Module streamr.json.toString
+// CONSOLIDATED from the former header
+// streamr-json/toString.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
+
+#include <initializer_list>
+#include <string>
+
+export module streamr.json.toString;
+
+import streamr.json.jsonConcepts;
+import streamr.json.toJson;
 
 /**
  * Convert (almost) any struct to string in C++20.
  **/
 
-#include "streamr-json/jsonConcepts.hpp"
-#include "streamr-json/toJson.hpp"
-
-namespace streamr::json {
+export namespace streamr::json {
 
 using suppresslint::SuppressLint; // otherwise linter thinks jsonConcepts.hpp
                                   // is unused
@@ -43,5 +51,3 @@ std::string toString(const T& value) {
 }
 
 } // namespace streamr::json
-
-#endif

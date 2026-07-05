@@ -8,10 +8,10 @@ module;
 #include <string>
 #include <string_view>
 #include <nlohmann/json.hpp>
-#include "streamr-json/toJson.hpp"
 
 export module streamr.logger.SLogger;
 
+import streamr.json.toJson;
 import streamr.logger.Logger;
 
 export namespace streamr::logger {

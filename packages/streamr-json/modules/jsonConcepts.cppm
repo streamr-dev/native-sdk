@@ -1,10 +1,19 @@
-#ifndef STREAMR_JSON_JSONCONCEPTS_HPP
-#define STREAMR_JSON_JSONCONCEPTS_HPP
+// Module streamr.json.jsonConcepts
+// CONSOLIDATED from the former header
+// streamr-json/jsonConcepts.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <initializer_list>
+#include <string>
+#include <string_view>
+#include <type_traits>
 #include <boost/pfr/traits.hpp>
 #include <nlohmann/json.hpp>
 
-namespace streamr::json {
+export module streamr.json.jsonConcepts;
+
+export namespace streamr::json {
 namespace suppresslint { // linter does not support concepts, and thinks this
                          // file is unused
 using SuppressLint = void;
@@ -89,5 +98,3 @@ std::initializer_list<noaland::i_dont_care>>);
 */
 
 } // namespace streamr::json
-
-#endif // STREAMR_JSON_JSONCONCEPTS_HPP
