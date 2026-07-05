@@ -60,6 +60,12 @@ runs:
           set +e
           MSG=$(tail -40 install-output.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
           echo "::error title=install.sh output tail::${MSG}"
+          # GitHub caps one annotation at 4096 characters, and a single
+          # module-compile command line can eat that alone — emit a second
+          # annotation with just the compiler error lines and their context
+          # so failures stay diagnosable from the Checks UI.
+          ERRMSG=$(grep -A 10 -E '(^|[^a-zA-Z])error:' install-output.log | tail -55 | cut -c1-260 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          [ -n "$ERRMSG" ] && echo "::error title=compiler errors (context)::${ERRMSG}"
           for log in $(ls -t vcpkg/buildtrees/*/*.log 2>/dev/null | head -16 | xargs grep -liE "(^|[^a-z])error[: ]" 2>/dev/null | head -3); do
             echo "::group::${log}"
             tail -120 "$log"
