@@ -1,10 +1,21 @@
-#ifndef STREAMR_UTILS_ABORTABLE_TIMERS_HPP
-#define STREAMR_UTILS_ABORTABLE_TIMERS_HPP
+// Module streamr.utils.AbortableTimers
+// CONSOLIDATED from the former header
+// streamr-utils/AbortableTimers.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <atomic>
+#include <chrono>
+#include <functional>
+#include <string>
+#include <utility>
 #include <folly/executors/FunctionScheduler.h>
-#include "AbortController.hpp"
 
-namespace streamr::utils {
+export module streamr.utils.AbortableTimers;
+
+import streamr.utils.AbortController;
+
+export namespace streamr::utils {
 
 using streamr::utils::AbortSignal;
 using streamr::utils::abortsignalevents::Aborted;
@@ -74,4 +85,3 @@ private:
 };
 
 } // namespace streamr::utils
-#endif // STREAMR_UTILS_ABORTABLE_TIMERS_HPP

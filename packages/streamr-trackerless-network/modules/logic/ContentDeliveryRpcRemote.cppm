@@ -15,7 +15,7 @@ import streamr.dht.DhtCallContext;
 import streamr.dht.RpcRemote;
 import streamr.dht.protos;
 import streamr.logger;
-import streamr.utils;
+import streamr.utils.StreamPartID;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve

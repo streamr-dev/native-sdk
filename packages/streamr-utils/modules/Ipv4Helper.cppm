@@ -1,11 +1,16 @@
-#ifndef STREAMR_UTILS_IPV4_HELPER_HPP
-#define STREAMR_UTILS_IPV4_HELPER_HPP
+// Module streamr.utils.Ipv4Helper
+// CONSOLIDATED from the former header
+// streamr-utils/Ipv4Helper.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <arpa/inet.h>
 #include <array>
 #include <string>
 
-namespace streamr::utils {
+export module streamr.utils.Ipv4Helper;
+
+export namespace streamr::utils {
 
 class Ipv4Helper {
 public:
@@ -22,5 +27,3 @@ public:
 };
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_IPV4_HELPER_HPP

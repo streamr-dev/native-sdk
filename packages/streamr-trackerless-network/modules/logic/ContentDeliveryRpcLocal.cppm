@@ -13,7 +13,7 @@ import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;
 import streamr.dht.ListeningRpcCommunicator;
 import streamr.dht.protos;
-import streamr.utils;
+import streamr.utils.StreamPartID;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified because relative namespace names resolve

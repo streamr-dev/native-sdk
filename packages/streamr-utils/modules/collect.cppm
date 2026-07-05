@@ -1,13 +1,21 @@
-#ifndef STREAMR_UTILS_COLLECT_HPP
-#define STREAMR_UTILS_COLLECT_HPP
+// Module streamr.utils.collect
+// CONSOLIDATED from the former header
+// streamr-utils/collect.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <tuple>
 #include <type_traits>
+#include <utility>
 #include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/Task.h>
 #include <folly/experimental/coro/ViaIfAsync.h>
-#include "streamr-utils/toCoroTask.hpp"
 
-namespace streamr::utils {
+export module streamr.utils.collect;
+
+import streamr.utils.toCoroTask;
+
+export namespace streamr::utils {
 
 using streamr::utils::toCoroTask;
 
@@ -42,5 +50,3 @@ inline auto collect(Tasks&&... tasks)
 }
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_COLLECT_HPP

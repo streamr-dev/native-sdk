@@ -30,7 +30,10 @@ import streamr.dht.Identifiers;
 import streamr.dht.protos;
 import streamr.logger;
 import streamr.trackerlessnetwork.ProxyClient;
-import streamr.utils;
+import streamr.utils.BinaryUtils;
+import streamr.utils.EthereumAddress;
+import streamr.utils.SigningUtils;
+import streamr.utils.StreamPartID;
 
 namespace streamr::libstreamrproxyclient {
 

@@ -12,7 +12,7 @@ module;
 
 export module streamr.dht.ConnectionLockStates;
 
-import streamr.utils;
+import streamr.utils.Branded;
 import streamr.dht.Identifiers;
 export namespace streamr::dht::connection {
 

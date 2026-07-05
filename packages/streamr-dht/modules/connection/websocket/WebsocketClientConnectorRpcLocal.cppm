@@ -12,7 +12,7 @@ module;
 export module streamr.dht.WebsocketClientConnectorRpcLocal;
 
 import streamr.dht.DhtRpcServer;
-import streamr.utils;
+import streamr.utils.AbortController;
 import streamr.dht.DhtCallContext;
 import streamr.dht.IPendingConnection;
 import streamr.dht.Identifiers;

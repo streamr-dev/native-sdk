@@ -1,16 +1,24 @@
-#ifndef STREAMR_UTILS_STREAM_ID_HPP
-#define STREAMR_UTILS_STREAM_ID_HPP
+// Module streamr.utils.StreamID
+// CONSOLIDATED from the former header
+// streamr-utils/StreamID.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <variant>
-#include "streamr-utils/Branded.hpp"
-#include "streamr-utils/ENSName.hpp"
-#include "streamr-utils/EthereumAddress.hpp"
-#include "streamr-utils/toEthereumAddressOrENSName.hpp"
 
-namespace streamr::utils {
+export module streamr.utils.StreamID;
+
+import streamr.utils.Branded;
+import streamr.utils.ENSName;
+import streamr.utils.EthereumAddress;
+import streamr.utils.toEthereumAddressOrENSName;
+
+export namespace streamr::utils {
 
 using StreamID = Branded<std::string, struct StreamIDBrand>;
 
@@ -94,5 +102,3 @@ class StreamIDUtils {
 };
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_STREAM_ID_HPP

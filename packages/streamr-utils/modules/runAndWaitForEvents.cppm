@@ -1,13 +1,25 @@
-#ifndef STREAMR_UTILS_RUN_AND_WAIT_FOR_EVENTS_HPP
-#define STREAMR_UTILS_RUN_AND_WAIT_FOR_EVENTS_HPP
+// Module streamr.utils.runAndWaitForEvents
+// CONSOLIDATED from the former header
+// streamr-utils/runAndWaitForEvents.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <chrono>
+#include <functional>
+#include <tuple>
+#include <utility>
+#include <vector>
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/Timeout.h>
-#include "streamr-utils/ReplayEventEmitterWrapper.hpp"
-#include "streamr-utils/waitForEvent.hpp"
 
-namespace streamr::utils {
+export module streamr.utils.runAndWaitForEvents;
+
+import streamr.eventemitter;
+import streamr.utils.ReplayEventEmitterWrapper;
+import streamr.utils.waitForEvent;
+
+export namespace streamr::utils {
 
 using streamr::eventemitter::EventEmitter;
 using streamr::eventemitter::HandlerToken;
@@ -51,5 +63,3 @@ inline void runAndWaitForEvents(
 }
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_RUN_AND_WAIT_FOR_EVENTS_HPP

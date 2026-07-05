@@ -1,10 +1,16 @@
-#ifndef STREAMR_UTILS_BINARYUTILS_HPP
-#define STREAMR_UTILS_BINARYUTILS_HPP
+// Module streamr.utils.BinaryUtils
+// CONSOLIDATED from the former header
+// streamr-utils/BinaryUtils.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <stdexcept>
 #include <string>
 #include <boost/algorithm/hex.hpp>
 
-namespace streamr::utils {
+export module streamr.utils.BinaryUtils;
+
+export namespace streamr::utils {
 
 class BinaryUtils {
 public:
@@ -44,5 +50,3 @@ public:
 };
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_BINARYUTILS_HPP

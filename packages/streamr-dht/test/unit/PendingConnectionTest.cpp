@@ -11,7 +11,7 @@ import streamr.dht.Connection;
 import streamr.dht.PendingConnection;
 import streamr.dht.Transport;
 import streamr.dht.protos;
-import streamr.utils;
+import streamr.utils.waitForCondition;
 
 using ::dht::PeerDescriptor;
 using streamr::dht::connection::Connection;

@@ -1,15 +1,26 @@
-#ifndef STREAMR_UTILS_RETRY_UTILS_HPP
-#define STREAMR_UTILS_RETRY_UTILS_HPP
+// Module streamr.utils.RetryUtils
+// CONSOLIDATED from the former header
+// streamr-utils/RetryUtils.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <chrono>
+#include <exception>
+#include <functional>
 #include <string>
+#include <utility>
 #include <folly/experimental/coro/Promise.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/experimental/coro/Task.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/Promise.h>
-#include "streamr-logger/SLogger.hpp"
-#include "streamr-utils/AbortController.hpp"
-namespace streamr::utils {
+
+export module streamr.utils.RetryUtils;
+
+import streamr.logger;
+import streamr.utils.AbortController;
+
+export namespace streamr::utils {
 
 using streamr::logger::SLogger;
 
@@ -46,5 +57,3 @@ public:
     }
 };
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_RETRY_UTILS_HPP

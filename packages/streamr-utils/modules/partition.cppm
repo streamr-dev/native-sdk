@@ -1,12 +1,17 @@
-#ifndef STREAMR_UTILS_PARTITION_HPP
-#define STREAMR_UTILS_PARTITION_HPP
+// Module streamr.utils.partition
+// CONSOLIDATED from the former header
+// streamr-utils/partition.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
 #include <string>
 
-namespace streamr::utils {
+export module streamr.utils.partition;
+
+export namespace streamr::utils {
 
 inline constexpr auto MAX_PARTITION_COUNT = 100; // NOLINT
 
@@ -31,5 +36,3 @@ inline void ensureValidStreamPartitionCount(
 }
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_PARTITION_HPP

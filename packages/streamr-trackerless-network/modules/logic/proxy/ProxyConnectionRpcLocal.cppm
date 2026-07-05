@@ -16,7 +16,9 @@ import streamr.dht.Identifiers;
 import streamr.dht.ListeningRpcCommunicator;
 import streamr.dht.protos;
 import streamr.eventemitter;
-import streamr.utils;
+import streamr.utils.BinaryUtils;
+import streamr.utils.EthereumAddress;
+import streamr.utils.StreamPartID;
 import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;
 
 // Hoisted from the former header (file scope, NOT exported);

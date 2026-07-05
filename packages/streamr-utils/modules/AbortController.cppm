@@ -1,10 +1,19 @@
-#ifndef STREAMR_UTILS_ABORT_CONTROLLER_HPP
-#define STREAMR_UTILS_ABORT_CONTROLLER_HPP
+// Module streamr.utils.AbortController
+// CONSOLIDATED from the former header
+// streamr-utils/AbortController.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
+#include <string>
+#include <string_view>
+#include <tuple>
 #include <folly/CancellationToken.h>
-#include "streamr-eventemitter/EventEmitter.hpp"
 
-namespace streamr::utils {
+export module streamr.utils.AbortController;
+
+import streamr.eventemitter;
+
+export namespace streamr::utils {
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
@@ -52,4 +61,3 @@ public:
 };
 
 } // namespace streamr::utils
-#endif // STREAMR_UTILS_ABORT_CONTROLLER_HPP

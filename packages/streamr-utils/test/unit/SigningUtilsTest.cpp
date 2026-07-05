@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
-import streamr.utils;
+import streamr.utils.BinaryUtils;
+import streamr.utils.SigningUtils;
 
 using streamr::utils::BinaryUtils;
 using streamr::utils::SigningUtils;

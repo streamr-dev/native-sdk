@@ -1,14 +1,19 @@
-#ifndef STREAMR_UTILS_ETHEREUM_ADDRESS_HPP
-#define STREAMR_UTILS_ETHEREUM_ADDRESS_HPP
+// Module streamr.utils.EthereumAddress
+// CONSOLIDATED from the former header
+// streamr-utils/EthereumAddress.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 
-#include "streamr-utils/Branded.hpp"
+export module streamr.utils.EthereumAddress;
 
-namespace streamr::utils {
+import streamr.utils.Branded;
+
+export namespace streamr::utils {
 
 using EthereumAddress = Branded<std::string, struct EthereumAddressBrand>;
 
@@ -27,5 +32,3 @@ inline EthereumAddress toEthereumAddress(std::string_view str) {
 }
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_ETHEREUM_ADDRESS_HPP

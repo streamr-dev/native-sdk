@@ -16,7 +16,8 @@ module;
 export module streamr.protorpc.RpcCommunicatorClientApi;
 
 import streamr.logger;
-import streamr.utils;
+import streamr.utils.Branded;
+import streamr.utils.Uuid;
 import streamr.protorpc.Errors;
 
 // Hoisted from the former header (file scope, NOT exported);

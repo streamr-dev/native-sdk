@@ -3,7 +3,8 @@
 #include <thread>
 #include <gtest/gtest.h>
 
-import streamr.utils;
+import streamr.utils.AbortController;
+import streamr.utils.AbortableTimers;
 
 using streamr::utils::AbortableTimers;
 using streamr::utils::AbortController;

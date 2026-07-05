@@ -12,7 +12,7 @@ module;
 export module streamr.dht.WebsocketConnection;
 
 import streamr.logger;
-import streamr.utils;
+import streamr.utils.EnableSharedFromThis;
 import streamr.dht.Connection;
 
 // Hoisted from the former header (file scope, NOT exported);

@@ -2,7 +2,7 @@
 #include <string>
 #include "gtest/gtest.h"
 
-import streamr.utils;
+import streamr.utils.BinaryUtils;
 
 using streamr::utils::BinaryUtils;
 

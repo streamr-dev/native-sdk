@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include <folly/experimental/coro/Timeout.h>
 
-import streamr.utils;
+import streamr.utils.runAndWaitForEvents;
 import streamr.eventemitter;
 
 using streamr::eventemitter::Event;

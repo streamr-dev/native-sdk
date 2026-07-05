@@ -18,7 +18,7 @@ import streamr.eventemitter;
 import streamr.dht.Connection;
 import streamr.dht.WebsocketConnection;
 import streamr.logger;
-import streamr.utils;
+import streamr.utils.Uuid;
 import streamr.dht.CertificateHelper;
 import streamr.dht.Errors;
 import streamr.dht.PortRange;

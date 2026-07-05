@@ -1,15 +1,24 @@
-#ifndef STREAMR_UTILS_WAITFORCONDITION_HPP
-#define STREAMR_UTILS_WAITFORCONDITION_HPP
+// Module streamr.utils.waitForCondition
+// CONSOLIDATED from the former header
+// streamr-utils/waitForCondition.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <chrono>
+#include <functional>
+#include <tuple>
+#include <utility>
 #include <folly/coro/Task.h>
 #include <folly/experimental/coro/Collect.h>
-#include "streamr-eventemitter/EventEmitter.hpp"
-#include "streamr-utils/AbortController.hpp"
-#include "streamr-utils/AbortableTimers.hpp"
-#include "streamr-utils/waitForEvent.hpp"
 
-namespace streamr::utils {
+export module streamr.utils.waitForCondition;
+
+import streamr.eventemitter;
+import streamr.utils.AbortController;
+import streamr.utils.AbortableTimers;
+import streamr.utils.waitForEvent;
+
+export namespace streamr::utils {
 
 using streamr::eventemitter::Event;
 using streamr::eventemitter::ReplayEventEmitter;
@@ -54,5 +63,3 @@ inline folly::coro::Task<void> waitForCondition(
 }
 
 } // namespace streamr::utils
-
-#endif // STREAMR_UTILS_WAITFORCONDITION_HPP

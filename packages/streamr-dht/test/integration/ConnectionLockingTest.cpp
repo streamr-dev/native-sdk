@@ -19,7 +19,8 @@ import streamr.dht.PortRange;
 import streamr.dht.Transport;
 import streamr.dht.protos;
 import streamr.logger;
-import streamr.utils;
+import streamr.utils.collect;
+import streamr.utils.waitForCondition;
 
 using ::dht::ConnectivityResponse;
 // using ::dht::Message;
