@@ -80,7 +80,9 @@ endif()
 #
 # Defines <target> as a STATIC library whose C++ module interface units are
 # the given files (FILE_SET CXX_MODULES, rooted at the package's modules/
-# directory). STATIC rather than INTERFACE: module interface units are
+# directory unless overridden with BASE_DIRS <dir> — e.g. test-only module
+# units living under test/utils). STATIC rather than INTERFACE: module
+# interface units are
 # compiled TUs, so even a previously header-only package gains a compiled
 # archive when it grows a module.
 #
@@ -88,16 +90,19 @@ endif()
 # as a STATIC library — with a generated stub source instead of module
 # units — so callers can keep using PUBLIC include dirs/links identically.
 function(streamr_add_module_library TARGET)
-    cmake_parse_arguments(ARG "" "" "FILES" ${ARGN})
+    cmake_parse_arguments(ARG "" "BASE_DIRS" "FILES" ${ARGN})
     if(NOT ARG_FILES)
         message(FATAL_ERROR "streamr_add_module_library(${TARGET}): FILES is required")
+    endif()
+    if(NOT ARG_BASE_DIRS)
+        set(ARG_BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/modules)
     endif()
     add_library(${TARGET} STATIC)
     if(STREAMR_MODULES_SUPPORTED)
         target_sources(${TARGET}
             PUBLIC
             FILE_SET CXX_MODULES
-            BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/modules
+            BASE_DIRS ${ARG_BASE_DIRS}
             FILES ${ARG_FILES})
         set_target_properties(${TARGET} PROPERTIES CXX_SCAN_FOR_MODULES ON)
     else()
@@ -136,9 +141,12 @@ endfunction()
 # .cc files). Same effect as streamr_add_module_library() minus the
 # add_library(). No-op where modules are unsupported.
 function(streamr_target_module_sources TARGET)
-    cmake_parse_arguments(ARG "" "" "FILES" ${ARGN})
+    cmake_parse_arguments(ARG "" "BASE_DIRS" "FILES" ${ARGN})
     if(NOT ARG_FILES)
         message(FATAL_ERROR "streamr_target_module_sources(${TARGET}): FILES is required")
+    endif()
+    if(NOT ARG_BASE_DIRS)
+        set(ARG_BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/modules)
     endif()
     if(NOT STREAMR_MODULES_SUPPORTED)
         return()
@@ -146,7 +154,7 @@ function(streamr_target_module_sources TARGET)
     target_sources(${TARGET}
         PUBLIC
         FILE_SET CXX_MODULES
-        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/modules
+        BASE_DIRS ${ARG_BASE_DIRS}
         FILES ${ARG_FILES})
     set_target_properties(${TARGET} PROPERTIES CXX_SCAN_FOR_MODULES ON)
     target_compile_features(${TARGET} PUBLIC cxx_std_26)

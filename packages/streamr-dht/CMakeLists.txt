@@ -137,6 +137,20 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         PUBLIC GTest::gtest
     )
 
+    # Test-only helpers (mock factories, gtest assertion formatters)
+    # ported from the TS package's test/utils; a module library of its
+    # own so both test targets can import streamr.dht.TestUtils.
+    streamr_add_module_library(streamr-dht-test-utils
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/test/utils
+        FILES ${CMAKE_CURRENT_SOURCE_DIR}/test/utils/TestUtils.cppm)
+    target_include_directories(streamr-dht-test-utils
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>)
+    target_link_libraries(streamr-dht-test-utils
+        PUBLIC streamr-dht
+        PUBLIC streamr::streamr-utils
+        PUBLIC GTest::gtest
+    )
+
     add_executable(streamr-dht-test-unit
         test/unit/WebsocketClientConnectionTest.cpp
         test/unit/WebsocketClientConnectorRpcLocalTest.cpp
@@ -177,6 +191,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/WebsocketServerConnectionTest.cpp
         test/unit/WebsocketServerTest.cpp
         test/unit/ListeningRpcCommunicatorTest.cpp
+        test/unit/CustomMatchersTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
@@ -191,6 +206,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     streamr_enable_imports(streamr-dht-test-unit)
     target_link_libraries(streamr-dht-test-unit
         PUBLIC streamr-dht
+        PUBLIC streamr-dht-test-utils
         PUBLIC streamr::streamr-logger
         PUBLIC streamr::streamr-eventemitter
         PUBLIC streamr::streamr-utils
@@ -214,6 +230,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     streamr_enable_imports(streamr-dht-test-integration)
     target_link_libraries(streamr-dht-test-integration
         PUBLIC streamr-dht
+        PUBLIC streamr-dht-test-utils
         PUBLIC streamr::streamr-logger
         PUBLIC streamr::streamr-eventemitter
         PUBLIC streamr::streamr-utils
