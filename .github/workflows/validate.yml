@@ -29,13 +29,15 @@ jobs:
         # revisit when GA.
         os: [macos-26, ubuntu-latest, linux-arm64-runner]
         # The standalone-package check (each package built in its own tree)
-        # validates packaging structure, which is host-independent — the
-        # macOS leg runs it, the Linux legs build only the root tree and
-        # lint against its compile database (MODERNIZATION.md "After the
-        # consolidation: CI speed", item 1).
+        # validates packaging structure, which is host-independent — and
+        # the iOS job necessarily builds every package standalone (the
+        # XCFramework is assembled from the per-package outputs), so it
+        # carries that check. All validate legs build only the root tree
+        # and lint against its compile database (MODERNIZATION.md "After
+        # the consolidation: CI speed", item 1; owner decision 2026-07-06).
         include:
           - os: macos-26
-            install_extra: ""
+            install_extra: "--no-standalone"
           - os: ubuntu-latest
             install_extra: "--no-standalone"
           - os: linux-arm64-runner

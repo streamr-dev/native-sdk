@@ -1214,13 +1214,15 @@ the build structure the caches would key on:
 **IMPLEMENTED (items 1 + 2, after C-8 and the wrapper modules, as
 planned):**
 - `install.sh --no-standalone` skips the per-package standalone builds;
-  the ubuntu and linux-arm64 legs pass it (via INSTALL_EXTRA_FLAGS in
-  validate.yml) and lint against the ROOT tree's compile database —
-  every package lint.sh falls back to `../../build` when its standalone
-  database is absent. The macOS leg keeps the full standalone loop as
-  the packaging-structure check; iOS keeps it because the XCFramework
-  is assembled from the per-package outputs (`--no-standalone --ios` is
-  rejected).
+  ALL validate legs pass it (via INSTALL_EXTRA_FLAGS in validate.yml)
+  and lint against the ROOT tree's compile database — every package
+  lint.sh falls back to `../../build` when its standalone database is
+  absent. The packaging-structure check is carried by the iOS job,
+  which builds every package standalone by construction (the
+  XCFramework is assembled from the per-package outputs;
+  `--no-standalone --ios` is rejected). Owner decision 2026-07-06: the
+  macOS leg originally kept the loop as the designated check; that
+  duplication was dropped since the iOS job already covers it.
 - The cached-install action now caches the ROOT build tree per platform
   (key: platform + vcpkg SHA + commit; prefix restore-keys), excluding
   vcpkg_installed (own cache) and the per-package trees (8 × 0.5–1.5 GB
