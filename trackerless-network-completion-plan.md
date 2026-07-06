@@ -278,6 +278,23 @@ double as a check that the existing endpoint state machine handles the simultane
 
 ### Milestone A — DHT core logic (runs on fake/simulator transport, no new connectivity)
 
+**Phase A0 — Connection-layer locking-discipline hardening.**
+Added after phase 0.3: the ported simultaneous-connect tests exposed (and partially fixed)
+lifetime and locking bugs in the connection layer that TypeScript's single-threaded runtime
+never hits. Fixed in 0.3: discarded handler tokens in `ConnectingEndpointState`; raw-`this`
+captures in the handshakers' event handlers (now weak self-captures registered after
+construction); the `waitForCondition` poller lifetime. Remaining, diagnosed under
+`--gtest_repeat` stress (single runs are stable): two ABBA lock-order inversions —
+(1) main thread `Endpoint::mutex → state mutex` vs. dispatcher
+`state mutex → Endpoint::mutex` (a connected-event handler in `ConnectingEndpointState`
+drives the endpoint while a send holds it), and (2) `ConnectionManager::endpointsMutex →
+Endpoint::mutex` (acceptNewConnection/setConnecting) vs. `Endpoint::mutex → endpointsMutex`
+(handleDisconnect → removeSelfFromContainer). The fix is a locking-policy pass over
+Endpoint/EndpointStates/ConnectionManager — one mutex per endpoint state machine, and no
+call-outs (emits, container callbacks) while holding any of these locks — plus a TSAN CI leg
+and `--gtest_repeat` stress runs as the acceptance test. Prerequisite for scaling the
+simulator-based integration tests in the rest of milestone A.
+
 **Phase A1 — Identifiers, distance, contact lists.**
 New classes: `Contact`, `ContactList`, `SortedContactList`, `RandomContactList`,
 `RingContactList`, ring identifiers/distance, `getClosestNodes`, `getPeerDistance` (raw

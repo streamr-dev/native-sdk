@@ -71,40 +71,53 @@ public:
         SLogger::debug(
             "OutgoingHandshaker() created for " +
             this->targetPeerDescriptor.DebugString());
+    }
+
+    // Called by newInstance() right after construction — see the note
+    // on Handshaker::registerBaseEventHandlers() for why the handlers
+    // hold weak references instead of raw `this`.
+    void registerEventHandlers() {
+        std::weak_ptr<OutgoingHandshaker> weakSelf =
+            this->sharedFromThis<OutgoingHandshaker>();
         // send handshake request when the connection is established
         this->connectedHandlerToken =
-            this->connection->once<connectionevents::Connected>([this]() {
-                this->sendHandshakeRequest(this->targetPeerDescriptor);
+            this->connection->once<connectionevents::Connected>([weakSelf]() {
+                if (auto self = weakSelf.lock()) {
+                    self->sendHandshakeRequest(self->targetPeerDescriptor);
+                }
             });
 
         // disconection of the connection will close the pending connection
         this->disconnectedHandlerToken =
             this->connection->once<connectionevents::Disconnected>(
-                [this](
+                [weakSelf](
                     bool gracefulLeave,
                     uint64_t /*code*/,
                     const std::string& /*reason*/) {
-                    auto self = this->sharedFromThis<OutgoingHandshaker>();
-                    this->pendingConnection->close(gracefulLeave);
-                    stopHandshaker();
+                    if (auto self = weakSelf.lock()) {
+                        self->pendingConnection->close(gracefulLeave);
+                        self->stopHandshaker();
+                    }
                 });
 
         this->errorHandlerToken =
             this->connection->once<connectionevents::Error>(
-                [this](const std::string& name) {
+                [weakSelf](const std::string& name) {
                     SLogger::error("OutgoingHandshaker got error: " + name);
-                    auto self = this->sharedFromThis<OutgoingHandshaker>();
-                    this->pendingConnection->onError(
-                        std::make_exception_ptr(std::runtime_error(name)));
+                    if (auto self = weakSelf.lock()) {
+                        self->pendingConnection->onError(
+                            std::make_exception_ptr(std::runtime_error(name)));
+                    }
                 });
         // disconnecting pending connection will close the connection
         this->pendingDisconnectedHandlerToken =
             this->pendingConnection
                 ->once<pendingconnectionevents::Disconnected>(
-                    [this](bool /*gracefulLeave*/) {
-                        auto self = this->sharedFromThis<OutgoingHandshaker>();
-                        this->connection->close(false);
-                        stopHandshaker();
+                    [weakSelf](bool /*gracefulLeave*/) {
+                        if (auto self = weakSelf.lock()) {
+                            self->connection->close(false);
+                            self->stopHandshaker();
+                        }
                     });
     }
 
@@ -113,12 +126,15 @@ public:
         const std::shared_ptr<Connection>& connection,
         const PeerDescriptor& targetPeerDescriptor,
         const std::shared_ptr<IPendingConnection>& pendingConnection) {
-        return std::make_shared<OutgoingHandshaker>(
+        auto instance = std::make_shared<OutgoingHandshaker>(
             Private{},
             localPeerDescriptor,
             connection,
             targetPeerDescriptor,
             pendingConnection);
+        instance->registerBaseEventHandlers();
+        instance->registerEventHandlers();
+        return instance;
     }
 
     [[nodiscard]] std::shared_ptr<IPendingConnection> getPendingConnection()

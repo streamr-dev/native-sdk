@@ -57,12 +57,17 @@ private:
     }
 
     void setupPendingConnectionDisconnectedHandler() {
+        // weak capture: see Handshaker::registerBaseEventHandlers()
+        std::weak_ptr<IncomingHandshaker> weakSelf =
+            this->sharedFromThis<IncomingHandshaker>();
         this->pendingDisconnectedHandlerToken =
             this->pendingConnection
                 ->once<pendingconnectionevents::Disconnected>(
-                    [this](bool /* gracefulLeave */) {
-                        this->connection->close(false);
-                        this->stopHandshaker();
+                    [weakSelf](bool /* gracefulLeave */) {
+                        if (auto self = weakSelf.lock()) {
+                            self->connection->close(false);
+                            self->stopHandshaker();
+                        }
                     });
     }
 
@@ -78,18 +83,27 @@ public:
             onNewConnectionCallback = std::nullopt)
         : Handshaker(localPeerDescriptor, connection),
           getPendingConnectionCallback(std::move(getPendingConnectionCallback)),
-          onNewConnectionCallback(onNewConnectionCallback) {
+          onNewConnectionCallback(onNewConnectionCallback) {}
+
+    // Called by newInstance() right after construction — see the note
+    // on Handshaker::registerBaseEventHandlers() for why the handlers
+    // hold weak references instead of raw `this`.
+    void registerEventHandlers() {
+        std::weak_ptr<IncomingHandshaker> weakSelf =
+            this->sharedFromThis<IncomingHandshaker>();
         // disconection of the connection will close the pending connection
         this->disconnectedHandlerToken =
             this->connection->once<connectionevents::Disconnected>(
-                [this](
+                [weakSelf](
                     bool gracefulLeave,
                     uint64_t /*code*/,
                     const std::string& /*reason*/) {
-                    if (this->pendingConnection) {
-                        this->pendingConnection->close(gracefulLeave);
+                    if (auto self = weakSelf.lock()) {
+                        if (self->pendingConnection) {
+                            self->pendingConnection->close(gracefulLeave);
+                        }
+                        self->stopHandshaker();
                     }
-                    this->stopHandshaker();
                 });
 
         // disconnecting pending connection will close the connection
@@ -106,12 +120,15 @@ public:
         const std::optional<
             std::function<bool(std::shared_ptr<IPendingConnection>)>>&
             onNewConnectionCallback = std::nullopt) {
-        return std::make_shared<IncomingHandshaker>(
+        auto instance = std::make_shared<IncomingHandshaker>(
             Private{},
             localPeerDescriptor,
             connection,
             std::move(getPendingConnectionCallback),
             onNewConnectionCallback);
+        instance->registerBaseEventHandlers();
+        instance->registerEventHandlers();
+        return instance;
     }
 
     [[nodiscard]] std::shared_ptr<IPendingConnection> getPendingConnection()

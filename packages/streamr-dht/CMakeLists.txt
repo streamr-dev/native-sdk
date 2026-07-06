@@ -192,6 +192,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/WebsocketServerTest.cpp
         test/unit/ListeningRpcCommunicatorTest.cpp
         test/unit/CustomMatchersTest.cpp
+        test/unit/SimulatorTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
@@ -221,6 +222,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     add_executable(streamr-dht-test-integration
         test/integration/WebsocketClientServerTest.cpp
         test/integration/ConnectionLockingTest.cpp
+        test/integration/SimultaneousConnectionsTest.cpp
+        test/integration/ConnectionManagerIntegrationTest.cpp
     )
 
     target_include_directories(streamr-dht-test-integration
