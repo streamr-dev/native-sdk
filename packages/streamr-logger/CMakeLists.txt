@@ -56,27 +56,32 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
   streamr_enable_imports(env_category_tests)
   target_link_libraries(env_category_tests PRIVATE streamr-logger)
   enable_testing()
+  # COMMAND by target name: resolves to the binary built in THIS tree —
+  # correct in both the root single-tree build and the standalone build.
+  # (The former hard-coded ${CMAKE_CURRENT_LIST_DIR}/build/... path made
+  # the root-tree ctest silently run the STANDALONE binary; surfaced by
+  # the --no-standalone CI legs, which have no standalone dirs.)
   add_test(
     NAME env_category_fatal_and_info_log_test
-    COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 1
+    COMMAND env_category_tests 1
   )
   set_property(TEST env_category_fatal_and_info_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
 
   add_test(
     NAME env_category_fatal_and_fatal_log_test
-    COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 2
+    COMMAND env_category_tests 2
   )
   set_property(TEST env_category_fatal_and_fatal_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
 
   add_test(
     NAME env_category_fatal_and_error_log_test
-    COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 3
+    COMMAND env_category_tests 3
   )
   set_property(TEST env_category_fatal_and_error_log_test PROPERTY ENVIRONMENT "LOG_LEVEL_test=fatal")
 
   add_test(
     NAME env_category_wrongly_written_as_fatal_and_info_log_test
-    COMMAND "${CMAKE_CURRENT_LIST_DIR}/build/env_category_tests" 4
+    COMMAND env_category_tests 4
   )
   set_property(TEST env_category_wrongly_written_as_fatal_and_info_log_test PROPERTY ENVIRONMENT "LOG_LEVEL=\"\"")
 endif()
