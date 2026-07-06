@@ -63,33 +63,43 @@ public:
         auto self = sharedFromThis<ConnectingEndpointState>();
         std::scoped_lock lock(this->connectingEndpointStateMutex);
         this->pendingConnection = pendingConnection;
-        this->pendingConnection->on<pendingconnectionevents::Disconnected>(
-            [this](bool gracefulLeave) {
-                std::shared_ptr<ConnectingEndpointState> self;
-                {
-                    std::scoped_lock lock(this->connectingEndpointStateMutex);
-                    self = sharedFromThis<ConnectingEndpointState>();
-                    self->pendingConnection
-                        ->off<pendingconnectionevents::Disconnected>(
-                            this->disconnectedHandlerToken);
-                    self->pendingConnection
-                        ->off<pendingconnectionevents::Connected>(
-                            this->connectedHandlerToken);
-                }
-                self->stateInterface.handleDisconnect(gracefulLeave);
-            });
-        this->pendingConnection->on<pendingconnectionevents::Connected>(
-            [this](
-                const PeerDescriptor& /*peerDescriptor*/,
-                const std::shared_ptr<Connection>& connection) {
-                std::shared_ptr<ConnectingEndpointState> self;
-                {
-                    std::scoped_lock lock(this->connectingEndpointStateMutex);
-                    self = sharedFromThis<ConnectingEndpointState>();
-                }
-                self->changeToConnectedState(connection);
-                self->stateInterface.handleConnected();
-            });
+        // The returned tokens MUST be stored: removeEventHandlers()
+        // detaches with them, and a pending connection replaced by the
+        // simultaneous-connect tiebreak (Endpoint::setConnecting) would
+        // otherwise keep driving this state — and through it a possibly
+        // already-destroyed Endpoint — when it later completes or fails
+        // (found by the ported SimultaneousConnections test, phase 0.3).
+        this->disconnectedHandlerToken =
+            this->pendingConnection->on<pendingconnectionevents::Disconnected>(
+                [this](bool gracefulLeave) {
+                    std::shared_ptr<ConnectingEndpointState> self;
+                    {
+                        std::scoped_lock lock(
+                            this->connectingEndpointStateMutex);
+                        self = sharedFromThis<ConnectingEndpointState>();
+                        self->pendingConnection
+                            ->off<pendingconnectionevents::Disconnected>(
+                                this->disconnectedHandlerToken);
+                        self->pendingConnection
+                            ->off<pendingconnectionevents::Connected>(
+                                this->connectedHandlerToken);
+                    }
+                    self->stateInterface.handleDisconnect(gracefulLeave);
+                });
+        this->connectedHandlerToken =
+            this->pendingConnection->on<pendingconnectionevents::Connected>(
+                [this](
+                    const PeerDescriptor& /*peerDescriptor*/,
+                    const std::shared_ptr<Connection>& connection) {
+                    std::shared_ptr<ConnectingEndpointState> self;
+                    {
+                        std::scoped_lock lock(
+                            this->connectingEndpointStateMutex);
+                        self = sharedFromThis<ConnectingEndpointState>();
+                    }
+                    self->changeToConnectedState(connection);
+                    self->stateInterface.handleConnected();
+                });
         SLogger::debug("ConnectingEndpointState::enterState end");
     }
 

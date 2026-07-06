@@ -91,9 +91,23 @@ protected:
     Handshaker(
         const PeerDescriptor& localPeerDescriptor,
         const std::shared_ptr<Connection>& connection)
-        : localPeerDescriptor(localPeerDescriptor), connection(connection) {
+        : localPeerDescriptor(localPeerDescriptor), connection(connection) {}
+
+    // Must be called by the newInstance() factories right after
+    // construction, once the instance is owned by a shared_ptr. The
+    // connection can emit from another thread concurrently with this
+    // handshaker being stopped and destroyed; a `once` handler already
+    // dequeued for invocation survives a concurrent off(), so the
+    // handler must hold a weak reference instead of a raw `this`
+    // (found by the ported SimultaneousConnections test, phase 0.3).
+    void registerBaseEventHandlers() {
+        std::weak_ptr<Handshaker> weakSelf = this->sharedFromThis<Handshaker>();
         this->onDataHandlerToken = this->connection->on<Data>(
-            [this](const std::vector<std::byte>& data) { this->onData(data); });
+            [weakSelf](const std::vector<std::byte>& data) {
+                if (auto self = weakSelf.lock()) {
+                    self->onData(data);
+                }
+            });
     }
 
     Message createHandshakeRequest(const PeerDescriptor& remotePeerDescriptor) {
