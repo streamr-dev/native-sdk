@@ -18,9 +18,20 @@ set (VCPKG_OVERLAY_TRIPLETS ENV{VCPKG_OVERLAY_TRIPLETS})
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
 project(proto-rpc CXX)
-find_package(streamr-logger CONFIG REQUIRED)
-find_package(streamr-eventemitter CONFIG REQUIRED)
-find_package(streamr-utils CONFIG REQUIRED)
+# Sibling monorepo packages: find_package only when the target is not
+# already in this build tree (in the root single-tree build the sibling
+# was added via add_subdirectory — the guard makes the root tree
+# self-contained, so it configures without the standalone per-package
+# build dirs; MODERNIZATION.md "After the consolidation: CI speed").
+if(NOT TARGET streamr::streamr-logger)
+    find_package(streamr-logger CONFIG REQUIRED)
+endif()
+if(NOT TARGET streamr::streamr-eventemitter)
+    find_package(streamr-eventemitter CONFIG REQUIRED)
+endif()
+if(NOT TARGET streamr::streamr-utils)
+    find_package(streamr-utils CONFIG REQUIRED)
+endif()
 find_package(Protobuf REQUIRED)
 find_package(Boost CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)

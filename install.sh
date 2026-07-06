@@ -28,15 +28,32 @@ PLATFORM=""
 ANDROID_ABI="arm64-v8a"
 ANDROID_PLATFORM=24
 
+STANDALONE_PACKAGES=true
+
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --prod) PROD_BUILD=true ;;
         --ios) TARGET_TRIPLET="arm64-ios"; CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/overlaytriplets/arm64-ios.cmake"; PLATFORM="OS64"; CREATE_XCFRAMEWORK=true ;;
         --android) TARGET_TRIPLET="arm64-android"; CHAINLOAD_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake";;
-        *) echo "Unknown parameter passed: $1. Usage: ./install.sh [--prod] [--ios] [--android]"; exit 1 ;;
+        # Skip the per-package standalone builds and build only the root
+        # tree (MODERNIZATION.md "After the consolidation: CI speed"). The
+        # root tree is self-contained — sibling find_package calls are
+        # guarded with if(NOT TARGET ...) in the package CMakeLists — so no
+        # standalone build dirs are needed. The full standalone build
+        # validates that each package works as an independent vcpkg-style
+        # unit; that check is host-independent, so CI runs it on the macOS
+        # leg only and the other host legs pass this flag. Not allowed with
+        # --ios: the XCFramework is assembled from the per-package outputs.
+        --no-standalone) STANDALONE_PACKAGES=false ;;
+        *) echo "Unknown parameter passed: $1. Usage: ./install.sh [--prod] [--ios] [--android] [--no-standalone]"; exit 1 ;;
     esac
     shift
 done
+
+if [ "$STANDALONE_PACKAGES" = false ] && [ "$TARGET_TRIPLET" = "arm64-ios" ]; then
+    echo "Error: --no-standalone cannot be combined with --ios (the XCFramework is built from the per-package outputs)."
+    exit 1
+fi
 
 # Set build type based on the --prod flag
 if [ "$PROD_BUILD" = true ]; then
@@ -61,6 +78,7 @@ else
 fi
 
 # Call build for all monorepo packages in their own build directories
+if [ "$STANDALONE_PACKAGES" = true ]; then
 for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | grep -v ")"); do
     cd packages/$package/build
     if [ -n "$TARGET_TRIPLET" ]; then
@@ -85,6 +103,7 @@ for package in $(cat MonorepoPackages.cmake | grep -v "set(MonorepoPackages" | g
     fi
     cd ../../..
 done
+fi
 
 # Call build for the root project
 echo "Building root project"

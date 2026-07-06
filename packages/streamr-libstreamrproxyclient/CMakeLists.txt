@@ -28,6 +28,14 @@ set (ANDROID_LIBRARY_VERSION ${STREAMRPROXYCLIENT_VERSION})
 
 project(streamr-streamrproxyclient CXX)
 
+# The library target links Folly::folly directly, so find it HERE,
+# unconditionally: it used to arrive only as a side effect of the
+# sibling packages' export configs (which run find_package(folly)), and
+# on iOS the test block below — which also finds folly — is skipped.
+# With the sibling find_package calls guarded out in the root
+# single-tree build, this file must find its own direct dependencies.
+find_package(folly CONFIG REQUIRED)
+
 # C++ modules support (guards, policies, helpers) — must come after
 # project() because it inspects the compiler id.
 include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
@@ -41,10 +49,23 @@ add_library(streamrproxyclient SHARED
 streamr_enable_imports(streamrproxyclient)
 
 set_target_properties(streamrproxyclient PROPERTIES VERSION ${SHAREDLIB_VERSION} SOVERSION ${SHAREDLIB_SOVERSION})
-find_package(streamr-trackerless-network CONFIG REQUIRED)
-find_package(streamr-dht CONFIG REQUIRED)
-find_package(streamr-logger CONFIG REQUIRED)
-find_package(streamr-utils CONFIG REQUIRED)
+# Sibling monorepo packages: find_package only when the target is not
+# already in this build tree (in the root single-tree build the sibling
+# was added via add_subdirectory — the guard makes the root tree
+# self-contained, so it configures without the standalone per-package
+# build dirs; MODERNIZATION.md "After the consolidation: CI speed").
+if(NOT TARGET streamr::streamr-trackerless-network)
+    find_package(streamr-trackerless-network CONFIG REQUIRED)
+endif()
+if(NOT TARGET streamr::streamr-dht)
+    find_package(streamr-dht CONFIG REQUIRED)
+endif()
+if(NOT TARGET streamr::streamr-logger)
+    find_package(streamr-logger CONFIG REQUIRED)
+endif()
+if(NOT TARGET streamr::streamr-utils)
+    find_package(streamr-utils CONFIG REQUIRED)
+endif()
 find_package(ada CONFIG REQUIRED)
 
 target_include_directories(streamrproxyclient PUBLIC include)
