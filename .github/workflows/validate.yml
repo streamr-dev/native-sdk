@@ -13,8 +13,13 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: build-${{ github.head_ref }}
-  cancel-in-progress: true
+  # head_ref is empty on push events, so all main pushes share one group —
+  # with unconditional cancel-in-progress every merge killed the previous
+  # main run mid-flight (observed twice on 2026-07-06), which also kept the
+  # build-tree caches from being saved. PR pushes still cancel their own
+  # superseded runs; main runs are left to finish.
+  group: build-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   install-lint-test:
