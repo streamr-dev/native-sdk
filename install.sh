@@ -37,11 +37,13 @@ while [[ "$#" -gt 0 ]]; do
         --android) TARGET_TRIPLET="arm64-android"; CHAINLOAD_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake";;
         # Skip the per-package standalone builds and build only the root
         # tree (MODERNIZATION.md "After the consolidation: CI speed"). The
-        # standalone builds validate that each package still works as an
-        # independent vcpkg-style unit — that check is host-independent, so
-        # CI runs it on the macOS leg only; the other host legs pass this
-        # flag. Not allowed with --ios: the XCFramework is assembled from
-        # the per-package build outputs.
+        # root tree is self-contained — sibling find_package calls are
+        # guarded with if(NOT TARGET ...) in the package CMakeLists — so no
+        # standalone build dirs are needed. The full standalone build
+        # validates that each package works as an independent vcpkg-style
+        # unit; that check is host-independent, so CI runs it on the macOS
+        # leg only and the other host legs pass this flag. Not allowed with
+        # --ios: the XCFramework is assembled from the per-package outputs.
         --no-standalone) STANDALONE_PACKAGES=false ;;
         *) echo "Unknown parameter passed: $1. Usage: ./install.sh [--prod] [--ios] [--android] [--no-standalone]"; exit 1 ;;
     esac

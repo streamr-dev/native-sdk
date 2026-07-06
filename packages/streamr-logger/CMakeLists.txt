@@ -21,7 +21,14 @@ project(logger CXX)
 
 set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH ON)
 find_package(folly CONFIG REQUIRED)
-find_package(streamr-json CONFIG REQUIRED)
+# Sibling monorepo packages: find_package only when the target is not
+# already in this build tree (in the root single-tree build the sibling
+# was added via add_subdirectory — the guard makes the root tree
+# self-contained, so it configures without the standalone per-package
+# build dirs; MODERNIZATION.md "After the consolidation: CI speed").
+if(NOT TARGET streamr::streamr-json)
+    find_package(streamr-json CONFIG REQUIRED)
+endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

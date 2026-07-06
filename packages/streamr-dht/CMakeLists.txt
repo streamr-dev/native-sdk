@@ -22,10 +22,23 @@ project(dht CXX)
 # add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
 # add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 
-find_package(streamr-utils CONFIG REQUIRED)
-find_package(streamr-logger CONFIG REQUIRED)
-find_package(streamr-proto-rpc CONFIG REQUIRED)
-find_package(streamr-eventemitter CONFIG REQUIRED)
+# Sibling monorepo packages: find_package only when the target is not
+# already in this build tree (in the root single-tree build the sibling
+# was added via add_subdirectory — the guard makes the root tree
+# self-contained, so it configures without the standalone per-package
+# build dirs; MODERNIZATION.md "After the consolidation: CI speed").
+if(NOT TARGET streamr::streamr-utils)
+    find_package(streamr-utils CONFIG REQUIRED)
+endif()
+if(NOT TARGET streamr::streamr-logger)
+    find_package(streamr-logger CONFIG REQUIRED)
+endif()
+if(NOT TARGET streamr::streamr-proto-rpc)
+    find_package(streamr-proto-rpc CONFIG REQUIRED)
+endif()
+if(NOT TARGET streamr::streamr-eventemitter)
+    find_package(streamr-eventemitter CONFIG REQUIRED)
+endif()
 find_package(Protobuf REQUIRED)
 find_package(Boost CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
