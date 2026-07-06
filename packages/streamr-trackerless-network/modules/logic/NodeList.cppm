@@ -10,7 +10,7 @@ module;
 export module streamr.trackerlessnetwork.NodeList;
 
 import streamr.dht.Identifiers;
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;
 
 // Hoisted from the former header (file scope, NOT exported);

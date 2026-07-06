@@ -9,7 +9,7 @@ module;
 
 export module streamr.dht.IPendingConnection;
 
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.dht.Connection;
 export namespace streamr::dht::connection {
 

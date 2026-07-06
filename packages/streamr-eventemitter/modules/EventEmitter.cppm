@@ -1,5 +1,8 @@
-#ifndef STREAMR_EVENTEMITTER_HPP
-#define STREAMR_EVENTEMITTER_HPP
+// Module streamr.eventemitter.EventEmitter
+// CONSOLIDATED from the former header
+// streamr-eventemitter/EventEmitter.hpp (MODERNIZATION.md Phase 2.6):
+// this file is now the source of truth.
+module;
 
 #include <cstddef>
 #include <functional>
@@ -9,7 +12,10 @@
 #include <optional>
 #include <tuple>
 #include <type_traits>
-namespace streamr::eventemitter {
+
+export module streamr.eventemitter.EventEmitter;
+
+export namespace streamr::eventemitter {
 
 // Event class that all events must inherit from.
 // Usage example:
@@ -435,5 +441,3 @@ public:
 };
 
 } // namespace streamr::eventemitter
-
-#endif

@@ -8,7 +8,7 @@ module;
 
 export module streamr.dht.Transport;
 
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.dht.Errors;
 
 // Hoisted from the former header (file scope, NOT exported);

@@ -15,7 +15,7 @@ import streamr.protorpc.test.TestProtosClient;
 import streamr.protorpc.test.WakeUpRpcClient;
 import streamr.protorpc.test.WakeUpRpcServer;
 import streamr.logger.SLogger;
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 
 namespace streamr::protorpc {
 

@@ -13,7 +13,7 @@ module;
 
 export module streamr.utils.waitForCondition;
 
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.utils.AbortController;
 import streamr.utils.AbortableTimers;
 import streamr.utils.waitForEvent;

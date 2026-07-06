@@ -12,9 +12,10 @@
 #                            dirs — their exported configs are needed by the
 #                            root configure)
 #   ./bench.sh incremental [header]
-#                            rebuild after touching a mid-stack header
-#                            (default: streamr-utils/StreamID.hpp, included
-#                            by most dht/trackerless-network TUs)
+#                            rebuild after touching a mid-stack module unit
+#                            (default: streamr-utils modules/StreamID.cppm,
+#                            imported across dht/trackerless-network — the
+#                            headers were consolidated away in Phase 2.6)
 #   ./bench.sh trace         clean build in a separate build-bench-trace/
 #                            tree with -ftime-trace; if ClangBuildAnalyzer is
 #                            installed (brew install clang-build-analyzer),
@@ -69,7 +70,7 @@ case "$MODE" in
     ;;
 
   incremental)
-    HEADER="${2:-packages/streamr-utils/include/streamr-utils/StreamID.hpp}"
+    HEADER="${2:-packages/streamr-utils/modules/StreamID.cppm}"
     if [ ! -f "$HEADER" ]; then
         echo "Error: header not found: $HEADER"
         exit 1

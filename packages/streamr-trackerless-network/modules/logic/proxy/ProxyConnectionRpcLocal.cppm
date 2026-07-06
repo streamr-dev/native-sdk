@@ -15,7 +15,7 @@ import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;
 import streamr.dht.ListeningRpcCommunicator;
 import streamr.dht.protos;
-import streamr.eventemitter;
+import streamr.eventemitter.EventEmitter;
 import streamr.utils.BinaryUtils;
 import streamr.utils.EthereumAddress;
 import streamr.utils.StreamPartID;

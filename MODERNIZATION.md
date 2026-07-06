@@ -1036,12 +1036,55 @@ exactly that. So consolidation walks the dependency chain from the top:
    skip-save-on-exact-hit) is restored verbatim; the first post-merge
    run per platform repopulates the caches (slow once), after which
    Android returns to ~10 min and iOS to ~5 min.
-8. C-8 streamr-eventemitter (+ final bench.sh metrics and memo closure)
+8. **C-8 streamr-eventemitter** ✅ — the single header (the Phase 2.1
+   canary) became the single named sub-module
+   `streamr.eventemitter.EventEmitter`; façade and include/ tree
+   deleted; all 23 importers flipped 1:1. Zero compile errors, zero
+   test changes. bench.sh's incremental default now points at
+   modules/StreamID.cppm (the header it used to touch no longer
+   exists).
 
-One package per PR, `bench.sh` measured at the dht step and at the end
-(the 2.4 lesson: measure before generalizing); headers deleted
-per-package — the compiler itself enforces that nothing still includes
-them.
+### CONSOLIDATION COMPLETE — final metrics and honest closure
+
+The end state holds: **no internal headers anywhere.** `#include`
+survives only for third-party libraries, generated protobuf message
+code (`*.pb.h`), and the public C API header `streamrproxyclient.h` —
+exactly the carve-outs the decision memo defined. Every package is
+named sub-modules, one per former header, no umbrellas; consumers and
+tests import precisely what they use; the compiler enforces the
+dependency DAG that check-include-dag.py used to approximate.
+
+Final bench.sh numbers (Debug root tree with all tests, same machine
+class as the earlier tables; 2026-07-05):
+
+| Metric | 2.0 baseline (headers) | 2.5 façade | **2.6 consolidated** |
+|---|---|---|---|
+| Clean root build | 102 s / 108 TUs | 78–88 s / ~160 TUs | **508 s / 225 TUs** |
+| StreamID touch (module unit vs former header) | 19 s | 32 s | **153–173 s** |
+| SLogger touch (imported by everything) | 62–70 s | 58 s | **392 s** |
+| utils leaf with one importer (Ipv4Helper) | — | — | **152 s** |
+| Test-file touch | — | — | **4 s** |
+
+**Honest reading.** The consolidation delivers its structural goals
+(headers gone, strict module DAG, ODR safety, narrow public surfaces)
+and keeps genuinely narrow edits — tests, code outside the hot import
+cones — at seconds. But wall-clock for clean builds and for edits to
+widely-imported units REGRESSED versus both the header world and the
+façade stage, for two compounding reasons measured here: (i) every one
+of the ~100 real-code module units now parses its own folly-heavy
+global module fragment (the façade stage parsed that code textually
+only where included — its thin units were artificially cheap), and
+(ii) an edited unit's rebuilt BMI invalidates its import cone, which
+rebuilds SERIALLY along the module chains instead of Ninja-parallel as
+textual includers used to. Where the cone is wide (SLogger), the edit
+pays for the world. The remaining lever is NOT architectural — it is
+caching: recompiling only what actually changed, which the module
+graph now makes precise. That is the next (owner-directed) step: CI
+build-directory caching, then a fresh measurement round against these
+numbers.
+
+One package per PR held throughout; headers were deleted per-package —
+the compiler itself enforced that nothing still includes them.
 
 ### `import std` verdict (investigated 2026-07-04, child session)
 Owner-requested experiment on the consolidated trackerless-network
