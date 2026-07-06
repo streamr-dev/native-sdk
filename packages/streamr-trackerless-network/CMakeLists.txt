@@ -134,7 +134,22 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         PUBLIC GTest::gtest
     )
 
+    # Test-only helpers (mock factories) ported from the TS package's
+    # test/utils; a module library of its own so the test targets can
+    # import streamr.trackerlessnetwork.TestUtils.
+    streamr_add_module_library(streamr-trackerless-network-test-utils
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/test/utils
+        FILES ${CMAKE_CURRENT_SOURCE_DIR}/test/utils/TestUtils.cppm)
+    target_include_directories(streamr-trackerless-network-test-utils
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>)
+    target_link_libraries(streamr-trackerless-network-test-utils
+        PUBLIC streamr-trackerless-network
+        PUBLIC streamr::streamr-dht
+        PUBLIC streamr::streamr-utils
+    )
+
     add_executable(streamr-trackerless-network-test-unit
+        test/unit/TestUtilsTest.cpp
         test/unit/ProxyClientTest.cpp
         test/unit/ProxyConnectionRpcLocalTest.cpp
         test/unit/ProxyConnectionRpcRemoteTest.cpp
@@ -160,6 +175,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     streamr_enable_imports(streamr-trackerless-network-test-unit)
     target_link_libraries(streamr-trackerless-network-test-unit
         PUBLIC streamr-trackerless-network
+        PUBLIC streamr-trackerless-network-test-utils
         PUBLIC streamr::streamr-logger
         PUBLIC GTest::gtest
         streamr-trackerless-network-test-main
@@ -184,8 +200,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
      )
      
      if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
-         #include(GoogleTest)
-         # gtest_discover_tests(streamr-trackerless-network-test-unit)
+         include(GoogleTest)
+         gtest_discover_tests(streamr-trackerless-network-test-unit)
          #gtest_discover_tests(streamr-trackerless-network-test-integration)
      
          # DISABLED: this test builds the whole streamr-dev/network TS
