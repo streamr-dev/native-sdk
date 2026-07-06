@@ -46,6 +46,12 @@ public:
     virtual void destroy() = 0;
     virtual const PeerDescriptor& getPeerDescriptor() const = 0;
     virtual void onError(const std::exception_ptr& error) = 0;
+    // Silence this pending connection: after this it emits neither
+    // Connected nor Disconnected. Used when it loses a simultaneous-connect
+    // tie-break, so the eventual close of its underlying connection cannot
+    // drive (or tear down) the endpoint that has moved on to the winning
+    // connection.
+    virtual void replaceAsDuplicate() = 0;
 };
 
 } // namespace streamr::dht::connection

@@ -10,6 +10,7 @@ module;
 
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <tuple>
 #include <utility>
 
@@ -17,8 +18,11 @@ export module streamr.utils.waitForEvent;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.AbortController;
+import streamr.eventemitter.EventEmitter;
 
 export namespace streamr::utils {
+
+using streamr::eventemitter::HandlerToken;
 
 template <typename T>
 struct remove_pointer { // NOLINT
@@ -60,17 +64,40 @@ waitForEvent(
     EmitterType* emitter,
     std::chrono::milliseconds timeout = defaultTimeout,
     AbortSignal* abortSignal = nullptr) {
-    Waiter<typename remove_pointer<EventType>::type::ArgumentTypes> waiter;
-    emitter->template once<typename remove_pointer<EventType>::type>(
-        waiter.function);
+    using RealEvent = typename remove_pointer<EventType>::type;
+    // The waiter is heap-owned and CO-OWNED by the registered listener,
+    // so a delivery that races the timeout or cancellation operates on a
+    // live promise. The old code registered a listener capturing a stack
+    // waiter and never removed it on the timeout path: once the coroutine
+    // frame unwound, a later emit invoked the dangling listener and
+    // called setValue on the destroyed promise (folly Promise.h
+    // "Check failed: state_" abort, hit in the connection-teardown stress
+    // runs, phase A0).
+    auto waiter = std::make_shared<Waiter<typename RealEvent::ArgumentTypes>>();
+    auto token = emitter->template once<RealEvent>([waiter](auto&&... args) {
+        waiter->function(std::forward<decltype(args)>(args)...);
+    });
+    // Remove the listener on every exit path. When the event fired, once()
+    // already removed it and this off() is a no-op; on the timeout and
+    // cancellation paths this is what unregisters it. A listener
+    // invocation already in flight on another thread keeps the waiter
+    // alive through its own copy of the callable, so this never races the
+    // waiter's destruction. The remover is declared after the waiter so
+    // it is destroyed (and unregisters) before the waiter shared_ptr in
+    // this frame drops.
+    struct Remover {
+        EmitterType* emitter;
+        HandlerToken token;
+        ~Remover() { emitter->template off<RealEvent>(token); }
+    } remover{emitter, token};
     if (abortSignal) {
         co_return co_await streamr::utils::co_withCancellation(
             abortSignal->getCancellationToken(),
             folly::coro::timeout(
-                std::move(waiter.promiseContract.second), timeout));
+                std::move(waiter->promiseContract.second), timeout));
     }
     co_return co_await folly::coro::timeout(
-        std::move(waiter.promiseContract.second), timeout);
+        std::move(waiter->promiseContract.second), timeout);
 }
 
 } // namespace streamr::utils

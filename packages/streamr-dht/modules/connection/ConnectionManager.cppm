@@ -103,13 +103,19 @@ private:
     std::atomic<ConnectionManagerState> state = ConnectionManagerState::IDLE;
     std::map<DhtAddress, std::shared_ptr<Endpoint>> endpoints;
     std::recursive_mutex endpointsMutex;
+    // Monotonic counter handed to Endpoint::setConnecting so an endpoint
+    // adopts pending connections in tie-break decision order even when the
+    // setConnecting() calls race across threads; guarded by endpointsMutex.
+    // See acceptNewConnection().
+    uint64_t connectingSequenceCounter = 0;
 
-    void addEndpoint(
-        const std::shared_ptr<IPendingConnection>& pendingConnection) {
-        SLogger::debug("ConnectionManager::addEndpoint start");
-
-        auto peerDescriptor = pendingConnection->getPeerDescriptor();
-        auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
+    // Constructs an Endpoint for the peer and wires its listeners; pure
+    // construction with no call-outs, so acceptNewConnection() may run
+    // it while holding endpointsMutex. The caller inserts the endpoint
+    // into the container and starts it connecting.
+    [[nodiscard]] std::shared_ptr<Endpoint> createEndpoint(
+        const PeerDescriptor& peerDescriptor, const DhtAddress& nodeId) {
+        SLogger::debug("ConnectionManager::createEndpoint start");
 
         auto endpoint = Endpoint::newInstance(
             peerDescriptor, [this, peerDescriptor, nodeId]() {
@@ -134,14 +140,8 @@ private:
             this->emit<transport::transportevents::Connected>(peerDescriptor);
         });
 
-        {
-            SLogger::debug("Trying to acquire mutex lock in addEndpoint");
-            std::scoped_lock lock(this->endpointsMutex);
-            SLogger::debug("Acquired mutex lock in addEndpoint");
-            this->endpoints[nodeId] = endpoint;
-        }
-        endpoint->changeToConnectingState(pendingConnection);
-        SLogger::debug("ConnectionManager::addEndpoint end");
+        SLogger::debug("ConnectionManager::createEndpoint end");
+        return endpoint;
     }
 
 public:
@@ -247,7 +247,10 @@ public:
         SLogger::trace("Starting ConnectionManager...");
         this->connectorFacade->start(
             [this](const std::shared_ptr<IPendingConnection>& connection) {
-                return this->onNewConnection(connection);
+                // Connections handed to us by the connector are incoming,
+                // i.e. initiated by the remote peer.
+                return this->onNewConnection(
+                    connection, /*isLocalInitiated=*/false);
             },
             [this](const DhtAddress& nodeId) {
                 return this->hasConnection(nodeId);
@@ -335,44 +338,62 @@ public:
         SLogger::trace("Sending message: " + debugMessage);
         SLogger::debug("Traced sending message details");
 
+        // endpointsMutex is held only for the container lookups;
+        // createConnection/onNewConnection and the endpoint queries lead
+        // into the connector facade and the endpoint state machine, and
+        // holding the container lock across them nests it with the
+        // endpoint mutex (phase-A0 locking policy: no call-outs under
+        // endpointsMutex).
         std::shared_ptr<Endpoint> endpoint;
         {
             SLogger::debug("Trying to acquire mutex lock in send");
             std::scoped_lock lock(this->endpointsMutex);
             SLogger::debug("Acquired mutex lock in send");
-
-            if (!this->endpoints.contains(nodeId)) {
-                SLogger::debug("Node ID not found in endpoints");
-                if (sendOptions.connect) {
-                    SLogger::debug("Creating new connection");
-                    std::shared_ptr<IPendingConnection> connection =
-                        this->connectorFacade->createConnection(peerDescriptor);
-
-                    SLogger::debug("Created new connection");
-                    this->onNewConnection(connection);
-                    SLogger::debug("Handled new connection");
-                    if (!this->endpoints.contains(nodeId)) {
-                        SLogger::debug(
-                            "Node ID not found in endpoints after creating new connection, this means that the connection failed");
-                        throw SendFailed(
-                            "No connection to target, connection failed");
-                    }
-                } else {
-                    SLogger::debug("Throwing SendFailed exception");
-                    throw SendFailed(
-                        "No connection to target, connect flag is false");
-                }
-            } else if (
-                !this->endpoints.at(nodeId)->isConnected() &&
-                !sendOptions.connect) {
-                SLogger::debug(
-                    "Throwing SendFailed exception due to disconnected endpoint");
+            const auto it = this->endpoints.find(nodeId);
+            if (it != this->endpoints.end()) {
+                endpoint = it->second;
+            }
+        }
+        if (!endpoint) {
+            SLogger::debug("Node ID not found in endpoints");
+            if (!sendOptions.connect) {
+                SLogger::debug("Throwing SendFailed exception");
                 throw SendFailed(
                     "No connection to target, connect flag is false");
             }
-            endpoint = this->endpoints.at(nodeId);
-            SLogger::debug("Passed connection checks");
+            SLogger::debug("Creating new connection");
+            std::shared_ptr<IPendingConnection> connection =
+                this->connectorFacade->createConnection(peerDescriptor);
+            SLogger::debug("Created new connection");
+            // This connection is outgoing (locally initiated). If the
+            // tie-break rejects it — a concurrent incoming connection from
+            // the same peer already won and owns the endpoint — discard the
+            // outgoing one we just created and fall through to that
+            // endpoint. (Simultaneous connect; see acceptNewConnection.)
+            const bool accepted =
+                this->onNewConnection(connection, /*isLocalInitiated=*/true);
+            SLogger::debug("Handled new connection");
+            if (!accepted) {
+                connection->close(false);
+            }
+            {
+                std::scoped_lock lock(this->endpointsMutex);
+                const auto it = this->endpoints.find(nodeId);
+                if (it != this->endpoints.end()) {
+                    endpoint = it->second;
+                }
+            }
+            if (!endpoint) {
+                SLogger::debug(
+                    "Node ID not found in endpoints after creating new connection, this means that the connection failed");
+                throw SendFailed("No connection to target, connection failed");
+            }
+        } else if (!endpoint->isConnected() && !sendOptions.connect) {
+            SLogger::debug(
+                "Throwing SendFailed exception due to disconnected endpoint");
+            throw SendFailed("No connection to target, connect flag is false");
         }
+        SLogger::debug("Passed connection checks");
         size_t nBytes = messageWithSource.ByteSizeLong();
         SLogger::debug("Calculated message size");
         if (nBytes == 0) {
@@ -522,9 +543,17 @@ public:
     }
 
     [[nodiscard]] std::vector<PeerDescriptor> getConnections() override {
-        std::scoped_lock lock(this->endpointsMutex);
-        return this->endpoints | std::views::values |
-            std::views::filter([](const auto& endpoint) {
+        // Snapshot the endpoints under the container lock, query them
+        // after releasing it: isConnected() takes the endpoint
+        // state-machine mutex, and nesting it under endpointsMutex is
+        // against the phase-A0 locking policy.
+        std::vector<std::shared_ptr<Endpoint>> endpointsSnapshot;
+        {
+            std::scoped_lock lock(this->endpointsMutex);
+            endpointsSnapshot = this->endpoints | std::views::values |
+                std::ranges::to<std::vector>();
+        }
+        return endpointsSnapshot | std::views::filter([](const auto& endpoint) {
                    return endpoint->isConnected();
                }) |
             std::views::transform([](const auto& endpoint) {
@@ -534,14 +563,18 @@ public:
     }
 
 private:
+    // isLocalInitiated: true for a connection we created ourselves
+    // (send() -> createConnection, outgoing), false for one handed to us
+    // by the connector (incoming, initiated by the remote peer).
     bool onNewConnection(
-        const std::shared_ptr<IPendingConnection>& connection) {
+        const std::shared_ptr<IPendingConnection>& connection,
+        bool isLocalInitiated) {
         if (this->state == ConnectionManagerState::STOPPED) {
             return false;
         }
         SLogger::trace("onNewConnection()");
 
-        return this->acceptNewConnection(connection);
+        return this->acceptNewConnection(connection, isLocalInitiated);
 
         // connection.once('connected', (peerDescriptor: PeerDescriptor,
         // connection: IConnection) => this.onConnected(peerDescriptor,
@@ -552,29 +585,75 @@ private:
     }
 
     bool acceptNewConnection(
-        const std::shared_ptr<IPendingConnection>& newConnection) {
-        const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
-            newConnection->getPeerDescriptor());
+        const std::shared_ptr<IPendingConnection>& newConnection,
+        bool isLocalInitiated) {
+        const auto peerDescriptor = newConnection->getPeerDescriptor();
+        const auto nodeId =
+            Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
+        // Resolved before taking endpointsMutex: getLocalPeerDescriptor()
+        // calls out into the connector facade.
+        const auto localNodeId = Identifiers::getNodeIdFromPeerDescriptor(
+            this->getLocalPeerDescriptor());
         SLogger::debug("ConnectionManager::acceptNewConnection()");
 
+        // Simultaneous connect: both peers must converge on the SAME
+        // physical connection, otherwise one direction's traffic is
+        // delivered to a connection the other side is not listening on.
+        // The convention is to keep the connection initiated by the
+        // offerer. TS decides this with `getOfferer == remote` alone,
+        // which is only correct because its single-threaded runtime
+        // guarantees a node registers its own outgoing connection before
+        // it ever processes the peer's incoming one. Here the connector's
+        // dispatcher thread can deliver the incoming connection before the
+        // main thread's send() registers the outgoing one; deciding on
+        // getOfferer alone would then let the non-offerer replace the
+        // offerer's (incoming) connection with its own (outgoing) one, and
+        // the two nodes would settle on different connections. So the
+        // tie-break is made direction-aware and therefore order-
+        // independent: the winning connection is the offerer's — the local
+        // node's own outgoing connection when it is the offerer, the
+        // remote's incoming connection when it is not.
+        const bool localIsOfferer =
+            OffererHelper::getOfferer(localNodeId, nodeId) == Offerer::LOCAL;
+        const bool newConnectionWins = (isLocalInitiated == localIsOfferer);
+
+        // The exists-check and the insert happen under one lock hold, so
+        // two racing accepts for the same peer cannot both insert (the
+        // second one would silently orphan the first endpoint). The
+        // endpoint calls (setConnecting) run after the lock is released:
+        // they take the endpoint's state-machine mutex and lead to
+        // call-outs, and holding endpointsMutex across them was one half
+        // of the phase-A0 ABBA inversion (the other half being
+        // handleDisconnect -> removeSelfFromContainer, which now runs
+        // without the state-machine mutex held).
+        std::shared_ptr<Endpoint> existingEndpoint;
+        std::shared_ptr<Endpoint> createdEndpoint;
+        uint64_t sequenceNumber = 0;
         {
             SLogger::debug("ConnectionManager::acceptNewConnection() start");
             std::scoped_lock lock(this->endpointsMutex);
             SLogger::debug("Acquired mutex lock in acceptNewConnection");
 
-            if (this->endpoints.contains(nodeId)) {
-                if (OffererHelper::getOfferer(
-                        Identifiers::getNodeIdFromPeerDescriptor(
-                            this->getLocalPeerDescriptor()),
-                        nodeId) == Offerer::REMOTE) {
-                    this->endpoints.at(nodeId)->setConnecting(newConnection);
-                    return true;
+            const auto it = this->endpoints.find(nodeId);
+            if (it != this->endpoints.end()) {
+                if (!newConnectionWins) {
+                    return false;
                 }
-                return false;
+                existingEndpoint = it->second;
+            } else {
+                createdEndpoint = this->createEndpoint(peerDescriptor, nodeId);
+                this->endpoints.emplace(nodeId, createdEndpoint);
             }
+            // Assigned in decision order under the lock; the endpoint uses
+            // it to ignore an adoption that a thread race would otherwise
+            // apply out of order.
+            sequenceNumber = ++this->connectingSequenceCounter;
         }
-        SLogger::debug("Calling addEndpoint() in acceptNewConnection()");
-        this->addEndpoint(newConnection);
+        if (existingEndpoint) {
+            existingEndpoint->setConnecting(newConnection, sequenceNumber);
+            return true;
+        }
+        createdEndpoint->setConnecting(newConnection, sequenceNumber);
         SLogger::trace(nodeId + " added to connections at acceptNewConnection");
         return true;
     }

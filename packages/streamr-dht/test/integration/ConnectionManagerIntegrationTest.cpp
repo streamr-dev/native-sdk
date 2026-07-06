@@ -39,7 +39,8 @@ namespace {
 
 constexpr auto serviceId = "demo";
 
-void expectCondition(std::function<bool()>&& condition) {
+void expectCondition(const char* label, std::function<bool()>&& condition) {
+    SCOPED_TRACE(label);
     auto task = waitForCondition(std::move(condition));
     EXPECT_NO_THROW(streamr::utils::blockingWait(std::move(task)));
 }
@@ -98,15 +99,20 @@ TEST(
     msg.mutable_targetdescriptor()->CopyFrom(peerDescriptor4);
     connectionManager3->send(msg, SendOptions{});
 
-    expectCondition([&dataReceived]() { return dataReceived.load(); });
-    expectCondition([&connected3]() { return connected3.load(); });
-    expectCondition([&connected4]() { return connected4.load(); });
+    expectCondition(
+        "dataReceived", [&dataReceived]() { return dataReceived.load(); });
+    expectCondition(
+        "connected3", [&connected3]() { return connected3.load(); });
+    expectCondition(
+        "connected4", [&connected4]() { return connected4.load(); });
 
     // disconnect through the public API (see the header comment)
     connectionManager3->stop();
 
-    expectCondition([&disconnected3]() { return disconnected3.load(); });
-    expectCondition([&disconnected4]() { return disconnected4.load(); });
+    expectCondition(
+        "disconnected3", [&disconnected3]() { return disconnected3.load(); });
+    expectCondition(
+        "disconnected4", [&disconnected4]() { return disconnected4.load(); });
 
     connectionManager4->stop();
     simulator2.stop();

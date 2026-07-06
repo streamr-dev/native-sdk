@@ -27,6 +27,8 @@ using streamr::dht::connection::Connection;
 using streamr::dht::connection::IPendingConnection;
 using streamr::dht::helpers::SendFailed;
 
+// All methods are called with the state-machine mutex held; see
+// EndpointState for the contract.
 class InitialEndpointState : public EndpointState {
 private:
     EndpointStateInterface& stateInterface;
@@ -50,31 +52,27 @@ public:
         SLogger::debug("InitialEndpointState destructor");
     }
 
-    void close(bool /*graceful*/) override {
-        SLogger::debug("InitialEndpointState::close start");
-        SLogger::debug("InitialEndpointState::close end");
+    [[nodiscard]] DeferredCallout close(bool /*graceful*/) override {
+        SLogger::debug("InitialEndpointState::close");
+        return {};
     }
 
     void send(const std::vector<std::byte>& /* data */) override {
-        SLogger::debug("InitialEndpointState::send start");
-        SLogger::debug("InitialEndpointState::send end");
+        SLogger::debug("InitialEndpointState::send");
         throw SendFailed("send() called on endpoint in initial state");
     }
 
-    void changeToConnectingState(
+    [[nodiscard]] DeferredCallout changeToConnectingState(
         const std::shared_ptr<IPendingConnection>& pendingConnection) override {
-        SLogger::debug("InitialEndpointState::changeToConnectingState start");
-
-        auto self = sharedFromThis<InitialEndpointState>();
-        this->stateInterface.changeToConnectingState(pendingConnection);
-
-        SLogger::debug("InitialEndpointState::changeToConnectingState end");
+        SLogger::debug("InitialEndpointState::changeToConnectingState");
+        this->stateInterface.enterConnectingState(pendingConnection);
+        return {};
     }
 
-    void changeToConnectedState(
+    [[nodiscard]] DeferredCallout changeToConnectedState(
         const std::shared_ptr<Connection>& /*connection*/) override {
-        SLogger::debug("InitialEndpointState::changeToConnectedState start");
-        SLogger::debug("InitialEndpointState::changeToConnectedState end");
+        SLogger::debug("InitialEndpointState::changeToConnectedState");
+        return {};
     }
 
     [[nodiscard]] bool isConnected() const override {

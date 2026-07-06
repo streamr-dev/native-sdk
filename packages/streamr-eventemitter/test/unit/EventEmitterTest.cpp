@@ -3,9 +3,12 @@
 #include <future>
 #include <iostream>
 #include <list>
+#include <mutex>
+#include <string>
 #include <string_view>
 #include <thread>
 #include <tuple>
+#include <vector>
 #include <gtest/gtest.h>
 
 import streamr.eventemitter.EventEmitter;
@@ -13,6 +16,7 @@ import streamr.eventemitter.EventEmitter;
 using streamr::eventemitter::Event;
 using streamr::eventemitter::EventEmitter;
 using streamr::eventemitter::HandlerToken;
+using streamr::eventemitter::ReplayEventEmitter;
 
 class EventEmitterTest : public ::testing::Test {
 protected:
@@ -56,6 +60,95 @@ TEST_F(EventEmitterTest, TestEmitMultipleListeners) {
 
     ASSERT_EQ(promise1.get_future().get(), "Hello, world!");
     ASSERT_EQ(promise2.get_future().get(), "Hello, world!");
+}
+
+TEST_F(EventEmitterTest, EachListenerReceivesItsOwnCopyOfMoveSensitiveArgs) {
+    // Regression test: the emit loop must hand each listener its own copy
+    // of the arguments. It used to std::forward the arguments into every
+    // invocation, so the first listener move-constructed its by-value
+    // parameter from the emit arguments and every later listener saw a
+    // moved-from (empty) value.
+    struct Payload : Event<std::vector<std::byte>> {};
+    using Events = std::tuple<Payload>;
+
+    EventEmitter<Events> eventEmitter;
+
+    std::vector<size_t> receivedSizes;
+    std::mutex receivedSizesMutex;
+    auto record = [&receivedSizes,
+                   &receivedSizesMutex](const std::vector<std::byte>& data) {
+        std::lock_guard lock(receivedSizesMutex);
+        receivedSizes.push_back(data.size());
+    };
+    eventEmitter.on<Payload>(record);
+    eventEmitter.on<Payload>(record);
+    eventEmitter.on<Payload>(record);
+
+    constexpr size_t payloadSize = 4;
+    constexpr std::byte fillByte{0x07};
+    std::vector<std::byte> data(payloadSize, fillByte);
+    eventEmitter.emit<Payload>(data);
+
+    ASSERT_EQ(receivedSizes.size(), 3U);
+    for (const auto size : receivedSizes) {
+        EXPECT_EQ(size, payloadSize);
+    }
+}
+
+TEST_F(
+    EventEmitterTest,
+    ReplayEmitterReplaysLatestEventExactlyOnceToLateListener) {
+    struct Greeting : Event<std::string> {};
+    using Events = std::tuple<Greeting>;
+
+    ReplayEventEmitter<Events> eventEmitter;
+    eventEmitter.emit<Greeting>("stored");
+
+    int callCount = 0;
+    std::string lastMessage;
+    eventEmitter.on<Greeting>([&callCount, &lastMessage](std::string message) {
+        ++callCount;
+        lastMessage = std::move(message);
+    });
+
+    EXPECT_EQ(callCount, 1);
+    EXPECT_EQ(lastMessage, "stored");
+}
+
+TEST_F(
+    EventEmitterTest,
+    ReplayEmitterHoldsNoHandlerMutexWhileInvokingReplayHandler) {
+    // The replayed handler must be invoked with NO internal EventEmitter
+    // mutex held, otherwise a handler that takes a user lock deadlocks
+    // ABBA against another thread that holds that user lock and calls
+    // off() (which needs the handler mutex). A same-thread re-entrancy
+    // test cannot detect this — the handler mutex is recursive — so this
+    // uses a second thread: from inside the replay it calls
+    // listenerCount(), which needs the handler mutex. If the replay held
+    // that mutex, the second thread would block until the replay
+    // returned, but the replay waits on the second thread — a deadlock,
+    // caught here as the 2 s timeout rather than a genuine hang.
+    struct Ping : Event<> {};
+    using Events = std::tuple<Ping>;
+
+    ReplayEventEmitter<Events> eventEmitter;
+    eventEmitter.emit<Ping>();
+
+    bool replayInvoked = false;
+    std::future_status otherThreadStatus = std::future_status::timeout;
+    eventEmitter.on<Ping>([&]() {
+        replayInvoked = true;
+        auto future = std::async(std::launch::async, [&eventEmitter]() {
+            return eventEmitter.listenerCount<Ping>();
+        });
+        otherThreadStatus = future.wait_for(std::chrono::seconds(2));
+        if (otherThreadStatus == std::future_status::ready) {
+            [[maybe_unused]] auto count = future.get();
+        }
+    });
+
+    EXPECT_TRUE(replayInvoked);
+    EXPECT_EQ(otherThreadStatus, std::future_status::ready);
 }
 
 TEST_F(EventEmitterTest, TestEmitFromMultipleThreads) {

@@ -54,7 +54,8 @@ PeerDescriptor createPeerDescriptorWithRandomRegion() {
     return descriptor;
 }
 
-void expectCondition(std::function<bool()>&& condition) {
+void expectCondition(const char* label, std::function<bool()>&& condition) {
+    SCOPED_TRACE(label);
     auto task = waitForCondition(std::move(condition));
     EXPECT_NO_THROW(streamr::utils::blockingWait(std::move(task)));
 }
@@ -90,16 +91,18 @@ TEST(SimultaneousConnectionsTest, SimultaneousSimulatedConnection) {
     transport1->send(createBaseMessage(peerDescriptor2), SendOptions{});
     transport2->send(createBaseMessage(peerDescriptor1), SendOptions{});
 
-    expectCondition([&received1]() { return received1.load(); });
-    expectCondition([&received2]() { return received2.load(); });
-    expectCondition([&transport2, &peerDescriptor1]() {
-        return transport2->hasConnection(
-            Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor1));
-    });
-    expectCondition([&transport1, &peerDescriptor2]() {
-        return transport1->hasConnection(
-            Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor2));
-    });
+    expectCondition("received1", [&received1]() { return received1.load(); });
+    expectCondition("received2", [&received2]() { return received2.load(); });
+    expectCondition(
+        "transport2 has connection", [&transport2, &peerDescriptor1]() {
+            return transport2->hasConnection(
+                Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor1));
+        });
+    expectCondition(
+        "transport1 has connection", [&transport1, &peerDescriptor2]() {
+            return transport1->hasConnection(
+                Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor2));
+        });
 
     transport1->stop();
     transport2->stop();
