@@ -129,7 +129,7 @@ public:
 protected:
     void onHandshakeRequest(
         const PeerDescriptor& /*source*/,
-        const std::string& /*version*/,
+        const std::string& /*protocolVersion*/,
         const std::optional<PeerDescriptor>& /*target*/) override {
         SLogger::error(
             "OutgoingHandshaker received a handshake request, this shoud never happen");
@@ -141,8 +141,8 @@ protected:
         if (handshakeResponse.has_error()) {
             this->pendingConnection->close(false);
             stopHandshaker();
-        } else if (!isAcceptedVersion(handshakeResponse.version())) {
-            this->handleFailure(HandshakeError::UNSUPPORTED_VERSION);
+        } else if (!isAcceptedVersion(handshakeResponse.protocolversion())) {
+            this->handleFailure(HandshakeError::UNSUPPORTED_PROTOCOL_VERSION);
         } else {
             this->handleSuccess(handshakeResponse.sourcepeerdescriptor());
         }
@@ -161,7 +161,7 @@ protected:
         this->emit<handshakerevents::HandshakeFailed>(error);
         if (error.has_value() &&
             (error.value() == HandshakeError::INVALID_TARGET_PEER_DESCRIPTOR ||
-             error.value() == HandshakeError::UNSUPPORTED_VERSION)) {
+             error.value() == HandshakeError::UNSUPPORTED_PROTOCOL_VERSION)) {
             SLogger::trace(
                 "handshake failed for outgoing connection, " +
                 Identifiers::getNodeIdFromPeerDescriptor(

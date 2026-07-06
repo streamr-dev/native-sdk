@@ -30,6 +30,11 @@ private:
     std::recursive_mutex remoteLocksMutex;
     std::map<DhtAddress, std::set<LockID>> weakLocks;
     std::recursive_mutex weakLocksMutex;
+    // Connections whose remote end has requested privacy (setPrivate RPC);
+    // not locks, but tracked here like the TS version does so the same
+    // class answers both "is locked" and "is private".
+    std::set<DhtAddress> remotePrivateConnections;
+    std::recursive_mutex remotePrivateConnectionsMutex;
 
 public:
     [[nodiscard]] size_t getLocalLockedConnectionCount() {
@@ -125,6 +130,26 @@ public:
                 this->remoteLocks.erase(id);
             }
         }
+    }
+
+    void addPrivate(const DhtAddress& id) {
+        std::scoped_lock lock(this->remotePrivateConnectionsMutex);
+        this->remotePrivateConnections.insert(id);
+    }
+
+    void removePrivate(const DhtAddress& id) {
+        std::scoped_lock lock(this->remotePrivateConnectionsMutex);
+        this->remotePrivateConnections.erase(id);
+    }
+
+    [[nodiscard]] std::set<DhtAddress> getPrivateConnections() {
+        std::scoped_lock lock(this->remotePrivateConnectionsMutex);
+        return this->remotePrivateConnections;
+    }
+
+    [[nodiscard]] bool isPrivate(const DhtAddress& id) {
+        std::scoped_lock lock(this->remotePrivateConnectionsMutex);
+        return this->remotePrivateConnections.contains(id);
     }
 
     void removeWeakLocked(const DhtAddress& id, const LockID& lockId) {

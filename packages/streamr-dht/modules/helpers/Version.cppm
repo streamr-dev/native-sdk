@@ -19,6 +19,10 @@ struct VersionNumber {
 class Version {
 public:
     static constexpr auto localProtocolVersion = "1.1";
+    // Sent in HandshakeRequest/Response applicationVersion (informational,
+    // never used for compatibility checks); the TS implementation sends its
+    // package version here.
+    static constexpr auto localApplicationVersion = "1.0.0";
 
     static bool isMaybeSupportedVersion(const std::string& remoteVersion) {
         const auto localVersionNumber = parseVersion(localProtocolVersion);

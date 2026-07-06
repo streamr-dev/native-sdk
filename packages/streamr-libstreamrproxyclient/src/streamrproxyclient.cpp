@@ -616,7 +616,7 @@ public:
                 signaturePayload, ethereumPrivateKey);
 
             message.set_signature(signature);
-            message.set_signaturetype(SignatureType::SECP256K1);
+            message.set_signaturetype(SignatureType::ECDSA_SECP256K1_EVM);
             SLogger::trace(
                 "Signature in hex: \"" +
                 BinaryUtils::binaryStringToHex(signature) + "\"");

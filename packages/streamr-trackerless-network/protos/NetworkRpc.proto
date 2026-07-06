@@ -3,7 +3,6 @@ syntax = "proto3";
 option optimize_for = CODE_SIZE;
 
 import "google/protobuf/empty.proto";
-import "google/protobuf/any.proto";
 import "packages/dht/protos/DhtRpc.proto";
 
 service ContentDeliveryRpc {
@@ -33,6 +32,12 @@ service NodeInfoRpc {
   rpc getInfo (NodeInfoRequest) returns (NodeInfoResponse);
 }
 
+service PlumtreeRpc {
+  rpc pauseNeighbor (PauseNeighborRequest) returns (PauseNeighborResponse);
+  rpc resumeNeighbor (ResumeNeighborRequest) returns (google.protobuf.Empty);
+  rpc sendMetadata (MessageID) returns (google.protobuf.Empty);
+}
+
 message MessageID {
   string streamId = 1;
   int32 streamPartition = 2;
@@ -57,10 +62,17 @@ enum EncryptionType {
   AES = 1;
 }
 
+enum AsymmetricEncryptionType {
+  RSA = 0; // default
+  ML_KEM = 1;
+}
+
 enum SignatureType {
-  LEGACY_SECP256K1 = 0;
-  SECP256K1 = 1;
+  ECDSA_SECP256K1_LEGACY = 0;
+  ECDSA_SECP256K1_EVM = 1;
   ERC_1271 = 2;
+  ML_DSA_87 = 3;
+  ECDSA_SECP256R1 = 4;
 }
 
 message StreamMessage {
@@ -81,23 +93,25 @@ message ContentMessage {
   ContentType contentType = 2;
   EncryptionType encryptionType = 3;
   optional string groupKeyId = 4;
-  optional GroupKey newGroupKey = 5;
+  optional EncryptedGroupKey newGroupKey = 5;
 }
 
 message GroupKeyRequest {
   string requestId = 1;
   bytes recipientId = 2;
-  bytes rsaPublicKey = 3;
+  bytes publicKey = 3;
   repeated string groupKeyIds = 4;
+  AsymmetricEncryptionType encryptionType = 5;
 }
 
 message GroupKeyResponse {
   string requestId = 1;
   bytes recipientId = 2;
-  repeated GroupKey groupKeys = 3;
+  repeated EncryptedGroupKey groupKeys = 3;
+  AsymmetricEncryptionType encryptionType = 4;
 }
 
-message GroupKey {
+message EncryptedGroupKey {
   string id = 1;
   bytes data = 2;
 }
@@ -137,7 +151,7 @@ message NeighborUpdate {
 }
 
 message ProxyConnectionRequest {
-  ProxyDirection direction = 1;
+  optional ProxyDirection direction = 1;
   bytes userId = 2;
 }
 
@@ -163,7 +177,13 @@ enum ProxyDirection {
 message StreamPartitionInfo {
   string id = 1;
   repeated dht.PeerDescriptor controlLayerNeighbors = 2;
-  repeated dht.PeerDescriptor contentDeliveryLayerNeighbors = 3;
+  repeated dht.PeerDescriptor deprecatedContentDeliveryLayerNeighbors = 3;
+  repeated ContentDeliveryLayerNeighborInfo contentDeliveryLayerNeighbors = 4;
+}
+
+message ContentDeliveryLayerNeighborInfo {
+  dht.PeerDescriptor peerDescriptor = 1;
+  optional int32 rtt = 2;
 }
 
 message ControlLayerInfo {
@@ -176,6 +196,19 @@ message NodeInfoRequest {}
 message NodeInfoResponse {
   dht.PeerDescriptor peerDescriptor = 1;
   repeated StreamPartitionInfo streamPartitions = 2;
-  optional ControlLayerInfo controlLayer = 3;
-  string version = 4;
+  ControlLayerInfo controlLayer = 3;
+  string applicationVersion = 4;
+}
+
+message PauseNeighborRequest {
+  string messageChainId = 1;
+}
+
+message PauseNeighborResponse {
+  bool accepted = 1;
+}
+
+message ResumeNeighborRequest {
+  string messageChainId = 1;
+  int64 fromTimestamp = 2;
 }

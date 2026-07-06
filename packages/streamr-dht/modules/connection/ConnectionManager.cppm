@@ -50,6 +50,7 @@ using ::dht::LockRequest;
 using ::dht::LockResponse;
 using ::dht::Message;
 using ::dht::PeerDescriptor;
+using ::dht::SetPrivateRequest;
 using ::dht::UnlockRequest;
 using streamr::dht::connection::ConnectionLocker;
 using streamr::dht::connection::ConnectionLockRpcLocal;
@@ -83,6 +84,9 @@ struct ConnectionManagerOptions {
     size_t maxConnections;
     // MetricsContext metricsContext;
     std::function<std::shared_ptr<ConnectorFacade>()> createConnectorFacade;
+    // Whether remote peers may mark their connection to us as private
+    // (setPrivate RPC); mirrors the TS option of the same name.
+    bool allowIncomingPrivateConnections = false;
 };
 
 class ConnectionManager : public Transport,
@@ -178,7 +182,22 @@ public:
                               peerDescriptor, gracefulLeave, reason);
                       },
                   .getLocalPeerDescriptor =
-                      [this]() { return this->getLocalPeerDescriptor(); }}) {
+                      [this]() { return this->getLocalPeerDescriptor(); },
+                  .setPrivate =
+                      [this](const DhtAddress& id, bool isPrivate) {
+                          if (!this->options.allowIncomingPrivateConnections) {
+                              SLogger::debug(
+                                  "node " + id +
+                                  " attempted to set a connection as private,"
+                                  " but it is not allowed");
+                              return;
+                          }
+                          if (isPrivate) {
+                              this->locks.addPrivate(id);
+                          } else {
+                              this->locks.removePrivate(id);
+                          }
+                      }}) {
         SLogger::debug("ConnectionManager constructor start");
         SLogger::info("ConnectionManager constructor");
         this->connectorFacade = this->options.createConnectorFacade();
@@ -197,6 +216,12 @@ public:
             "gracefulDisconnect",
             [this](const DisconnectNotice& req, const DhtCallContext& context) {
                 this->connectionLockRpcLocal.gracefulDisconnect(req, context);
+            });
+        this->rpcCommunicator.registerRpcNotification<SetPrivateRequest>(
+            "setPrivate",
+            [this](
+                const SetPrivateRequest& req, const DhtCallContext& context) {
+                this->connectionLockRpcLocal.setPrivate(req, context);
             });
         SLogger::debug("ConnectionManager constructor end");
     }

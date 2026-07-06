@@ -105,6 +105,34 @@ struct StreamPartHandshakeRequestDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StreamPartHandshakeRequestDefaultTypeInternal _StreamPartHandshakeRequest_default_instance_;
 
+inline constexpr ResumeNeighborRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        messagechainid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        fromtimestamp_{::int64_t{0}} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ResumeNeighborRequest::ResumeNeighborRequest(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ResumeNeighborRequest_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ResumeNeighborRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ResumeNeighborRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ResumeNeighborRequestDefaultTypeInternal() {}
+  union {
+    ResumeNeighborRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ResumeNeighborRequestDefaultTypeInternal _ResumeNeighborRequest_default_instance_;
+
 inline constexpr ProxyConnectionResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -157,6 +185,58 @@ struct ProxyConnectionRequestDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProxyConnectionRequestDefaultTypeInternal _ProxyConnectionRequest_default_instance_;
+
+inline constexpr PauseNeighborResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        accepted_{false} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR PauseNeighborResponse::PauseNeighborResponse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(PauseNeighborResponse_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct PauseNeighborResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR PauseNeighborResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~PauseNeighborResponseDefaultTypeInternal() {}
+  union {
+    PauseNeighborResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PauseNeighborResponseDefaultTypeInternal _PauseNeighborResponse_default_instance_;
+
+inline constexpr PauseNeighborRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        messagechainid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()) {}
+
+template <typename>
+PROTOBUF_CONSTEXPR PauseNeighborRequest::PauseNeighborRequest(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(PauseNeighborRequest_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct PauseNeighborRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR PauseNeighborRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~PauseNeighborRequestDefaultTypeInternal() {}
+  union {
+    PauseNeighborRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PauseNeighborRequestDefaultTypeInternal _PauseNeighborRequest_default_instance_;
 template <typename>
 PROTOBUF_CONSTEXPR NodeInfoRequest::NodeInfoRequest(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -301,9 +381,10 @@ inline constexpr GroupKeyRequest::Impl_::Impl_(
         recipientid_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        rsapublickey_(
+        publickey_(
             &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()) {}
+            ::_pbi::ConstantInitialized()),
+        encryptiontype_{static_cast< ::AsymmetricEncryptionType >(0)} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR GroupKeyRequest::GroupKeyRequest(::_pbi::ConstantInitialized)
@@ -325,7 +406,7 @@ struct GroupKeyRequestDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GroupKeyRequestDefaultTypeInternal _GroupKeyRequest_default_instance_;
 
-inline constexpr GroupKey::Impl_::Impl_(
+inline constexpr EncryptedGroupKey::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         id_(
@@ -336,24 +417,24 @@ inline constexpr GroupKey::Impl_::Impl_(
             ::_pbi::ConstantInitialized()) {}
 
 template <typename>
-PROTOBUF_CONSTEXPR GroupKey::GroupKey(::_pbi::ConstantInitialized)
+PROTOBUF_CONSTEXPR EncryptedGroupKey::EncryptedGroupKey(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(GroupKey_class_data_.base()),
+    : ::google::protobuf::Message(EncryptedGroupKey_class_data_.base()),
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(),
 #endif  // PROTOBUF_CUSTOM_VTABLE
       _impl_(::_pbi::ConstantInitialized()) {
 }
-struct GroupKeyDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR GroupKeyDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~GroupKeyDefaultTypeInternal() {}
+struct EncryptedGroupKeyDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR EncryptedGroupKeyDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~EncryptedGroupKeyDefaultTypeInternal() {}
   union {
-    GroupKey _instance;
+    EncryptedGroupKey _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GroupKeyDefaultTypeInternal _GroupKey_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 EncryptedGroupKeyDefaultTypeInternal _EncryptedGroupKey_default_instance_;
 template <typename>
 PROTOBUF_CONSTEXPR CloseTemporaryConnection::CloseTemporaryConnection(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -382,7 +463,8 @@ inline constexpr GroupKeyResponse::Impl_::Impl_(
             ::_pbi::ConstantInitialized()),
         recipientid_(
             &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()) {}
+            ::_pbi::ConstantInitialized()),
+        encryptiontype_{static_cast< ::AsymmetricEncryptionType >(0)} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR GroupKeyResponse::GroupKeyResponse(::_pbi::ConstantInitialized)
@@ -436,35 +518,6 @@ struct ContentMessageDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ContentMessageDefaultTypeInternal _ContentMessage_default_instance_;
-
-inline constexpr StreamPartitionInfo::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        controllayerneighbors_{},
-        contentdeliverylayerneighbors_{},
-        id_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()) {}
-
-template <typename>
-PROTOBUF_CONSTEXPR StreamPartitionInfo::StreamPartitionInfo(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(StreamPartitionInfo_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(::_pbi::ConstantInitialized()) {
-}
-struct StreamPartitionInfoDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR StreamPartitionInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~StreamPartitionInfoDefaultTypeInternal() {}
-  union {
-    StreamPartitionInfo _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StreamPartitionInfoDefaultTypeInternal _StreamPartitionInfo_default_instance_;
 
 inline constexpr StreamPartHandshakeResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -607,11 +660,67 @@ struct ControlLayerInfoDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ControlLayerInfoDefaultTypeInternal _ControlLayerInfo_default_instance_;
 
+inline constexpr ContentDeliveryLayerNeighborInfo::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        peerdescriptor_{nullptr},
+        rtt_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ContentDeliveryLayerNeighborInfo::ContentDeliveryLayerNeighborInfo(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ContentDeliveryLayerNeighborInfo_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ContentDeliveryLayerNeighborInfoDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ContentDeliveryLayerNeighborInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ContentDeliveryLayerNeighborInfoDefaultTypeInternal() {}
+  union {
+    ContentDeliveryLayerNeighborInfo _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ContentDeliveryLayerNeighborInfoDefaultTypeInternal _ContentDeliveryLayerNeighborInfo_default_instance_;
+
+inline constexpr StreamPartitionInfo::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        controllayerneighbors_{},
+        deprecatedcontentdeliverylayerneighbors_{},
+        contentdeliverylayerneighbors_{},
+        id_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()) {}
+
+template <typename>
+PROTOBUF_CONSTEXPR StreamPartitionInfo::StreamPartitionInfo(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(StreamPartitionInfo_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct StreamPartitionInfoDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR StreamPartitionInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~StreamPartitionInfoDefaultTypeInternal() {}
+  union {
+    StreamPartitionInfo _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StreamPartitionInfoDefaultTypeInternal _StreamPartitionInfo_default_instance_;
+
 inline constexpr NodeInfoResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         streampartitions_{},
-        version_(
+        applicationversion_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         peerdescriptor_{nullptr},
@@ -637,7 +746,7 @@ struct NodeInfoResponseDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NodeInfoResponseDefaultTypeInternal _NodeInfoResponse_default_instance_;
 static const ::_pb::EnumDescriptor* PROTOBUF_NONNULL
-    file_level_enum_descriptors_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto[4];
+    file_level_enum_descriptors_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto[5];
 static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto = nullptr;
 const ::uint32_t
@@ -699,29 +808,33 @@ const ::uint32_t
         2,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GroupKeyRequest, _impl_._has_bits_),
-        7, // hasbit index offset
+        8, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GroupKeyRequest, _impl_.requestid_),
         PROTOBUF_FIELD_OFFSET(::GroupKeyRequest, _impl_.recipientid_),
-        PROTOBUF_FIELD_OFFSET(::GroupKeyRequest, _impl_.rsapublickey_),
+        PROTOBUF_FIELD_OFFSET(::GroupKeyRequest, _impl_.publickey_),
         PROTOBUF_FIELD_OFFSET(::GroupKeyRequest, _impl_.groupkeyids_),
+        PROTOBUF_FIELD_OFFSET(::GroupKeyRequest, _impl_.encryptiontype_),
         1,
         2,
         3,
         0,
+        4,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::GroupKeyResponse, _impl_._has_bits_),
-        6, // hasbit index offset
+        7, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::GroupKeyResponse, _impl_.requestid_),
         PROTOBUF_FIELD_OFFSET(::GroupKeyResponse, _impl_.recipientid_),
         PROTOBUF_FIELD_OFFSET(::GroupKeyResponse, _impl_.groupkeys_),
+        PROTOBUF_FIELD_OFFSET(::GroupKeyResponse, _impl_.encryptiontype_),
         1,
         2,
         0,
+        3,
         0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::GroupKey, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::EncryptedGroupKey, _impl_._has_bits_),
         5, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::GroupKey, _impl_.id_),
-        PROTOBUF_FIELD_OFFSET(::GroupKey, _impl_.data_),
+        PROTOBUF_FIELD_OFFSET(::EncryptedGroupKey, _impl_.id_),
+        PROTOBUF_FIELD_OFFSET(::EncryptedGroupKey, _impl_.data_),
         0,
         1,
         0x081, // bitmap
@@ -793,11 +906,20 @@ const ::uint32_t
         0x000, // bitmap
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::StreamPartitionInfo, _impl_._has_bits_),
-        6, // hasbit index offset
+        7, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::StreamPartitionInfo, _impl_.id_),
         PROTOBUF_FIELD_OFFSET(::StreamPartitionInfo, _impl_.controllayerneighbors_),
+        PROTOBUF_FIELD_OFFSET(::StreamPartitionInfo, _impl_.deprecatedcontentdeliverylayerneighbors_),
         PROTOBUF_FIELD_OFFSET(::StreamPartitionInfo, _impl_.contentdeliverylayerneighbors_),
+        3,
+        0,
+        1,
         2,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::ContentDeliveryLayerNeighborInfo, _impl_._has_bits_),
+        5, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::ContentDeliveryLayerNeighborInfo, _impl_.peerdescriptor_),
+        PROTOBUF_FIELD_OFFSET(::ContentDeliveryLayerNeighborInfo, _impl_.rtt_),
         0,
         1,
         0x081, // bitmap
@@ -814,10 +936,27 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NodeInfoResponse, _impl_.peerdescriptor_),
         PROTOBUF_FIELD_OFFSET(::NodeInfoResponse, _impl_.streampartitions_),
         PROTOBUF_FIELD_OFFSET(::NodeInfoResponse, _impl_.controllayer_),
-        PROTOBUF_FIELD_OFFSET(::NodeInfoResponse, _impl_.version_),
+        PROTOBUF_FIELD_OFFSET(::NodeInfoResponse, _impl_.applicationversion_),
         2,
         0,
         3,
+        1,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::PauseNeighborRequest, _impl_._has_bits_),
+        4, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::PauseNeighborRequest, _impl_.messagechainid_),
+        0,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::PauseNeighborResponse, _impl_._has_bits_),
+        4, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::PauseNeighborResponse, _impl_.accepted_),
+        0,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::ResumeNeighborRequest, _impl_._has_bits_),
+        5, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::ResumeNeighborRequest, _impl_.messagechainid_),
+        PROTOBUF_FIELD_OFFSET(::ResumeNeighborRequest, _impl_.fromtimestamp_),
+        0,
         1,
 };
 
@@ -828,23 +967,27 @@ static const ::_pbi::MigrationSchema
         {22, sizeof(::StreamMessage)},
         {41, sizeof(::ContentMessage)},
         {54, sizeof(::GroupKeyRequest)},
-        {65, sizeof(::GroupKeyResponse)},
-        {74, sizeof(::GroupKey)},
-        {81, sizeof(::StreamPartHandshakeRequest)},
-        {94, sizeof(::StreamPartHandshakeResponse)},
-        {103, sizeof(::InterleaveRequest)},
-        {108, sizeof(::InterleaveResponse)},
-        {113, sizeof(::LeaveStreamPartNotice)},
-        {120, sizeof(::NeighborUpdate)},
-        {129, sizeof(::ProxyConnectionRequest)},
-        {136, sizeof(::ProxyConnectionResponse)},
-        {141, sizeof(::TemporaryConnectionRequest)},
-        {142, sizeof(::TemporaryConnectionResponse)},
-        {147, sizeof(::CloseTemporaryConnection)},
-        {148, sizeof(::StreamPartitionInfo)},
-        {157, sizeof(::ControlLayerInfo)},
-        {164, sizeof(::NodeInfoRequest)},
-        {165, sizeof(::NodeInfoResponse)},
+        {67, sizeof(::GroupKeyResponse)},
+        {78, sizeof(::EncryptedGroupKey)},
+        {85, sizeof(::StreamPartHandshakeRequest)},
+        {98, sizeof(::StreamPartHandshakeResponse)},
+        {107, sizeof(::InterleaveRequest)},
+        {112, sizeof(::InterleaveResponse)},
+        {117, sizeof(::LeaveStreamPartNotice)},
+        {124, sizeof(::NeighborUpdate)},
+        {133, sizeof(::ProxyConnectionRequest)},
+        {140, sizeof(::ProxyConnectionResponse)},
+        {145, sizeof(::TemporaryConnectionRequest)},
+        {146, sizeof(::TemporaryConnectionResponse)},
+        {151, sizeof(::CloseTemporaryConnection)},
+        {152, sizeof(::StreamPartitionInfo)},
+        {163, sizeof(::ContentDeliveryLayerNeighborInfo)},
+        {170, sizeof(::ControlLayerInfo)},
+        {177, sizeof(::NodeInfoRequest)},
+        {178, sizeof(::NodeInfoResponse)},
+        {189, sizeof(::PauseNeighborRequest)},
+        {194, sizeof(::PauseNeighborResponse)},
+        {199, sizeof(::ResumeNeighborRequest)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::_MessageID_default_instance_._instance,
@@ -853,7 +996,7 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::_ContentMessage_default_instance_._instance,
     &::_GroupKeyRequest_default_instance_._instance,
     &::_GroupKeyResponse_default_instance_._instance,
-    &::_GroupKey_default_instance_._instance,
+    &::_EncryptedGroupKey_default_instance_._instance,
     &::_StreamPartHandshakeRequest_default_instance_._instance,
     &::_StreamPartHandshakeResponse_default_instance_._instance,
     &::_InterleaveRequest_default_instance_._instance,
@@ -866,101 +1009,123 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::_TemporaryConnectionResponse_default_instance_._instance,
     &::_CloseTemporaryConnection_default_instance_._instance,
     &::_StreamPartitionInfo_default_instance_._instance,
+    &::_ContentDeliveryLayerNeighborInfo_default_instance_._instance,
     &::_ControlLayerInfo_default_instance_._instance,
     &::_NodeInfoRequest_default_instance_._instance,
     &::_NodeInfoResponse_default_instance_._instance,
+    &::_PauseNeighborRequest_default_instance_._instance,
+    &::_PauseNeighborResponse_default_instance_._instance,
+    &::_ResumeNeighborRequest_default_instance_._instance,
 };
 const char descriptor_table_protodef_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n(packages/network/protos/NetworkRpc.pro"
-    "to\032\033google/protobuf/empty.proto\032\031google/"
-    "protobuf/any.proto\032 packages/dht/protos/"
-    "DhtRpc.proto\"\216\001\n\tMessageID\022\020\n\010streamId\030\001"
-    " \001(\t\022\027\n\017streamPartition\030\002 \001(\005\022\021\n\ttimesta"
-    "mp\030\003 \001(\003\022\026\n\016sequenceNumber\030\004 \001(\005\022\023\n\013publ"
-    "isherId\030\005 \001(\014\022\026\n\016messageChainId\030\006 \001(\t\"7\n"
-    "\nMessageRef\022\021\n\ttimestamp\030\001 \001(\003\022\026\n\016sequen"
-    "ceNumber\030\002 \001(\005\"\274\002\n\rStreamMessage\022\035\n\tmess"
-    "ageId\030\001 \001(\0132\n.MessageID\022,\n\022previousMessa"
-    "geRef\030\002 \001(\0132\013.MessageRefH\001\210\001\001\022\021\n\tsignatu"
-    "re\030\003 \001(\014\022%\n\rsignatureType\030\004 \001(\0162\016.Signat"
-    "ureType\022)\n\016contentMessage\030\005 \001(\0132\017.Conten"
-    "tMessageH\000\022+\n\017groupKeyRequest\030\006 \001(\0132\020.Gr"
-    "oupKeyRequestH\000\022-\n\020groupKeyResponse\030\007 \001("
-    "\0132\021.GroupKeyResponseH\000B\006\n\004bodyB\025\n\023_previ"
-    "ousMessageRef\"\312\001\n\016ContentMessage\022\017\n\007cont"
-    "ent\030\001 \001(\014\022!\n\013contentType\030\002 \001(\0162\014.Content"
-    "Type\022\'\n\016encryptionType\030\003 \001(\0162\017.Encryptio"
-    "nType\022\027\n\ngroupKeyId\030\004 \001(\tH\000\210\001\001\022#\n\013newGro"
-    "upKey\030\005 \001(\0132\t.GroupKeyH\001\210\001\001B\r\n\013_groupKey"
-    "IdB\016\n\014_newGroupKey\"d\n\017GroupKeyRequest\022\021\n"
-    "\trequestId\030\001 \001(\t\022\023\n\013recipientId\030\002 \001(\014\022\024\n"
-    "\014rsaPublicKey\030\003 \001(\014\022\023\n\013groupKeyIds\030\004 \003(\t"
-    "\"X\n\020GroupKeyResponse\022\021\n\trequestId\030\001 \001(\t\022"
-    "\023\n\013recipientId\030\002 \001(\014\022\034\n\tgroupKeys\030\003 \003(\0132"
-    "\t.GroupKey\"$\n\010GroupKey\022\n\n\002id\030\001 \001(\t\022\014\n\004da"
-    "ta\030\002 \001(\014\"\330\001\n\032StreamPartHandshakeRequest\022"
-    "\024\n\014streamPartId\030\001 \001(\t\022\021\n\trequestId\030\002 \001(\t"
-    "\022&\n\031concurrentHandshakeNodeId\030\003 \001(\014H\000\210\001\001"
-    "\022\027\n\017neighborNodeIds\030\004 \003(\014\022\035\n\020interleaveN"
-    "odeId\030\005 \001(\014H\001\210\001\001B\034\n\032_concurrentHandshake"
-    "NodeIdB\023\n\021_interleaveNodeId\"\237\001\n\033StreamPa"
-    "rtHandshakeResponse\022\020\n\010accepted\030\001 \001(\010\022\021\n"
-    "\trequestId\030\002 \001(\t\022<\n\032interleaveTargetDesc"
-    "riptor\030\003 \001(\0132\023.dht.PeerDescriptorH\000\210\001\001B\035"
-    "\n\033_interleaveTargetDescriptor\"L\n\021Interle"
-    "aveRequest\0227\n\032interleaveTargetDescriptor"
-    "\030\001 \001(\0132\023.dht.PeerDescriptor\"&\n\022Interleav"
-    "eResponse\022\020\n\010accepted\030\001 \001(\010\"C\n\025LeaveStre"
-    "amPartNotice\022\024\n\014streamPartId\030\001 \001(\t\022\024\n\014is"
-    "EntryPoint\030\002 \001(\010\"j\n\016NeighborUpdate\022\024\n\014st"
-    "reamPartId\030\001 \001(\t\022\020\n\010removeMe\030\002 \001(\010\0220\n\023ne"
-    "ighborDescriptors\030\003 \003(\0132\023.dht.PeerDescri"
-    "ptor\"L\n\026ProxyConnectionRequest\022\"\n\tdirect"
-    "ion\030\001 \001(\0162\017.ProxyDirection\022\016\n\006userId\030\002 \001"
-    "(\014\"+\n\027ProxyConnectionResponse\022\020\n\010accepte"
+    "to\032\033google/protobuf/empty.proto\032 package"
+    "s/dht/protos/DhtRpc.proto\"\216\001\n\tMessageID\022"
+    "\020\n\010streamId\030\001 \001(\t\022\027\n\017streamPartition\030\002 \001"
+    "(\005\022\021\n\ttimestamp\030\003 \001(\003\022\026\n\016sequenceNumber\030"
+    "\004 \001(\005\022\023\n\013publisherId\030\005 \001(\014\022\026\n\016messageCha"
+    "inId\030\006 \001(\t\"7\n\nMessageRef\022\021\n\ttimestamp\030\001 "
+    "\001(\003\022\026\n\016sequenceNumber\030\002 \001(\005\"\274\002\n\rStreamMe"
+    "ssage\022\035\n\tmessageId\030\001 \001(\0132\n.MessageID\022,\n\022"
+    "previousMessageRef\030\002 \001(\0132\013.MessageRefH\001\210"
+    "\001\001\022\021\n\tsignature\030\003 \001(\014\022%\n\rsignatureType\030\004"
+    " \001(\0162\016.SignatureType\022)\n\016contentMessage\030\005"
+    " \001(\0132\017.ContentMessageH\000\022+\n\017groupKeyReque"
+    "st\030\006 \001(\0132\020.GroupKeyRequestH\000\022-\n\020groupKey"
+    "Response\030\007 \001(\0132\021.GroupKeyResponseH\000B\006\n\004b"
+    "odyB\025\n\023_previousMessageRef\"\323\001\n\016ContentMe"
+    "ssage\022\017\n\007content\030\001 \001(\014\022!\n\013contentType\030\002 "
+    "\001(\0162\014.ContentType\022\'\n\016encryptionType\030\003 \001("
+    "\0162\017.EncryptionType\022\027\n\ngroupKeyId\030\004 \001(\tH\000"
+    "\210\001\001\022,\n\013newGroupKey\030\005 \001(\0132\022.EncryptedGrou"
+    "pKeyH\001\210\001\001B\r\n\013_groupKeyIdB\016\n\014_newGroupKey"
+    "\"\224\001\n\017GroupKeyRequest\022\021\n\trequestId\030\001 \001(\t\022"
+    "\023\n\013recipientId\030\002 \001(\014\022\021\n\tpublicKey\030\003 \001(\014\022"
+    "\023\n\013groupKeyIds\030\004 \003(\t\0221\n\016encryptionType\030\005"
+    " \001(\0162\031.AsymmetricEncryptionType\"\224\001\n\020Grou"
+    "pKeyResponse\022\021\n\trequestId\030\001 \001(\t\022\023\n\013recip"
+    "ientId\030\002 \001(\014\022%\n\tgroupKeys\030\003 \003(\0132\022.Encryp"
+    "tedGroupKey\0221\n\016encryptionType\030\004 \001(\0162\031.As"
+    "ymmetricEncryptionType\"-\n\021EncryptedGroup"
+    "Key\022\n\n\002id\030\001 \001(\t\022\014\n\004data\030\002 \001(\014\"\330\001\n\032Stream"
+    "PartHandshakeRequest\022\024\n\014streamPartId\030\001 \001"
+    "(\t\022\021\n\trequestId\030\002 \001(\t\022&\n\031concurrentHands"
+    "hakeNodeId\030\003 \001(\014H\000\210\001\001\022\027\n\017neighborNodeIds"
+    "\030\004 \003(\014\022\035\n\020interleaveNodeId\030\005 \001(\014H\001\210\001\001B\034\n"
+    "\032_concurrentHandshakeNodeIdB\023\n\021_interlea"
+    "veNodeId\"\237\001\n\033StreamPartHandshakeResponse"
+    "\022\020\n\010accepted\030\001 \001(\010\022\021\n\trequestId\030\002 \001(\t\022<\n"
+    "\032interleaveTargetDescriptor\030\003 \001(\0132\023.dht."
+    "PeerDescriptorH\000\210\001\001B\035\n\033_interleaveTarget"
+    "Descriptor\"L\n\021InterleaveRequest\0227\n\032inter"
+    "leaveTargetDescriptor\030\001 \001(\0132\023.dht.PeerDe"
+    "scriptor\"&\n\022InterleaveResponse\022\020\n\010accept"
+    "ed\030\001 \001(\010\"C\n\025LeaveStreamPartNotice\022\024\n\014str"
+    "eamPartId\030\001 \001(\t\022\024\n\014isEntryPoint\030\002 \001(\010\"j\n"
+    "\016NeighborUpdate\022\024\n\014streamPartId\030\001 \001(\t\022\020\n"
+    "\010removeMe\030\002 \001(\010\0220\n\023neighborDescriptors\030\003"
+    " \003(\0132\023.dht.PeerDescriptor\"_\n\026ProxyConnec"
+    "tionRequest\022\'\n\tdirection\030\001 \001(\0162\017.ProxyDi"
+    "rectionH\000\210\001\001\022\016\n\006userId\030\002 \001(\014B\014\n\n_directi"
+    "on\"+\n\027ProxyConnectionResponse\022\020\n\010accepte"
     "d\030\001 \001(\010\"\034\n\032TemporaryConnectionRequest\"/\n"
     "\033TemporaryConnectionResponse\022\020\n\010accepted"
-    "\030\001 \001(\010\"\032\n\030CloseTemporaryConnection\"\221\001\n\023S"
+    "\030\001 \001(\010\"\032\n\030CloseTemporaryConnection\"\345\001\n\023S"
     "treamPartitionInfo\022\n\n\002id\030\001 \001(\t\0222\n\025contro"
     "lLayerNeighbors\030\002 \003(\0132\023.dht.PeerDescript"
-    "or\022:\n\035contentDeliveryLayerNeighbors\030\003 \003("
-    "\0132\023.dht.PeerDescriptor\"d\n\020ControlLayerIn"
-    "fo\022&\n\tneighbors\030\001 \003(\0132\023.dht.PeerDescript"
-    "or\022(\n\013connections\030\002 \003(\0132\023.dht.PeerDescri"
-    "ptor\"\021\n\017NodeInfoRequest\"\277\001\n\020NodeInfoResp"
-    "onse\022+\n\016peerDescriptor\030\001 \001(\0132\023.dht.PeerD"
-    "escriptor\022.\n\020streamPartitions\030\002 \003(\0132\024.St"
-    "reamPartitionInfo\022,\n\014controlLayer\030\003 \001(\0132"
-    "\021.ControlLayerInfoH\000\210\001\001\022\017\n\007version\030\004 \001(\t"
-    "B\017\n\r_controlLayer*#\n\013ContentType\022\010\n\004JSON"
-    "\020\000\022\n\n\006BINARY\020\001*#\n\016EncryptionType\022\010\n\004NONE"
-    "\020\000\022\007\n\003AES\020\001*B\n\rSignatureType\022\024\n\020LEGACY_S"
-    "ECP256K1\020\000\022\r\n\tSECP256K1\020\001\022\014\n\010ERC_1271\020\002*"
-    ",\n\016ProxyDirection\022\013\n\007PUBLISH\020\000\022\r\n\tSUBSCR"
-    "IBE\020\0012\232\001\n\022ContentDeliveryRpc\022;\n\021sendStre"
-    "amMessage\022\016.StreamMessage\032\026.google.proto"
-    "buf.Empty\022G\n\025leaveStreamPartNotice\022\026.Lea"
-    "veStreamPartNotice\032\026.google.protobuf.Emp"
-    "ty2\\\n\022ProxyConnectionRpc\022F\n\021requestConne"
-    "ction\022\027.ProxyConnectionRequest\032\030.ProxyCo"
-    "nnectionResponse2\224\001\n\014HandshakeRpc\022F\n\than"
-    "dshake\022\033.StreamPartHandshakeRequest\032\034.St"
-    "reamPartHandshakeResponse\022<\n\021interleaveR"
-    "equest\022\022.InterleaveRequest\032\023.InterleaveR"
-    "esponse2G\n\021NeighborUpdateRpc\0222\n\016neighbor"
-    "Update\022\017.NeighborUpdate\032\017.NeighborUpdate"
-    "2\253\001\n\026TemporaryConnectionRpc\022K\n\016openConne"
-    "ction\022\033.TemporaryConnectionRequest\032\034.Tem"
-    "poraryConnectionResponse\022D\n\017closeConnect"
-    "ion\022\031.CloseTemporaryConnection\032\026.google."
-    "protobuf.Empty2=\n\013NodeInfoRpc\022.\n\007getInfo"
-    "\022\020.NodeInfoRequest\032\021.NodeInfoResponseB\002H"
-    "\002b\006proto3"
+    "or\022D\n\'deprecatedContentDeliveryLayerNeig"
+    "hbors\030\003 \003(\0132\023.dht.PeerDescriptor\022H\n\035cont"
+    "entDeliveryLayerNeighbors\030\004 \003(\0132!.Conten"
+    "tDeliveryLayerNeighborInfo\"i\n ContentDel"
+    "iveryLayerNeighborInfo\022+\n\016peerDescriptor"
+    "\030\001 \001(\0132\023.dht.PeerDescriptor\022\020\n\003rtt\030\002 \001(\005"
+    "H\000\210\001\001B\006\n\004_rtt\"d\n\020ControlLayerInfo\022&\n\tnei"
+    "ghbors\030\001 \003(\0132\023.dht.PeerDescriptor\022(\n\013con"
+    "nections\030\002 \003(\0132\023.dht.PeerDescriptor\"\021\n\017N"
+    "odeInfoRequest\"\264\001\n\020NodeInfoResponse\022+\n\016p"
+    "eerDescriptor\030\001 \001(\0132\023.dht.PeerDescriptor"
+    "\022.\n\020streamPartitions\030\002 \003(\0132\024.StreamParti"
+    "tionInfo\022\'\n\014controlLayer\030\003 \001(\0132\021.Control"
+    "LayerInfo\022\032\n\022applicationVersion\030\004 \001(\t\".\n"
+    "\024PauseNeighborRequest\022\026\n\016messageChainId\030"
+    "\001 \001(\t\")\n\025PauseNeighborResponse\022\020\n\010accept"
+    "ed\030\001 \001(\010\"F\n\025ResumeNeighborRequest\022\026\n\016mes"
+    "sageChainId\030\001 \001(\t\022\025\n\rfromTimestamp\030\002 \001(\003"
+    "*#\n\013ContentType\022\010\n\004JSON\020\000\022\n\n\006BINARY\020\001*#\n"
+    "\016EncryptionType\022\010\n\004NONE\020\000\022\007\n\003AES\020\001*/\n\030As"
+    "ymmetricEncryptionType\022\007\n\003RSA\020\000\022\n\n\006ML_KE"
+    "M\020\001*v\n\rSignatureType\022\032\n\026ECDSA_SECP256K1_"
+    "LEGACY\020\000\022\027\n\023ECDSA_SECP256K1_EVM\020\001\022\014\n\010ERC"
+    "_1271\020\002\022\r\n\tML_DSA_87\020\003\022\023\n\017ECDSA_SECP256R"
+    "1\020\004*,\n\016ProxyDirection\022\013\n\007PUBLISH\020\000\022\r\n\tSU"
+    "BSCRIBE\020\0012\232\001\n\022ContentDeliveryRpc\022;\n\021send"
+    "StreamMessage\022\016.StreamMessage\032\026.google.p"
+    "rotobuf.Empty\022G\n\025leaveStreamPartNotice\022\026"
+    ".LeaveStreamPartNotice\032\026.google.protobuf"
+    ".Empty2\\\n\022ProxyConnectionRpc\022F\n\021requestC"
+    "onnection\022\027.ProxyConnectionRequest\032\030.Pro"
+    "xyConnectionResponse2\224\001\n\014HandshakeRpc\022F\n"
+    "\thandshake\022\033.StreamPartHandshakeRequest\032"
+    "\034.StreamPartHandshakeResponse\022<\n\021interle"
+    "aveRequest\022\022.InterleaveRequest\032\023.Interle"
+    "aveResponse2G\n\021NeighborUpdateRpc\0222\n\016neig"
+    "hborUpdate\022\017.NeighborUpdate\032\017.NeighborUp"
+    "date2\253\001\n\026TemporaryConnectionRpc\022K\n\016openC"
+    "onnection\022\033.TemporaryConnectionRequest\032\034"
+    ".TemporaryConnectionResponse\022D\n\017closeCon"
+    "nection\022\031.CloseTemporaryConnection\032\026.goo"
+    "gle.protobuf.Empty2=\n\013NodeInfoRpc\022.\n\007get"
+    "Info\022\020.NodeInfoRequest\032\021.NodeInfoRespons"
+    "e2\303\001\n\013PlumtreeRpc\022>\n\rpauseNeighbor\022\025.Pau"
+    "seNeighborRequest\032\026.PauseNeighborRespons"
+    "e\022@\n\016resumeNeighbor\022\026.ResumeNeighborRequ"
+    "est\032\026.google.protobuf.Empty\0222\n\014sendMetad"
+    "ata\022\n.MessageID\032\026.google.protobuf.EmptyB"
+    "\002H\002b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
-    descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto_deps[3] = {
-        &::descriptor_table_google_2fprotobuf_2fany_2eproto,
+    descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto_deps[2] = {
         &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
         &::descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2eproto,
 };
@@ -968,13 +1133,13 @@ static ::absl::once_flag descriptor_table_packages_2fnetwork_2fprotos_2fNetworkR
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto = {
     false,
     false,
-    3369,
+    4131,
     descriptor_table_protodef_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto,
     "packages/network/protos/NetworkRpc.proto",
     &descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto_once,
     descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto_deps,
-    3,
-    22,
+    2,
+    26,
     schemas,
     file_default_instances,
     TableStruct_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto::offsets,
@@ -993,15 +1158,21 @@ const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL EncryptionType_descri
 }
 PROTOBUF_CONSTINIT const uint32_t EncryptionType_internal_data_[] = {
     131072u, 0u, };
-const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL SignatureType_descriptor() {
+const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL AsymmetricEncryptionType_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto);
   return file_level_enum_descriptors_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto[2];
 }
-PROTOBUF_CONSTINIT const uint32_t SignatureType_internal_data_[] = {
-    196608u, 0u, };
-const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL ProxyDirection_descriptor() {
+PROTOBUF_CONSTINIT const uint32_t AsymmetricEncryptionType_internal_data_[] = {
+    131072u, 0u, };
+const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL SignatureType_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto);
   return file_level_enum_descriptors_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto[3];
+}
+PROTOBUF_CONSTINIT const uint32_t SignatureType_internal_data_[] = {
+    327680u, 0u, };
+const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL ProxyDirection_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto);
+  return file_level_enum_descriptors_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto[4];
 }
 PROTOBUF_CONSTINIT const uint32_t ProxyDirection_internal_data_[] = {
     131072u, 0u, };
@@ -1821,7 +1992,7 @@ ContentMessage::_table_ = {
     {::_pbi::TcParser::FastUS1,
      {34, 1, 0,
       PROTOBUF_FIELD_OFFSET(ContentMessage, _impl_.groupkeyid_)}},
-    // optional .GroupKey newGroupKey = 5;
+    // optional .EncryptedGroupKey newGroupKey = 5;
     {::_pbi::TcParser::FastMtS1,
      {42, 2, 0,
       PROTOBUF_FIELD_OFFSET(ContentMessage, _impl_.newgroupkey_)}},
@@ -1838,11 +2009,11 @@ ContentMessage::_table_ = {
     {PROTOBUF_FIELD_OFFSET(ContentMessage, _impl_.encryptiontype_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
     // optional string groupKeyId = 4;
     {PROTOBUF_FIELD_OFFSET(ContentMessage, _impl_.groupkeyid_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // optional .GroupKey newGroupKey = 5;
+    // optional .EncryptedGroupKey newGroupKey = 5;
     {PROTOBUF_FIELD_OFFSET(ContentMessage, _impl_.newgroupkey_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }},
   {{
-      {::_pbi::TcParser::GetTable<::GroupKey>()},
+      {::_pbi::TcParser::GetTable<::EncryptedGroupKey>()},
   }},
   {{
     "\16\0\0\0\12\0\0\0"
@@ -1885,7 +2056,7 @@ PROTOBUF_NDEBUG_INLINE GroupKeyRequest::Impl_::Impl_(
         groupkeyids_{visibility, arena, from.groupkeyids_},
         requestid_(arena, from.requestid_),
         recipientid_(arena, from.recipientid_),
-        rsapublickey_(arena, from.rsapublickey_) {}
+        publickey_(arena, from.publickey_) {}
 
 GroupKeyRequest::GroupKeyRequest(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -1900,6 +2071,7 @@ GroupKeyRequest::GroupKeyRequest(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.encryptiontype_ = from._impl_.encryptiontype_;
 
   // @@protoc_insertion_point(copy_constructor:GroupKeyRequest)
 }
@@ -1910,10 +2082,11 @@ PROTOBUF_NDEBUG_INLINE GroupKeyRequest::Impl_::Impl_(
         groupkeyids_{visibility, arena},
         requestid_(arena),
         recipientid_(arena),
-        rsapublickey_(arena) {}
+        publickey_(arena) {}
 
 inline void GroupKeyRequest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.encryptiontype_ = {};
 }
 GroupKeyRequest::~GroupKeyRequest() {
   // @@protoc_insertion_point(destructor:GroupKeyRequest)
@@ -1928,7 +2101,7 @@ inline void GroupKeyRequest::SharedDtor(MessageLite& self) {
   ABSL_DCHECK(this_.GetArena() == nullptr);
   this_._impl_.requestid_.Destroy();
   this_._impl_.recipientid_.Destroy();
-  this_._impl_.rsapublickey_.Destroy();
+  this_._impl_.publickey_.Destroy();
   this_._impl_.~Impl_();
 }
 
@@ -1988,16 +2161,16 @@ GroupKeyRequest::GetClassData() const {
   return GroupKeyRequest_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 44, 2>
+const ::_pbi::TcParseTable<3, 5, 0, 44, 2>
 GroupKeyRequest::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_._has_bits_),
     0, // no _extensions_
-    4, 24,  // max_field_number, fast_idx_mask
+    5, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967280,  // skipmap
+    4294967264,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
+    5,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     GroupKeyRequest_class_data_.base(),
@@ -2007,10 +2180,7 @@ GroupKeyRequest::_table_ = {
     ::_pbi::TcParser::GetTable<::GroupKeyRequest>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // repeated string groupKeyIds = 4;
-    {::_pbi::TcParser::FastUR1,
-     {34, 0, 0,
-      PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.groupkeyids_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // string requestId = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 1, 0,
@@ -2019,10 +2189,20 @@ GroupKeyRequest::_table_ = {
     {::_pbi::TcParser::FastBS1,
      {18, 2, 0,
       PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.recipientid_)}},
-    // bytes rsaPublicKey = 3;
+    // bytes publicKey = 3;
     {::_pbi::TcParser::FastBS1,
      {26, 3, 0,
-      PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.rsapublickey_)}},
+      PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.publickey_)}},
+    // repeated string groupKeyIds = 4;
+    {::_pbi::TcParser::FastUR1,
+     {34, 0, 0,
+      PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.groupkeyids_)}},
+    // .AsymmetricEncryptionType encryptionType = 5;
+    {::_pbi::TcParser::FastV32S1,
+     {40, 4, 0,
+      PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.encryptiontype_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2030,10 +2210,12 @@ GroupKeyRequest::_table_ = {
     {PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.requestid_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // bytes recipientId = 2;
     {PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.recipientid_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
-    // bytes rsaPublicKey = 3;
-    {PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.rsapublickey_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
+    // bytes publicKey = 3;
+    {PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.publickey_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
     // repeated string groupKeyIds = 4;
     {PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.groupkeyids_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+    // .AsymmetricEncryptionType encryptionType = 5;
+    {PROTOBUF_FIELD_OFFSET(GroupKeyRequest, _impl_.encryptiontype_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
   }},
   // no aux_entries
   {{
@@ -2092,6 +2274,7 @@ GroupKeyResponse::GroupKeyResponse(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.encryptiontype_ = from._impl_.encryptiontype_;
 
   // @@protoc_insertion_point(copy_constructor:GroupKeyResponse)
 }
@@ -2105,6 +2288,7 @@ PROTOBUF_NDEBUG_INLINE GroupKeyResponse::Impl_::Impl_(
 
 inline void GroupKeyResponse::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.encryptiontype_ = {};
 }
 GroupKeyResponse::~GroupKeyResponse() {
   // @@protoc_insertion_point(destructor:GroupKeyResponse)
@@ -2178,16 +2362,16 @@ GroupKeyResponse::GetClassData() const {
   return GroupKeyResponse_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 1, 34, 2>
+const ::_pbi::TcParseTable<2, 4, 1, 34, 2>
 GroupKeyResponse::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(GroupKeyResponse, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    4,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     GroupKeyResponse_class_data_.base(),
@@ -2197,7 +2381,10 @@ GroupKeyResponse::_table_ = {
     ::_pbi::TcParser::GetTable<::GroupKeyResponse>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // .AsymmetricEncryptionType encryptionType = 4;
+    {::_pbi::TcParser::FastV32S1,
+     {32, 3, 0,
+      PROTOBUF_FIELD_OFFSET(GroupKeyResponse, _impl_.encryptiontype_)}},
     // string requestId = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 1, 0,
@@ -2206,7 +2393,7 @@ GroupKeyResponse::_table_ = {
     {::_pbi::TcParser::FastBS1,
      {18, 2, 0,
       PROTOBUF_FIELD_OFFSET(GroupKeyResponse, _impl_.recipientid_)}},
-    // repeated .GroupKey groupKeys = 3;
+    // repeated .EncryptedGroupKey groupKeys = 3;
     {::_pbi::TcParser::FastMtR1,
      {26, 0, 0,
       PROTOBUF_FIELD_OFFSET(GroupKeyResponse, _impl_.groupkeys_)}},
@@ -2217,11 +2404,13 @@ GroupKeyResponse::_table_ = {
     {PROTOBUF_FIELD_OFFSET(GroupKeyResponse, _impl_.requestid_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // bytes recipientId = 2;
     {PROTOBUF_FIELD_OFFSET(GroupKeyResponse, _impl_.recipientid_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
-    // repeated .GroupKey groupKeys = 3;
+    // repeated .EncryptedGroupKey groupKeys = 3;
     {PROTOBUF_FIELD_OFFSET(GroupKeyResponse, _impl_.groupkeys_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .AsymmetricEncryptionType encryptionType = 4;
+    {PROTOBUF_FIELD_OFFSET(GroupKeyResponse, _impl_.encryptiontype_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
   }},
   {{
-      {::_pbi::TcParser::GetTable<::GroupKey>()},
+      {::_pbi::TcParser::GetTable<::EncryptedGroupKey>()},
   }},
   {{
     "\20\11\0\0\0\0\0\0"
@@ -2238,64 +2427,64 @@ void GroupKeyResponse::InternalSwap(GroupKeyResponse* PROTOBUF_RESTRICT PROTOBUF
 }
 // ===================================================================
 
-class GroupKey::_Internal {
+class EncryptedGroupKey::_Internal {
  public:
   using HasBits =
-      decltype(::std::declval<GroupKey>()._impl_._has_bits_);
+      decltype(::std::declval<EncryptedGroupKey>()._impl_._has_bits_);
   static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(GroupKey, _impl_._has_bits_);
+      8 * PROTOBUF_FIELD_OFFSET(EncryptedGroupKey, _impl_._has_bits_);
 };
 
-GroupKey::GroupKey(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+EncryptedGroupKey::EncryptedGroupKey(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, GroupKey_class_data_.base()) {
+    : ::google::protobuf::Message(arena, EncryptedGroupKey_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:GroupKey)
+  // @@protoc_insertion_point(arena_constructor:EncryptedGroupKey)
 }
-PROTOBUF_NDEBUG_INLINE GroupKey::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE EncryptedGroupKey::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-    [[maybe_unused]] const ::GroupKey& from_msg)
+    [[maybe_unused]] const ::EncryptedGroupKey& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
         id_(arena, from.id_),
         data_(arena, from.data_) {}
 
-GroupKey::GroupKey(
+EncryptedGroupKey::EncryptedGroupKey(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
-    const GroupKey& from)
+    const EncryptedGroupKey& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, GroupKey_class_data_.base()) {
+    : ::google::protobuf::Message(arena, EncryptedGroupKey_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  GroupKey* const _this = this;
+  EncryptedGroupKey* const _this = this;
   (void)_this;
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
 
-  // @@protoc_insertion_point(copy_constructor:GroupKey)
+  // @@protoc_insertion_point(copy_constructor:EncryptedGroupKey)
 }
-PROTOBUF_NDEBUG_INLINE GroupKey::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE EncryptedGroupKey::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
         id_(arena),
         data_(arena) {}
 
-inline void GroupKey::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+inline void EncryptedGroupKey::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
 }
-GroupKey::~GroupKey() {
-  // @@protoc_insertion_point(destructor:GroupKey)
+EncryptedGroupKey::~EncryptedGroupKey() {
+  // @@protoc_insertion_point(destructor:EncryptedGroupKey)
   SharedDtor(*this);
 }
-inline void GroupKey::SharedDtor(MessageLite& self) {
-  GroupKey& this_ = static_cast<GroupKey&>(self);
+inline void EncryptedGroupKey::SharedDtor(MessageLite& self) {
+  EncryptedGroupKey& this_ = static_cast<EncryptedGroupKey&>(self);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
@@ -2306,54 +2495,54 @@ inline void GroupKey::SharedDtor(MessageLite& self) {
   this_._impl_.~Impl_();
 }
 
-inline void* PROTOBUF_NONNULL GroupKey::PlacementNew_(
+inline void* PROTOBUF_NONNULL EncryptedGroupKey::PlacementNew_(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) GroupKey(arena);
+  return ::new (mem) EncryptedGroupKey(arena);
 }
-constexpr auto GroupKey::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(GroupKey),
-                                            alignof(GroupKey));
+constexpr auto EncryptedGroupKey::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(EncryptedGroupKey),
+                                            alignof(EncryptedGroupKey));
 }
-constexpr auto GroupKey::InternalGenerateClassData_() {
+constexpr auto EncryptedGroupKey::InternalGenerateClassData_() {
   return ::google::protobuf::internal::ClassDataFull{
       ::google::protobuf::internal::ClassData{
-          &_GroupKey_default_instance_._instance,
+          &_EncryptedGroupKey_default_instance_._instance,
           &_table_.header,
           nullptr,  // OnDemandRegisterArenaDtor
           nullptr,  // IsInitialized
-          &GroupKey::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<GroupKey>(),
+          &EncryptedGroupKey::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<EncryptedGroupKey>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-          &GroupKey::SharedDtor,
-          static_cast<void (::google::protobuf::MessageLite::*)()>(&GroupKey::ClearImpl),
+          &EncryptedGroupKey::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&EncryptedGroupKey::ClearImpl),
               ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
               ,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(GroupKey, _impl_._cached_size_),
+          PROTOBUF_FIELD_OFFSET(EncryptedGroupKey, _impl_._cached_size_),
           false,
       },
-      &GroupKey::kDescriptorMethods,
+      &EncryptedGroupKey::kDescriptorMethods,
       &descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto,
       nullptr,  // tracker
   };
 }
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull GroupKey_class_data_ =
-        GroupKey::InternalGenerateClassData_();
+    ::google::protobuf::internal::ClassDataFull EncryptedGroupKey_class_data_ =
+        EncryptedGroupKey::InternalGenerateClassData_();
 
 PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-GroupKey::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&GroupKey_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(GroupKey_class_data_.tc_table);
-  return GroupKey_class_data_.base();
+EncryptedGroupKey::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&EncryptedGroupKey_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(EncryptedGroupKey_class_data_.tc_table);
+  return EncryptedGroupKey_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 19, 2>
-GroupKey::_table_ = {
+const ::_pbi::TcParseTable<1, 2, 0, 28, 2>
+EncryptedGroupKey::_table_ = {
   {
-    PROTOBUF_FIELD_OFFSET(GroupKey, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(EncryptedGroupKey, _impl_._has_bits_),
     0, // no _extensions_
     2, 8,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
@@ -2362,41 +2551,41 @@ GroupKey::_table_ = {
     2,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
-    GroupKey_class_data_.base(),
+    EncryptedGroupKey_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::GroupKey>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::EncryptedGroupKey>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     // bytes data = 2;
     {::_pbi::TcParser::FastBS1,
      {18, 1, 0,
-      PROTOBUF_FIELD_OFFSET(GroupKey, _impl_.data_)}},
+      PROTOBUF_FIELD_OFFSET(EncryptedGroupKey, _impl_.data_)}},
     // string id = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 0, 0,
-      PROTOBUF_FIELD_OFFSET(GroupKey, _impl_.id_)}},
+      PROTOBUF_FIELD_OFFSET(EncryptedGroupKey, _impl_.id_)}},
   }}, {{
     65535, 65535
   }}, {{
     // string id = 1;
-    {PROTOBUF_FIELD_OFFSET(GroupKey, _impl_.id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(EncryptedGroupKey, _impl_.id_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // bytes data = 2;
-    {PROTOBUF_FIELD_OFFSET(GroupKey, _impl_.data_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(EncryptedGroupKey, _impl_.data_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\10\2\0\0\0\0\0\0"
-    "GroupKey"
+    "\21\2\0\0\0\0\0\0"
+    "EncryptedGroupKey"
     "id"
   }},
 };
-void GroupKey::InternalSwap(GroupKey* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+void EncryptedGroupKey::InternalSwap(EncryptedGroupKey* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
   GetReflection()->Swap(this, other);}
 
-::google::protobuf::Metadata GroupKey::GetMetadata() const {
+::google::protobuf::Metadata EncryptedGroupKey::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
@@ -3579,14 +3768,14 @@ ProxyConnectionRequest::_table_ = {
     {::_pbi::TcParser::FastBS1,
      {18, 0, 0,
       PROTOBUF_FIELD_OFFSET(ProxyConnectionRequest, _impl_.userid_)}},
-    // .ProxyDirection direction = 1;
+    // optional .ProxyDirection direction = 1;
     {::_pbi::TcParser::FastV32S1,
      {8, 1, 0,
       PROTOBUF_FIELD_OFFSET(ProxyConnectionRequest, _impl_.direction_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // .ProxyDirection direction = 1;
+    // optional .ProxyDirection direction = 1;
     {PROTOBUF_FIELD_OFFSET(ProxyConnectionRequest, _impl_.direction_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
     // bytes userId = 2;
     {PROTOBUF_FIELD_OFFSET(ProxyConnectionRequest, _impl_.userid_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
@@ -4100,9 +4289,9 @@ void StreamPartitionInfo::clear_controllayerneighbors() {
   ClearHasBitForRepeated(_impl_._has_bits_[0],
                   0x00000001U);
 }
-void StreamPartitionInfo::clear_contentdeliverylayerneighbors() {
+void StreamPartitionInfo::clear_deprecatedcontentdeliverylayerneighbors() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.contentdeliverylayerneighbors_.Clear();
+  _impl_.deprecatedcontentdeliverylayerneighbors_.Clear();
   ClearHasBitForRepeated(_impl_._has_bits_[0],
                   0x00000002U);
 }
@@ -4122,6 +4311,7 @@ PROTOBUF_NDEBUG_INLINE StreamPartitionInfo::Impl_::Impl_(
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
         controllayerneighbors_{visibility, arena, from.controllayerneighbors_},
+        deprecatedcontentdeliverylayerneighbors_{visibility, arena, from.deprecatedcontentdeliverylayerneighbors_},
         contentdeliverylayerneighbors_{visibility, arena, from.contentdeliverylayerneighbors_},
         id_(arena, from.id_) {}
 
@@ -4146,6 +4336,7 @@ PROTOBUF_NDEBUG_INLINE StreamPartitionInfo::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
         controllayerneighbors_{visibility, arena},
+        deprecatedcontentdeliverylayerneighbors_{visibility, arena},
         contentdeliverylayerneighbors_{visibility, arena},
         id_(arena) {}
 
@@ -4176,6 +4367,10 @@ constexpr auto StreamPartitionInfo::InternalNewImpl_() {
   constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
       PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.controllayerneighbors_) +
           decltype(StreamPartitionInfo::_impl_.controllayerneighbors_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+      PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.deprecatedcontentdeliverylayerneighbors_) +
+          decltype(StreamPartitionInfo::_impl_.deprecatedcontentdeliverylayerneighbors_)::
               InternalGetArenaOffset(
                   ::google::protobuf::Message::internal_visibility()),
       PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.contentdeliverylayerneighbors_) +
@@ -4227,17 +4422,17 @@ StreamPartitionInfo::GetClassData() const {
   return StreamPartitionInfo_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 2, 30, 2>
+const ::_pbi::TcParseTable<2, 4, 3, 30, 2>
 StreamPartitionInfo::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
-    2,  // num_aux_entries
+    4,  // num_field_entries
+    3,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     StreamPartitionInfo_class_data_.base(),
     nullptr,  // post_loop_handler
@@ -4246,32 +4441,38 @@ StreamPartitionInfo::_table_ = {
     ::_pbi::TcParser::GetTable<::StreamPartitionInfo>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // repeated .ContentDeliveryLayerNeighborInfo contentDeliveryLayerNeighbors = 4;
+    {::_pbi::TcParser::FastMtR1,
+     {34, 2, 2,
+      PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.contentdeliverylayerneighbors_)}},
     // string id = 1;
     {::_pbi::TcParser::FastUS1,
-     {10, 2, 0,
+     {10, 3, 0,
       PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.id_)}},
     // repeated .dht.PeerDescriptor controlLayerNeighbors = 2;
     {::_pbi::TcParser::FastMtR1,
      {18, 0, 0,
       PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.controllayerneighbors_)}},
-    // repeated .dht.PeerDescriptor contentDeliveryLayerNeighbors = 3;
+    // repeated .dht.PeerDescriptor deprecatedContentDeliveryLayerNeighbors = 3;
     {::_pbi::TcParser::FastMtR1,
      {26, 1, 1,
-      PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.contentdeliverylayerneighbors_)}},
+      PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.deprecatedcontentdeliverylayerneighbors_)}},
   }}, {{
     65535, 65535
   }}, {{
     // string id = 1;
-    {PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.id_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.id_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // repeated .dht.PeerDescriptor controlLayerNeighbors = 2;
     {PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.controllayerneighbors_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
-    // repeated .dht.PeerDescriptor contentDeliveryLayerNeighbors = 3;
-    {PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.contentdeliverylayerneighbors_), _Internal::kHasBitsOffset + 1, 1, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // repeated .dht.PeerDescriptor deprecatedContentDeliveryLayerNeighbors = 3;
+    {PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.deprecatedcontentdeliverylayerneighbors_), _Internal::kHasBitsOffset + 1, 1, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // repeated .ContentDeliveryLayerNeighborInfo contentDeliveryLayerNeighbors = 4;
+    {PROTOBUF_FIELD_OFFSET(StreamPartitionInfo, _impl_.contentdeliverylayerneighbors_), _Internal::kHasBitsOffset + 2, 2, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
   }},
   {{
       {::_pbi::TcParser::GetTable<::dht::PeerDescriptor>()},
       {::_pbi::TcParser::GetTable<::dht::PeerDescriptor>()},
+      {::_pbi::TcParser::GetTable<::ContentDeliveryLayerNeighborInfo>()},
   }},
   {{
     "\23\2\0\0\0\0\0\0"
@@ -4284,6 +4485,180 @@ void StreamPartitionInfo::InternalSwap(StreamPartitionInfo* PROTOBUF_RESTRICT PR
   GetReflection()->Swap(this, other);}
 
 ::google::protobuf::Metadata StreamPartitionInfo::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ContentDeliveryLayerNeighborInfo::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ContentDeliveryLayerNeighborInfo>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ContentDeliveryLayerNeighborInfo, _impl_._has_bits_);
+};
+
+void ContentDeliveryLayerNeighborInfo::clear_peerdescriptor() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.peerdescriptor_ != nullptr) _impl_.peerdescriptor_->Clear();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+ContentDeliveryLayerNeighborInfo::ContentDeliveryLayerNeighborInfo(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ContentDeliveryLayerNeighborInfo_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:ContentDeliveryLayerNeighborInfo)
+}
+PROTOBUF_NDEBUG_INLINE ContentDeliveryLayerNeighborInfo::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::ContentDeliveryLayerNeighborInfo& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0} {}
+
+ContentDeliveryLayerNeighborInfo::ContentDeliveryLayerNeighborInfo(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ContentDeliveryLayerNeighborInfo& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ContentDeliveryLayerNeighborInfo_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ContentDeliveryLayerNeighborInfo* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.peerdescriptor_ = (CheckHasBit(cached_has_bits, 0x00000001U))
+                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.peerdescriptor_)
+                : nullptr;
+  _impl_.rtt_ = from._impl_.rtt_;
+
+  // @@protoc_insertion_point(copy_constructor:ContentDeliveryLayerNeighborInfo)
+}
+PROTOBUF_NDEBUG_INLINE ContentDeliveryLayerNeighborInfo::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0} {}
+
+inline void ContentDeliveryLayerNeighborInfo::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, peerdescriptor_),
+           0,
+           offsetof(Impl_, rtt_) -
+               offsetof(Impl_, peerdescriptor_) +
+               sizeof(Impl_::rtt_));
+}
+ContentDeliveryLayerNeighborInfo::~ContentDeliveryLayerNeighborInfo() {
+  // @@protoc_insertion_point(destructor:ContentDeliveryLayerNeighborInfo)
+  SharedDtor(*this);
+}
+inline void ContentDeliveryLayerNeighborInfo::SharedDtor(MessageLite& self) {
+  ContentDeliveryLayerNeighborInfo& this_ = static_cast<ContentDeliveryLayerNeighborInfo&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  delete this_._impl_.peerdescriptor_;
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ContentDeliveryLayerNeighborInfo::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ContentDeliveryLayerNeighborInfo(arena);
+}
+constexpr auto ContentDeliveryLayerNeighborInfo::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(ContentDeliveryLayerNeighborInfo),
+                                            alignof(ContentDeliveryLayerNeighborInfo));
+}
+constexpr auto ContentDeliveryLayerNeighborInfo::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ContentDeliveryLayerNeighborInfo_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ContentDeliveryLayerNeighborInfo::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ContentDeliveryLayerNeighborInfo>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ContentDeliveryLayerNeighborInfo::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&ContentDeliveryLayerNeighborInfo::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ContentDeliveryLayerNeighborInfo, _impl_._cached_size_),
+          false,
+      },
+      &ContentDeliveryLayerNeighborInfo::kDescriptorMethods,
+      &descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ContentDeliveryLayerNeighborInfo_class_data_ =
+        ContentDeliveryLayerNeighborInfo::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ContentDeliveryLayerNeighborInfo::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ContentDeliveryLayerNeighborInfo_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ContentDeliveryLayerNeighborInfo_class_data_.tc_table);
+  return ContentDeliveryLayerNeighborInfo_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 1, 0, 2>
+ContentDeliveryLayerNeighborInfo::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ContentDeliveryLayerNeighborInfo, _impl_._has_bits_),
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    ContentDeliveryLayerNeighborInfo_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::ContentDeliveryLayerNeighborInfo>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // optional int32 rtt = 2;
+    {::_pbi::TcParser::FastV32S1,
+     {16, 1, 0,
+      PROTOBUF_FIELD_OFFSET(ContentDeliveryLayerNeighborInfo, _impl_.rtt_)}},
+    // .dht.PeerDescriptor peerDescriptor = 1;
+    {::_pbi::TcParser::FastMtS1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ContentDeliveryLayerNeighborInfo, _impl_.peerdescriptor_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // .dht.PeerDescriptor peerDescriptor = 1;
+    {PROTOBUF_FIELD_OFFSET(ContentDeliveryLayerNeighborInfo, _impl_.peerdescriptor_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // optional int32 rtt = 2;
+    {PROTOBUF_FIELD_OFFSET(ContentDeliveryLayerNeighborInfo, _impl_.rtt_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+  }},
+  {{
+      {::_pbi::TcParser::GetTable<::dht::PeerDescriptor>()},
+  }},
+  {{
+  }},
+};
+void ContentDeliveryLayerNeighborInfo::InternalSwap(ContentDeliveryLayerNeighborInfo* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  GetReflection()->Swap(this, other);}
+
+::google::protobuf::Metadata ContentDeliveryLayerNeighborInfo::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
@@ -4611,7 +4986,7 @@ PROTOBUF_NDEBUG_INLINE NodeInfoResponse::Impl_::Impl_(
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
         streampartitions_{visibility, arena, from.streampartitions_},
-        version_(arena, from.version_) {}
+        applicationversion_(arena, from.applicationversion_) {}
 
 NodeInfoResponse::NodeInfoResponse(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -4641,7 +5016,7 @@ PROTOBUF_NDEBUG_INLINE NodeInfoResponse::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
         streampartitions_{visibility, arena},
-        version_(arena) {}
+        applicationversion_(arena) {}
 
 inline void NodeInfoResponse::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -4663,7 +5038,7 @@ inline void NodeInfoResponse::SharedDtor(MessageLite& self) {
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.version_.Destroy();
+  this_._impl_.applicationversion_.Destroy();
   delete this_._impl_.peerdescriptor_;
   delete this_._impl_.controllayer_;
   this_._impl_.~Impl_();
@@ -4725,7 +5100,7 @@ NodeInfoResponse::GetClassData() const {
   return NodeInfoResponse_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 3, 32, 2>
+const ::_pbi::TcParseTable<2, 4, 3, 43, 2>
 NodeInfoResponse::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_._has_bits_),
@@ -4744,10 +5119,10 @@ NodeInfoResponse::_table_ = {
     ::_pbi::TcParser::GetTable<::NodeInfoResponse>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string version = 4;
+    // string applicationVersion = 4;
     {::_pbi::TcParser::FastUS1,
      {34, 1, 0,
-      PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.version_)}},
+      PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.applicationversion_)}},
     // .dht.PeerDescriptor peerDescriptor = 1;
     {::_pbi::TcParser::FastMtS1,
      {10, 2, 0,
@@ -4756,7 +5131,7 @@ NodeInfoResponse::_table_ = {
     {::_pbi::TcParser::FastMtR1,
      {18, 0, 1,
       PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.streampartitions_)}},
-    // optional .ControlLayerInfo controlLayer = 3;
+    // .ControlLayerInfo controlLayer = 3;
     {::_pbi::TcParser::FastMtS1,
      {26, 3, 2,
       PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.controllayer_)}},
@@ -4767,10 +5142,10 @@ NodeInfoResponse::_table_ = {
     {PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.peerdescriptor_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
     // repeated .StreamPartitionInfo streamPartitions = 2;
     {PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.streampartitions_), _Internal::kHasBitsOffset + 0, 1, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
-    // optional .ControlLayerInfo controlLayer = 3;
+    // .ControlLayerInfo controlLayer = 3;
     {PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.controllayer_), _Internal::kHasBitsOffset + 3, 2, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
-    // string version = 4;
-    {PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.version_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string applicationVersion = 4;
+    {PROTOBUF_FIELD_OFFSET(NodeInfoResponse, _impl_.applicationversion_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   {{
       {::_pbi::TcParser::GetTable<::dht::PeerDescriptor>()},
@@ -4778,9 +5153,9 @@ NodeInfoResponse::_table_ = {
       {::_pbi::TcParser::GetTable<::ControlLayerInfo>()},
   }},
   {{
-    "\20\0\0\0\7\0\0\0"
+    "\20\0\0\0\22\0\0\0"
     "NodeInfoResponse"
-    "version"
+    "applicationVersion"
   }},
 };
 void NodeInfoResponse::InternalSwap(NodeInfoResponse* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
@@ -4788,6 +5163,459 @@ void NodeInfoResponse::InternalSwap(NodeInfoResponse* PROTOBUF_RESTRICT PROTOBUF
   GetReflection()->Swap(this, other);}
 
 ::google::protobuf::Metadata NodeInfoResponse::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class PauseNeighborRequest::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<PauseNeighborRequest>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(PauseNeighborRequest, _impl_._has_bits_);
+};
+
+PauseNeighborRequest::PauseNeighborRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, PauseNeighborRequest_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:PauseNeighborRequest)
+}
+PROTOBUF_NDEBUG_INLINE PauseNeighborRequest::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::PauseNeighborRequest& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        messagechainid_(arena, from.messagechainid_) {}
+
+PauseNeighborRequest::PauseNeighborRequest(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const PauseNeighborRequest& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, PauseNeighborRequest_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  PauseNeighborRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:PauseNeighborRequest)
+}
+PROTOBUF_NDEBUG_INLINE PauseNeighborRequest::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        messagechainid_(arena) {}
+
+inline void PauseNeighborRequest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+PauseNeighborRequest::~PauseNeighborRequest() {
+  // @@protoc_insertion_point(destructor:PauseNeighborRequest)
+  SharedDtor(*this);
+}
+inline void PauseNeighborRequest::SharedDtor(MessageLite& self) {
+  PauseNeighborRequest& this_ = static_cast<PauseNeighborRequest&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.messagechainid_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL PauseNeighborRequest::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) PauseNeighborRequest(arena);
+}
+constexpr auto PauseNeighborRequest::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(PauseNeighborRequest),
+                                            alignof(PauseNeighborRequest));
+}
+constexpr auto PauseNeighborRequest::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_PauseNeighborRequest_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &PauseNeighborRequest::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<PauseNeighborRequest>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &PauseNeighborRequest::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&PauseNeighborRequest::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(PauseNeighborRequest, _impl_._cached_size_),
+          false,
+      },
+      &PauseNeighborRequest::kDescriptorMethods,
+      &descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull PauseNeighborRequest_class_data_ =
+        PauseNeighborRequest::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+PauseNeighborRequest::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&PauseNeighborRequest_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(PauseNeighborRequest_class_data_.tc_table);
+  return PauseNeighborRequest_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 43, 2>
+PauseNeighborRequest::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(PauseNeighborRequest, _impl_._has_bits_),
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    PauseNeighborRequest_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::PauseNeighborRequest>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string messageChainId = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(PauseNeighborRequest, _impl_.messagechainid_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string messageChainId = 1;
+    {PROTOBUF_FIELD_OFFSET(PauseNeighborRequest, _impl_.messagechainid_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\24\16\0\0\0\0\0\0"
+    "PauseNeighborRequest"
+    "messageChainId"
+  }},
+};
+void PauseNeighborRequest::InternalSwap(PauseNeighborRequest* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  GetReflection()->Swap(this, other);}
+
+::google::protobuf::Metadata PauseNeighborRequest::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class PauseNeighborResponse::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<PauseNeighborResponse>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(PauseNeighborResponse, _impl_._has_bits_);
+};
+
+PauseNeighborResponse::PauseNeighborResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, PauseNeighborResponse_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:PauseNeighborResponse)
+}
+PauseNeighborResponse::PauseNeighborResponse(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const PauseNeighborResponse& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, PauseNeighborResponse_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+PROTOBUF_NDEBUG_INLINE PauseNeighborResponse::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0} {}
+
+inline void PauseNeighborResponse::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.accepted_ = {};
+}
+PauseNeighborResponse::~PauseNeighborResponse() {
+  // @@protoc_insertion_point(destructor:PauseNeighborResponse)
+  SharedDtor(*this);
+}
+inline void PauseNeighborResponse::SharedDtor(MessageLite& self) {
+  PauseNeighborResponse& this_ = static_cast<PauseNeighborResponse&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL PauseNeighborResponse::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) PauseNeighborResponse(arena);
+}
+constexpr auto PauseNeighborResponse::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(PauseNeighborResponse),
+                                            alignof(PauseNeighborResponse));
+}
+constexpr auto PauseNeighborResponse::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_PauseNeighborResponse_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &PauseNeighborResponse::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<PauseNeighborResponse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &PauseNeighborResponse::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&PauseNeighborResponse::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(PauseNeighborResponse, _impl_._cached_size_),
+          false,
+      },
+      &PauseNeighborResponse::kDescriptorMethods,
+      &descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull PauseNeighborResponse_class_data_ =
+        PauseNeighborResponse::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+PauseNeighborResponse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&PauseNeighborResponse_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(PauseNeighborResponse_class_data_.tc_table);
+  return PauseNeighborResponse_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2>
+PauseNeighborResponse::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(PauseNeighborResponse, _impl_._has_bits_),
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    PauseNeighborResponse_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::PauseNeighborResponse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // bool accepted = 1;
+    {::_pbi::TcParser::FastV8S1,
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(PauseNeighborResponse, _impl_.accepted_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // bool accepted = 1;
+    {PROTOBUF_FIELD_OFFSET(PauseNeighborResponse, _impl_.accepted_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+void PauseNeighborResponse::InternalSwap(PauseNeighborResponse* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  GetReflection()->Swap(this, other);}
+
+::google::protobuf::Metadata PauseNeighborResponse::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ResumeNeighborRequest::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ResumeNeighborRequest>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ResumeNeighborRequest, _impl_._has_bits_);
+};
+
+ResumeNeighborRequest::ResumeNeighborRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ResumeNeighborRequest_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:ResumeNeighborRequest)
+}
+PROTOBUF_NDEBUG_INLINE ResumeNeighborRequest::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::ResumeNeighborRequest& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        messagechainid_(arena, from.messagechainid_) {}
+
+ResumeNeighborRequest::ResumeNeighborRequest(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ResumeNeighborRequest& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ResumeNeighborRequest_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ResumeNeighborRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.fromtimestamp_ = from._impl_.fromtimestamp_;
+
+  // @@protoc_insertion_point(copy_constructor:ResumeNeighborRequest)
+}
+PROTOBUF_NDEBUG_INLINE ResumeNeighborRequest::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        messagechainid_(arena) {}
+
+inline void ResumeNeighborRequest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.fromtimestamp_ = {};
+}
+ResumeNeighborRequest::~ResumeNeighborRequest() {
+  // @@protoc_insertion_point(destructor:ResumeNeighborRequest)
+  SharedDtor(*this);
+}
+inline void ResumeNeighborRequest::SharedDtor(MessageLite& self) {
+  ResumeNeighborRequest& this_ = static_cast<ResumeNeighborRequest&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.messagechainid_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ResumeNeighborRequest::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ResumeNeighborRequest(arena);
+}
+constexpr auto ResumeNeighborRequest::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(ResumeNeighborRequest),
+                                            alignof(ResumeNeighborRequest));
+}
+constexpr auto ResumeNeighborRequest::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ResumeNeighborRequest_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ResumeNeighborRequest::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ResumeNeighborRequest>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ResumeNeighborRequest::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&ResumeNeighborRequest::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ResumeNeighborRequest, _impl_._cached_size_),
+          false,
+      },
+      &ResumeNeighborRequest::kDescriptorMethods,
+      &descriptor_table_packages_2fnetwork_2fprotos_2fNetworkRpc_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ResumeNeighborRequest_class_data_ =
+        ResumeNeighborRequest::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ResumeNeighborRequest::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ResumeNeighborRequest_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ResumeNeighborRequest_class_data_.tc_table);
+  return ResumeNeighborRequest_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 44, 2>
+ResumeNeighborRequest::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ResumeNeighborRequest, _impl_._has_bits_),
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ResumeNeighborRequest_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::ResumeNeighborRequest>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // int64 fromTimestamp = 2;
+    {::_pbi::TcParser::FastV64S1,
+     {16, 1, 0,
+      PROTOBUF_FIELD_OFFSET(ResumeNeighborRequest, _impl_.fromtimestamp_)}},
+    // string messageChainId = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ResumeNeighborRequest, _impl_.messagechainid_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string messageChainId = 1;
+    {PROTOBUF_FIELD_OFFSET(ResumeNeighborRequest, _impl_.messagechainid_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int64 fromTimestamp = 2;
+    {PROTOBUF_FIELD_OFFSET(ResumeNeighborRequest, _impl_.fromtimestamp_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt64)},
+  }},
+  // no aux_entries
+  {{
+    "\25\16\0\0\0\0\0\0"
+    "ResumeNeighborRequest"
+    "messageChainId"
+  }},
+};
+void ResumeNeighborRequest::InternalSwap(ResumeNeighborRequest* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  GetReflection()->Swap(this, other);}
+
+::google::protobuf::Metadata ResumeNeighborRequest::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

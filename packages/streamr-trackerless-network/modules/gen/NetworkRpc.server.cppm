@@ -54,5 +54,13 @@ public:
    virtual ~NodeInfoRpc() = default;
    virtual NodeInfoResponse getInfo(const NodeInfoRequest& request, const CallContextType& callContext) = 0;
 }; // class NodeInfoRpc
+template <typename CallContextType>
+class PlumtreeRpc {
+public:
+   virtual ~PlumtreeRpc() = default;
+   virtual PauseNeighborResponse pauseNeighbor(const PauseNeighborRequest& request, const CallContextType& callContext) = 0;
+   virtual void resumeNeighbor(const ResumeNeighborRequest& request, const CallContextType& callContext) = 0;
+   virtual void sendMetadata(const MessageID& request, const CallContextType& callContext) = 0;
+}; // class PlumtreeRpc
 }; // namespace streamr::protorpc
 

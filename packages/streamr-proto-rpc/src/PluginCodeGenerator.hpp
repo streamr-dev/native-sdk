@@ -119,6 +119,12 @@ private:
                  << "\"\n";
         headerSs << "\n";
         headerSs << "module;\n\n";
+        headerSs << "// std::coroutine_traits must be visible in every "
+                    "translation unit\n";
+        headerSs << "// that defines OR instantiates a coroutine; it cannot "
+                    "arrive through\n";
+        headerSs << "// an imported BMI.\n";
+        headerSs << "#include <coroutine> // IWYU pragma: keep\n\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";
 
         std::stringstream sourceSs;
@@ -234,6 +240,12 @@ private:
         headerSs << "\n";
         headerSs << "module;\n\n";
 
+        headerSs << "// std::coroutine_traits must be visible in every "
+                    "translation unit\n";
+        headerSs << "// that defines OR instantiates a coroutine; it cannot "
+                    "arrive through\n";
+        headerSs << "// an imported BMI.\n";
+        headerSs << "#include <coroutine> // IWYU pragma: keep\n\n";
         headerSs << "#include <chrono>\n";
         headerSs << "#include <optional>\n";
         headerSs << "#include \"" << typesFilename << "\" // NOLINT\n";

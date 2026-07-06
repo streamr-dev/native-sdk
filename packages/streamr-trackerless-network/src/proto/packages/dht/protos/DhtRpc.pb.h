@@ -114,6 +114,14 @@ class ExternalFetchDataResponse;
 struct ExternalFetchDataResponseDefaultTypeInternal;
 extern ExternalFetchDataResponseDefaultTypeInternal _ExternalFetchDataResponse_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull ExternalFetchDataResponse_class_data_;
+class ExternalFindClosestNodesRequest;
+struct ExternalFindClosestNodesRequestDefaultTypeInternal;
+extern ExternalFindClosestNodesRequestDefaultTypeInternal _ExternalFindClosestNodesRequest_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ExternalFindClosestNodesRequest_class_data_;
+class ExternalFindClosestNodesResponse;
+struct ExternalFindClosestNodesResponseDefaultTypeInternal;
+extern ExternalFindClosestNodesResponseDefaultTypeInternal _ExternalFindClosestNodesResponse_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull ExternalFindClosestNodesResponse_class_data_;
 class ExternalStoreDataRequest;
 struct ExternalStoreDataRequestDefaultTypeInternal;
 extern ExternalStoreDataRequestDefaultTypeInternal _ExternalStoreDataRequest_default_instance_;
@@ -190,6 +198,10 @@ class RtcOffer;
 struct RtcOfferDefaultTypeInternal;
 extern RtcOfferDefaultTypeInternal _RtcOffer_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull RtcOffer_class_data_;
+class SetPrivateRequest;
+struct SetPrivateRequestDefaultTypeInternal;
+extern SetPrivateRequestDefaultTypeInternal _SetPrivateRequest_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull SetPrivateRequest_class_data_;
 class StoreDataRequest;
 struct StoreDataRequestDefaultTypeInternal;
 extern StoreDataRequestDefaultTypeInternal _StoreDataRequest_default_instance_;
@@ -386,7 +398,7 @@ inline bool RouteMessageError_Parse(
 enum HandshakeError : int {
   DUPLICATE_CONNECTION = 0,
   INVALID_TARGET_PEER_DESCRIPTOR = 1,
-  UNSUPPORTED_VERSION = 2,
+  UNSUPPORTED_PROTOCOL_VERSION = 2,
   HandshakeError_INT_MIN_SENTINEL_DO_NOT_USE_ =
       ::std::numeric_limits<::int32_t>::min(),
   HandshakeError_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -984,6 +996,162 @@ class StoreDataResponse final : public ::google::protobuf::internal::ZeroFieldsB
 };
 
 extern const ::google::protobuf::internal::ClassDataFull StoreDataResponse_class_data_;
+// -------------------------------------------------------------------
+
+class SetPrivateRequest final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:dht.SetPrivateRequest) */ {
+ public:
+  inline SetPrivateRequest() : SetPrivateRequest(nullptr) {}
+  ~SetPrivateRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(SetPrivateRequest* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(SetPrivateRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR SetPrivateRequest(::google::protobuf::internal::ConstantInitialized);
+
+  inline SetPrivateRequest(const SetPrivateRequest& from) : SetPrivateRequest(nullptr, from) {}
+  inline SetPrivateRequest(SetPrivateRequest&& from) noexcept
+      : SetPrivateRequest(nullptr, ::std::move(from)) {}
+  inline SetPrivateRequest& operator=(const SetPrivateRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SetPrivateRequest& operator=(SetPrivateRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SetPrivateRequest& default_instance() {
+    return *reinterpret_cast<const SetPrivateRequest*>(
+        &_SetPrivateRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 33;
+  friend void swap(SetPrivateRequest& a, SetPrivateRequest& b) { a.Swap(&b); }
+  inline void Swap(SetPrivateRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SetPrivateRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SetPrivateRequest* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<SetPrivateRequest>(arena);
+  }
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(SetPrivateRequest* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "dht.SetPrivateRequest"; }
+
+  explicit SetPrivateRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  SetPrivateRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const SetPrivateRequest& from);
+  SetPrivateRequest(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, SetPrivateRequest&& from) noexcept
+      : SetPrivateRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kIsPrivateFieldNumber = 1,
+  };
+  // bool isPrivate = 1;
+  void clear_isprivate() ;
+  bool isprivate() const;
+  void set_isprivate(bool value);
+
+  private:
+  bool _internal_isprivate() const;
+  void _internal_set_isprivate(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:dht.SetPrivateRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const SetPrivateRequest& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    bool isprivate_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_packages_2fdht_2fprotos_2fDhtRpc_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull SetPrivateRequest_class_data_;
 // -------------------------------------------------------------------
 
 class RtcOffer final : public ::google::protobuf::Message
@@ -2644,6 +2812,167 @@ class IceCandidate final : public ::google::protobuf::Message
 extern const ::google::protobuf::internal::ClassDataFull IceCandidate_class_data_;
 // -------------------------------------------------------------------
 
+class ExternalFindClosestNodesRequest final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:dht.ExternalFindClosestNodesRequest) */ {
+ public:
+  inline ExternalFindClosestNodesRequest() : ExternalFindClosestNodesRequest(nullptr) {}
+  ~ExternalFindClosestNodesRequest() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ExternalFindClosestNodesRequest* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ExternalFindClosestNodesRequest));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ExternalFindClosestNodesRequest(::google::protobuf::internal::ConstantInitialized);
+
+  inline ExternalFindClosestNodesRequest(const ExternalFindClosestNodesRequest& from) : ExternalFindClosestNodesRequest(nullptr, from) {}
+  inline ExternalFindClosestNodesRequest(ExternalFindClosestNodesRequest&& from) noexcept
+      : ExternalFindClosestNodesRequest(nullptr, ::std::move(from)) {}
+  inline ExternalFindClosestNodesRequest& operator=(const ExternalFindClosestNodesRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ExternalFindClosestNodesRequest& operator=(ExternalFindClosestNodesRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ExternalFindClosestNodesRequest& default_instance() {
+    return *reinterpret_cast<const ExternalFindClosestNodesRequest*>(
+        &_ExternalFindClosestNodesRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 36;
+  friend void swap(ExternalFindClosestNodesRequest& a, ExternalFindClosestNodesRequest& b) { a.Swap(&b); }
+  inline void Swap(ExternalFindClosestNodesRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ExternalFindClosestNodesRequest* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ExternalFindClosestNodesRequest* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ExternalFindClosestNodesRequest>(arena);
+  }
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ExternalFindClosestNodesRequest* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "dht.ExternalFindClosestNodesRequest"; }
+
+  explicit ExternalFindClosestNodesRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ExternalFindClosestNodesRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ExternalFindClosestNodesRequest& from);
+  ExternalFindClosestNodesRequest(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ExternalFindClosestNodesRequest&& from) noexcept
+      : ExternalFindClosestNodesRequest(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNodeIdFieldNumber = 1,
+  };
+  // bytes nodeId = 1;
+  void clear_nodeid() ;
+  const ::std::string& nodeid() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_nodeid(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_nodeid();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_nodeid();
+  void set_allocated_nodeid(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_nodeid() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_nodeid(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_nodeid();
+
+  public:
+  // @@protoc_insertion_point(class_scope:dht.ExternalFindClosestNodesRequest)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   0, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ExternalFindClosestNodesRequest& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr nodeid_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_packages_2fdht_2fprotos_2fDhtRpc_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ExternalFindClosestNodesRequest_class_data_;
+// -------------------------------------------------------------------
+
 class ExternalFetchDataRequest final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:dht.ExternalFetchDataRequest) */ {
  public:
@@ -2699,7 +3028,7 @@ class ExternalFetchDataRequest final : public ::google::protobuf::Message
     return *reinterpret_cast<const ExternalFetchDataRequest*>(
         &_ExternalFetchDataRequest_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 33;
+  static constexpr int kIndexInFileMessages = 34;
   friend void swap(ExternalFetchDataRequest& a, ExternalFetchDataRequest& b) { a.Swap(&b); }
   inline void Swap(ExternalFetchDataRequest* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -4763,7 +5092,7 @@ class ConnectivityResponse final : public ::google::protobuf::Message
   enum : int {
     kHostFieldNumber = 1,
     kNatTypeFieldNumber = 2,
-    kVersionFieldNumber = 5,
+    kProtocolVersionFieldNumber = 5,
     kWebsocketFieldNumber = 3,
     kLatitudeFieldNumber = 6,
     kLongitudeFieldNumber = 7,
@@ -4799,19 +5128,19 @@ class ConnectivityResponse final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_nattype();
 
   public:
-  // string version = 5;
-  void clear_version() ;
-  const ::std::string& version() const;
+  // string protocolVersion = 5;
+  void clear_protocolversion() ;
+  const ::std::string& protocolversion() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
-  void set_version(Arg_&& arg, Args_... args);
-  ::std::string* PROTOBUF_NONNULL mutable_version();
-  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_version();
-  void set_allocated_version(::std::string* PROTOBUF_NULLABLE value);
+  void set_protocolversion(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_protocolversion();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_protocolversion();
+  void set_allocated_protocolversion(::std::string* PROTOBUF_NULLABLE value);
 
   private:
-  const ::std::string& _internal_version() const;
-  PROTOBUF_ALWAYS_INLINE void _internal_set_version(const ::std::string& value);
-  ::std::string* PROTOBUF_NONNULL _internal_mutable_version();
+  const ::std::string& _internal_protocolversion() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_protocolversion(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_protocolversion();
 
   public:
   // .dht.ConnectivityMethod websocket = 3;
@@ -4866,7 +5195,7 @@ class ConnectivityResponse final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<3, 7,
-                                   1, 51,
+                                   1, 59,
                                    2>
       _table_;
 
@@ -4889,7 +5218,7 @@ class ConnectivityResponse final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr host_;
     ::google::protobuf::internal::ArenaStringPtr nattype_;
-    ::google::protobuf::internal::ArenaStringPtr version_;
+    ::google::protobuf::internal::ArenaStringPtr protocolversion_;
     ::dht::ConnectivityMethod* PROTOBUF_NULLABLE websocket_;
     double latitude_;
     double longitude_;
@@ -5385,23 +5714,39 @@ class HandshakeResponse final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kVersionFieldNumber = 3,
+    kProtocolVersionFieldNumber = 3,
+    kApplicationVersionFieldNumber = 4,
     kSourcePeerDescriptorFieldNumber = 1,
     kErrorFieldNumber = 2,
   };
-  // string version = 3;
-  void clear_version() ;
-  const ::std::string& version() const;
+  // string protocolVersion = 3;
+  void clear_protocolversion() ;
+  const ::std::string& protocolversion() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
-  void set_version(Arg_&& arg, Args_... args);
-  ::std::string* PROTOBUF_NONNULL mutable_version();
-  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_version();
-  void set_allocated_version(::std::string* PROTOBUF_NULLABLE value);
+  void set_protocolversion(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_protocolversion();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_protocolversion();
+  void set_allocated_protocolversion(::std::string* PROTOBUF_NULLABLE value);
 
   private:
-  const ::std::string& _internal_version() const;
-  PROTOBUF_ALWAYS_INLINE void _internal_set_version(const ::std::string& value);
-  ::std::string* PROTOBUF_NONNULL _internal_mutable_version();
+  const ::std::string& _internal_protocolversion() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_protocolversion(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_protocolversion();
+
+  public:
+  // string applicationVersion = 4;
+  void clear_applicationversion() ;
+  const ::std::string& applicationversion() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_applicationversion(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_applicationversion();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_applicationversion();
+  void set_allocated_applicationversion(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_applicationversion() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_applicationversion(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_applicationversion();
 
   public:
   // .dht.PeerDescriptor sourcePeerDescriptor = 1;
@@ -5434,8 +5779,8 @@ class HandshakeResponse final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
-                                   1, 37,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   1, 63,
                                    2>
       _table_;
 
@@ -5456,7 +5801,8 @@ class HandshakeResponse final : public ::google::protobuf::Message
         const HandshakeResponse& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::google::protobuf::internal::ArenaStringPtr version_;
+    ::google::protobuf::internal::ArenaStringPtr protocolversion_;
+    ::google::protobuf::internal::ArenaStringPtr applicationversion_;
     ::dht::PeerDescriptor* PROTOBUF_NULLABLE sourcepeerdescriptor_;
     int error_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -5576,23 +5922,39 @@ class HandshakeRequest final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kVersionFieldNumber = 3,
+    kProtocolVersionFieldNumber = 3,
+    kApplicationVersionFieldNumber = 4,
     kSourcePeerDescriptorFieldNumber = 1,
     kTargetPeerDescriptorFieldNumber = 2,
   };
-  // string version = 3;
-  void clear_version() ;
-  const ::std::string& version() const;
+  // string protocolVersion = 3;
+  void clear_protocolversion() ;
+  const ::std::string& protocolversion() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
-  void set_version(Arg_&& arg, Args_... args);
-  ::std::string* PROTOBUF_NONNULL mutable_version();
-  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_version();
-  void set_allocated_version(::std::string* PROTOBUF_NULLABLE value);
+  void set_protocolversion(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_protocolversion();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_protocolversion();
+  void set_allocated_protocolversion(::std::string* PROTOBUF_NULLABLE value);
 
   private:
-  const ::std::string& _internal_version() const;
-  PROTOBUF_ALWAYS_INLINE void _internal_set_version(const ::std::string& value);
-  ::std::string* PROTOBUF_NONNULL _internal_mutable_version();
+  const ::std::string& _internal_protocolversion() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_protocolversion(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_protocolversion();
+
+  public:
+  // string applicationVersion = 4;
+  void clear_applicationversion() ;
+  const ::std::string& applicationversion() const;
+  template <typename Arg_ = const ::std::string&, typename... Args_>
+  void set_applicationversion(Arg_&& arg, Args_... args);
+  ::std::string* PROTOBUF_NONNULL mutable_applicationversion();
+  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_applicationversion();
+  void set_allocated_applicationversion(::std::string* PROTOBUF_NULLABLE value);
+
+  private:
+  const ::std::string& _internal_applicationversion() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_applicationversion(const ::std::string& value);
+  ::std::string* PROTOBUF_NONNULL _internal_mutable_applicationversion();
 
   public:
   // .dht.PeerDescriptor sourcePeerDescriptor = 1;
@@ -5629,8 +5991,8 @@ class HandshakeRequest final : public ::google::protobuf::Message
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
-                                   2, 36,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
+                                   2, 62,
                                    2>
       _table_;
 
@@ -5651,7 +6013,8 @@ class HandshakeRequest final : public ::google::protobuf::Message
         const HandshakeRequest& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::google::protobuf::internal::ArenaStringPtr version_;
+    ::google::protobuf::internal::ArenaStringPtr protocolversion_;
+    ::google::protobuf::internal::ArenaStringPtr applicationversion_;
     ::dht::PeerDescriptor* PROTOBUF_NULLABLE sourcepeerdescriptor_;
     ::dht::PeerDescriptor* PROTOBUF_NULLABLE targetpeerdescriptor_;
     PROTOBUF_TSAN_DECLARE_MEMBER
@@ -5826,6 +6189,169 @@ class ExternalStoreDataResponse final : public ::google::protobuf::Message
 extern const ::google::protobuf::internal::ClassDataFull ExternalStoreDataResponse_class_data_;
 // -------------------------------------------------------------------
 
+class ExternalFindClosestNodesResponse final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:dht.ExternalFindClosestNodesResponse) */ {
+ public:
+  inline ExternalFindClosestNodesResponse() : ExternalFindClosestNodesResponse(nullptr) {}
+  ~ExternalFindClosestNodesResponse() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(ExternalFindClosestNodesResponse* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(ExternalFindClosestNodesResponse));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ExternalFindClosestNodesResponse(::google::protobuf::internal::ConstantInitialized);
+
+  inline ExternalFindClosestNodesResponse(const ExternalFindClosestNodesResponse& from) : ExternalFindClosestNodesResponse(nullptr, from) {}
+  inline ExternalFindClosestNodesResponse(ExternalFindClosestNodesResponse&& from) noexcept
+      : ExternalFindClosestNodesResponse(nullptr, ::std::move(from)) {}
+  inline ExternalFindClosestNodesResponse& operator=(const ExternalFindClosestNodesResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ExternalFindClosestNodesResponse& operator=(ExternalFindClosestNodesResponse&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* PROTOBUF_NONNULL mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* PROTOBUF_NONNULL GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ExternalFindClosestNodesResponse& default_instance() {
+    return *reinterpret_cast<const ExternalFindClosestNodesResponse*>(
+        &_ExternalFindClosestNodesResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 37;
+  friend void swap(ExternalFindClosestNodesResponse& a, ExternalFindClosestNodesResponse& b) { a.Swap(&b); }
+  inline void Swap(ExternalFindClosestNodesResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ExternalFindClosestNodesResponse* PROTOBUF_NONNULL other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ExternalFindClosestNodesResponse* PROTOBUF_NONNULL New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<ExternalFindClosestNodesResponse>(arena);
+  }
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(ExternalFindClosestNodesResponse* PROTOBUF_NONNULL other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "dht.ExternalFindClosestNodesResponse"; }
+
+  explicit ExternalFindClosestNodesResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  ExternalFindClosestNodesResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const ExternalFindClosestNodesResponse& from);
+  ExternalFindClosestNodesResponse(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, ExternalFindClosestNodesResponse&& from) noexcept
+      : ExternalFindClosestNodesResponse(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
+  static void* PROTOBUF_NONNULL PlacementNew_(
+      const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kClosestNodesFieldNumber = 1,
+  };
+  // repeated .dht.PeerDescriptor closestNodes = 1;
+  int closestnodes_size() const;
+  private:
+  int _internal_closestnodes_size() const;
+
+  public:
+  void clear_closestnodes() ;
+  ::dht::PeerDescriptor* PROTOBUF_NONNULL mutable_closestnodes(int index);
+  ::google::protobuf::RepeatedPtrField<::dht::PeerDescriptor>* PROTOBUF_NONNULL mutable_closestnodes();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::dht::PeerDescriptor>& _internal_closestnodes() const;
+  ::google::protobuf::RepeatedPtrField<::dht::PeerDescriptor>* PROTOBUF_NONNULL _internal_mutable_closestnodes();
+  public:
+  const ::dht::PeerDescriptor& closestnodes(int index) const;
+  ::dht::PeerDescriptor* PROTOBUF_NONNULL add_closestnodes();
+  const ::google::protobuf::RepeatedPtrField<::dht::PeerDescriptor>& closestnodes() const;
+  // @@protoc_insertion_point(class_scope:dht.ExternalFindClosestNodesResponse)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<0, 1,
+                                   1, 0,
+                                   2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+    inline explicit Impl_(
+        ::google::protobuf::internal::InternalVisibility visibility,
+        ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+        const ExternalFindClosestNodesResponse& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::RepeatedPtrField< ::dht::PeerDescriptor > closestnodes_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_packages_2fdht_2fprotos_2fDhtRpc_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull ExternalFindClosestNodesResponse_class_data_;
+// -------------------------------------------------------------------
+
 class ExternalFetchDataResponse final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:dht.ExternalFetchDataResponse) */ {
  public:
@@ -5881,7 +6407,7 @@ class ExternalFetchDataResponse final : public ::google::protobuf::Message
     return *reinterpret_cast<const ExternalFetchDataResponse*>(
         &_ExternalFetchDataResponse_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 34;
+  static constexpr int kIndexInFileMessages = 35;
   friend void swap(ExternalFetchDataResponse& a, ExternalFetchDataResponse& b) { a.Swap(&b); }
   inline void Swap(ExternalFetchDataResponse* PROTOBUF_NONNULL other) {
     if (other == this) return;
@@ -10910,69 +11436,69 @@ inline void ConnectivityResponse::_internal_set_ipaddress(::uint32_t value) {
   _impl_.ipaddress_ = value;
 }
 
-// string version = 5;
-inline void ConnectivityResponse::clear_version() {
+// string protocolVersion = 5;
+inline void ConnectivityResponse::clear_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.version_.ClearToEmpty();
+  _impl_.protocolversion_.ClearToEmpty();
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline const ::std::string& ConnectivityResponse::version() const
+inline const ::std::string& ConnectivityResponse::protocolversion() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:dht.ConnectivityResponse.version)
-  return _internal_version();
+  // @@protoc_insertion_point(field_get:dht.ConnectivityResponse.protocolVersion)
+  return _internal_protocolversion();
 }
 template <typename Arg_, typename... Args_>
-PROTOBUF_ALWAYS_INLINE void ConnectivityResponse::set_version(Arg_&& arg, Args_... args) {
+PROTOBUF_ALWAYS_INLINE void ConnectivityResponse::set_protocolversion(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  _impl_.version_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:dht.ConnectivityResponse.version)
+  _impl_.protocolversion_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:dht.ConnectivityResponse.protocolVersion)
 }
-inline ::std::string* PROTOBUF_NONNULL ConnectivityResponse::mutable_version()
+inline ::std::string* PROTOBUF_NONNULL ConnectivityResponse::mutable_protocolversion()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  ::std::string* _s = _internal_mutable_version();
-  // @@protoc_insertion_point(field_mutable:dht.ConnectivityResponse.version)
+  ::std::string* _s = _internal_mutable_protocolversion();
+  // @@protoc_insertion_point(field_mutable:dht.ConnectivityResponse.protocolVersion)
   return _s;
 }
-inline const ::std::string& ConnectivityResponse::_internal_version() const {
+inline const ::std::string& ConnectivityResponse::_internal_protocolversion() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.version_.Get();
+  return _impl_.protocolversion_.Get();
 }
-inline void ConnectivityResponse::_internal_set_version(const ::std::string& value) {
+inline void ConnectivityResponse::_internal_set_protocolversion(const ::std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.version_.Set(value, GetArena());
+  _impl_.protocolversion_.Set(value, GetArena());
 }
-inline ::std::string* PROTOBUF_NONNULL ConnectivityResponse::_internal_mutable_version() {
+inline ::std::string* PROTOBUF_NONNULL ConnectivityResponse::_internal_mutable_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.version_.Mutable( GetArena());
+  return _impl_.protocolversion_.Mutable( GetArena());
 }
-inline ::std::string* PROTOBUF_NULLABLE ConnectivityResponse::release_version() {
+inline ::std::string* PROTOBUF_NULLABLE ConnectivityResponse::release_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:dht.ConnectivityResponse.version)
+  // @@protoc_insertion_point(field_release:dht.ConnectivityResponse.protocolVersion)
   if (!CheckHasBit(_impl_._has_bits_[0], 0x00000004U)) {
     return nullptr;
   }
   ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
-  auto* released = _impl_.version_.Release();
+  auto* released = _impl_.protocolversion_.Release();
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
-    _impl_.version_.Set("", GetArena());
+    _impl_.protocolversion_.Set("", GetArena());
   }
   return released;
 }
-inline void ConnectivityResponse::set_allocated_version(::std::string* PROTOBUF_NULLABLE value) {
+inline void ConnectivityResponse::set_allocated_protocolversion(::std::string* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (value != nullptr) {
     SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   } else {
     ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   }
-  _impl_.version_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.version_.IsDefault()) {
-    _impl_.version_.Set("", GetArena());
+  _impl_.protocolversion_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.protocolversion_.IsDefault()) {
+    _impl_.protocolversion_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:dht.ConnectivityResponse.version)
+  // @@protoc_insertion_point(field_set_allocated:dht.ConnectivityResponse.protocolVersion)
 }
 
 // optional double latitude = 6;
@@ -11039,7 +11565,7 @@ inline void ConnectivityResponse::_internal_set_longitude(double value) {
 
 // .dht.PeerDescriptor sourcePeerDescriptor = 1;
 inline bool HandshakeRequest::has_sourcepeerdescriptor() const {
-  bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000002U);
+  bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000004U);
   PROTOBUF_ASSUME(!value || _impl_.sourcepeerdescriptor_ != nullptr);
   return value;
 }
@@ -11047,7 +11573,7 @@ inline void HandshakeRequest::clear_sourcepeerdescriptor() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (_impl_.sourcepeerdescriptor_ != nullptr) _impl_.sourcepeerdescriptor_->Clear();
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
 inline const ::dht::PeerDescriptor& HandshakeRequest::_internal_sourcepeerdescriptor() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
@@ -11066,16 +11592,16 @@ inline void HandshakeRequest::unsafe_arena_set_allocated_sourcepeerdescriptor(
   }
   _impl_.sourcepeerdescriptor_ = reinterpret_cast<::dht::PeerDescriptor*>(value);
   if (value != nullptr) {
-    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+    SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   } else {
-    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+    ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:dht.HandshakeRequest.sourcePeerDescriptor)
 }
 inline ::dht::PeerDescriptor* PROTOBUF_NULLABLE HandshakeRequest::release_sourcepeerdescriptor() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
 
-  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   ::dht::PeerDescriptor* released = _impl_.sourcepeerdescriptor_;
   _impl_.sourcepeerdescriptor_ = nullptr;
   if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
@@ -11095,7 +11621,7 @@ inline ::dht::PeerDescriptor* PROTOBUF_NULLABLE HandshakeRequest::unsafe_arena_r
   ::google::protobuf::internal::TSanWrite(&_impl_);
   // @@protoc_insertion_point(field_release:dht.HandshakeRequest.sourcePeerDescriptor)
 
-  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   ::dht::PeerDescriptor* temp = _impl_.sourcepeerdescriptor_;
   _impl_.sourcepeerdescriptor_ = nullptr;
   return temp;
@@ -11110,7 +11636,7 @@ inline ::dht::PeerDescriptor* PROTOBUF_NONNULL HandshakeRequest::_internal_mutab
 }
 inline ::dht::PeerDescriptor* PROTOBUF_NONNULL HandshakeRequest::mutable_sourcepeerdescriptor()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   ::dht::PeerDescriptor* _msg = _internal_mutable_sourcepeerdescriptor();
   // @@protoc_insertion_point(field_mutable:dht.HandshakeRequest.sourcePeerDescriptor)
   return _msg;
@@ -11127,9 +11653,9 @@ inline void HandshakeRequest::set_allocated_sourcepeerdescriptor(::dht::PeerDesc
     if (message_arena != submessage_arena) {
       value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
     }
-    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+    SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   } else {
-    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+    ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   }
 
   _impl_.sourcepeerdescriptor_ = reinterpret_cast<::dht::PeerDescriptor*>(value);
@@ -11138,7 +11664,7 @@ inline void HandshakeRequest::set_allocated_sourcepeerdescriptor(::dht::PeerDesc
 
 // optional .dht.PeerDescriptor targetPeerDescriptor = 2;
 inline bool HandshakeRequest::has_targetpeerdescriptor() const {
-  bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000004U);
+  bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000008U);
   PROTOBUF_ASSUME(!value || _impl_.targetpeerdescriptor_ != nullptr);
   return value;
 }
@@ -11146,7 +11672,7 @@ inline void HandshakeRequest::clear_targetpeerdescriptor() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (_impl_.targetpeerdescriptor_ != nullptr) _impl_.targetpeerdescriptor_->Clear();
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline const ::dht::PeerDescriptor& HandshakeRequest::_internal_targetpeerdescriptor() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
@@ -11165,16 +11691,16 @@ inline void HandshakeRequest::unsafe_arena_set_allocated_targetpeerdescriptor(
   }
   _impl_.targetpeerdescriptor_ = reinterpret_cast<::dht::PeerDescriptor*>(value);
   if (value != nullptr) {
-    SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+    SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   } else {
-    ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
+    ClearHasBit(_impl_._has_bits_[0], 0x00000008U);
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:dht.HandshakeRequest.targetPeerDescriptor)
 }
 inline ::dht::PeerDescriptor* PROTOBUF_NULLABLE HandshakeRequest::release_targetpeerdescriptor() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
 
-  ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
+  ClearHasBit(_impl_._has_bits_[0], 0x00000008U);
   ::dht::PeerDescriptor* released = _impl_.targetpeerdescriptor_;
   _impl_.targetpeerdescriptor_ = nullptr;
   if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
@@ -11194,7 +11720,7 @@ inline ::dht::PeerDescriptor* PROTOBUF_NULLABLE HandshakeRequest::unsafe_arena_r
   ::google::protobuf::internal::TSanWrite(&_impl_);
   // @@protoc_insertion_point(field_release:dht.HandshakeRequest.targetPeerDescriptor)
 
-  ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
+  ClearHasBit(_impl_._has_bits_[0], 0x00000008U);
   ::dht::PeerDescriptor* temp = _impl_.targetpeerdescriptor_;
   _impl_.targetpeerdescriptor_ = nullptr;
   return temp;
@@ -11209,7 +11735,7 @@ inline ::dht::PeerDescriptor* PROTOBUF_NONNULL HandshakeRequest::_internal_mutab
 }
 inline ::dht::PeerDescriptor* PROTOBUF_NONNULL HandshakeRequest::mutable_targetpeerdescriptor()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   ::dht::PeerDescriptor* _msg = _internal_mutable_targetpeerdescriptor();
   // @@protoc_insertion_point(field_mutable:dht.HandshakeRequest.targetPeerDescriptor)
   return _msg;
@@ -11226,78 +11752,143 @@ inline void HandshakeRequest::set_allocated_targetpeerdescriptor(::dht::PeerDesc
     if (message_arena != submessage_arena) {
       value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
     }
-    SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+    SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   } else {
-    ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
+    ClearHasBit(_impl_._has_bits_[0], 0x00000008U);
   }
 
   _impl_.targetpeerdescriptor_ = reinterpret_cast<::dht::PeerDescriptor*>(value);
   // @@protoc_insertion_point(field_set_allocated:dht.HandshakeRequest.targetPeerDescriptor)
 }
 
-// string version = 3;
-inline void HandshakeRequest::clear_version() {
+// string protocolVersion = 3;
+inline void HandshakeRequest::clear_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.version_.ClearToEmpty();
+  _impl_.protocolversion_.ClearToEmpty();
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline const ::std::string& HandshakeRequest::version() const
+inline const ::std::string& HandshakeRequest::protocolversion() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:dht.HandshakeRequest.version)
-  return _internal_version();
+  // @@protoc_insertion_point(field_get:dht.HandshakeRequest.protocolVersion)
+  return _internal_protocolversion();
 }
 template <typename Arg_, typename... Args_>
-PROTOBUF_ALWAYS_INLINE void HandshakeRequest::set_version(Arg_&& arg, Args_... args) {
+PROTOBUF_ALWAYS_INLINE void HandshakeRequest::set_protocolversion(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  _impl_.version_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:dht.HandshakeRequest.version)
+  _impl_.protocolversion_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:dht.HandshakeRequest.protocolVersion)
 }
-inline ::std::string* PROTOBUF_NONNULL HandshakeRequest::mutable_version()
+inline ::std::string* PROTOBUF_NONNULL HandshakeRequest::mutable_protocolversion()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  ::std::string* _s = _internal_mutable_version();
-  // @@protoc_insertion_point(field_mutable:dht.HandshakeRequest.version)
+  ::std::string* _s = _internal_mutable_protocolversion();
+  // @@protoc_insertion_point(field_mutable:dht.HandshakeRequest.protocolVersion)
   return _s;
 }
-inline const ::std::string& HandshakeRequest::_internal_version() const {
+inline const ::std::string& HandshakeRequest::_internal_protocolversion() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.version_.Get();
+  return _impl_.protocolversion_.Get();
 }
-inline void HandshakeRequest::_internal_set_version(const ::std::string& value) {
+inline void HandshakeRequest::_internal_set_protocolversion(const ::std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.version_.Set(value, GetArena());
+  _impl_.protocolversion_.Set(value, GetArena());
 }
-inline ::std::string* PROTOBUF_NONNULL HandshakeRequest::_internal_mutable_version() {
+inline ::std::string* PROTOBUF_NONNULL HandshakeRequest::_internal_mutable_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.version_.Mutable( GetArena());
+  return _impl_.protocolversion_.Mutable( GetArena());
 }
-inline ::std::string* PROTOBUF_NULLABLE HandshakeRequest::release_version() {
+inline ::std::string* PROTOBUF_NULLABLE HandshakeRequest::release_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:dht.HandshakeRequest.version)
+  // @@protoc_insertion_point(field_release:dht.HandshakeRequest.protocolVersion)
   if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
     return nullptr;
   }
   ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
-  auto* released = _impl_.version_.Release();
+  auto* released = _impl_.protocolversion_.Release();
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
-    _impl_.version_.Set("", GetArena());
+    _impl_.protocolversion_.Set("", GetArena());
   }
   return released;
 }
-inline void HandshakeRequest::set_allocated_version(::std::string* PROTOBUF_NULLABLE value) {
+inline void HandshakeRequest::set_allocated_protocolversion(::std::string* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (value != nullptr) {
     SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   } else {
     ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
   }
-  _impl_.version_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.version_.IsDefault()) {
-    _impl_.version_.Set("", GetArena());
+  _impl_.protocolversion_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.protocolversion_.IsDefault()) {
+    _impl_.protocolversion_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:dht.HandshakeRequest.version)
+  // @@protoc_insertion_point(field_set_allocated:dht.HandshakeRequest.protocolVersion)
+}
+
+// string applicationVersion = 4;
+inline void HandshakeRequest::clear_applicationversion() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.applicationversion_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline const ::std::string& HandshakeRequest::applicationversion() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:dht.HandshakeRequest.applicationVersion)
+  return _internal_applicationversion();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void HandshakeRequest::set_applicationversion(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  _impl_.applicationversion_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:dht.HandshakeRequest.applicationVersion)
+}
+inline ::std::string* PROTOBUF_NONNULL HandshakeRequest::mutable_applicationversion()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ::std::string* _s = _internal_mutable_applicationversion();
+  // @@protoc_insertion_point(field_mutable:dht.HandshakeRequest.applicationVersion)
+  return _s;
+}
+inline const ::std::string& HandshakeRequest::_internal_applicationversion() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.applicationversion_.Get();
+}
+inline void HandshakeRequest::_internal_set_applicationversion(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.applicationversion_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL HandshakeRequest::_internal_mutable_applicationversion() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.applicationversion_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE HandshakeRequest::release_applicationversion() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:dht.HandshakeRequest.applicationVersion)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  auto* released = _impl_.applicationversion_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.applicationversion_.Set("", GetArena());
+  }
+  return released;
+}
+inline void HandshakeRequest::set_allocated_applicationversion(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  }
+  _impl_.applicationversion_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.applicationversion_.IsDefault()) {
+    _impl_.applicationversion_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:dht.HandshakeRequest.applicationVersion)
 }
 
 // -------------------------------------------------------------------
@@ -11306,7 +11897,7 @@ inline void HandshakeRequest::set_allocated_version(::std::string* PROTOBUF_NULL
 
 // .dht.PeerDescriptor sourcePeerDescriptor = 1;
 inline bool HandshakeResponse::has_sourcepeerdescriptor() const {
-  bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000002U);
+  bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000004U);
   PROTOBUF_ASSUME(!value || _impl_.sourcepeerdescriptor_ != nullptr);
   return value;
 }
@@ -11314,7 +11905,7 @@ inline void HandshakeResponse::clear_sourcepeerdescriptor() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (_impl_.sourcepeerdescriptor_ != nullptr) _impl_.sourcepeerdescriptor_->Clear();
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000002U);
+                  0x00000004U);
 }
 inline const ::dht::PeerDescriptor& HandshakeResponse::_internal_sourcepeerdescriptor() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
@@ -11333,16 +11924,16 @@ inline void HandshakeResponse::unsafe_arena_set_allocated_sourcepeerdescriptor(
   }
   _impl_.sourcepeerdescriptor_ = reinterpret_cast<::dht::PeerDescriptor*>(value);
   if (value != nullptr) {
-    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+    SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   } else {
-    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+    ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:dht.HandshakeResponse.sourcePeerDescriptor)
 }
 inline ::dht::PeerDescriptor* PROTOBUF_NULLABLE HandshakeResponse::release_sourcepeerdescriptor() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
 
-  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   ::dht::PeerDescriptor* released = _impl_.sourcepeerdescriptor_;
   _impl_.sourcepeerdescriptor_ = nullptr;
   if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
@@ -11362,7 +11953,7 @@ inline ::dht::PeerDescriptor* PROTOBUF_NULLABLE HandshakeResponse::unsafe_arena_
   ::google::protobuf::internal::TSanWrite(&_impl_);
   // @@protoc_insertion_point(field_release:dht.HandshakeResponse.sourcePeerDescriptor)
 
-  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   ::dht::PeerDescriptor* temp = _impl_.sourcepeerdescriptor_;
   _impl_.sourcepeerdescriptor_ = nullptr;
   return temp;
@@ -11377,7 +11968,7 @@ inline ::dht::PeerDescriptor* PROTOBUF_NONNULL HandshakeResponse::_internal_muta
 }
 inline ::dht::PeerDescriptor* PROTOBUF_NONNULL HandshakeResponse::mutable_sourcepeerdescriptor()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   ::dht::PeerDescriptor* _msg = _internal_mutable_sourcepeerdescriptor();
   // @@protoc_insertion_point(field_mutable:dht.HandshakeResponse.sourcePeerDescriptor)
   return _msg;
@@ -11394,9 +11985,9 @@ inline void HandshakeResponse::set_allocated_sourcepeerdescriptor(::dht::PeerDes
     if (message_arena != submessage_arena) {
       value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
     }
-    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+    SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   } else {
-    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+    ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   }
 
   _impl_.sourcepeerdescriptor_ = reinterpret_cast<::dht::PeerDescriptor*>(value);
@@ -11405,14 +11996,14 @@ inline void HandshakeResponse::set_allocated_sourcepeerdescriptor(::dht::PeerDes
 
 // optional .dht.HandshakeError error = 2;
 inline bool HandshakeResponse::has_error() const {
-  bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000004U);
+  bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000008U);
   return value;
 }
 inline void HandshakeResponse::clear_error() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.error_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
-                  0x00000004U);
+                  0x00000008U);
 }
 inline ::dht::HandshakeError HandshakeResponse::error() const {
   // @@protoc_insertion_point(field_get:dht.HandshakeResponse.error)
@@ -11420,7 +12011,7 @@ inline ::dht::HandshakeError HandshakeResponse::error() const {
 }
 inline void HandshakeResponse::set_error(::dht::HandshakeError value) {
   _internal_set_error(value);
-  SetHasBit(_impl_._has_bits_[0], 0x00000004U);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
   // @@protoc_insertion_point(field_set:dht.HandshakeResponse.error)
 }
 inline ::dht::HandshakeError HandshakeResponse::_internal_error() const {
@@ -11432,69 +12023,134 @@ inline void HandshakeResponse::_internal_set_error(::dht::HandshakeError value) 
   _impl_.error_ = value;
 }
 
-// string version = 3;
-inline void HandshakeResponse::clear_version() {
+// string protocolVersion = 3;
+inline void HandshakeResponse::clear_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.version_.ClearToEmpty();
+  _impl_.protocolversion_.ClearToEmpty();
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline const ::std::string& HandshakeResponse::version() const
+inline const ::std::string& HandshakeResponse::protocolversion() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:dht.HandshakeResponse.version)
-  return _internal_version();
+  // @@protoc_insertion_point(field_get:dht.HandshakeResponse.protocolVersion)
+  return _internal_protocolversion();
 }
 template <typename Arg_, typename... Args_>
-PROTOBUF_ALWAYS_INLINE void HandshakeResponse::set_version(Arg_&& arg, Args_... args) {
+PROTOBUF_ALWAYS_INLINE void HandshakeResponse::set_protocolversion(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  _impl_.version_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:dht.HandshakeResponse.version)
+  _impl_.protocolversion_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:dht.HandshakeResponse.protocolVersion)
 }
-inline ::std::string* PROTOBUF_NONNULL HandshakeResponse::mutable_version()
+inline ::std::string* PROTOBUF_NONNULL HandshakeResponse::mutable_protocolversion()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
-  ::std::string* _s = _internal_mutable_version();
-  // @@protoc_insertion_point(field_mutable:dht.HandshakeResponse.version)
+  ::std::string* _s = _internal_mutable_protocolversion();
+  // @@protoc_insertion_point(field_mutable:dht.HandshakeResponse.protocolVersion)
   return _s;
 }
-inline const ::std::string& HandshakeResponse::_internal_version() const {
+inline const ::std::string& HandshakeResponse::_internal_protocolversion() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.version_.Get();
+  return _impl_.protocolversion_.Get();
 }
-inline void HandshakeResponse::_internal_set_version(const ::std::string& value) {
+inline void HandshakeResponse::_internal_set_protocolversion(const ::std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.version_.Set(value, GetArena());
+  _impl_.protocolversion_.Set(value, GetArena());
 }
-inline ::std::string* PROTOBUF_NONNULL HandshakeResponse::_internal_mutable_version() {
+inline ::std::string* PROTOBUF_NONNULL HandshakeResponse::_internal_mutable_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.version_.Mutable( GetArena());
+  return _impl_.protocolversion_.Mutable( GetArena());
 }
-inline ::std::string* PROTOBUF_NULLABLE HandshakeResponse::release_version() {
+inline ::std::string* PROTOBUF_NULLABLE HandshakeResponse::release_protocolversion() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:dht.HandshakeResponse.version)
+  // @@protoc_insertion_point(field_release:dht.HandshakeResponse.protocolVersion)
   if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
     return nullptr;
   }
   ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
-  auto* released = _impl_.version_.Release();
+  auto* released = _impl_.protocolversion_.Release();
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
-    _impl_.version_.Set("", GetArena());
+    _impl_.protocolversion_.Set("", GetArena());
   }
   return released;
 }
-inline void HandshakeResponse::set_allocated_version(::std::string* PROTOBUF_NULLABLE value) {
+inline void HandshakeResponse::set_allocated_protocolversion(::std::string* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (value != nullptr) {
     SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   } else {
     ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
   }
-  _impl_.version_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.version_.IsDefault()) {
-    _impl_.version_.Set("", GetArena());
+  _impl_.protocolversion_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.protocolversion_.IsDefault()) {
+    _impl_.protocolversion_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:dht.HandshakeResponse.version)
+  // @@protoc_insertion_point(field_set_allocated:dht.HandshakeResponse.protocolVersion)
+}
+
+// string applicationVersion = 4;
+inline void HandshakeResponse::clear_applicationversion() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.applicationversion_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
+inline const ::std::string& HandshakeResponse::applicationversion() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:dht.HandshakeResponse.applicationVersion)
+  return _internal_applicationversion();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void HandshakeResponse::set_applicationversion(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  _impl_.applicationversion_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:dht.HandshakeResponse.applicationVersion)
+}
+inline ::std::string* PROTOBUF_NONNULL HandshakeResponse::mutable_applicationversion()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  ::std::string* _s = _internal_mutable_applicationversion();
+  // @@protoc_insertion_point(field_mutable:dht.HandshakeResponse.applicationVersion)
+  return _s;
+}
+inline const ::std::string& HandshakeResponse::_internal_applicationversion() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.applicationversion_.Get();
+}
+inline void HandshakeResponse::_internal_set_applicationversion(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.applicationversion_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL HandshakeResponse::_internal_mutable_applicationversion() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.applicationversion_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE HandshakeResponse::release_applicationversion() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:dht.HandshakeResponse.applicationVersion)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  auto* released = _impl_.applicationversion_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.applicationversion_.Set("", GetArena());
+  }
+  return released;
+}
+inline void HandshakeResponse::set_allocated_applicationversion(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000002U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000002U);
+  }
+  _impl_.applicationversion_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.applicationversion_.IsDefault()) {
+    _impl_.applicationversion_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:dht.HandshakeResponse.applicationVersion)
 }
 
 // -------------------------------------------------------------------
@@ -12992,6 +13648,35 @@ inline void DisconnectNotice::_internal_set_disconnectmode(::dht::DisconnectMode
 
 // -------------------------------------------------------------------
 
+// SetPrivateRequest
+
+// bool isPrivate = 1;
+inline void SetPrivateRequest::clear_isprivate() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.isprivate_ = false;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline bool SetPrivateRequest::isprivate() const {
+  // @@protoc_insertion_point(field_get:dht.SetPrivateRequest.isPrivate)
+  return _internal_isprivate();
+}
+inline void SetPrivateRequest::set_isprivate(bool value) {
+  _internal_set_isprivate(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_set:dht.SetPrivateRequest.isPrivate)
+}
+inline bool SetPrivateRequest::_internal_isprivate() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.isprivate_;
+}
+inline void SetPrivateRequest::_internal_set_isprivate(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.isprivate_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // ExternalFetchDataRequest
 
 // bytes key = 1;
@@ -13117,6 +13802,135 @@ inline ::google::protobuf::RepeatedPtrField<::dht::DataEntry>* PROTOBUF_NONNULL
 ExternalFetchDataResponse::_internal_mutable_entries() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.entries_;
+}
+
+// -------------------------------------------------------------------
+
+// ExternalFindClosestNodesRequest
+
+// bytes nodeId = 1;
+inline void ExternalFindClosestNodesRequest::clear_nodeid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.nodeid_.ClearToEmpty();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline const ::std::string& ExternalFindClosestNodesRequest::nodeid() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:dht.ExternalFindClosestNodesRequest.nodeId)
+  return _internal_nodeid();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void ExternalFindClosestNodesRequest::set_nodeid(Arg_&& arg, Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  _impl_.nodeid_.SetBytes(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:dht.ExternalFindClosestNodesRequest.nodeId)
+}
+inline ::std::string* PROTOBUF_NONNULL ExternalFindClosestNodesRequest::mutable_nodeid()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  ::std::string* _s = _internal_mutable_nodeid();
+  // @@protoc_insertion_point(field_mutable:dht.ExternalFindClosestNodesRequest.nodeId)
+  return _s;
+}
+inline const ::std::string& ExternalFindClosestNodesRequest::_internal_nodeid() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.nodeid_.Get();
+}
+inline void ExternalFindClosestNodesRequest::_internal_set_nodeid(const ::std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.nodeid_.Set(value, GetArena());
+}
+inline ::std::string* PROTOBUF_NONNULL ExternalFindClosestNodesRequest::_internal_mutable_nodeid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.nodeid_.Mutable( GetArena());
+}
+inline ::std::string* PROTOBUF_NULLABLE ExternalFindClosestNodesRequest::release_nodeid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:dht.ExternalFindClosestNodesRequest.nodeId)
+  if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
+    return nullptr;
+  }
+  ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  auto* released = _impl_.nodeid_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.nodeid_.Set("", GetArena());
+  }
+  return released;
+}
+inline void ExternalFindClosestNodesRequest::set_allocated_nodeid(::std::string* PROTOBUF_NULLABLE value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    SetHasBit(_impl_._has_bits_[0], 0x00000001U);
+  } else {
+    ClearHasBit(_impl_._has_bits_[0], 0x00000001U);
+  }
+  _impl_.nodeid_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.nodeid_.IsDefault()) {
+    _impl_.nodeid_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:dht.ExternalFindClosestNodesRequest.nodeId)
+}
+
+// -------------------------------------------------------------------
+
+// ExternalFindClosestNodesResponse
+
+// repeated .dht.PeerDescriptor closestNodes = 1;
+inline int ExternalFindClosestNodesResponse::_internal_closestnodes_size() const {
+  return _internal_closestnodes().size();
+}
+inline int ExternalFindClosestNodesResponse::closestnodes_size() const {
+  return _internal_closestnodes_size();
+}
+inline void ExternalFindClosestNodesResponse::clear_closestnodes() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.closestnodes_.Clear();
+  ClearHasBitForRepeated(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+inline ::dht::PeerDescriptor* PROTOBUF_NONNULL ExternalFindClosestNodesResponse::mutable_closestnodes(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:dht.ExternalFindClosestNodesResponse.closestNodes)
+  return _internal_mutable_closestnodes()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::dht::PeerDescriptor>* PROTOBUF_NONNULL ExternalFindClosestNodesResponse::mutable_closestnodes()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_mutable_list:dht.ExternalFindClosestNodesResponse.closestNodes)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_closestnodes();
+}
+inline const ::dht::PeerDescriptor& ExternalFindClosestNodesResponse::closestnodes(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:dht.ExternalFindClosestNodesResponse.closestNodes)
+  return _internal_closestnodes().Get(index);
+}
+inline ::dht::PeerDescriptor* PROTOBUF_NONNULL ExternalFindClosestNodesResponse::add_closestnodes()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::dht::PeerDescriptor* _add =
+      _internal_mutable_closestnodes()->InternalAddWithArena(
+          ::google::protobuf::MessageLite::internal_visibility(), GetArena());
+  SetHasBitForRepeated(_impl_._has_bits_[0], 0x00000001U);
+  // @@protoc_insertion_point(field_add:dht.ExternalFindClosestNodesResponse.closestNodes)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::dht::PeerDescriptor>& ExternalFindClosestNodesResponse::closestnodes() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:dht.ExternalFindClosestNodesResponse.closestNodes)
+  return _internal_closestnodes();
+}
+inline const ::google::protobuf::RepeatedPtrField<::dht::PeerDescriptor>&
+ExternalFindClosestNodesResponse::_internal_closestnodes() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.closestnodes_;
+}
+inline ::google::protobuf::RepeatedPtrField<::dht::PeerDescriptor>* PROTOBUF_NONNULL
+ExternalFindClosestNodesResponse::_internal_mutable_closestnodes() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.closestnodes_;
 }
 
 #ifdef __GNUC__

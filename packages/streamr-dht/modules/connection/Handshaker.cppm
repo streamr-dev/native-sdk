@@ -68,7 +68,10 @@ public:
         if (error.has_value()) {
             outgoingHandshakeResponse.set_error(error.value());
         }
-        outgoingHandshakeResponse.set_version(Version::localProtocolVersion);
+        outgoingHandshakeResponse.set_protocolversion(
+            Version::localProtocolVersion);
+        outgoingHandshakeResponse.set_applicationversion(
+            Version::localApplicationVersion);
 
         Message message;
         message.set_serviceid(handshakerServiceId);
@@ -99,7 +102,9 @@ protected:
             localPeerDescriptor);
         outgoingHandshake.mutable_targetpeerdescriptor()->CopyFrom(
             remotePeerDescriptor);
-        outgoingHandshake.set_version(Version::localProtocolVersion);
+        outgoingHandshake.set_protocolversion(Version::localProtocolVersion);
+        outgoingHandshake.set_applicationversion(
+            Version::localApplicationVersion);
         Message message;
         message.set_serviceid(handshakerServiceId);
         message.set_messageid(Uuid::v4());
@@ -142,13 +147,13 @@ protected:
             msg.DebugString());
     }
 
-    static bool isAcceptedVersion(const std::string& version) {
-        return Version::isMaybeSupportedVersion(version);
+    static bool isAcceptedVersion(const std::string& protocolVersion) {
+        return Version::isMaybeSupportedVersion(protocolVersion);
     }
 
     virtual void onHandshakeRequest(
         const PeerDescriptor& source,
-        const std::string& version,
+        const std::string& protocolVersion,
         const std::optional<PeerDescriptor>& target) = 0;
     virtual void onHandshakeResponse(const HandshakeResponse& response) = 0;
     virtual void handleSuccess(const PeerDescriptor& peerDescriptor) = 0;
@@ -169,7 +174,7 @@ private:
                 const auto& handshake = message.handshakerequest();
                 this->onHandshakeRequest(
                     handshake.sourcepeerdescriptor(),
-                    handshake.version(),
+                    handshake.protocolversion(),
                     handshake.targetpeerdescriptor());
             } else if (message.has_handshakeresponse()) {
                 SLogger::trace(

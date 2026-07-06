@@ -14,9 +14,10 @@ export module streamr.trackerlessnetwork.protos;
 
 // messages
 export using ::CloseTemporaryConnection;
+export using ::ContentDeliveryLayerNeighborInfo;
 export using ::ContentMessage;
 export using ::ControlLayerInfo;
-export using ::GroupKey;
+export using ::EncryptedGroupKey;
 export using ::GroupKeyRequest;
 export using ::GroupKeyResponse;
 export using ::InterleaveRequest;
@@ -27,8 +28,11 @@ export using ::MessageRef;
 export using ::NeighborUpdate;
 export using ::NodeInfoRequest;
 export using ::NodeInfoResponse;
+export using ::PauseNeighborRequest;
+export using ::PauseNeighborResponse;
 export using ::ProxyConnectionRequest;
 export using ::ProxyConnectionResponse;
+export using ::ResumeNeighborRequest;
 export using ::StreamMessage;
 export using ::StreamPartHandshakeRequest;
 export using ::StreamPartHandshakeResponse;
@@ -37,6 +41,7 @@ export using ::TemporaryConnectionRequest;
 export using ::TemporaryConnectionResponse;
 
 // enums (unscoped, global namespace; enumerators reachable via EnumName::)
+export using ::AsymmetricEncryptionType;
 export using ::ContentType;
 export using ::EncryptionType;
 export using ::ProxyDirection;

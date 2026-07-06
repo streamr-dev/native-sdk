@@ -131,6 +131,9 @@ public:
     folly::coro::Task<void> gracefulDisconnect(DisconnectNotice&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         return communicator.template notify<DisconnectNotice>("gracefulDisconnect", std::move(request), std::move(callContext), timeout);
     }
+    folly::coro::Task<void> setPrivate(SetPrivateRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<SetPrivateRequest>("setPrivate", std::move(request), std::move(callContext), timeout);
+    }
 }; // class ConnectionLockRpcClient
 template <typename CallContextType>
 class ExternalApiRpcClient {
@@ -143,6 +146,9 @@ public:
     }
     folly::coro::Task<ExternalStoreDataResponse> externalStoreData(ExternalStoreDataRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         return communicator.template request<ExternalStoreDataResponse, ExternalStoreDataRequest>("externalStoreData", std::move(request), std::move(callContext), timeout);
+    }
+    folly::coro::Task<ExternalFindClosestNodesResponse> externalFindClosestNodes(ExternalFindClosestNodesRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<ExternalFindClosestNodesResponse, ExternalFindClosestNodesRequest>("externalFindClosestNodes", std::move(request), std::move(callContext), timeout);
     }
 }; // class ExternalApiRpcClient
 }; // namespace dht
