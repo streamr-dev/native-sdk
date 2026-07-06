@@ -41,9 +41,10 @@ while [[ "$#" -gt 0 ]]; do
         # guarded with if(NOT TARGET ...) in the package CMakeLists — so no
         # standalone build dirs are needed. The full standalone build
         # validates that each package works as an independent vcpkg-style
-        # unit; that check is host-independent, so CI runs it on the macOS
-        # leg only and the other host legs pass this flag. Not allowed with
-        # --ios: the XCFramework is assembled from the per-package outputs.
+        # unit; that check is host-independent and the iOS CI job runs it by
+        # construction (the XCFramework is assembled from the per-package
+        # outputs), so ALL validate legs pass this flag. Not allowed with
+        # --ios for the same reason.
         --no-standalone) STANDALONE_PACKAGES=false ;;
         *) echo "Unknown parameter passed: $1. Usage: ./install.sh [--prod] [--ios] [--android] [--no-standalone]"; exit 1 ;;
     esac

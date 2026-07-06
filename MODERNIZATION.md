@@ -1214,13 +1214,15 @@ the build structure the caches would key on:
 **IMPLEMENTED (items 1 + 2, after C-8 and the wrapper modules, as
 planned):**
 - `install.sh --no-standalone` skips the per-package standalone builds;
-  the ubuntu and linux-arm64 legs pass it (via INSTALL_EXTRA_FLAGS in
-  validate.yml) and lint against the ROOT tree's compile database —
-  every package lint.sh falls back to `../../build` when its standalone
-  database is absent. The macOS leg keeps the full standalone loop as
-  the packaging-structure check; iOS keeps it because the XCFramework
-  is assembled from the per-package outputs (`--no-standalone --ios` is
-  rejected).
+  ALL validate legs pass it (via INSTALL_EXTRA_FLAGS in validate.yml)
+  and lint against the ROOT tree's compile database — every package
+  lint.sh falls back to `../../build` when its standalone database is
+  absent. The packaging-structure check is carried by the iOS job,
+  which builds every package standalone by construction (the
+  XCFramework is assembled from the per-package outputs;
+  `--no-standalone --ios` is rejected). Owner decision 2026-07-06: the
+  macOS leg originally kept the loop as the designated check; that
+  duplication was dropped since the iOS job already covers it.
 - The cached-install action now caches the ROOT build tree per platform
   (key: platform + vcpkg SHA + commit; prefix restore-keys), excluding
   vcpkg_installed (own cache) and the per-package trees (8 × 0.5–1.5 GB
@@ -1234,11 +1236,25 @@ planned):**
   restored tree rebuilds exactly the pull request's touched cone.
 - Item 3 (ccache) remains a fallback if this proves fragile; item 4
   (port randomization + parallel ctest) remains open.
-- Measurement protocol: the first post-merge main run populates the
-  caches (slow once per platform); the next pull request measures the
-  warm path. Record against: pre-caching PR legs ubuntu ~45-50 min,
-  arm64 ~44-45 min, macos ~72-103 min, iOS ~68-97 min, Android
-  ~91-123 min.
+- **MEASURED (PR #54, 2026-07-06).** All legs green:
+
+  | Leg | before this work | measured | state |
+  |---|---|---|---|
+  | ubuntu | 45–52 min | **5 min** | warm build tree |
+  | linux-arm64 | 44–45 min | **11 min** | warm build tree |
+  | macOS | 103–115 min | **36 min** | COLD, no standalone loop |
+  | iOS | 68–97 min | 73 min | warm tree + #52 proto-drift rebuild; keeps the standalone loop (XCFramework) |
+  | Android | 91–123 min | 70 min | cold (its tree fell to cache eviction); improves after main saves |
+
+  The ubuntu warm path is the headline: five minutes for checkout,
+  dependency restore, build-tree restore, drift rebuild, lint and
+  tests. macOS improves further once a main run saves its tree, and
+  Android once its tree survives in the cache budget. Follow-ups noted:
+  the shared 10 GB actions-cache budget is now the binding constraint
+  (three build trees ≈ 6.4 GB + two dependency-cache generations —
+  the plan's NuGet-feed option for dependency caches is the relief
+  valve), and item 4 (test-port randomization + parallel ctest) remains
+  open.
 
 ### Interim posture (adopted now)
 The façade stage is COMPLETE and delivers: uniform `import streamr.<pkg>`
