@@ -1211,6 +1211,35 @@ the build structure the caches would key on:
 4. **Randomize test ports, then run ctest in parallel** — tests
    currently use fixed ports and must run serially.
 
+**IMPLEMENTED (items 1 + 2, after C-8 and the wrapper modules, as
+planned):**
+- `install.sh --no-standalone` skips the per-package standalone builds;
+  the ubuntu and linux-arm64 legs pass it (via INSTALL_EXTRA_FLAGS in
+  validate.yml) and lint against the ROOT tree's compile database —
+  every package lint.sh falls back to `../../build` when its standalone
+  database is absent. The macOS leg keeps the full standalone loop as
+  the packaging-structure check; iOS keeps it because the XCFramework
+  is assembled from the per-package outputs (`--no-standalone --ios` is
+  rejected).
+- The cached-install action now caches the ROOT build tree per platform
+  (key: platform + vcpkg SHA + commit; prefix restore-keys), excluding
+  vcpkg_installed (own cache) and the per-package trees (8 × 0.5–1.5 GB
+  would blow the shared 10 GB budget). SAVED ONLY FROM MAIN-BRANCH RUNS
+  — pull requests consume, merges publish; a broken PR tree can never
+  poison the cache (the corrupted arm64-ios entry lesson). Because
+  Ninja compares source mtimes against the recorded build state, and a
+  fresh checkout stamps everything with checkout time, the action first
+  resets every tracked file's mtime to its last-change commit time
+  (single git-log pass; needs the workflows' fetch-depth: 0) — so a
+  restored tree rebuilds exactly the pull request's touched cone.
+- Item 3 (ccache) remains a fallback if this proves fragile; item 4
+  (port randomization + parallel ctest) remains open.
+- Measurement protocol: the first post-merge main run populates the
+  caches (slow once per platform); the next pull request measures the
+  warm path. Record against: pre-caching PR legs ubuntu ~45-50 min,
+  arm64 ~44-45 min, macos ~72-103 min, iOS ~68-97 min, Android
+  ~91-123 min.
+
 ### Interim posture (adopted now)
 The façade stage is COMPLETE and delivers: uniform `import streamr.<pkg>`
 consumption, −24% clean builds, 250+ tests through import, and module

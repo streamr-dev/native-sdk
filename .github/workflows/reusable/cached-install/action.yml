@@ -51,6 +51,57 @@ runs:
           ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-v2-
         path: |
           ./build/vcpkg_installed
+    # Ninja decides what to rebuild by comparing source mtimes against the
+    # state recorded in the cached build tree. A fresh checkout stamps every
+    # file with the checkout time, which would force a full rebuild — so
+    # reset every tracked file's mtime to its last-change commit time (the
+    # same rule the run that SAVED the cache used; requires the workflows'
+    # fetch-depth: 0). Single pass over git log, a few seconds.
+    - name: restore source mtimes
+      run: |
+        python3 - <<'PYEOF'
+        import subprocess, os
+        tracked = set(subprocess.run(['git','ls-files'], capture_output=True, text=True).stdout.splitlines())
+        log = subprocess.run(['git','log','--format=%ct','--name-only','--no-renames'], capture_output=True, text=True).stdout
+        seen, t = set(), None
+        for line in log.splitlines():
+            if not line:
+                continue
+            if line not in tracked and line.isdigit():
+                t = int(line)
+                continue
+            if line in tracked and line not in seen:
+                seen.add(line)
+                try:
+                    os.utime(line, (t, t))
+                except FileNotFoundError:
+                    pass
+            if len(seen) == len(tracked):
+                break
+        print(f"restored mtimes for {len(seen)}/{len(tracked)} tracked files")
+        PYEOF
+      shell: bash
+    # Build-tree cache (MODERNIZATION.md "After the consolidation: CI
+    # speed", item 2): restore the previous ROOT build tree so Ninja
+    # recompiles only what the pull request touched. vcpkg_installed is
+    # excluded (it has its own cache above); the per-package standalone
+    # trees are NOT cached — at ~8 x 0.5-1.5 GB they would blow the shared
+    # 10 GB actions-cache budget (the macOS leg rebuilds them as the
+    # packaging check; the Linux legs skip them via --no-standalone).
+    # Saved from main-branch runs only, so entries rotate once per merge
+    # instead of once per push, and a broken PR tree can never poison the
+    # cache (lesson from the corrupted arm64-ios dependency cache).
+    - name: cache build tree
+      id: cache-buildtree
+      uses: actions/cache/restore@v4
+      with:
+        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v1-${{ steps.keys.outputs.vcpkg_sha }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v1-${{ steps.keys.outputs.vcpkg_sha }}-
+          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v1-
+        path: |
+          ./build
+          !./build/vcpkg_installed
     - name: install-prerequisities
       run:
         source install-prerequisities.sh
@@ -60,7 +111,7 @@ runs:
         # Composite steps run under bash -e -o pipefail: disarm around the
         # pipeline or a failure aborts the script before we can annotate.
         set +e +o pipefail
-        ./install.sh --prod ${ARCHFLAGS:-} 2>&1 | tee install-output.log
+        ./install.sh --prod ${ARCHFLAGS:-} ${INSTALL_EXTRA_FLAGS:-} 2>&1 | tee install-output.log
         EXITCODE=${PIPESTATUS[0]}
         if [ "$EXITCODE" -ne 0 ]; then
           # Surface failure context as error annotations so failures are
@@ -103,3 +154,13 @@ runs:
         key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-installed-v2-${{ steps.keys.outputs.vcpkg_sha }}-${{ hashFiles('./vcpkg.json', './overlaytriplets/**', './overlayports/**') }}
         path: |
           ./build/vcpkg_installed
+    - name: cache build tree save
+      id: cache-buildtree-save
+      # Success-only and main-only: PR runs consume, merge runs publish.
+      if: github.ref == 'refs/heads/main' && steps.cache-buildtree.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v1-${{ steps.keys.outputs.vcpkg_sha }}-${{ github.sha }}
+        path: |
+          ./build
+          !./build/vcpkg_installed

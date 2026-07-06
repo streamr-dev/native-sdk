@@ -28,7 +28,21 @@ jobs:
         # ubuntu-latest = 24.04: ubuntu-26.04 is still a preview image —
         # revisit when GA.
         os: [macos-26, ubuntu-latest, linux-arm64-runner]
+        # The standalone-package check (each package built in its own tree)
+        # validates packaging structure, which is host-independent — the
+        # macOS leg runs it, the Linux legs build only the root tree and
+        # lint against its compile database (MODERNIZATION.md "After the
+        # consolidation: CI speed", item 1).
+        include:
+          - os: macos-26
+            install_extra: ""
+          - os: ubuntu-latest
+            install_extra: "--no-standalone"
+          - os: linux-arm64-runner
+            install_extra: "--no-standalone"
     runs-on: ${{ matrix.os }}
+    env:
+      INSTALL_EXTRA_FLAGS: ${{ matrix.install_extra }}
     steps:
       - uses: actions/checkout@v4
         with:
