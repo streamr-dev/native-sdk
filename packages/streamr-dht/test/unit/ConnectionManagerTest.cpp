@@ -2,12 +2,12 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Promise.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
 import streamr.dht.ConnectionManager;
 import streamr.dht.ConnectorFacade;
 import streamr.dht.Errors;
@@ -163,7 +163,7 @@ TEST_F(
 
     connectionManager1->send(msg, SendOptions{.connect = true});
 
-    folly::coro::blockingWait(
+    streamr::utils::blockingWait(
         folly::coro::collectAll(
             std::move(promiseContract.second),
             std::move(connectedPromiseContract1.second),

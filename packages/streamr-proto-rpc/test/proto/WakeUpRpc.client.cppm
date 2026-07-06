@@ -3,13 +3,19 @@
 
 module;
 
-#include <folly/experimental/coro/Task.h>
+// std::coroutine_traits must be visible in every translation unit
+// that defines OR instantiates a coroutine; it cannot arrive through
+// an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <chrono>
 #include <optional>
 #include "WakeUpRpc.pb.h" // NOLINT
 
 
 export module streamr.protorpc.test.WakeUpRpcClient;
+
+import streamr.utils.CoroutineHelper;
 
 import streamr.protorpc.RpcCommunicator;
 

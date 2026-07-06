@@ -1,11 +1,9 @@
 #include <tuple>
 #include <gtest/gtest.h>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Invoke.h>
-#include <folly/experimental/coro/Sleep.h>
-#include <folly/experimental/coro/Timeout.h>
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
 import streamr.utils.AbortController;
 import streamr.utils.waitForEvent;
 import streamr.eventemitter.EventEmitter;
@@ -23,7 +21,7 @@ using TestEvents = std::tuple<Connected, Disconnected>;
 TEST(WaitForEventTest, WaitForVoidEvent) {
     EventEmitter<TestEvents> emitter;
 
-    folly::coro::blockingWait(
+    streamr::utils::blockingWait(
         folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
             auto result = co_await folly::coro::collectAll(
                 waitForEvent<Connected>(&emitter), // NOLINT
@@ -37,7 +35,7 @@ TEST(WaitForEventTest, WaitForVoidEvent) {
 TEST(WaitForEventTest, WaitForStringEvent) {
     EventEmitter<TestEvents> emitter;
 
-    folly::coro::blockingWait(
+    streamr::utils::blockingWait(
         folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
             auto result = co_await folly::coro::collectAll(
                 waitForEvent<Disconnected>(&emitter), // NOLINT
@@ -53,7 +51,7 @@ TEST(WaitForEventTest, WaitForTimeout) {
     EventEmitter<TestEvents> emitter;
 
     EXPECT_THROW(
-        folly::coro::blockingWait(
+        streamr::utils::blockingWait(
             folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
                 auto result = co_await folly::coro::collectAll(
                     waitForEvent<Disconnected>(&emitter, 10ms), // NOLINT
@@ -72,7 +70,7 @@ TEST(WaitForEventTest, WaitForStringEventWithAbortSignal) {
     AbortController abortController;
 
     EXPECT_THROW(
-        folly::coro::blockingWait(
+        streamr::utils::blockingWait(
             folly::coro::co_invoke(
                 [&emitter, &abortController]() -> folly::coro::Task<void> {
                     auto result = co_await folly::coro::collectAll(

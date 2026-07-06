@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
-#include <folly/experimental/coro/BlockingWait.h>
 
+#include <coroutine> // IWYU pragma: keep
+#include <thread>
+
+import streamr.utils.CoroutineHelper;
 import streamr.utils.AbortController;
 import streamr.utils.waitForCondition;
 
@@ -20,7 +23,7 @@ TEST_F(WaitForConditionTest, ConditionMetImmediately) {
         return conditionMet;
     };
     auto task = waitForCondition(std::move(condition));
-    EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
+    EXPECT_NO_THROW(streamr::utils::blockingWait(std::move(task)));
 }
 
 TEST_F(WaitForConditionTest, ConditionMetAfterDelay) {
@@ -39,7 +42,7 @@ TEST_F(WaitForConditionTest, ConditionMetAfterDelay) {
         100ms // NOLINT
     );
 
-    EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
+    EXPECT_NO_THROW(streamr::utils::blockingWait(std::move(task)));
     EXPECT_TRUE(conditionMet);
 }
 
@@ -47,7 +50,7 @@ TEST_F(WaitForConditionTest, TimeoutExceeded) {
     auto task =
         waitForCondition([]() { return false; }, 500ms, 100ms); // NOLINT
     EXPECT_THROW(
-        folly::coro::blockingWait(std::move(task)), folly::FutureTimeout);
+        streamr::utils::blockingWait(std::move(task)), folly::FutureTimeout);
 }
 
 TEST_F(WaitForConditionTest, AbortSignalTriggered) {
@@ -65,7 +68,8 @@ TEST_F(WaitForConditionTest, AbortSignalTriggered) {
     }).detach();
 
     EXPECT_THROW(
-        folly::coro::blockingWait(std::move(task)), folly::OperationCancelled);
+        streamr::utils::blockingWait(std::move(task)),
+        folly::OperationCancelled);
 }
 
 // Test disabled because it does not guaranteed to work on slow runners
@@ -82,7 +86,7 @@ TEST_F(WaitForConditionTest, DISABLED_CustomRetryInterval) {
         200ms // NOLINT
     );
 
-    EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
+    EXPECT_NO_THROW(streamr::utils::blockingWait(std::move(task)));
     auto elapsed = std::chrono::steady_clock::now() - start;
     EXPECT_GE(elapsed, 400ms);
     EXPECT_LT(elapsed, 600ms);

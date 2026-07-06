@@ -4,15 +4,18 @@
 // this file is now the source of truth.
 module;
 
+// std::coroutine_traits must be visible in every translation unit
+// that defines OR instantiates a coroutine; it cannot arrive through
+// an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <tuple>
 #include <type_traits>
 #include <utility>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Task.h>
-#include <folly/experimental/coro/ViaIfAsync.h>
 
 export module streamr.utils.collect;
 
+import streamr.utils.CoroutineHelper;
 import streamr.utils.toCoroTask;
 
 export namespace streamr::utils {

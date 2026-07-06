@@ -4,15 +4,18 @@
 // this file is now the source of truth.
 module;
 
+// Coroutine definitions need std::coroutine_traits declared in THIS
+// translation unit; it cannot arrive through an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <chrono>
 #include <functional>
 #include <tuple>
 #include <utility>
-#include <folly/coro/Task.h>
-#include <folly/experimental/coro/Collect.h>
 
 export module streamr.utils.waitForCondition;
 
+import streamr.utils.CoroutineHelper;
 import streamr.eventemitter.EventEmitter;
 import streamr.utils.AbortController;
 import streamr.utils.AbortableTimers;

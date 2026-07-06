@@ -4,15 +4,19 @@
 // Phase 2.6): this file is now the source of truth.
 module;
 
+// Coroutine definitions need std::coroutine_traits declared in THIS
+// translation unit; it cannot arrive through an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <chrono>
 #include <optional>
-#include <folly/experimental/coro/Task.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.ConnectionLockRpcRemote;
 
+import streamr.utils.CoroutineHelper;
 import streamr.dht.DhtRpcClient;
 import streamr.logger.SLogger;
 import streamr.dht.ConnectionLockStates;

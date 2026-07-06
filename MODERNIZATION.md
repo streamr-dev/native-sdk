@@ -1086,6 +1086,72 @@ numbers.
 One package per PR held throughout; headers were deleted per-package —
 the compiler itself enforced that nothing still includes them.
 
+### Third-party wrapper modules (owner-directed follow-up to the final metrics)
+
+The census behind the 508 s clean build: the folly COROUTINE header
+stack was parsed textually in ~28 module-unit global module fragments
+plus ~21 test files — by far the dominant repeated parse. Everything
+else was already effectively single-owner (rtc/rtc.hpp ×4 dht units;
+folly logging ~6 units confined to streamr-logger; boost-uuid /
+cryptopp+secp256k1 / nlohmann+boost-pfr / magic_enum each confined to
+1–4 units that already act as their wrapper).
+
+Fix (functional names per owner, living in streamr-utils):
+**streamr.utils.CoroutineHelper** is now THE single owner of the folly
+coroutine headers, and **streamr.utils.ExecutorHelper** of the
+executor/scheduler headers. Names are re-exported in their ORIGINAL
+namespaces (folly::coro::Task stays folly::coro::Task), so use sites
+kept their spelling — with three exceptions: folly's blockingWait /
+co_withExecutor / co_withCancellation are customization-point objects
+that cannot be re-exported by using-declaration (internal linkage or
+conflicting redeclarations), so they are exported as perfect-forwarding
+shims spelled streamr::utils::X. The protoc plugin emits
+`import streamr.utils.CoroutineHelper;` in generated stubs. Every
+former textual folly-coro include was swept in the same change (the
+C-5 rule: overlapping folly-coro GMFs are a miscompile risk — this
+change REDUCES that surface to one owning unit; all 309 tests pass
+with per-test timeouts, RpcCommunicator included).
+
+Migration rule discovered: `std::coroutine_traits` must be VISIBLE in
+every translation unit that defines OR INSTANTIATES a coroutine — it
+cannot arrive through an imported BMI, so every CoroutineHelper
+importer textually includes the (tiny) `<coroutine>` header, tagged
+`// IWYU pragma: keep` because clangd's include-cleaner cannot see the
+coroutine-transformation requirement. One more clangd-tidy exclusion of
+the known std-type-unification class (dht PendingConnectionTest.cpp,
+fifth overall).
+
+**Measured effect (same Debug tree as the final-metrics table):**
+
+| Metric | consolidated (C-8) | + wrapper modules |
+|---|---|---|
+| Clean root build | 508 s | **315 s (−38%)** |
+| StreamID touch | 153–173 s | **94 s (−39…−46%)** |
+| SLogger touch | 392 s | **326 s (−17%)** |
+
+The SLogger case remains cone-bound: every importer still rebuilds,
+just cheaper per unit. Shrinking that cone needs the next lever
+(implementation units + reduced BMIs — candidate follow-up after the
+CI caching step). rtc/rtc.hpp (4 dht units) is the remaining wrap
+candidate if more clean-build reduction is wanted.
+
+**CI incident during this PR (recorded for the caching step):** the
+first arm64-ios vcpkg cache entry saved after the C-7 key repair
+RESTORED CORRUPTLY on every later run — boost headers came back empty,
+producing "use of undeclared identifier 'boost'" in Uuid.cppm while the
+identical compile (same clang 22.1.8, same iPhoneOS 26.5 SDK) passed
+locally. actions/cache treats a partial extraction as a warning, not an
+error, and vcpkg's reconciliation trusts its status database without
+checking file contents, so the damage persisted across runs. Entries
+are immutable under their key; the fix was a generation bump (-v2- in
+the key names) forcing one clean rebuild+save per platform. Two
+diagnostics hardenings came out of it: a second CI annotation carrying
+only compiler-error context (GitHub caps annotations at 4096 chars and
+one module-compile command line can eat that alone), and this record.
+The repository cache being over the 10 GB limit (continuous LRU
+eviction) raises the odds of interrupted saves — relevant when the CI
+build-directory caching step adds more entries.
+
 ### `import std` verdict (investigated 2026-07-04, child session)
 Owner-requested experiment on the consolidated trackerless-network
 partition, with Android as the gate. Findings (full detail and a

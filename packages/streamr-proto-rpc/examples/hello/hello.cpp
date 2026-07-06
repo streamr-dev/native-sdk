@@ -1,8 +1,10 @@
 #include <exception>
 #include <iostream>
-#include <folly/experimental/coro/BlockingWait.h>
 #include "HelloRpc.pb.h"
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
 import streamr.protorpc.ProtoCallContext;
 import streamr.protorpc.RpcCommunicator;
 import streamr.protorpc.protos;
@@ -66,7 +68,7 @@ int main() {
 
     HelloRequest request;
     request.set_myname("Alice");
-    auto response = folly::coro::blockingWait(
+    auto response = streamr::utils::blockingWait(
         helloClient.sayHello(std::move(request), ProtoCallContext()));
     std::cout << response.greeting() << "\n";
 

@@ -4,17 +4,19 @@
 // this file is now the source of truth.
 module;
 
+// Coroutine definitions need std::coroutine_traits declared in THIS
+// translation unit; it cannot arrive through an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <chrono>
 #include <functional>
 #include <tuple>
 #include <utility>
 #include <vector>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Timeout.h>
 
 export module streamr.utils.runAndWaitForEvents;
 
+import streamr.utils.CoroutineHelper;
 import streamr.eventemitter.EventEmitter;
 import streamr.utils.ReplayEventEmitterWrapper;
 import streamr.utils.waitForEvent;
@@ -51,7 +53,7 @@ inline void runAndWaitForEvents(
 
     std::apply(
         [timeout, &operationTasks](auto&... eventEmitterWrapper) {
-            folly::coro::blockingWait(
+            streamr::utils::blockingWait(
                 folly::coro::timeout(
                     folly::coro::collectAll(
                         folly::coro::collectAllRange(std::move(operationTasks)),

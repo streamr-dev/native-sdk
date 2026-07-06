@@ -4,19 +4,19 @@
 // this file is now the source of truth.
 module;
 
+// Coroutine definitions need std::coroutine_traits declared in THIS
+// translation unit; it cannot arrive through an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <chrono>
 #include <exception>
 #include <functional>
 #include <string>
 #include <utility>
-#include <folly/experimental/coro/Promise.h>
-#include <folly/experimental/coro/Sleep.h>
-#include <folly/experimental/coro/Task.h>
-#include <folly/futures/Future.h>
-#include <folly/futures/Promise.h>
 
 export module streamr.utils.RetryUtils;
 
+import streamr.utils.CoroutineHelper;
 import streamr.logger.SLogger;
 import streamr.utils.AbortController;
 
@@ -48,7 +48,7 @@ public:
             auto cancelToken =
                 abortController.getSignal().getCancellationToken();
             try {
-                co_await folly::coro::co_withCancellation(
+                co_await streamr::utils::co_withCancellation(
                     std::move(cancelToken), folly::coro::sleep(delay));
             } catch (const folly::FutureCancellation&) {
                 break;

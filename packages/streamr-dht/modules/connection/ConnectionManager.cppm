@@ -4,21 +4,22 @@
 // this file is now the source of truth.
 module;
 
+// Coroutine definitions need std::coroutine_traits declared in THIS
+// translation unit; it cannot arrive through an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <utility>
-#include <folly/experimental/coro/BlockingWait.h>
-#include <folly/experimental/coro/Task.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
-#include <folly/experimental/coro/Collect.h>
-
 export module streamr.dht.ConnectionManager;
 
+import streamr.utils.CoroutineHelper;
 import streamr.protorpc.RpcCommunicator;
 import streamr.dht.ConnectionLockStates;
 import streamr.logger.SLogger;
@@ -417,7 +418,7 @@ public:
         this->locks.addLocalLocked(nodeId, lockId);
 
         try {
-            auto accepted = folly::coro::blockingWait(
+            auto accepted = streamr::utils::blockingWait(
                 rpcRemote.lockRequest(std::move(lockId)));
             if (accepted) {
                 SLogger::trace("LockRequest successful");
@@ -457,7 +458,8 @@ public:
         ConnectionLockRpcRemote rpcRemote(
             this->getLocalPeerDescriptor(), targetDescriptor, client);
 
-        folly::coro::blockingWait(rpcRemote.unlockRequest(std::move(lockId)));
+        streamr::utils::blockingWait(
+            rpcRemote.unlockRequest(std::move(lockId)));
     }
 
     void weakLockConnection(
@@ -606,7 +608,7 @@ private:
         if (endpoint->isConnected()) {
             try {
                 SLogger::debug("gracefullyDisconnect() calling blockingWait()");
-                folly::coro::blockingWait(
+                streamr::utils::blockingWait(
                     folly::coro::co_invoke(
                         [this,
                          endpoint,

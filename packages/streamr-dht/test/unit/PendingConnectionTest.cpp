@@ -4,8 +4,10 @@
 // folly/coro/... and folly/experimental/coro/... spellings of this header
 // between an importing TU and the imported BMIs makes clang see duplicate
 // (unmergeable) definitions with identical mangled names in Release.
-#include <folly/experimental/coro/BlockingWait.h>
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
 import streamr.dht.IPendingConnection;
 import streamr.dht.Connection;
 import streamr.dht.PendingConnection;
@@ -74,7 +76,7 @@ TEST_F(PendingConnectionTest, EmitsDisconnectedAfterTimedOut) {
         [&](bool /* gracefulLeave */) { isEmitted = true; });
 
     auto task = waitForCondition(std::move(condition), timeout, retryInternal);
-    EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
+    EXPECT_NO_THROW(streamr::utils::blockingWait(std::move(task)));
     EXPECT_TRUE(isEmitted);
 }
 

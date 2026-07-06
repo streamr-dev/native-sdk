@@ -2,14 +2,14 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <rtc/rtc.hpp>
-#include <folly/experimental/coro/BlockingWait.h>
 // Collect.h textually: this TU instantiates streamr::utils::collect
 // (imported), whose body calls folly::coro::collectAll - the folly
 // machinery must be textually visible at the instantiation point.
-#include <folly/experimental/coro/Collect.h>
-#include <folly/experimental/coro/Promise.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 
+#include <coroutine> // IWYU pragma: keep
+
+import streamr.utils.CoroutineHelper;
 import streamr.dht.ConnectionLockStates;
 import streamr.dht.ConnectionManager;
 import streamr.dht.ConnectorFacade;
@@ -153,7 +153,7 @@ TEST_F(ConnectionLockingTest, CanLockConnections) {
             Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor1));
     };
     auto task = waitForCondition(std::move(condition));
-    EXPECT_NO_THROW(folly::coro::blockingWait(std::move(task)));
+    EXPECT_NO_THROW(streamr::utils::blockingWait(std::move(task)));
     ASSERT_TRUE(connectionManager1->hasConnection(
         Identifiers::getNodeIdFromPeerDescriptor(tmpMockPeerDescriptor2)));
     ASSERT_TRUE(connectionManager1->hasLocalLockedConnection(
@@ -210,7 +210,7 @@ TEST_F(ConnectionLockingTest, LockingBothWays) {
         waitForCondition(condition) // NOLINT
     );
 
-    folly::coro::blockingWait(std::move(task));
+    streamr::utils::blockingWait(std::move(task));
 
     auto task2 = collect(
         [&]() {
@@ -220,7 +220,7 @@ TEST_F(ConnectionLockingTest, LockingBothWays) {
         waitForCondition(condition) // NOLINT
     );
 
-    folly::coro::blockingWait(std::move(task2));
+    streamr::utils::blockingWait(std::move(task2));
 
     ASSERT_TRUE(connectionManager3->hasConnection(
         Identifiers::getNodeIdFromPeerDescriptor(mockPeerDescriptor4)));

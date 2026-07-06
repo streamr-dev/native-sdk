@@ -3,6 +3,11 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
+// std::coroutine_traits must be visible in every translation unit
+// that defines OR instantiates a coroutine; it cannot arrive through
+// an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <exception>
 #include <map>
 #include <optional>
@@ -10,14 +15,14 @@ module;
 #include <string>
 // Textual: entities reached only through an imported module's global
 // module fragment are not reliably reachable; this unit's code calls
-// folly::coro::blockingWait and std::mt19937 directly. (The former
+// streamr::utils::blockingWait and std::mt19937 directly. (The former
 // header received both transitively from the headers it included.)
-#include <folly/experimental/coro/BlockingWait.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.ProxyClient;
 
+import streamr.utils.CoroutineHelper;
 import streamr.dht.DhtCallContext;
 import streamr.dht.ListeningRpcCommunicator;
 import streamr.dht.ConnectionLockStates;
@@ -182,7 +187,7 @@ public:
                           const StreamMessage& msg) {
                           const auto remote = this->neighbors.get(neighborId);
                           if (remote.has_value()) {
-                              folly::coro::blockingWait(
+                              streamr::utils::blockingWait(
                                   remote.value()->sendStreamMessage(msg));
                           } else {
                               throw std::runtime_error(
@@ -320,7 +325,7 @@ public:
 
         auto accepted = false;
         try {
-            accepted = folly::coro::blockingWait(
+            accepted = streamr::utils::blockingWait(
                 rpcRemote.requestConnection(direction, userId));
         } catch (const std::exception& e) {
             SLogger::warn(
@@ -380,8 +385,9 @@ public:
                  {"streamPartId", this->options.streamPartId}});
             const auto server = this->neighbors.get(nodeId);
             if (server.has_value()) {
-                folly::coro::blockingWait(server.value()->leaveStreamPartNotice(
-                    this->options.streamPartId, false));
+                streamr::utils::blockingWait(
+                    server.value()->leaveStreamPartNotice(
+                        this->options.streamPartId, false));
             }
             this->removeConnection(this->connections.at(nodeId).peerDescriptor);
         }
@@ -455,7 +461,7 @@ public:
             this->options.connectionLocker.unlockConnection(
                 peerDescriptor, LockID{SERVICE_ID});
             this->removeConnection(peerDescriptor);
-            folly::coro::blockingWait(
+            streamr::utils::blockingWait(
                 RetryUtils::constantRetry<void>(
                     [this]() -> void { this->updateConnections(); },
                     "updating proxy connections",
@@ -481,7 +487,7 @@ public:
         for (const auto& remote : allNeighbors) {
             this->options.connectionLocker.unlockConnection(
                 remote->getPeerDescriptor(), LockID{SERVICE_ID});
-            folly::coro::blockingWait(remote->leaveStreamPartNotice(
+            streamr::utils::blockingWait(remote->leaveStreamPartNotice(
                 this->options.streamPartId, false));
         }
 
