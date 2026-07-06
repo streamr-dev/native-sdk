@@ -72,6 +72,7 @@ public:
    virtual LockResponse lockRequest(const LockRequest& request, const CallContextType& callContext) = 0;
    virtual void unlockRequest(const UnlockRequest& request, const CallContextType& callContext) = 0;
    virtual void gracefulDisconnect(const DisconnectNotice& request, const CallContextType& callContext) = 0;
+   virtual void setPrivate(const SetPrivateRequest& request, const CallContextType& callContext) = 0;
 }; // class ConnectionLockRpc
 template <typename CallContextType>
 class ExternalApiRpc {
@@ -79,6 +80,7 @@ public:
    virtual ~ExternalApiRpc() = default;
    virtual ExternalFetchDataResponse externalFetchData(const ExternalFetchDataRequest& request, const CallContextType& callContext) = 0;
    virtual ExternalStoreDataResponse externalStoreData(const ExternalStoreDataRequest& request, const CallContextType& callContext) = 0;
+   virtual ExternalFindClosestNodesResponse externalFindClosestNodes(const ExternalFindClosestNodesRequest& request, const CallContextType& callContext) = 0;
 }; // class ExternalApiRpc
 }; // namespace dht
 

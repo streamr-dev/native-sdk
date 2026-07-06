@@ -106,7 +106,8 @@ TEST_F(HandshakerTest, OutgoingOnHandshakeFailedUnsupportedVersion) {
     EXPECT_CALL(*pendingConnection, onHandshakeCompleted(::testing::_))
         .Times(0);
     EXPECT_CALL(*pendingConnection, close(::testing::_)).Times(1);
-    handshaker->emit<HandshakeFailed>(HandshakeError::UNSUPPORTED_VERSION);
+    handshaker->emit<HandshakeFailed>(
+        HandshakeError::UNSUPPORTED_PROTOCOL_VERSION);
 }
 */
 

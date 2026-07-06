@@ -122,10 +122,10 @@ public:
 protected:
     void onHandshakeRequest(
         const PeerDescriptor& source,
-        const std::string& version,
+        const std::string& protocolVersion,
         const std::optional<PeerDescriptor>& target) override {
-        if (!isAcceptedVersion(version)) {
-            this->handleFailure(HandshakeError::UNSUPPORTED_VERSION);
+        if (!isAcceptedVersion(protocolVersion)) {
+            this->handleFailure(HandshakeError::UNSUPPORTED_PROTOCOL_VERSION);
             return;
         }
 

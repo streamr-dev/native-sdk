@@ -91,5 +91,21 @@ public:
         return communicator.template request<NodeInfoResponse, NodeInfoRequest>("getInfo", std::move(request), std::move(callContext), timeout);
     }
 }; // class NodeInfoRpcClient
+template <typename CallContextType>
+class PlumtreeRpcClient {
+private:
+RpcCommunicator<CallContextType>& communicator;
+public:
+    explicit PlumtreeRpcClient(RpcCommunicator<CallContextType>& communicator) : communicator(communicator) {}
+    folly::coro::Task<PauseNeighborResponse> pauseNeighbor(PauseNeighborRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template request<PauseNeighborResponse, PauseNeighborRequest>("pauseNeighbor", std::move(request), std::move(callContext), timeout);
+    }
+    folly::coro::Task<void> resumeNeighbor(ResumeNeighborRequest&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<ResumeNeighborRequest>("resumeNeighbor", std::move(request), std::move(callContext), timeout);
+    }
+    folly::coro::Task<void> sendMetadata(MessageID&& request, CallContextType&& callContext, std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
+        return communicator.template notify<MessageID>("sendMetadata", std::move(request), std::move(callContext), timeout);
+    }
+}; // class PlumtreeRpcClient
 }; // namespace streamr::protorpc
 

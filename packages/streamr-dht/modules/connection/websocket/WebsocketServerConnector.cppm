@@ -186,14 +186,14 @@ public:
             response.set_host("127.0.0.1");
             response.set_nattype(NatType::UNKNOWN);
             response.set_ipaddress(Ipv4Helper::ipv4ToNumber("127.0.0.1"));
-            response.set_version(Version::localProtocolVersion);
+            response.set_protocolversion(Version::localProtocolVersion);
         } else {
             // return connectivity info given in options
 
             response.set_host(this->host.value());
             response.set_nattype(NatType::OPEN_INTERNET);
             response.set_ipaddress(Ipv4Helper::ipv4ToNumber("127.0.0.1"));
-            response.set_version(Version::localProtocolVersion);
+            response.set_protocolversion(Version::localProtocolVersion);
             response.mutable_websocket()->set_host(this->host.value());
             response.mutable_websocket()->set_port(this->selectedPort.value());
             response.mutable_websocket()->set_tls(

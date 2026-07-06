@@ -30,6 +30,7 @@ using ::dht::DisconnectNotice;
 using ::dht::LockRequest;
 using ::dht::LockResponse;
 using ::dht::PeerDescriptor;
+using ::dht::SetPrivateRequest;
 using ::dht::UnlockRequest;
 using streamr::dht::rpcprotocol::DhtCallContext;
 
@@ -40,6 +41,7 @@ struct ConnectionLockRpcLocalOptions {
         const PeerDescriptor&, bool, const std::optional<std::string>&)>
         closeConnection;
     std::function<PeerDescriptor()> getLocalPeerDescriptor;
+    std::function<void(const DhtAddress&, bool)> setPrivate;
 };
 
 class ConnectionLockRpcLocal : public ConnectionLockRpc<DhtCallContext> {
@@ -101,6 +103,15 @@ public:
                 false,
                 "graceful disconnect notified");
         }
+    }
+
+    void setPrivate(
+        const SetPrivateRequest& request,
+        const DhtCallContext& callContext) override {
+        const auto senderPeerDescriptor = callContext.incomingSourceDescriptor;
+        const auto senderId = Identifiers::getNodeIdFromPeerDescriptor(
+            senderPeerDescriptor.value());
+        this->options.setPrivate(senderId, request.isprivate());
     }
 };
 

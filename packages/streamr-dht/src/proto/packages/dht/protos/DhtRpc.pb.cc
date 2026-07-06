@@ -107,6 +107,31 @@ struct StoreDataResponseDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StoreDataResponseDefaultTypeInternal _StoreDataResponse_default_instance_;
 
+inline constexpr SetPrivateRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        isprivate_{false} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR SetPrivateRequest::SetPrivateRequest(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(SetPrivateRequest_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct SetPrivateRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SetPrivateRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SetPrivateRequestDefaultTypeInternal() {}
+  union {
+    SetPrivateRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SetPrivateRequestDefaultTypeInternal _SetPrivateRequest_default_instance_;
+
 inline constexpr RtcOffer::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -379,6 +404,33 @@ struct IceCandidateDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IceCandidateDefaultTypeInternal _IceCandidate_default_instance_;
+
+inline constexpr ExternalFindClosestNodesRequest::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        nodeid_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()) {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ExternalFindClosestNodesRequest::ExternalFindClosestNodesRequest(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ExternalFindClosestNodesRequest_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ExternalFindClosestNodesRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ExternalFindClosestNodesRequestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ExternalFindClosestNodesRequestDefaultTypeInternal() {}
+  union {
+    ExternalFindClosestNodesRequest _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ExternalFindClosestNodesRequestDefaultTypeInternal _ExternalFindClosestNodesRequest_default_instance_;
 
 inline constexpr ExternalFetchDataRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -696,7 +748,7 @@ inline constexpr ConnectivityResponse::Impl_::Impl_(
         nattype_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        version_(
+        protocolversion_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         websocket_{nullptr},
@@ -780,7 +832,10 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr HandshakeResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        version_(
+        protocolversion_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        applicationversion_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         sourcepeerdescriptor_{nullptr},
@@ -809,7 +864,10 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 inline constexpr HandshakeRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        version_(
+        protocolversion_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        applicationversion_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         sourcepeerdescriptor_{nullptr},
@@ -859,6 +917,31 @@ struct ExternalStoreDataResponseDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ExternalStoreDataResponseDefaultTypeInternal _ExternalStoreDataResponse_default_instance_;
+
+inline constexpr ExternalFindClosestNodesResponse::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        closestnodes_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ExternalFindClosestNodesResponse::ExternalFindClosestNodesResponse(::_pbi::ConstantInitialized)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(ExternalFindClosestNodesResponse_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(::_pbi::ConstantInitialized()) {
+}
+struct ExternalFindClosestNodesResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ExternalFindClosestNodesResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ExternalFindClosestNodesResponseDefaultTypeInternal() {}
+  union {
+    ExternalFindClosestNodesResponse _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ExternalFindClosestNodesResponseDefaultTypeInternal _ExternalFindClosestNodesResponse_default_instance_;
 
 inline constexpr ExternalFetchDataResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -1199,7 +1282,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::dht::ConnectivityResponse, _impl_.nattype_),
         PROTOBUF_FIELD_OFFSET(::dht::ConnectivityResponse, _impl_.websocket_),
         PROTOBUF_FIELD_OFFSET(::dht::ConnectivityResponse, _impl_.ipaddress_),
-        PROTOBUF_FIELD_OFFSET(::dht::ConnectivityResponse, _impl_.version_),
+        PROTOBUF_FIELD_OFFSET(::dht::ConnectivityResponse, _impl_.protocolversion_),
         PROTOBUF_FIELD_OFFSET(::dht::ConnectivityResponse, _impl_.latitude_),
         PROTOBUF_FIELD_OFFSET(::dht::ConnectivityResponse, _impl_.longitude_),
         0,
@@ -1211,22 +1294,26 @@ const ::uint32_t
         5,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::dht::HandshakeRequest, _impl_._has_bits_),
-        6, // hasbit index offset
+        7, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::dht::HandshakeRequest, _impl_.sourcepeerdescriptor_),
         PROTOBUF_FIELD_OFFSET(::dht::HandshakeRequest, _impl_.targetpeerdescriptor_),
-        PROTOBUF_FIELD_OFFSET(::dht::HandshakeRequest, _impl_.version_),
-        1,
+        PROTOBUF_FIELD_OFFSET(::dht::HandshakeRequest, _impl_.protocolversion_),
+        PROTOBUF_FIELD_OFFSET(::dht::HandshakeRequest, _impl_.applicationversion_),
         2,
+        3,
         0,
+        1,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::dht::HandshakeResponse, _impl_._has_bits_),
-        6, // hasbit index offset
+        7, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::dht::HandshakeResponse, _impl_.sourcepeerdescriptor_),
         PROTOBUF_FIELD_OFFSET(::dht::HandshakeResponse, _impl_.error_),
-        PROTOBUF_FIELD_OFFSET(::dht::HandshakeResponse, _impl_.version_),
-        1,
+        PROTOBUF_FIELD_OFFSET(::dht::HandshakeResponse, _impl_.protocolversion_),
+        PROTOBUF_FIELD_OFFSET(::dht::HandshakeResponse, _impl_.applicationversion_),
         2,
+        3,
         0,
+        1,
         0x085, // bitmap
         PROTOBUF_FIELD_OFFSET(::dht::Message, _impl_._has_bits_),
         PROTOBUF_FIELD_OFFSET(::dht::Message, _impl_._oneof_case_[0]),
@@ -1298,6 +1385,11 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::dht::DisconnectNotice, _impl_.disconnectmode_),
         0,
         0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::dht::SetPrivateRequest, _impl_._has_bits_),
+        4, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::dht::SetPrivateRequest, _impl_.isprivate_),
+        0,
+        0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::dht::ExternalFetchDataRequest, _impl_._has_bits_),
         4, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::dht::ExternalFetchDataRequest, _impl_.key_),
@@ -1306,6 +1398,16 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::dht::ExternalFetchDataResponse, _impl_._has_bits_),
         4, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::dht::ExternalFetchDataResponse, _impl_.entries_),
+        0,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::dht::ExternalFindClosestNodesRequest, _impl_._has_bits_),
+        4, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::dht::ExternalFindClosestNodesRequest, _impl_.nodeid_),
+        0,
+        0x081, // bitmap
+        PROTOBUF_FIELD_OFFSET(::dht::ExternalFindClosestNodesResponse, _impl_._has_bits_),
+        4, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::dht::ExternalFindClosestNodesResponse, _impl_.closestnodes_),
         0,
 };
 
@@ -1333,19 +1435,22 @@ static const ::_pbi::MigrationSchema
         {163, sizeof(::dht::ConnectivityRequest)},
         {174, sizeof(::dht::ConnectivityResponse)},
         {191, sizeof(::dht::HandshakeRequest)},
-        {200, sizeof(::dht::HandshakeResponse)},
-        {209, sizeof(::dht::Message)},
-        {234, sizeof(::dht::WebsocketConnectionRequest)},
-        {235, sizeof(::dht::WebrtcConnectionRequest)},
-        {236, sizeof(::dht::RtcOffer)},
-        {243, sizeof(::dht::RtcAnswer)},
-        {250, sizeof(::dht::IceCandidate)},
-        {259, sizeof(::dht::LockRequest)},
-        {264, sizeof(::dht::UnlockRequest)},
-        {269, sizeof(::dht::LockResponse)},
-        {274, sizeof(::dht::DisconnectNotice)},
-        {279, sizeof(::dht::ExternalFetchDataRequest)},
-        {284, sizeof(::dht::ExternalFetchDataResponse)},
+        {202, sizeof(::dht::HandshakeResponse)},
+        {213, sizeof(::dht::Message)},
+        {238, sizeof(::dht::WebsocketConnectionRequest)},
+        {239, sizeof(::dht::WebrtcConnectionRequest)},
+        {240, sizeof(::dht::RtcOffer)},
+        {247, sizeof(::dht::RtcAnswer)},
+        {254, sizeof(::dht::IceCandidate)},
+        {263, sizeof(::dht::LockRequest)},
+        {268, sizeof(::dht::UnlockRequest)},
+        {273, sizeof(::dht::LockResponse)},
+        {278, sizeof(::dht::DisconnectNotice)},
+        {283, sizeof(::dht::SetPrivateRequest)},
+        {288, sizeof(::dht::ExternalFetchDataRequest)},
+        {293, sizeof(::dht::ExternalFetchDataResponse)},
+        {298, sizeof(::dht::ExternalFindClosestNodesRequest)},
+        {303, sizeof(::dht::ExternalFindClosestNodesResponse)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::dht::_StoreDataRequest_default_instance_._instance,
@@ -1381,8 +1486,11 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
     &::dht::_UnlockRequest_default_instance_._instance,
     &::dht::_LockResponse_default_instance_._instance,
     &::dht::_DisconnectNotice_default_instance_._instance,
+    &::dht::_SetPrivateRequest_default_instance_._instance,
     &::dht::_ExternalFetchDataRequest_default_instance_._instance,
     &::dht::_ExternalFetchDataResponse_default_instance_._instance,
+    &::dht::_ExternalFindClosestNodesRequest_default_instance_._instance,
+    &::dht::_ExternalFindClosestNodesResponse_default_instance_._instance,
 };
 const char descriptor_table_protodef_packages_2fdht_2fprotos_2fDhtRpc_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
@@ -1443,20 +1551,22 @@ const char descriptor_table_protodef_packages_2fdht_2fprotos_2fDhtRpc_2eproto[] 
     "geErrorH\000\210\001\001B\010\n\006_error\"p\n\023ConnectivityRe"
     "quest\022\014\n\004port\030\001 \001(\r\022\013\n\003tls\030\002 \001(\010\022\021\n\004host"
     "\030\003 \001(\tH\000\210\001\001\022\"\n\032allowSelfSignedCertificat"
-    "e\030\004 \001(\010B\007\n\005_host\"\317\001\n\024ConnectivityRespons"
+    "e\030\004 \001(\010B\007\n\005_host\"\327\001\n\024ConnectivityRespons"
     "e\022\014\n\004host\030\001 \001(\t\022\017\n\007natType\030\002 \001(\t\022*\n\twebs"
     "ocket\030\003 \001(\0132\027.dht.ConnectivityMethod\022\021\n\t"
-    "ipAddress\030\004 \001(\r\022\017\n\007version\030\005 \001(\t\022\025\n\010lati"
-    "tude\030\006 \001(\001H\000\210\001\001\022\026\n\tlongitude\030\007 \001(\001H\001\210\001\001B"
-    "\013\n\t_latitudeB\014\n\n_longitude\"\247\001\n\020Handshake"
-    "Request\0221\n\024sourcePeerDescriptor\030\001 \001(\0132\023."
-    "dht.PeerDescriptor\0226\n\024targetPeerDescript"
-    "or\030\002 \001(\0132\023.dht.PeerDescriptorH\000\210\001\001\022\017\n\007ve"
-    "rsion\030\003 \001(\tB\027\n\025_targetPeerDescriptor\"\212\001\n"
-    "\021HandshakeResponse\0221\n\024sourcePeerDescript"
-    "or\030\001 \001(\0132\023.dht.PeerDescriptor\022\'\n\005error\030\002"
-    " \001(\0162\023.dht.HandshakeErrorH\000\210\001\001\022\017\n\007versio"
-    "n\030\003 \001(\tB\010\n\006_error\"\342\003\n\007Message\022\021\n\tmessage"
+    "ipAddress\030\004 \001(\r\022\027\n\017protocolVersion\030\005 \001(\t"
+    "\022\025\n\010latitude\030\006 \001(\001H\000\210\001\001\022\026\n\tlongitude\030\007 \001"
+    "(\001H\001\210\001\001B\013\n\t_latitudeB\014\n\n_longitude\"\313\001\n\020H"
+    "andshakeRequest\0221\n\024sourcePeerDescriptor\030"
+    "\001 \001(\0132\023.dht.PeerDescriptor\0226\n\024targetPeer"
+    "Descriptor\030\002 \001(\0132\023.dht.PeerDescriptorH\000\210"
+    "\001\001\022\027\n\017protocolVersion\030\003 \001(\t\022\032\n\022applicati"
+    "onVersion\030\004 \001(\tB\027\n\025_targetPeerDescriptor"
+    "\"\256\001\n\021HandshakeResponse\0221\n\024sourcePeerDesc"
+    "riptor\030\001 \001(\0132\023.dht.PeerDescriptor\022\'\n\005err"
+    "or\030\002 \001(\0162\023.dht.HandshakeErrorH\000\210\001\001\022\027\n\017pr"
+    "otocolVersion\030\003 \001(\t\022\032\n\022applicationVersio"
+    "n\030\004 \001(\tB\010\n\006_error\"\342\003\n\007Message\022\021\n\tmessage"
     "Id\030\001 \001(\t\022-\n\020sourceDescriptor\030\002 \001(\0132\023.dht"
     ".PeerDescriptor\022-\n\020targetDescriptor\030\003 \001("
     "\0132\023.dht.PeerDescriptor\022\021\n\tserviceId\030\004 \001("
@@ -1478,59 +1588,67 @@ const char descriptor_table_protodef_packages_2fdht_2fprotos_2fDhtRpc_2eproto[] 
     "ockId\030\001 \001(\t\"\037\n\rUnlockRequest\022\016\n\006lockId\030\001"
     " \001(\t\" \n\014LockResponse\022\020\n\010accepted\030\001 \001(\010\"\?"
     "\n\020DisconnectNotice\022+\n\016disconnectMode\030\001 \001"
-    "(\0162\023.dht.DisconnectMode\"\'\n\030ExternalFetch"
+    "(\0162\023.dht.DisconnectMode\"&\n\021SetPrivateReq"
+    "uest\022\021\n\tisPrivate\030\001 \001(\010\"\'\n\030ExternalFetch"
     "DataRequest\022\013\n\003key\030\001 \001(\014\"<\n\031ExternalFetc"
     "hDataResponse\022\037\n\007entries\030\001 \003(\0132\016.dht.Dat"
-    "aEntry*M\n\022RecursiveOperation\022\026\n\022FIND_CLO"
-    "SEST_NODES\020\000\022\016\n\nFETCH_DATA\020\001\022\017\n\013DELETE_D"
-    "ATA\020\002*#\n\010NodeType\022\n\n\006NODEJS\020\000\022\013\n\007BROWSER"
-    "\020\001*c\n\020RpcResponseError\022\021\n\rSERVER_TIMOUT\020"
-    "\000\022\022\n\016CLIENT_TIMEOUT\020\001\022\020\n\014SERVER_ERROR\020\002\022"
-    "\026\n\022UNKNOWN_RPC_METHOD\020\003*\?\n\021RouteMessageE"
-    "rror\022\016\n\nNO_TARGETS\020\000\022\r\n\tDUPLICATE\020\001\022\013\n\007S"
-    "TOPPED\020\002*g\n\016HandshakeError\022\030\n\024DUPLICATE_"
-    "CONNECTION\020\000\022\"\n\036INVALID_TARGET_PEER_DESC"
-    "RIPTOR\020\001\022\027\n\023UNSUPPORTED_VERSION\020\002*)\n\016Dis"
-    "connectMode\022\n\n\006NORMAL\020\000\022\013\n\007LEAVING\020\0012\216\002\n"
-    "\nDhtNodeRpc\022F\n\017getClosestPeers\022\030.dht.Clo"
-    "sestPeersRequest\032\031.dht.ClosestPeersRespo"
-    "nse\022R\n\023getClosestRingPeers\022\034.dht.Closest"
-    "RingPeersRequest\032\035.dht.ClosestRingPeersR"
-    "esponse\022+\n\004ping\022\020.dht.PingRequest\032\021.dht."
-    "PingResponse\0227\n\013leaveNotice\022\020.dht.LeaveN"
-    "otice\032\026.google.protobuf.Empty2\215\001\n\tRouter"
-    "Rpc\022>\n\014routeMessage\022\030.dht.RouteMessageWr"
-    "apper\032\024.dht.RouteMessageAck\022@\n\016forwardMe"
-    "ssage\022\030.dht.RouteMessageWrapper\032\024.dht.Ro"
-    "uteMessageAck2W\n\025RecursiveOperationRpc\022>"
-    "\n\014routeRequest\022\030.dht.RouteMessageWrapper"
-    "\032\024.dht.RouteMessageAck2\212\001\n\010StoreRpc\022:\n\ts"
-    "toreData\022\025.dht.StoreDataRequest\032\026.dht.St"
-    "oreDataResponse\022B\n\rreplicateData\022\031.dht.R"
-    "eplicateDataRequest\032\026.google.protobuf.Em"
-    "pty2g\n\034RecursiveOperationSessionRpc\022G\n\014s"
-    "endResponse\022\037.dht.RecursiveOperationResp"
-    "onse\032\026.google.protobuf.Empty2k\n\033Websocke"
-    "tClientConnectorRpc\022L\n\021requestConnection"
-    "\022\037.dht.WebsocketConnectionRequest\032\026.goog"
-    "le.protobuf.Empty2\202\002\n\022WebrtcConnectorRpc"
-    "\022I\n\021requestConnection\022\034.dht.WebrtcConnec"
-    "tionRequest\032\026.google.protobuf.Empty\0221\n\010r"
-    "tcOffer\022\r.dht.RtcOffer\032\026.google.protobuf"
-    ".Empty\0223\n\trtcAnswer\022\016.dht.RtcAnswer\032\026.go"
-    "ogle.protobuf.Empty\0229\n\014iceCandidate\022\021.dh"
-    "t.IceCandidate\032\026.google.protobuf.Empty2\311"
-    "\001\n\021ConnectionLockRpc\0222\n\013lockRequest\022\020.dh"
-    "t.LockRequest\032\021.dht.LockResponse\022;\n\runlo"
-    "ckRequest\022\022.dht.UnlockRequest\032\026.google.p"
-    "rotobuf.Empty\022C\n\022gracefulDisconnect\022\025.dh"
-    "t.DisconnectNotice\032\026.google.protobuf.Emp"
-    "ty2\270\001\n\016ExternalApiRpc\022R\n\021externalFetchDa"
-    "ta\022\035.dht.ExternalFetchDataRequest\032\036.dht."
-    "ExternalFetchDataResponse\022R\n\021externalSto"
-    "reData\022\035.dht.ExternalStoreDataRequest\032\036."
-    "dht.ExternalStoreDataResponseB\002H\002b\006proto"
-    "3"
+    "aEntry\"1\n\037ExternalFindClosestNodesReques"
+    "t\022\016\n\006nodeId\030\001 \001(\014\"M\n ExternalFindClosest"
+    "NodesResponse\022)\n\014closestNodes\030\001 \003(\0132\023.dh"
+    "t.PeerDescriptor*M\n\022RecursiveOperation\022\026"
+    "\n\022FIND_CLOSEST_NODES\020\000\022\016\n\nFETCH_DATA\020\001\022\017"
+    "\n\013DELETE_DATA\020\002*#\n\010NodeType\022\n\n\006NODEJS\020\000\022"
+    "\013\n\007BROWSER\020\001*c\n\020RpcResponseError\022\021\n\rSERV"
+    "ER_TIMOUT\020\000\022\022\n\016CLIENT_TIMEOUT\020\001\022\020\n\014SERVE"
+    "R_ERROR\020\002\022\026\n\022UNKNOWN_RPC_METHOD\020\003*\?\n\021Rou"
+    "teMessageError\022\016\n\nNO_TARGETS\020\000\022\r\n\tDUPLIC"
+    "ATE\020\001\022\013\n\007STOPPED\020\002*p\n\016HandshakeError\022\030\n\024"
+    "DUPLICATE_CONNECTION\020\000\022\"\n\036INVALID_TARGET"
+    "_PEER_DESCRIPTOR\020\001\022 \n\034UNSUPPORTED_PROTOC"
+    "OL_VERSION\020\002*)\n\016DisconnectMode\022\n\n\006NORMAL"
+    "\020\000\022\013\n\007LEAVING\020\0012\216\002\n\nDhtNodeRpc\022F\n\017getClo"
+    "sestPeers\022\030.dht.ClosestPeersRequest\032\031.dh"
+    "t.ClosestPeersResponse\022R\n\023getClosestRing"
+    "Peers\022\034.dht.ClosestRingPeersRequest\032\035.dh"
+    "t.ClosestRingPeersResponse\022+\n\004ping\022\020.dht"
+    ".PingRequest\032\021.dht.PingResponse\0227\n\013leave"
+    "Notice\022\020.dht.LeaveNotice\032\026.google.protob"
+    "uf.Empty2\215\001\n\tRouterRpc\022>\n\014routeMessage\022\030"
+    ".dht.RouteMessageWrapper\032\024.dht.RouteMess"
+    "ageAck\022@\n\016forwardMessage\022\030.dht.RouteMess"
+    "ageWrapper\032\024.dht.RouteMessageAck2W\n\025Recu"
+    "rsiveOperationRpc\022>\n\014routeRequest\022\030.dht."
+    "RouteMessageWrapper\032\024.dht.RouteMessageAc"
+    "k2\212\001\n\010StoreRpc\022:\n\tstoreData\022\025.dht.StoreD"
+    "ataRequest\032\026.dht.StoreDataResponse\022B\n\rre"
+    "plicateData\022\031.dht.ReplicateDataRequest\032\026"
+    ".google.protobuf.Empty2g\n\034RecursiveOpera"
+    "tionSessionRpc\022G\n\014sendResponse\022\037.dht.Rec"
+    "ursiveOperationResponse\032\026.google.protobu"
+    "f.Empty2k\n\033WebsocketClientConnectorRpc\022L"
+    "\n\021requestConnection\022\037.dht.WebsocketConne"
+    "ctionRequest\032\026.google.protobuf.Empty2\202\002\n"
+    "\022WebrtcConnectorRpc\022I\n\021requestConnection"
+    "\022\034.dht.WebrtcConnectionRequest\032\026.google."
+    "protobuf.Empty\0221\n\010rtcOffer\022\r.dht.RtcOffe"
+    "r\032\026.google.protobuf.Empty\0223\n\trtcAnswer\022\016"
+    ".dht.RtcAnswer\032\026.google.protobuf.Empty\0229"
+    "\n\014iceCandidate\022\021.dht.IceCandidate\032\026.goog"
+    "le.protobuf.Empty2\207\002\n\021ConnectionLockRpc\022"
+    "2\n\013lockRequest\022\020.dht.LockRequest\032\021.dht.L"
+    "ockResponse\022;\n\runlockRequest\022\022.dht.Unloc"
+    "kRequest\032\026.google.protobuf.Empty\022C\n\022grac"
+    "efulDisconnect\022\025.dht.DisconnectNotice\032\026."
+    "google.protobuf.Empty\022<\n\nsetPrivate\022\026.dh"
+    "t.SetPrivateRequest\032\026.google.protobuf.Em"
+    "pty2\241\002\n\016ExternalApiRpc\022R\n\021externalFetchD"
+    "ata\022\035.dht.ExternalFetchDataRequest\032\036.dht"
+    ".ExternalFetchDataResponse\022R\n\021externalSt"
+    "oreData\022\035.dht.ExternalStoreDataRequest\032\036"
+    ".dht.ExternalStoreDataResponse\022g\n\030extern"
+    "alFindClosestNodes\022$.dht.ExternalFindClo"
+    "sestNodesRequest\032%.dht.ExternalFindClose"
+    "stNodesResponseB\002H\002b\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2eproto_deps[4] = {
@@ -1543,13 +1661,13 @@ static ::absl::once_flag descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2epro
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2eproto = {
     false,
     false,
-    5761,
+    6187,
     descriptor_table_protodef_packages_2fdht_2fprotos_2fDhtRpc_2eproto,
     "packages/dht/protos/DhtRpc.proto",
     &descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2eproto_once,
     descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2eproto_deps,
     4,
-    35,
+    38,
     schemas,
     file_default_instances,
     TableStruct_packages_2fdht_2fprotos_2fDhtRpc_2eproto::offsets,
@@ -5145,7 +5263,7 @@ PROTOBUF_NDEBUG_INLINE ConnectivityResponse::Impl_::Impl_(
         _cached_size_{0},
         host_(arena, from.host_),
         nattype_(arena, from.nattype_),
-        version_(arena, from.version_) {}
+        protocolversion_(arena, from.protocolversion_) {}
 
 ConnectivityResponse::ConnectivityResponse(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -5180,7 +5298,7 @@ PROTOBUF_NDEBUG_INLINE ConnectivityResponse::Impl_::Impl_(
       : _cached_size_{0},
         host_(arena),
         nattype_(arena),
-        version_(arena) {}
+        protocolversion_(arena) {}
 
 inline void ConnectivityResponse::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -5204,7 +5322,7 @@ inline void ConnectivityResponse::SharedDtor(MessageLite& self) {
   ABSL_DCHECK(this_.GetArena() == nullptr);
   this_._impl_.host_.Destroy();
   this_._impl_.nattype_.Destroy();
-  this_._impl_.version_.Destroy();
+  this_._impl_.protocolversion_.Destroy();
   delete this_._impl_.websocket_;
   this_._impl_.~Impl_();
 }
@@ -5253,7 +5371,7 @@ ConnectivityResponse::GetClassData() const {
   return ConnectivityResponse_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 7, 1, 51, 2>
+const ::_pbi::TcParseTable<3, 7, 1, 59, 2>
 ConnectivityResponse::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_._has_bits_),
@@ -5289,10 +5407,10 @@ ConnectivityResponse::_table_ = {
     {::_pbi::TcParser::FastV32S1,
      {32, 6, 0,
       PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_.ipaddress_)}},
-    // string version = 5;
+    // string protocolVersion = 5;
     {::_pbi::TcParser::FastUS1,
      {42, 2, 0,
-      PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_.version_)}},
+      PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_.protocolversion_)}},
     // optional double latitude = 6;
     {::_pbi::TcParser::FastF64S1,
      {49, 4, 0,
@@ -5312,8 +5430,8 @@ ConnectivityResponse::_table_ = {
     {PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_.websocket_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
     // uint32 ipAddress = 4;
     {PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_.ipaddress_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kUInt32)},
-    // string version = 5;
-    {PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_.version_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string protocolVersion = 5;
+    {PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_.protocolversion_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // optional double latitude = 6;
     {PROTOBUF_FIELD_OFFSET(ConnectivityResponse, _impl_.latitude_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kDouble)},
     // optional double longitude = 7;
@@ -5323,11 +5441,11 @@ ConnectivityResponse::_table_ = {
       {::_pbi::TcParser::GetTable<::dht::ConnectivityMethod>()},
   }},
   {{
-    "\30\4\7\0\0\7\0\0"
+    "\30\4\7\0\0\17\0\0"
     "dht.ConnectivityResponse"
     "host"
     "natType"
-    "version"
+    "protocolVersion"
   }},
 };
 void ConnectivityResponse::InternalSwap(ConnectivityResponse* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
@@ -5362,7 +5480,8 @@ PROTOBUF_NDEBUG_INLINE HandshakeRequest::Impl_::Impl_(
     [[maybe_unused]] const ::dht::HandshakeRequest& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
-        version_(arena, from.version_) {}
+        protocolversion_(arena, from.protocolversion_),
+        applicationversion_(arena, from.applicationversion_) {}
 
 HandshakeRequest::HandshakeRequest(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -5378,10 +5497,10 @@ HandshakeRequest::HandshakeRequest(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.sourcepeerdescriptor_ = (CheckHasBit(cached_has_bits, 0x00000002U))
+  _impl_.sourcepeerdescriptor_ = (CheckHasBit(cached_has_bits, 0x00000004U))
                 ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.sourcepeerdescriptor_)
                 : nullptr;
-  _impl_.targetpeerdescriptor_ = (CheckHasBit(cached_has_bits, 0x00000004U))
+  _impl_.targetpeerdescriptor_ = (CheckHasBit(cached_has_bits, 0x00000008U))
                 ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.targetpeerdescriptor_)
                 : nullptr;
 
@@ -5391,7 +5510,8 @@ PROTOBUF_NDEBUG_INLINE HandshakeRequest::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
-        version_(arena) {}
+        protocolversion_(arena),
+        applicationversion_(arena) {}
 
 inline void HandshakeRequest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -5413,7 +5533,8 @@ inline void HandshakeRequest::SharedDtor(MessageLite& self) {
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.version_.Destroy();
+  this_._impl_.protocolversion_.Destroy();
+  this_._impl_.applicationversion_.Destroy();
   delete this_._impl_.sourcepeerdescriptor_;
   delete this_._impl_.targetpeerdescriptor_;
   this_._impl_.~Impl_();
@@ -5463,16 +5584,16 @@ HandshakeRequest::GetClassData() const {
   return HandshakeRequest_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 2, 36, 2>
+const ::_pbi::TcParseTable<2, 4, 2, 62, 2>
 HandshakeRequest::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    4,  // num_field_entries
     2,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     HandshakeRequest_class_data_.base(),
@@ -5482,37 +5603,43 @@ HandshakeRequest::_table_ = {
     ::_pbi::TcParser::GetTable<::dht::HandshakeRequest>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // string applicationVersion = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 1, 0,
+      PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.applicationversion_)}},
     // .dht.PeerDescriptor sourcePeerDescriptor = 1;
     {::_pbi::TcParser::FastMtS1,
-     {10, 1, 0,
+     {10, 2, 0,
       PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.sourcepeerdescriptor_)}},
     // optional .dht.PeerDescriptor targetPeerDescriptor = 2;
     {::_pbi::TcParser::FastMtS1,
-     {18, 2, 1,
+     {18, 3, 1,
       PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.targetpeerdescriptor_)}},
-    // string version = 3;
+    // string protocolVersion = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 0, 0,
-      PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.version_)}},
+      PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.protocolversion_)}},
   }}, {{
     65535, 65535
   }}, {{
     // .dht.PeerDescriptor sourcePeerDescriptor = 1;
-    {PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.sourcepeerdescriptor_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    {PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.sourcepeerdescriptor_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
     // optional .dht.PeerDescriptor targetPeerDescriptor = 2;
-    {PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.targetpeerdescriptor_), _Internal::kHasBitsOffset + 2, 1, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
-    // string version = 3;
-    {PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.version_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.targetpeerdescriptor_), _Internal::kHasBitsOffset + 3, 1, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // string protocolVersion = 3;
+    {PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.protocolversion_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string applicationVersion = 4;
+    {PROTOBUF_FIELD_OFFSET(HandshakeRequest, _impl_.applicationversion_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   {{
       {::_pbi::TcParser::GetTable<::dht::PeerDescriptor>()},
       {::_pbi::TcParser::GetTable<::dht::PeerDescriptor>()},
   }},
   {{
-    "\24\0\0\7\0\0\0\0"
+    "\24\0\0\17\22\0\0\0"
     "dht.HandshakeRequest"
-    "version"
+    "protocolVersion"
+    "applicationVersion"
   }},
 };
 void HandshakeRequest::InternalSwap(HandshakeRequest* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
@@ -5547,7 +5674,8 @@ PROTOBUF_NDEBUG_INLINE HandshakeResponse::Impl_::Impl_(
     [[maybe_unused]] const ::dht::HandshakeResponse& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
-        version_(arena, from.version_) {}
+        protocolversion_(arena, from.protocolversion_),
+        applicationversion_(arena, from.applicationversion_) {}
 
 HandshakeResponse::HandshakeResponse(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -5563,7 +5691,7 @@ HandshakeResponse::HandshakeResponse(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.sourcepeerdescriptor_ = (CheckHasBit(cached_has_bits, 0x00000002U))
+  _impl_.sourcepeerdescriptor_ = (CheckHasBit(cached_has_bits, 0x00000004U))
                 ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.sourcepeerdescriptor_)
                 : nullptr;
   _impl_.error_ = from._impl_.error_;
@@ -5574,7 +5702,8 @@ PROTOBUF_NDEBUG_INLINE HandshakeResponse::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
-        version_(arena) {}
+        protocolversion_(arena),
+        applicationversion_(arena) {}
 
 inline void HandshakeResponse::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -5596,7 +5725,8 @@ inline void HandshakeResponse::SharedDtor(MessageLite& self) {
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.version_.Destroy();
+  this_._impl_.protocolversion_.Destroy();
+  this_._impl_.applicationversion_.Destroy();
   delete this_._impl_.sourcepeerdescriptor_;
   this_._impl_.~Impl_();
 }
@@ -5645,16 +5775,16 @@ HandshakeResponse::GetClassData() const {
   return HandshakeResponse_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 1, 37, 2>
+const ::_pbi::TcParseTable<2, 4, 1, 63, 2>
 HandshakeResponse::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    4,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     HandshakeResponse_class_data_.base(),
@@ -5664,36 +5794,42 @@ HandshakeResponse::_table_ = {
     ::_pbi::TcParser::GetTable<::dht::HandshakeResponse>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // string applicationVersion = 4;
+    {::_pbi::TcParser::FastUS1,
+     {34, 1, 0,
+      PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.applicationversion_)}},
     // .dht.PeerDescriptor sourcePeerDescriptor = 1;
     {::_pbi::TcParser::FastMtS1,
-     {10, 1, 0,
+     {10, 2, 0,
       PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.sourcepeerdescriptor_)}},
     // optional .dht.HandshakeError error = 2;
     {::_pbi::TcParser::FastV32S1,
-     {16, 2, 0,
+     {16, 3, 0,
       PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.error_)}},
-    // string version = 3;
+    // string protocolVersion = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 0, 0,
-      PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.version_)}},
+      PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.protocolversion_)}},
   }}, {{
     65535, 65535
   }}, {{
     // .dht.PeerDescriptor sourcePeerDescriptor = 1;
-    {PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.sourcepeerdescriptor_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    {PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.sourcepeerdescriptor_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
     // optional .dht.HandshakeError error = 2;
-    {PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.error_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
-    // string version = 3;
-    {PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.version_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.error_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
+    // string protocolVersion = 3;
+    {PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.protocolversion_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string applicationVersion = 4;
+    {PROTOBUF_FIELD_OFFSET(HandshakeResponse, _impl_.applicationversion_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   {{
       {::_pbi::TcParser::GetTable<::dht::PeerDescriptor>()},
   }},
   {{
-    "\25\0\0\7\0\0\0\0"
+    "\25\0\0\17\22\0\0\0"
     "dht.HandshakeResponse"
-    "version"
+    "protocolVersion"
+    "applicationVersion"
   }},
 };
 void HandshakeResponse::InternalSwap(HandshakeResponse* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
@@ -7390,6 +7526,143 @@ void DisconnectNotice::InternalSwap(DisconnectNotice* PROTOBUF_RESTRICT PROTOBUF
 }
 // ===================================================================
 
+class SetPrivateRequest::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<SetPrivateRequest>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(SetPrivateRequest, _impl_._has_bits_);
+};
+
+SetPrivateRequest::SetPrivateRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, SetPrivateRequest_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:dht.SetPrivateRequest)
+}
+SetPrivateRequest::SetPrivateRequest(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const SetPrivateRequest& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, SetPrivateRequest_class_data_.base()),
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena),
+#endif  // PROTOBUF_CUSTOM_VTABLE
+      _impl_(from._impl_) {
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+}
+PROTOBUF_NDEBUG_INLINE SetPrivateRequest::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0} {}
+
+inline void SetPrivateRequest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.isprivate_ = {};
+}
+SetPrivateRequest::~SetPrivateRequest() {
+  // @@protoc_insertion_point(destructor:dht.SetPrivateRequest)
+  SharedDtor(*this);
+}
+inline void SetPrivateRequest::SharedDtor(MessageLite& self) {
+  SetPrivateRequest& this_ = static_cast<SetPrivateRequest&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL SetPrivateRequest::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) SetPrivateRequest(arena);
+}
+constexpr auto SetPrivateRequest::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(SetPrivateRequest),
+                                            alignof(SetPrivateRequest));
+}
+constexpr auto SetPrivateRequest::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_SetPrivateRequest_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &SetPrivateRequest::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<SetPrivateRequest>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &SetPrivateRequest::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&SetPrivateRequest::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(SetPrivateRequest, _impl_._cached_size_),
+          false,
+      },
+      &SetPrivateRequest::kDescriptorMethods,
+      &descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull SetPrivateRequest_class_data_ =
+        SetPrivateRequest::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+SetPrivateRequest::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&SetPrivateRequest_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(SetPrivateRequest_class_data_.tc_table);
+  return SetPrivateRequest_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2>
+SetPrivateRequest::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(SetPrivateRequest, _impl_._has_bits_),
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    SetPrivateRequest_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::dht::SetPrivateRequest>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // bool isPrivate = 1;
+    {::_pbi::TcParser::FastV8S1,
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(SetPrivateRequest, _impl_.isprivate_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // bool isPrivate = 1;
+    {PROTOBUF_FIELD_OFFSET(SetPrivateRequest, _impl_.isprivate_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+void SetPrivateRequest::InternalSwap(SetPrivateRequest* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  GetReflection()->Swap(this, other);}
+
+::google::protobuf::Metadata SetPrivateRequest::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class ExternalFetchDataRequest::_Internal {
  public:
   using HasBits =
@@ -7701,6 +7974,321 @@ void ExternalFetchDataResponse::InternalSwap(ExternalFetchDataResponse* PROTOBUF
   GetReflection()->Swap(this, other);}
 
 ::google::protobuf::Metadata ExternalFetchDataResponse::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ExternalFindClosestNodesRequest::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ExternalFindClosestNodesRequest>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesRequest, _impl_._has_bits_);
+};
+
+ExternalFindClosestNodesRequest::ExternalFindClosestNodesRequest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ExternalFindClosestNodesRequest_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:dht.ExternalFindClosestNodesRequest)
+}
+PROTOBUF_NDEBUG_INLINE ExternalFindClosestNodesRequest::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::dht::ExternalFindClosestNodesRequest& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        nodeid_(arena, from.nodeid_) {}
+
+ExternalFindClosestNodesRequest::ExternalFindClosestNodesRequest(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ExternalFindClosestNodesRequest& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ExternalFindClosestNodesRequest_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ExternalFindClosestNodesRequest* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:dht.ExternalFindClosestNodesRequest)
+}
+PROTOBUF_NDEBUG_INLINE ExternalFindClosestNodesRequest::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        nodeid_(arena) {}
+
+inline void ExternalFindClosestNodesRequest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+ExternalFindClosestNodesRequest::~ExternalFindClosestNodesRequest() {
+  // @@protoc_insertion_point(destructor:dht.ExternalFindClosestNodesRequest)
+  SharedDtor(*this);
+}
+inline void ExternalFindClosestNodesRequest::SharedDtor(MessageLite& self) {
+  ExternalFindClosestNodesRequest& this_ = static_cast<ExternalFindClosestNodesRequest&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.nodeid_.Destroy();
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ExternalFindClosestNodesRequest::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ExternalFindClosestNodesRequest(arena);
+}
+constexpr auto ExternalFindClosestNodesRequest::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(ExternalFindClosestNodesRequest),
+                                            alignof(ExternalFindClosestNodesRequest));
+}
+constexpr auto ExternalFindClosestNodesRequest::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ExternalFindClosestNodesRequest_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ExternalFindClosestNodesRequest::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ExternalFindClosestNodesRequest>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ExternalFindClosestNodesRequest::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&ExternalFindClosestNodesRequest::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesRequest, _impl_._cached_size_),
+          false,
+      },
+      &ExternalFindClosestNodesRequest::kDescriptorMethods,
+      &descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ExternalFindClosestNodesRequest_class_data_ =
+        ExternalFindClosestNodesRequest::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ExternalFindClosestNodesRequest::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ExternalFindClosestNodesRequest_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ExternalFindClosestNodesRequest_class_data_.tc_table);
+  return ExternalFindClosestNodesRequest_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2>
+ExternalFindClosestNodesRequest::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesRequest, _impl_._has_bits_),
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    ExternalFindClosestNodesRequest_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::dht::ExternalFindClosestNodesRequest>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // bytes nodeId = 1;
+    {::_pbi::TcParser::FastBS1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesRequest, _impl_.nodeid_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // bytes nodeId = 1;
+    {PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesRequest, _impl_.nodeid_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+void ExternalFindClosestNodesRequest::InternalSwap(ExternalFindClosestNodesRequest* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  GetReflection()->Swap(this, other);}
+
+::google::protobuf::Metadata ExternalFindClosestNodesRequest::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ExternalFindClosestNodesResponse::_Internal {
+ public:
+  using HasBits =
+      decltype(::std::declval<ExternalFindClosestNodesResponse>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesResponse, _impl_._has_bits_);
+};
+
+ExternalFindClosestNodesResponse::ExternalFindClosestNodesResponse(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ExternalFindClosestNodesResponse_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:dht.ExternalFindClosestNodesResponse)
+}
+PROTOBUF_NDEBUG_INLINE ExternalFindClosestNodesResponse::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
+    [[maybe_unused]] const ::dht::ExternalFindClosestNodesResponse& from_msg)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        closestnodes_{visibility, arena, from.closestnodes_} {}
+
+ExternalFindClosestNodesResponse::ExternalFindClosestNodesResponse(
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
+    const ExternalFindClosestNodesResponse& from)
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+    : ::google::protobuf::Message(arena, ExternalFindClosestNodesResponse_class_data_.base()) {
+#else   // PROTOBUF_CUSTOM_VTABLE
+    : ::google::protobuf::Message(arena) {
+#endif  // PROTOBUF_CUSTOM_VTABLE
+  ExternalFindClosestNodesResponse* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:dht.ExternalFindClosestNodesResponse)
+}
+PROTOBUF_NDEBUG_INLINE ExternalFindClosestNodesResponse::Impl_::Impl_(
+    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
+    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+      : _cached_size_{0},
+        closestnodes_{visibility, arena} {}
+
+inline void ExternalFindClosestNodesResponse::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+ExternalFindClosestNodesResponse::~ExternalFindClosestNodesResponse() {
+  // @@protoc_insertion_point(destructor:dht.ExternalFindClosestNodesResponse)
+  SharedDtor(*this);
+}
+inline void ExternalFindClosestNodesResponse::SharedDtor(MessageLite& self) {
+  ExternalFindClosestNodesResponse& this_ = static_cast<ExternalFindClosestNodesResponse&>(self);
+  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
+    this_.CheckHasBitConsistency();
+  }
+  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  ABSL_DCHECK(this_.GetArena() == nullptr);
+  this_._impl_.~Impl_();
+}
+
+inline void* PROTOBUF_NONNULL ExternalFindClosestNodesResponse::PlacementNew_(
+    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
+    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
+  return ::new (mem) ExternalFindClosestNodesResponse(arena);
+}
+constexpr auto ExternalFindClosestNodesResponse::InternalNewImpl_() {
+  constexpr auto arena_bits = ::google::protobuf::internal::EncodePlacementArenaOffsets({
+      PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesResponse, _impl_.closestnodes_) +
+          decltype(ExternalFindClosestNodesResponse::_impl_.closestnodes_)::
+              InternalGetArenaOffset(
+                  ::google::protobuf::Message::internal_visibility()),
+  });
+  if (arena_bits.has_value()) {
+    return ::google::protobuf::internal::MessageCreator::ZeroInit(
+        sizeof(ExternalFindClosestNodesResponse), alignof(ExternalFindClosestNodesResponse), *arena_bits);
+  } else {
+    return ::google::protobuf::internal::MessageCreator(&ExternalFindClosestNodesResponse::PlacementNew_,
+                                 sizeof(ExternalFindClosestNodesResponse),
+                                 alignof(ExternalFindClosestNodesResponse));
+  }
+}
+constexpr auto ExternalFindClosestNodesResponse::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassDataFull{
+      ::google::protobuf::internal::ClassData{
+          &_ExternalFindClosestNodesResponse_default_instance_._instance,
+          &_table_.header,
+          nullptr,  // OnDemandRegisterArenaDtor
+          nullptr,  // IsInitialized
+          &ExternalFindClosestNodesResponse::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<ExternalFindClosestNodesResponse>(),
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+          &ExternalFindClosestNodesResponse::SharedDtor,
+          static_cast<void (::google::protobuf::MessageLite::*)()>(&ExternalFindClosestNodesResponse::ClearImpl),
+              ::google::protobuf::Message::ByteSizeLongImpl, ::google::protobuf::Message::_InternalSerializeImpl
+              ,
+#endif  // PROTOBUF_CUSTOM_VTABLE
+          PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesResponse, _impl_._cached_size_),
+          false,
+      },
+      &ExternalFindClosestNodesResponse::kDescriptorMethods,
+      &descriptor_table_packages_2fdht_2fprotos_2fDhtRpc_2eproto,
+      nullptr,  // tracker
+  };
+}
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
+    ::google::protobuf::internal::ClassDataFull ExternalFindClosestNodesResponse_class_data_ =
+        ExternalFindClosestNodesResponse::InternalGenerateClassData_();
+
+PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
+ExternalFindClosestNodesResponse::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&ExternalFindClosestNodesResponse_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(ExternalFindClosestNodesResponse_class_data_.tc_table);
+  return ExternalFindClosestNodesResponse_class_data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2>
+ExternalFindClosestNodesResponse::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesResponse, _impl_._has_bits_),
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    ExternalFindClosestNodesResponse_class_data_.base(),
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::dht::ExternalFindClosestNodesResponse>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated .dht.PeerDescriptor closestNodes = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesResponse, _impl_.closestnodes_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .dht.PeerDescriptor closestNodes = 1;
+    {PROTOBUF_FIELD_OFFSET(ExternalFindClosestNodesResponse, _impl_.closestnodes_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }},
+  {{
+      {::_pbi::TcParser::GetTable<::dht::PeerDescriptor>()},
+  }},
+  {{
+  }},
+};
+void ExternalFindClosestNodesResponse::InternalSwap(ExternalFindClosestNodesResponse* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+  using ::std::swap;
+  GetReflection()->Swap(this, other);}
+
+::google::protobuf::Metadata ExternalFindClosestNodesResponse::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
