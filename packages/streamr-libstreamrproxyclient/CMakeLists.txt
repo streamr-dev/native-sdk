@@ -28,6 +28,14 @@ set (ANDROID_LIBRARY_VERSION ${STREAMRPROXYCLIENT_VERSION})
 
 project(streamr-streamrproxyclient CXX)
 
+# The library target links Folly::folly directly, so find it HERE,
+# unconditionally: it used to arrive only as a side effect of the
+# sibling packages' export configs (which run find_package(folly)), and
+# on iOS the test block below — which also finds folly — is skipped.
+# With the sibling find_package calls guarded out in the root
+# single-tree build, this file must find its own direct dependencies.
+find_package(folly CONFIG REQUIRED)
+
 # C++ modules support (guards, policies, helpers) — must come after
 # project() because it inspects the compiler id.
 include(${CMAKE_CURRENT_SOURCE_DIR}/StreamrModules.cmake)
