@@ -351,6 +351,25 @@ New classes: `Contact`, `ContactList`, `SortedContactList`, `RandomContactList`,
 *Tests to port:* `unit/SortedContactList.test.ts`, `unit/RandomContactList.test.ts`,
 `unit/getClosestNodes.test.ts`, ring-contact coverage from `benchmark/RingCorrectness.test.ts`
 (port as a plain unit test, dropping the benchmark harness).
+*Implemented (phase-A1 PR):* all classes ported to `modules/dht/contact/` (namespace
+`streamr::dht::contact`) plus `getPeerDistance` in `modules/helpers/`. `getPeerDistance`
+replicates npm `k-bucket`'s `KBucket.distance` as a double accumulation so the sort key
+matches TS bit-for-bit (KBucket itself is phase A2). The contact lists are class templates
+over `C`, constrained with concepts (`HasGetNodeId` for the sorted/random lists,
+`HasGetPeerDescriptor` for the ring list) that enforce the required member at compile time
+instead of by comment,
+storing `shared_ptr<C>` and emitting the shared `ContactListEvents<C>`
+(contactAdded/contactRemoved); the TS `hasEventListeners()` emit guard is dropped as a no-op
+(emitting to zero listeners is already a no-op).
+`SortedContactList` uses `std::lower_bound` for the lodash `sortedIndexBy` insertion.
+`ringIdentifiers` computes the 120-bit ring id via `unsigned __int128` before the single
+narrowing to double, matching TS's `Number(binaryToBigInt(...))` (a byte-by-byte double
+accumulation would round differently); `RingContactList` uses `std::map<RingDistance, C>` for
+the TS `OrderedMap`. The three unit tests port directly; the ring coverage is a from-scratch
+`RingContactListTest` (the `RingCorrectness` benchmark needs `DhtNode`/`joinRing` and
+ground-truth data files, all later phases) exercising per-side neighbour selection, the
+per-side cap, reference/excluded-id filtering, removal and lookup. All 15 new tests green;
+full `./test.sh` and `./lint.sh` green.
 
 **Phase A2 — KBucket.**
 New class: `KBucket` (port of npm `k-bucket`), with contact arbitration and events wired to
