@@ -165,6 +165,28 @@ public:
     }
 
     /**
+     * @brief Register an async (coroutine) method to be called by remote
+     * clients. `fn` returns folly::coro::Task<ReturnType> and is awaited by
+     * the server layer, so it may co_await a worker executor without blocking
+     * the delivery thread.
+     *
+     * @param name name of the method
+     * @param fn coroutine function to be registered
+     * @param options options for the method
+     */
+
+    template <typename RequestType, typename ReturnType, typename F>
+        requires std::is_assignable_v<
+            std::function<Task<ReturnType>(RequestType, CallContextType)>,
+            F>
+    void registerRpcMethodAsync(
+        const std::string& name, const F& fn, MethodOptions options = {}) {
+        mRpcCommunicatorServerApi
+            .template registerRpcMethodAsync<RequestType, ReturnType, F>(
+                name, fn, options);
+    }
+
+    /**
      * @brief Register a notification to be called by remote clients
      *
      * @param name name of the notification

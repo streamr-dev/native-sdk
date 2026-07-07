@@ -1,3 +1,4 @@
+#include <atomic>
 #include <chrono>
 #include <exception>
 #include <thread>
@@ -475,6 +476,118 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
         EXPECT_TRUE(false);
         EXPECT_TRUE(false);
     }
+}
+
+// --- Async server handlers: the delivery thread must not block on the
+// handler (follow-up to Phase A4). ---
+
+namespace {
+RpcMessage makeRequestMessage(
+    const std::string& methodName, const std::string& myname) {
+    static std::atomic<uint64_t> counter = 0;
+    HelloRequest request;
+    request.set_myname(myname);
+    RpcMessage message;
+    message.mutable_body()->PackFrom(request);
+    (*message.mutable_header())["method"] = methodName;
+    (*message.mutable_header())["request"] = "request";
+    message.set_requestid("req-" + std::to_string(counter++));
+    return message;
+}
+} // namespace
+
+// handleIncomingMessage() delivers on the (shared) delivery thread. When a
+// handler is async and slow, the call must return promptly and the response
+// must be produced later, off that thread.
+TEST_F(RpcCommunicatorTest, TestServerAsyncHandlerDoesNotBlockDeliveryThread) {
+    constexpr auto handlerDelay = 500ms;
+    std::atomic<bool> responseSent = false;
+    communicator1.setOutgoingMessageCallback(
+        [&responseSent](
+            const RpcMessage& /* message */,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            responseSent = true;
+        });
+    communicator1.registerRpcMethodAsync<HelloRequest, HelloResponse>(
+        "slowFunction",
+        [handlerDelay](
+            const HelloRequest& request, const ProtoCallContext& /* context */)
+            -> folly::coro::Task<HelloResponse> {
+            co_await folly::coro::sleep(handlerDelay);
+            HelloResponse response;
+            response.set_greeting("Hello, " + request.myname());
+            co_return response;
+        });
+
+    const auto start = std::chrono::steady_clock::now();
+    communicator1.handleIncomingMessage(
+        makeRequestMessage("slowFunction", "Test"), ProtoCallContext());
+    const auto elapsed = std::chrono::steady_clock::now() - start;
+
+    // The delivery thread returned well before the handler's delay, and the
+    // response has not been produced yet.
+    EXPECT_LT(elapsed, 200ms);
+    EXPECT_EQ(responseSent.load(), false);
+
+    // After the handler's delay the response is delivered off-thread.
+    std::this_thread::sleep_for(handlerDelay + 400ms);
+    EXPECT_EQ(responseSent.load(), true);
+}
+
+// Our own (fast) incoming traffic must be serviced while a slow handler is
+// still in flight — the priority-1 guarantee the async change restores.
+TEST_F(RpcCommunicatorTest, TestOwnTrafficNotDelayedByInFlightSlowHandler) {
+    const auto t0 = std::chrono::steady_clock::now();
+    std::atomic<int64_t> slowDoneAt = 0;
+    std::atomic<int64_t> fastDoneAt = 0;
+    communicator1.setOutgoingMessageCallback(
+        [&](const RpcMessage& message,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            const auto ms =
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - t0)
+                    .count();
+            if (message.header().at("method") == "slow") {
+                slowDoneAt = ms;
+            } else {
+                fastDoneAt = ms;
+            }
+        });
+    // A slow async handler (stands in for routing) ...
+    communicator1.registerRpcMethodAsync<HelloRequest, HelloResponse>(
+        "slow",
+        [](const HelloRequest& request, const ProtoCallContext& /* context */)
+            -> folly::coro::Task<HelloResponse> {
+            co_await folly::coro::sleep(500ms);
+            HelloResponse response;
+            response.set_greeting("Hello, " + request.myname());
+            co_return response;
+        });
+    // ... and a fast synchronous handler (stands in for our own ping).
+    communicator1.registerRpcMethod<HelloRequest, HelloResponse>(
+        "fast",
+        [](const HelloRequest& request,
+           const ProtoCallContext& /* context */) -> HelloResponse {
+            HelloResponse response;
+            response.set_greeting("Hello, " + request.myname());
+            return response;
+        });
+
+    // Deliver the slow request first, then our own fast one right behind it.
+    communicator1.handleIncomingMessage(
+        makeRequestMessage("slow", "A"), ProtoCallContext());
+    communicator1.handleIncomingMessage(
+        makeRequestMessage("fast", "B"), ProtoCallContext());
+
+    std::this_thread::sleep_for(900ms);
+    ASSERT_GT(fastDoneAt.load(), 0);
+    ASSERT_GT(slowDoneAt.load(), 0);
+    // The fast response came back promptly, long before the slow one — the
+    // in-flight slow handler did not delay our own traffic.
+    EXPECT_LT(fastDoneAt.load(), 200);
+    EXPECT_LT(fastDoneAt.load(), slowDoneAt.load());
 }
 
 } // namespace streamr::protorpc

@@ -22,6 +22,7 @@ module;
 
 #include <folly/CancellationToken.h>
 #include <folly/Unit.h>
+#include <folly/experimental/coro/AsyncScope.h>
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Collect.h>
 #include <folly/experimental/coro/DetachOnCancel.h>
@@ -37,6 +38,8 @@ export module streamr.utils.CoroutineHelper;
 
 export namespace folly::coro {
 
+using folly::coro::AsyncScope;
+using folly::coro::CancellableAsyncScope;
 using folly::coro::co_invoke;
 using folly::coro::collectAll;
 using folly::coro::collectAllRange;
