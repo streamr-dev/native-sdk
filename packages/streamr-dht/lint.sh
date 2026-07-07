@@ -29,7 +29,15 @@ echo "Running clangd-tidy on $FILES"
 # simulator + ported TS integration tests) trip the same false positive
 # through their simulator-module imports. The compiler accepts and runs
 # all three on every platform; clang-format still checks them.
-TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | tr '\n' ' ')
+# DhtNodeRpcLocalTest.cpp and DhtNodeRpcRemoteTest.cpp (phase A3, the
+# DhtNodeRpc client/server port) trip the same std-type unification false
+# positive through the DhtNodeRpc module cluster (DhtNodeRpcRemote /
+# DhtRpcClient imports): clangd reports gtest's own CodeLocation /
+# MakeAndRegisterTestInfo calls as ambiguous (spurious two-std::string
+# mismatch). The compiler accepts and runs both on every platform;
+# clang-format still checks them. (PeerManagerTest.cpp imports the same
+# cluster but does NOT trip it, so it stays in the clangd-tidy set.)
+TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | tr '\n' ' ')
 clangd-tidy -p "$COMPILE_DB" $TIDY_FILES
 
 echo "Running clang-format --dry-run on $FILES"
