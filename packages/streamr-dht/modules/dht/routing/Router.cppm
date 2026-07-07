@@ -6,18 +6,27 @@
 //
 // C++ threading (the routing operations proved heavy in TS): the Router
 // owns a dedicated single-thread worker executor and runs ALL routing work
-// on it — the RPC handlers hop onto the worker and block for the ack, the
-// session send-completions resume on the worker, and the cross-thread
-// entry points (onNodeConnected/Disconnected, resetCache, stop, the
-// duplicate-detector accessors) dispatch onto it too. Because every access
-// to the routing state (routing-tables cache, ongoing sessions, forwarding
-// table, duplicate detector) happens on that one worker thread, the state
-// needs no additional locks, and the heavy routing computation never runs
-// on the transport/RPC delivery thread. (Server-side RPC handlers run
-// inline on the delivering thread, so this offload is not free — see the
-// worker-thread note in the phase A4 PR.) A single worker serializes
-// routing; scaling it to a pool would require finer-grained locking of the
-// cache and sessions.
+// on it — the routeMessage/forwardMessage RPC handlers co_await onto the
+// worker (async, see below), the session send-completions resume on the
+// worker, and the cross-thread entry points (onNodeConnected/Disconnected,
+// resetCache, stop, the duplicate-detector accessors) dispatch onto it too.
+// Because every access to the routing state (routing-tables cache, ongoing
+// sessions, forwarding table, duplicate detector) happens on that one
+// worker thread, the state needs no additional locks, and the heavy routing
+// computation never runs on the transport/RPC delivery thread. A single
+// worker serializes routing; scaling it to a pool would require finer-
+// grained locking of the cache and sessions.
+//
+// Follow-up to Phase A4 (owner priority model — our own traffic is
+// priority 1, routing is best-effort "whenever we have time"): the
+// routeMessage/forwardMessage handlers are registered as ASYNC proto-rpc
+// handlers (registerRpcMethodAsync) that co_await the routing worker
+// instead of blockingWait-ing on it. The delivery coroutine therefore
+// SUSPENDS (it does not block) and the shared delivery thread returns to
+// our own incoming traffic immediately; the ack is produced on the worker
+// and sent later. The worker is additionally given a low OS thread priority
+// (a positive nice value, best-effort per-platform) so routing yields the
+// CPU to our own work under contention.
 module;
 
 #include <coroutine> // IWYU pragma: keep
@@ -87,6 +96,12 @@ private:
     static constexpr size_t duplicateDetectorSize = 10000;
     static constexpr std::chrono::milliseconds forwardingEntryTtl{10000};
     static constexpr std::chrono::milliseconds sessionTimeout{10000};
+    // Nice value for the routing worker thread: a positive value lowers its
+    // OS priority so routing runs "whenever we have time" relative to our
+    // own traffic. Lowering priority (raising nice) is unprivileged; the
+    // effect is best-effort per platform (honoured on Linux/Android, weaker
+    // on Darwin, where per-thread nice is not fully applied).
+    static constexpr int routingWorkerThreadNice = 10;
 
     struct ForwardingTableEntry {
         std::vector<PeerDescriptor> peerDescriptors;
@@ -94,7 +109,11 @@ private:
     };
 
     RouterOptions options;
-    folly::CPUThreadPoolExecutor routingExecutor{routingWorkerThreadCount};
+    folly::CPUThreadPoolExecutor routingExecutor{
+        routingWorkerThreadCount,
+        std::make_shared<folly::PriorityThreadFactory>(
+            std::make_shared<folly::NamedThreadFactory>("DhtRouting"),
+            routingWorkerThreadNice)};
     AbortController abortController; // cancels the session-cleanup timeouts
     std::map<DhtAddress, ForwardingTableEntry> forwardingTable;
     RoutingTablesCache routingTablesCache;
@@ -143,48 +162,68 @@ private:
                 .localPeerDescriptor = this->options.localPeerDescriptor});
 
         std::weak_ptr<Router> weakSelf = this->sharedFromThis<Router>();
-        this->options.rpcCommunicator
-            .template registerRpcMethod<RouteMessageWrapper, RouteMessageAck>(
-                "routeMessage",
-                [weakSelf](
-                    const RouteMessageWrapper& routedMessage,
-                    const DhtCallContext& callContext) -> RouteMessageAck {
-                    auto self = weakSelf.lock();
-                    if (!self) {
-                        return createRouteMessageAck(
-                            routedMessage, RouteMessageError::STOPPED);
-                    }
-                    return self->runOnWorker(
-                        [&self, &routedMessage, &callContext]() {
+        // routeMessage/forwardMessage are async handlers: they co_await the
+        // routing worker so the delivery coroutine SUSPENDS (does not block
+        // the shared delivery thread) until the ack is ready. `self` (a
+        // shared_ptr held in the coroutine frame) keeps the Router and its
+        // routingExecutor alive across the suspension. The inner worker task
+        // captures its inputs by value, so it is independent of the outer
+        // frame. Wire semantics are unchanged from the previous blocking
+        // handlers (same STOPPED / NO_TARGETS / DUPLICATE acks).
+        this->options.rpcCommunicator.template registerRpcMethodAsync<
+            RouteMessageWrapper,
+            RouteMessageAck>(
+            "routeMessage",
+            [weakSelf](
+                const RouteMessageWrapper& routedMessage,
+                const DhtCallContext& callContext)
+                -> folly::coro::Task<RouteMessageAck> {
+                auto self = weakSelf.lock();
+                if (!self) {
+                    co_return createRouteMessageAck(
+                        routedMessage, RouteMessageError::STOPPED);
+                }
+                co_return co_await streamr::utils::co_withExecutor(
+                    &self->routingExecutor,
+                    folly::coro::co_invoke(
+                        [self,
+                         routedMessage,
+                         callContext]() -> folly::coro::Task<RouteMessageAck> {
                             if (self->stopped) {
-                                return createRouteMessageAck(
+                                co_return createRouteMessageAck(
                                     routedMessage, RouteMessageError::STOPPED);
                             }
-                            return self->routerRpcLocal->routeMessage(
+                            co_return self->routerRpcLocal->routeMessage(
                                 routedMessage, callContext);
-                        });
-                });
-        this->options.rpcCommunicator
-            .template registerRpcMethod<RouteMessageWrapper, RouteMessageAck>(
-                "forwardMessage",
-                [weakSelf](
-                    const RouteMessageWrapper& forwardMessage,
-                    const DhtCallContext& callContext) -> RouteMessageAck {
-                    auto self = weakSelf.lock();
-                    if (!self) {
-                        return createRouteMessageAck(
-                            forwardMessage, RouteMessageError::STOPPED);
-                    }
-                    return self->runOnWorker(
-                        [&self, &forwardMessage, &callContext]() {
+                        }));
+            });
+        this->options.rpcCommunicator.template registerRpcMethodAsync<
+            RouteMessageWrapper,
+            RouteMessageAck>(
+            "forwardMessage",
+            [weakSelf](
+                const RouteMessageWrapper& forwardMessage,
+                const DhtCallContext& callContext)
+                -> folly::coro::Task<RouteMessageAck> {
+                auto self = weakSelf.lock();
+                if (!self) {
+                    co_return createRouteMessageAck(
+                        forwardMessage, RouteMessageError::STOPPED);
+                }
+                co_return co_await streamr::utils::co_withExecutor(
+                    &self->routingExecutor,
+                    folly::coro::co_invoke(
+                        [self,
+                         forwardMessage,
+                         callContext]() -> folly::coro::Task<RouteMessageAck> {
                             if (self->stopped) {
-                                return createRouteMessageAck(
+                                co_return createRouteMessageAck(
                                     forwardMessage, RouteMessageError::STOPPED);
                             }
-                            return self->routerRpcLocal->forwardMessage(
+                            co_return self->routerRpcLocal->forwardMessage(
                                 forwardMessage, callContext);
-                        });
-                });
+                        }));
+            });
     }
 
     // Runs on the routing worker.

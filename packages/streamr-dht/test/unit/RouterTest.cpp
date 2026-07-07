@@ -5,9 +5,12 @@
 // invokes the registered handler by name (the TS test's FakeRpcCommunicator
 // captures the handler and calls it directly; here it goes through the real
 // server registry via handleIncomingMessage and unpacks the response ack).
+#include <chrono>
+#include <condition_variable>
 #include <cstddef>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
@@ -43,9 +46,21 @@ namespace {
 // A real RpcCommunicator (so Router can register on it and build remotes
 // from it) with a helper to invoke a registered handler by name and hand
 // back the unpacked response, standing in for the TS FakeRpcCommunicator.
+//
+// routeMessage/forwardMessage are now ASYNC handlers: handleIncomingMessage
+// schedules the response on a worker and returns immediately, so the ack
+// arrives on another thread. The ack response carries the same requestid as
+// the request, which distinguishes it from the outgoing forward requests the
+// Router itself sends (those have fresh requestids). callRpcMethod waits for
+// the matching ack under a condition variable.
 class FakeRpcCommunicator : public RpcCommunicator<DhtCallContext> {
 private:
-    bool capturing = false;
+    // Upper bound for the async ack to come back; routing acks return in
+    // milliseconds, so this only bounds a hang.
+    static constexpr std::chrono::seconds ackWaitTimeout{5};
+
+    std::mutex mutex;
+    std::condition_variable cv;
     std::string captureRequestId;
     std::optional<RpcMessage> captured;
 
@@ -56,9 +71,10 @@ public:
                 const RpcMessage& message,
                 const std::string& /*requestId*/,
                 const DhtCallContext& /*context*/) {
-                if (this->capturing &&
-                    message.requestid() == this->captureRequestId) {
+                std::lock_guard lock(this->mutex);
+                if (message.requestid() == this->captureRequestId) {
                     this->captured = message;
+                    this->cv.notify_all();
                 }
             });
     }
@@ -71,11 +87,17 @@ public:
         (*requestMessage.mutable_header())["request"] = "request";
         requestMessage.set_requestid(Uuid::v4());
 
-        this->captured.reset();
-        this->captureRequestId = requestMessage.requestid();
-        this->capturing = true;
+        {
+            std::lock_guard lock(this->mutex);
+            this->captured.reset();
+            this->captureRequestId = requestMessage.requestid();
+        }
         this->handleIncomingMessage(requestMessage, DhtCallContext());
-        this->capturing = false;
+
+        std::unique_lock lock(this->mutex);
+        this->cv.wait_for(lock, ackWaitTimeout, [this]() {
+            return this->captured.has_value();
+        });
 
         Resp response;
         if (this->captured.has_value()) {

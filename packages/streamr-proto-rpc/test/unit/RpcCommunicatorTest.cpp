@@ -1,5 +1,7 @@
+#include <atomic>
 #include <chrono>
 #include <exception>
+#include <memory>
 #include <thread>
 #include <gtest/gtest.h>
 #include "HelloRpc.pb.h"
@@ -475,6 +477,142 @@ TEST_F(RpcCommunicatorTest, TestRpcTimeoutOnClientSideForNotification) {
         EXPECT_TRUE(false);
         EXPECT_TRUE(false);
     }
+}
+
+// --- Async server handlers: the delivery thread must not block on the
+// handler (follow-up to Phase A4). ---
+
+namespace {
+RpcMessage makeRequestMessage(
+    const std::string& methodName, const std::string& myname) {
+    static std::atomic<uint64_t> counter = 0;
+    HelloRequest request;
+    request.set_myname(myname);
+    RpcMessage message;
+    message.mutable_body()->PackFrom(request);
+    (*message.mutable_header())["method"] = methodName;
+    (*message.mutable_header())["request"] = "request";
+    message.set_requestid("req-" + std::to_string(counter++));
+    return message;
+}
+} // namespace
+
+// handleIncomingMessage() delivers on the (shared) delivery thread. When a
+// handler is async and slow, the call must return promptly and the response
+// must be produced later, off that thread.
+TEST_F(RpcCommunicatorTest, TestServerAsyncHandlerDoesNotBlockDeliveryThread) {
+    constexpr auto handlerDelay = 500ms;
+    std::atomic<bool> responseSent = false;
+    communicator1.setOutgoingMessageCallback(
+        [&responseSent](
+            const RpcMessage& /* message */,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            responseSent = true;
+        });
+    communicator1.registerRpcMethodAsync<HelloRequest, HelloResponse>(
+        "slowFunction",
+        [handlerDelay](
+            const HelloRequest& request, const ProtoCallContext& /* context */)
+            -> folly::coro::Task<HelloResponse> {
+            co_await folly::coro::sleep(handlerDelay);
+            HelloResponse response;
+            response.set_greeting("Hello, " + request.myname());
+            co_return response;
+        });
+
+    const auto start = std::chrono::steady_clock::now();
+    communicator1.handleIncomingMessage(
+        makeRequestMessage("slowFunction", "Test"), ProtoCallContext());
+    const auto elapsed = std::chrono::steady_clock::now() - start;
+
+    // The delivery thread returned well before the handler's delay, and the
+    // response has not been produced yet.
+    EXPECT_LT(elapsed, 200ms);
+    EXPECT_EQ(responseSent.load(), false);
+
+    // After the handler's delay the response is delivered off-thread.
+    std::this_thread::sleep_for(handlerDelay + 400ms);
+    EXPECT_EQ(responseSent.load(), true);
+}
+
+// Our own (fast) incoming traffic must be serviced while a slow handler is
+// still in flight — the priority-1 guarantee the async change restores.
+//
+// Deterministic (no wall-clock thresholds, robust under CI load): the slow
+// handler stays gated until the test releases it, so observing the fast
+// response arrive WHILE the slow one is still pending proves our own traffic
+// was not stuck behind the in-flight slow handler. The wait bounds only
+// guard against a hang; they are not part of the timing being asserted.
+TEST_F(RpcCommunicatorTest, TestOwnTrafficNotDelayedByInFlightSlowHandler) {
+    constexpr auto pollInterval = 5ms;
+    constexpr auto hangGuard = 5s;
+    auto released = std::make_shared<std::atomic<bool>>(false);
+    std::atomic<int> order = 0;
+    std::atomic<int> slowOrder = 0;
+    std::atomic<int> fastOrder = 0;
+    std::atomic<bool> slowDone = false;
+    std::atomic<bool> fastDone = false;
+    communicator1.setOutgoingMessageCallback(
+        [&](const RpcMessage& message,
+            const std::string& /* requestId */,
+            const ProtoCallContext& /* context */) -> void {
+            if (message.header().at("method") == "slow") {
+                slowOrder = ++order;
+                slowDone = true;
+            } else {
+                fastOrder = ++order;
+                fastDone = true;
+            }
+        });
+    // A slow async handler (stands in for routing): it stays pending, yielding
+    // the worker thread on each poll, until the test releases it.
+    communicator1.registerRpcMethodAsync<HelloRequest, HelloResponse>(
+        "slow",
+        [released, pollInterval](
+            const HelloRequest& request, const ProtoCallContext& /* context */)
+            -> folly::coro::Task<HelloResponse> {
+            while (!released->load()) {
+                co_await folly::coro::sleep(pollInterval);
+            }
+            HelloResponse response;
+            response.set_greeting("Hello, " + request.myname());
+            co_return response;
+        });
+    // ... and a fast synchronous handler (stands in for our own ping).
+    communicator1.registerRpcMethod<HelloRequest, HelloResponse>(
+        "fast",
+        [](const HelloRequest& request,
+           const ProtoCallContext& /* context */) -> HelloResponse {
+            HelloResponse response;
+            response.set_greeting("Hello, " + request.myname());
+            return response;
+        });
+
+    // Deliver the slow request first, then our own fast one right behind it.
+    communicator1.handleIncomingMessage(
+        makeRequestMessage("slow", "A"), ProtoCallContext());
+    communicator1.handleIncomingMessage(
+        makeRequestMessage("fast", "B"), ProtoCallContext());
+
+    // The fast response comes back while the slow handler is still gated.
+    const auto fastDeadline = std::chrono::steady_clock::now() + hangGuard;
+    while (!fastDone.load() &&
+           std::chrono::steady_clock::now() < fastDeadline) {
+        std::this_thread::sleep_for(pollInterval);
+    }
+    EXPECT_EQ(fastDone.load(), true);
+    EXPECT_EQ(slowDone.load(), false);
+
+    // Releasing the slow handler lets it complete; it responded after us.
+    released->store(true);
+    const auto slowDeadline = std::chrono::steady_clock::now() + hangGuard;
+    while (!slowDone.load() &&
+           std::chrono::steady_clock::now() < slowDeadline) {
+        std::this_thread::sleep_for(pollInterval);
+    }
+    EXPECT_EQ(slowDone.load(), true);
+    EXPECT_LT(fastOrder.load(), slowOrder.load());
 }
 
 } // namespace streamr::protorpc
