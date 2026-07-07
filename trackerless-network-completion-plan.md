@@ -376,6 +376,21 @@ New class: `KBucket` (port of npm `k-bucket`), with contact arbitration and even
 `streamr-eventemitter`.
 *Tests:* new unit tests derived from the library's behavior contract (add/split/ping-eviction/
 closest iteration), sized by what `PeerManager` actually uses.
+*Implemented (phase-A2 PR):* `KBucket<C>` in `modules/dht/contact/` (namespace
+`streamr::dht::contact`), a faithful port of the npm `k-bucket` binary-tree implementation —
+`add` (descend / update / append / split / ping), `get`, `remove`, `closest`, `count`,
+`toArray`, with the tree nodes held as `std::optional<vector>` contacts (nullopt = inner
+node) and `unique_ptr` children. Sized to the DHT's usage: the default XOR distance
+(`getPeerDistance`) and the default vector-clock arbiter are built in rather than exposed as
+constructor options, and the `metadata` option and `toIterable` generator are dropped. The
+contact type is constrained by a `KBucketContact` concept (`getId()` → `DhtAddressRaw`,
+`getVectorClock()` → integral), replacing TS's `KBucketContact` interface; events
+(added/removed/updated/ping) go through `streamr-eventemitter`. 13 unit tests cover the
+behaviour contract through the public API (the tree is private): add/dedupe/move-to-end,
+`added`; splitting retaining all 21 contacts; a non-splittable full bucket emitting `ping`
+of the 3 longest-uncontacted and rejecting the overflow; `closest` by XOR distance (limited
+and unlimited); remove/`removed`; the vector-clock arbiter (lower dropped, higher wins +
+`updated`); count/toArray. Full `./test.sh` and `./lint.sh` green.
 
 **Phase A3 — DhtNodeRpc and PeerManager.**
 New classes: `DhtNodeRpcLocal`, `DhtNodeRpcRemote` (extends the existing `RpcRemote` base),
