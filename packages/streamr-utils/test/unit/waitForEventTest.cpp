@@ -65,6 +65,43 @@ TEST(WaitForEventTest, WaitForTimeout) {
         folly::FutureTimeout);
 }
 
+TEST(WaitForEventTest, RemovesListenerAfterTimeout) {
+    // Regression test for the dangling-listener use-after-free: after a
+    // timeout, waitForEvent must have removed its once-listener, so a
+    // later emit reaches no handler backed by the destroyed coroutine
+    // frame. Asserted directly via the listener count (deterministic),
+    // then a late emit that must be a harmless no-op.
+    EventEmitter<TestEvents> emitter;
+
+    EXPECT_THROW(
+        streamr::utils::blockingWait(
+            waitForEvent<Disconnected>(&emitter, 10ms)), // NOLINT
+        folly::FutureTimeout);
+
+    EXPECT_EQ(emitter.listenerCount<Disconnected>(), 0U);
+    emitter.emit<Disconnected>("late"); // must not crash
+}
+
+TEST(WaitForEventTest, RemovesListenerAfterDelivery) {
+    // The mirror case: after the event fires, once() removed the listener
+    // and waitForEvent's own cleanup is a harmless no-op — the count is
+    // back to zero and a second emit reaches nothing.
+    EventEmitter<TestEvents> emitter;
+
+    streamr::utils::blockingWait(
+        folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
+            co_await folly::coro::collectAll(
+                waitForEvent<Disconnected>(&emitter), // NOLINT
+                folly::coro::co_invoke([&emitter]() -> folly::coro::Task<void> {
+                    emitter.emit<Disconnected>("test");
+                    co_return;
+                }));
+        }));
+
+    EXPECT_EQ(emitter.listenerCount<Disconnected>(), 0U);
+    emitter.emit<Disconnected>("again"); // must not crash
+}
+
 TEST(WaitForEventTest, WaitForStringEventWithAbortSignal) {
     EventEmitter<TestEvents> emitter;
     AbortController abortController;

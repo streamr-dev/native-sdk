@@ -27,12 +27,17 @@ using streamr::dht::connection::Connection;
 using streamr::dht::connection::IPendingConnection;
 using streamr::dht::helpers::SendFailed;
 
+// Terminal state: a disconnected endpoint ignores further transitions
+// (a connection accepted for it by the simultaneous-connect tiebreak
+// while the disconnect was completing is deliberately dropped). All
+// methods are called with the state-machine mutex held; see
+// EndpointState for the contract.
 class DisconnectedEndpointState : public EndpointState {
 private:
-    EndpointStateInterface& stateInterface;
-
-    explicit DisconnectedEndpointState(EndpointStateInterface& stateInterface)
-        : stateInterface(stateInterface) {
+    // The terminal state drives no further transitions, so unlike its
+    // siblings it does not keep the EndpointStateInterface reference.
+    explicit DisconnectedEndpointState(
+        EndpointStateInterface& /*stateInterface*/) {
         SLogger::debug("DisconnectedEndpointState constructor");
     }
 
@@ -50,31 +55,27 @@ public:
         SLogger::debug("DisconnectedEndpointState destructor");
     }
 
-    void close(bool /*graceful*/) override {
-        SLogger::debug("DisconnectedEndpointState::close start");
-        SLogger::debug("DisconnectedEndpointState::close end");
+    [[nodiscard]] DeferredCallout close(bool /*graceful*/) override {
+        SLogger::debug("DisconnectedEndpointState::close");
+        return {};
     }
 
     void send(const std::vector<std::byte>& /* data */) override {
-        SLogger::debug("DisconnectedEndpointState::send start");
-        SLogger::debug("DisconnectedEndpointState::send end");
+        SLogger::debug("DisconnectedEndpointState::send");
         throw SendFailed("send() called on disconnected endpoint");
     }
 
-    void changeToConnectingState(
+    [[nodiscard]] DeferredCallout changeToConnectingState(
         const std::shared_ptr<IPendingConnection>& /*pendingConnection*/)
         override {
-        SLogger::debug(
-            "DisconnectedEndpointState::changeToConnectingState start");
-        SLogger::debug(
-            "DisconnectedEndpointState::changeToConnectingState end");
+        SLogger::debug("DisconnectedEndpointState::changeToConnectingState");
+        return {};
     }
 
-    void changeToConnectedState(
+    [[nodiscard]] DeferredCallout changeToConnectedState(
         const std::shared_ptr<Connection>& /*connection*/) override {
-        SLogger::debug(
-            "DisconnectedEndpointState::changeToConnectedState start");
-        SLogger::debug("DisconnectedEndpointState::changeToConnectedState end");
+        SLogger::debug("DisconnectedEndpointState::changeToConnectedState");
+        return {};
     }
 
     [[nodiscard]] bool isConnected() const override {

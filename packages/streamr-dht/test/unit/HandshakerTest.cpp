@@ -39,6 +39,7 @@ public:
         (const, override)); // NOLINT
     MOCK_METHOD(
         void, onError, (const std::exception_ptr&), (override)); // NOLINT
+    MOCK_METHOD(void, replaceAsDuplicate, (), (override)); // NOLINT
 };
 
 class MockConnection : public Connection {

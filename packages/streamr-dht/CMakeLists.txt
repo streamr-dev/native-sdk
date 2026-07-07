@@ -22,6 +22,19 @@ project(dht CXX)
 # add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
 # add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 
+# Opt-in ThreadSanitizer build for the connection-layer concurrency work
+# (phase A0). Enable with -DSTREAMR_DHT_TSAN=ON and run the
+# --gtest_repeat stress loops under it. NOTE: the vcpkg dependencies
+# (folly, protobuf, ...) are NOT built with TSAN, so their internals show
+# up as uninstrumented and some reports need a suppressions file; this is
+# a developer aid, not yet a clean CI leg (tracked in
+# trackerless-network-completion-plan.md phase A0).
+option(STREAMR_DHT_TSAN "Build streamr-dht with ThreadSanitizer" OFF)
+if(STREAMR_DHT_TSAN)
+    add_compile_options(-fsanitize=thread -fno-omit-frame-pointer -g)
+    add_link_options(-fsanitize=thread)
+endif()
+
 # Sibling monorepo packages: find_package only when the target is not
 # already in this build tree (in the root single-tree build the sibling
 # was added via add_subdirectory — the guard makes the root tree

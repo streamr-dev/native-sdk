@@ -294,6 +294,55 @@ Endpoint/EndpointStates/ConnectionManager — one mutex per endpoint state machi
 call-outs (emits, container callbacks) while holding any of these locks — plus a TSAN CI leg
 and `--gtest_repeat` stress runs as the acceptance test. Prerequisite for scaling the
 simulator-based integration tests in the rest of milestone A.
+*Implemented (phase-A0 PR):* the state machine now runs under one recursive mutex owned by
+`Endpoint` (reached by the states through `EndpointStateInterface::getStateMachineMutex()`;
+the per-state mutexes are gone), every public `Endpoint` operation is two-phase — transition
+under the mutex, call-outs (event emits, connection/pending-connection close, container
+removal, replay-emitter handler registration) after releasing it, with the states returning
+their call-outs as deferred closures — and connection-event handlers pin the endpoint through
+a weak reference and re-validate under the mutex that they still belong to the current
+pending connection/connection before acting (an in-flight emit can outlive `off()`, and a
+`ReplayEventEmitter` can replay during `on()`). `ConnectionManager` holds `endpointsMutex`
+only for container lookups/inserts; `createConnection`/`onNewConnection`, `setConnecting`
+and the endpoint queries in `send()`/`getConnections()` run outside it, and the
+exists-check/insert race in `acceptNewConnection` is closed by deciding and inserting under
+a single lock hold. The TSAN CI leg is still open (tracked as follow-up; the vcpkg-built
+dependencies would need instrumented builds for a clean run).
+Two further defects surfaced by the same stress loop were fixed alongside the locking pass:
+(a) `EventEmitter::emit` `std::forward`-ed the arguments into every listener in its dispatch
+loop, so with more than one listener the second and later handlers received moved-from
+(empty) values — it now passes each listener its own copy; and (b) `waitForEvent` registered
+a `once` listener that captured a stack waiter and never removed it on the timeout/cancel
+path, so a later emit invoked the dangling listener and called `setValue` on the destroyed
+promise (a folly `Promise.h` abort seen in the teardown of a timed-out connection) — the
+waiter is now heap-owned and co-owned by the listener, which is removed on every exit path.
+Both are covered by new unit tests in `streamr-eventemitter` and `streamr-utils`.
+The remaining defects were in the simultaneous-connect convergence, which the threaded
+runtime exposes but TS's single-threaded model hides (both surfaced as a `received2` timeout,
+initially ~1 in 30 simultaneous-connect stress iterations). Three changes, all matching the
+TS behavior once the threading is accounted for:
+- *Direction-aware tie-break.* `acceptNewConnection` replaced on `getOfferer == remote`
+  alone, correct only when a node always registers its own outgoing connection before it
+  processes the peer's incoming one. The connector's dispatcher thread can deliver the
+  incoming before the main-thread `send()` registers the outgoing, inverting the tie-break so
+  the two nodes settle on different connections. `onNewConnection` now carries an
+  `isLocalInitiated` flag and the winning connection is the offerer's regardless of which
+  thread registered it first.
+- *Adoption sequence number.* Even with the right decision, the initial `setConnecting` from
+  `send()` and the replacing `setConnecting` from the incoming connection race on the endpoint
+  mutex outside `endpointsMutex`, so the initial one could run last and re-adopt the losing
+  connection. `ConnectionManager` assigns a monotonic sequence under `endpointsMutex` and the
+  endpoint adopts only strictly-newer sequences, making the outcome independent of that race.
+- *No teardown of the losing endpoint.* `OutgoingHandshaker::onHandshakeResponse` closed the
+  pending connection on ANY error response instead of routing through `handleFailure`, so a
+  `DUPLICATE_CONNECTION` rejection (the peer won the tie-break) tore the endpoint down and
+  dropped its buffered messages. It now routes through `handleFailure`, which for
+  `DUPLICATE_CONNECTION` marks the pending connection `replaceAsDuplicate()` — silencing it so
+  the peer's subsequent connection close cannot drive or tear down the endpoint that is about
+  to be handed the winning connection. The error response precedes that close on the same
+  association (per-association FIFO), so the silencing is always in place in time, making the
+  convergence race-free. Acceptance stress loop: 500 `--gtest_repeat` rounds of
+  `Simultaneous*:ConnectionManagerIntegration*` with zero failures.
 
 **Phase A1 — Identifiers, distance, contact lists.**
 New classes: `Contact`, `ContactList`, `SortedContactList`, `RandomContactList`,

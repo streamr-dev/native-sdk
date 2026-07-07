@@ -192,7 +192,6 @@ public:
         MatchingEventType<EmitterEventType> EventType,
         MatchingCallbackType<EmitterEventType> CallbackType>
     HandlerToken on(const CallbackType& callback, bool once = false) {
-        std::lock_guard guard{mEventHandlersMutex};
         typename EmitterEventType::Handler::HandlerFunction handlerFunction =
             callback;
         // silently ignore null callbacks
@@ -205,15 +204,55 @@ public:
             handlerFunction, handlerReference.getId(), once);
 
         if constexpr (ReplayLatestEventToNewListeners) {
-            std::lock_guard guard{mLatestEventMutex};
-            if (mLatestEvent.has_value()) {
-                invokeLatestEvent(handler, mLatestEvent.value().getArguments());
+            // The replay-check and the registration are one atomic step
+            // under mEventHandlersMutex, matching emit()'s latest-store +
+            // snapshot (also under mEventHandlersMutex): a listener that
+            // registers concurrently with an emit either lands in that
+            // emit's snapshot (live dispatch, and it observed no stored
+            // event here) or observes the stored event and replays it
+            // (and is absent from that snapshot) — never neither, never
+            // both.
+            //
+            // The replayed handler is invoked AFTER the mutex is
+            // released. It is user code that may take its own locks and
+            // call back into on()/off(); invoking it under
+            // mEventHandlersMutex is an ABBA deadlock against a thread
+            // that holds such a user lock and calls off() (which needs
+            // mEventHandlersMutex). This is deliberately NOT serialized
+            // with emit() through mEmitLoopMutex: taking mEmitLoopMutex
+            // here would self-deadlock when a handler runs on()/once()
+            // during an emit on the same thread. The cost is that, under
+            // a concurrent emit, a brand-new listener could observe a
+            // newer live event before its replay of the older stored one;
+            // the ReplayEventEmitter is only used for terminal one-shot
+            // events (a pending connection's single Connected xor
+            // Disconnected), where no such ordering arises.
+            std::optional<typename EmitterEventType::ArgumentTypes>
+                replayArguments;
+            {
+                std::lock_guard guard{mEventHandlersMutex};
+                {
+                    std::lock_guard latestGuard{mLatestEventMutex};
+                    if (mLatestEvent.has_value()) {
+                        replayArguments = mLatestEvent.value().getArguments();
+                    }
+                }
+                // a once-listener satisfied by the replay is never
+                // registered at all
+                if (!(once && replayArguments.has_value())) {
+                    mEventHandlers.push_back(handler);
+                }
+            }
+            if (replayArguments.has_value()) {
+                invokeLatestEvent(handler, std::move(replayArguments.value()));
                 if (once) {
                     return HandlerToken{};
                 }
             }
+            return handlerReference;
         }
 
+        std::lock_guard guard{mEventHandlersMutex};
         mEventHandlers.push_back(handler);
         return handlerReference;
     }
@@ -315,7 +354,15 @@ public:
 
         while (auto ret = popHandlerFromExecutingEmitLoopHandlersMap()) {
             auto handler = ret.value();
-            std::invoke(handler, std::forward<EventArgs>(args)...);
+            // Pass the arguments as lvalues, NOT std::forward: every
+            // handler must receive its own copy. Forwarding here moved
+            // the arguments into the first handler's by-value parameters,
+            // leaving the second and later handlers with moved-from
+            // values (an empty vector for a Data<std::vector<std::byte>>
+            // event, for instance). The per-handler copy is the intended
+            // fan-out semantics; Handler::operator() then moves the copy
+            // on into the stored std::function.
+            std::invoke(handler, args...);
             if (handler.isOnce()) {
                 std::lock_guard guard{mEventHandlersMutex};
                 mEventHandlers.remove(handler);

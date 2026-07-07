@@ -154,11 +154,26 @@ protected:
 
     void onHandshakeResponse(
         const HandshakeResponse& handshakeResponse) override {
-        if (handshakeResponse.has_error()) {
-            this->pendingConnection->close(false);
-            stopHandshaker();
-        } else if (!isAcceptedVersion(handshakeResponse.protocolversion())) {
-            this->handleFailure(HandshakeError::UNSUPPORTED_PROTOCOL_VERSION);
+        // An errored response is routed through handleFailure(), NOT
+        // closed directly: handleFailure() closes the pending connection
+        // only for INVALID_TARGET_PEER_DESCRIPTOR /
+        // UNSUPPORTED_PROTOCOL_VERSION and otherwise waits for the other
+        // end to close the connection (matching the TS handshaker). This
+        // matters for DUPLICATE_CONNECTION — the peer won the
+        // simultaneous-connect tie-break and rejected this outgoing
+        // connection — where closing here would tear this endpoint down
+        // (and drop its buffered messages) even though it is about to be
+        // served by the peer's incoming connection. Directly closing on
+        // any error was the cause of the ~1-in-30 `received2` message loss
+        // in the SimultaneousConnections stress runs (phase A0).
+        std::optional<HandshakeError> error;
+        if (!isAcceptedVersion(handshakeResponse.protocolversion())) {
+            error = HandshakeError::UNSUPPORTED_PROTOCOL_VERSION;
+        } else if (handshakeResponse.has_error()) {
+            error = handshakeResponse.error();
+        }
+        if (error.has_value()) {
+            this->handleFailure(error);
         } else {
             this->handleSuccess(handshakeResponse.sourcepeerdescriptor());
         }
@@ -191,6 +206,17 @@ protected:
                 Identifiers::getNodeIdFromPeerDescriptor(
                     this->targetPeerDescriptor) +
                 " waiting for the other end to close the connection");
+            // The other end won the simultaneous-connect tie-break
+            // (DUPLICATE_CONNECTION). Silence this pending connection now,
+            // on receipt of the error, so that when its connection is
+            // subsequently closed by the peer the close does NOT tear down
+            // our endpoint: the endpoint is about to be handed the peer's
+            // winning connection (with its buffered messages intact). The
+            // error response is delivered before that close on the same
+            // association (per-association FIFO), so the silencing is
+            // always in place in time — this is what makes the convergence
+            // race-free rather than merely likely to win the race.
+            this->pendingConnection->replaceAsDuplicate();
         }
     }
 };

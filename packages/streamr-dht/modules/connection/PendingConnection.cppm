@@ -60,7 +60,7 @@ public:
             this->connectingAbortController.getSignal());
     }
 
-    void replaceAsDuplicate() {
+    void replaceAsDuplicate() override {
         SLogger::trace(
             Identifiers::getNodeIdFromPeerDescriptor(
                 this->remotePeerDescriptor) +
