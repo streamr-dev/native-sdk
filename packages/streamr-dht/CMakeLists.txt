@@ -220,6 +220,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/LocalDataStoreTest.cpp
         test/unit/StoreRpcLocalTest.cpp
         test/unit/StoreManagerTest.cpp
+        test/unit/DiscoverySessionTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit

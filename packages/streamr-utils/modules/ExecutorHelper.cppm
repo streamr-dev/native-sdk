@@ -5,6 +5,7 @@
 // re-exported in their original namespace.
 module;
 
+#include <folly/Executor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/FunctionScheduler.h>
 #include <folly/executors/thread_factory/NamedThreadFactory.h>
@@ -15,6 +16,7 @@ export module streamr.utils.ExecutorHelper;
 export namespace folly {
 
 using folly::CPUThreadPoolExecutor;
+using folly::Executor;
 using folly::FunctionScheduler;
 using folly::NamedThreadFactory;
 using folly::PriorityThreadFactory;

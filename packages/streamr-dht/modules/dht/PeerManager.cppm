@@ -429,6 +429,21 @@ public:
         return this->nearbyContacts->getSize(excludedNodeIds);
     }
 
+    // TS returns the SortedContactList itself; the only consumer
+    // (DiscoverySession) maps it straight to peer descriptors, so this returns
+    // the descriptors directly and keeps the list access under the mutex.
+    [[nodiscard]] std::vector<PeerDescriptor> getNearbyContacts() {
+        std::scoped_lock lock(this->mutex);
+        const auto contacts =
+            this->nearbyContacts->getAllContactsInUndefinedOrder();
+        std::vector<PeerDescriptor> result;
+        result.reserve(contacts.size());
+        for (const auto& contact : contacts) {
+            result.push_back(contact->getPeerDescriptor());
+        }
+        return result;
+    }
+
     [[nodiscard]] size_t getNeighborCount() {
         std::scoped_lock lock(this->mutex);
         return this->neighbors->count();

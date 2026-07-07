@@ -95,7 +95,8 @@ public:
             this->getPeerDescriptor());
     }
 
-    folly::coro::Task<std::vector<PeerDescriptor>> getClosestPeers(
+    // Virtual (like ping()) so tests can substitute a deterministic result.
+    virtual folly::coro::Task<std::vector<PeerDescriptor>> getClosestPeers(
         const DhtAddress& nodeId) {
         ClosestPeersRequest request;
         request.set_nodeid(Identifiers::getRawFromDhtAddress(nodeId));
@@ -112,7 +113,8 @@ public:
         co_return peers;
     }
 
-    folly::coro::Task<ClosestRingPeerDescriptors> getClosestRingPeers(
+    // Virtual (like ping()) so tests can substitute a deterministic result.
+    virtual folly::coro::Task<ClosestRingPeerDescriptors> getClosestRingPeers(
         const RingIdRaw& ringIdRaw) {
         ClosestRingPeersRequest request;
         request.set_ringid(ringIdRaw);
