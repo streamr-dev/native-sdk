@@ -44,7 +44,15 @@ private:
 public:
     explicit LocalDataStore(uint32_t maxTtl) : maxTtl(maxTtl) {}
 
-    bool storeEntry(const DataEntry& dataEntry) {
+    // Virtual so tests can substitute a mock store (StoreManager /
+    // StoreRpcLocal hold it by reference).
+    virtual ~LocalDataStore() = default;
+    LocalDataStore(const LocalDataStore&) = delete;
+    LocalDataStore& operator=(const LocalDataStore&) = delete;
+    LocalDataStore(LocalDataStore&&) = delete;
+    LocalDataStore& operator=(LocalDataStore&&) = delete;
+
+    virtual bool storeEntry(const DataEntry& dataEntry) {
         const DhtAddress key =
             Identifiers::getDhtAddressFromRaw(DhtAddressRaw{dataEntry.key()});
         const DhtAddress creatorNodeId = Identifiers::getDhtAddressFromRaw(
@@ -73,7 +81,8 @@ public:
         return true;
     }
 
-    bool markAsDeleted(const DhtAddress& key, const DhtAddress& creator) {
+    virtual bool markAsDeleted(
+        const DhtAddress& key, const DhtAddress& creator) {
         const auto it = this->store.find(key);
         if (it == this->store.end() || !it->second.has(creator)) {
             return false;
@@ -82,7 +91,7 @@ public:
         return true;
     }
 
-    [[nodiscard]] std::vector<DataEntry> values(
+    [[nodiscard]] virtual std::vector<DataEntry> values(
         const std::optional<DhtAddress>& key = std::nullopt) {
         std::vector<DataEntry> result;
         if (key.has_value()) {
@@ -100,7 +109,7 @@ public:
         return result;
     }
 
-    [[nodiscard]] std::vector<DhtAddress> keys() {
+    [[nodiscard]] virtual std::vector<DhtAddress> keys() {
         std::vector<DhtAddress> result;
         result.reserve(this->store.size());
         for (const auto& [key, map] : this->store) {
@@ -109,7 +118,7 @@ public:
         return result;
     }
 
-    void setAllEntriesAsStale(const DhtAddress& key) {
+    virtual void setAllEntriesAsStale(const DhtAddress& key) {
         const auto it = this->store.find(key);
         if (it != this->store.end()) {
             it->second.forEach(
@@ -119,7 +128,7 @@ public:
         }
     }
 
-    void deleteEntry(const DhtAddress& key, const DhtAddress& creator) {
+    virtual void deleteEntry(const DhtAddress& key, const DhtAddress& creator) {
         const auto it = this->store.find(key);
         if (it != this->store.end() && it->second.get(creator) != nullptr) {
             it->second.remove(creator);
@@ -129,7 +138,7 @@ public:
         }
     }
 
-    void clear() {
+    virtual void clear() {
         for (auto& [key, map] : this->store) {
             map.clear();
         }

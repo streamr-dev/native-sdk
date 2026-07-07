@@ -7,6 +7,8 @@
 // (trackerless-network-completion-plan.md, phase 0.2).
 module;
 
+#include <chrono>
+#include <cstdint>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -26,9 +28,11 @@ export namespace streamr::dht::testutils {
 
 using ::dht::ClosestPeersRequest;
 using ::dht::ConnectivityMethod;
+using ::dht::DataEntry;
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;
 using ::protorpc::RpcMessage;
+using streamr::dht::DhtAddress;
 
 // Ported from createMockPeerDescriptor() (test/utils/utils.ts). The TS
 // version merges a Partial<PeerDescriptor> over the defaults; in C++ the
@@ -40,6 +44,39 @@ inline PeerDescriptor createMockPeerDescriptor() {
             Identifiers::createRandomDhtAddress()));
     descriptor.set_type(NodeType::NODEJS);
     return descriptor;
+}
+
+// Ported from createMockDataEntry() (test/utils/mock/mockDataEntry.ts). The
+// data payload is left empty — the store tests identify entries by (key,
+// creator), not by the packed data.
+struct MockDataEntryOptions {
+    std::optional<DhtAddress> key;
+    std::optional<DhtAddress> creator;
+    std::optional<uint32_t> ttl;
+};
+
+inline DataEntry createMockDataEntry(const MockDataEntryOptions& opts = {}) {
+    constexpr uint32_t defaultTtl = 10000;
+    DataEntry entry;
+    entry.set_key(
+        Identifiers::getRawFromDhtAddress(
+            opts.key.value_or(Identifiers::createRandomDhtAddress())));
+    entry.set_creator(
+        Identifiers::getRawFromDhtAddress(
+            opts.creator.value_or(Identifiers::createRandomDhtAddress())));
+    entry.set_ttl(opts.ttl.value_or(defaultTtl));
+    entry.set_stale(false);
+    entry.set_deleted(false);
+    const auto sinceEpoch = std::chrono::system_clock::now().time_since_epoch();
+    const auto seconds =
+        std::chrono::duration_cast<std::chrono::seconds>(sinceEpoch);
+    entry.mutable_createdat()->set_seconds(seconds.count());
+    entry.mutable_createdat()->set_nanos(
+        static_cast<int32_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                sinceEpoch - seconds)
+                .count()));
+    return entry;
 }
 
 // Ported from createWrappedClosestPeersRequest() (test/utils/utils.ts).
