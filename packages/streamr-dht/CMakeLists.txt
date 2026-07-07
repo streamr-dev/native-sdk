@@ -213,6 +213,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/KBucketTest.cpp
         test/unit/DhtNodeRpcLocalTest.cpp
         test/unit/PeerManagerTest.cpp
+        test/unit/RoutingSessionTest.cpp
+        test/unit/RouterTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
@@ -245,6 +247,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/integration/SimultaneousConnectionsTest.cpp
         test/integration/ConnectionManagerIntegrationTest.cpp
         test/integration/DhtNodeRpcRemoteTest.cpp
+        test/integration/RouterRpcRemoteTest.cpp
     )
 
     target_include_directories(streamr-dht-test-integration

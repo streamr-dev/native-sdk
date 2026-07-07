@@ -37,7 +37,12 @@ echo "Running clangd-tidy on $FILES"
 # mismatch). The compiler accepts and runs both on every platform;
 # clang-format still checks them. (PeerManagerTest.cpp imports the same
 # cluster but does NOT trip it, so it stays in the clangd-tidy set.)
-TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | tr '\n' ' ')
+# RoutingSessionTest.cpp (phase A4) trips the same std-type unification
+# false positive through the RoutingSession coroutine cluster; the compiler
+# builds and runs it, and clang-format still checks it. (RouterTest.cpp and
+# RouterRpcRemoteTest.cpp import the same cluster but do NOT trip it, so
+# they stay in the clangd-tidy set.)
+TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | tr '\n' ' ')
 clangd-tidy -p "$COMPILE_DB" $TIDY_FILES
 
 echo "Running clang-format --dry-run on $FILES"
