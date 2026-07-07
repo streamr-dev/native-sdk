@@ -210,6 +210,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/RandomContactListTest.cpp
         test/unit/getClosestNodesTest.cpp
         test/unit/RingContactListTest.cpp
+        test/unit/KBucketTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
