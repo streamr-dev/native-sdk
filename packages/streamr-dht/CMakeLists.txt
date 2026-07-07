@@ -206,6 +206,10 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/ListeningRpcCommunicatorTest.cpp
         test/unit/CustomMatchersTest.cpp
         test/unit/SimulatorTest.cpp
+        test/unit/SortedContactListTest.cpp
+        test/unit/RandomContactListTest.cpp
+        test/unit/getClosestNodesTest.cpp
+        test/unit/RingContactListTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
