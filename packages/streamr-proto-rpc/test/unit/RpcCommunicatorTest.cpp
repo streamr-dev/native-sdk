@@ -1,6 +1,7 @@
 #include <atomic>
 #include <chrono>
 #include <exception>
+#include <memory>
 #include <thread>
 #include <gtest/gtest.h>
 #include "HelloRpc.pb.h"
@@ -537,30 +538,43 @@ TEST_F(RpcCommunicatorTest, TestServerAsyncHandlerDoesNotBlockDeliveryThread) {
 
 // Our own (fast) incoming traffic must be serviced while a slow handler is
 // still in flight — the priority-1 guarantee the async change restores.
+//
+// Deterministic (no wall-clock thresholds, robust under CI load): the slow
+// handler stays gated until the test releases it, so observing the fast
+// response arrive WHILE the slow one is still pending proves our own traffic
+// was not stuck behind the in-flight slow handler. The wait bounds only
+// guard against a hang; they are not part of the timing being asserted.
 TEST_F(RpcCommunicatorTest, TestOwnTrafficNotDelayedByInFlightSlowHandler) {
-    const auto t0 = std::chrono::steady_clock::now();
-    std::atomic<int64_t> slowDoneAt = 0;
-    std::atomic<int64_t> fastDoneAt = 0;
+    constexpr auto pollInterval = 5ms;
+    constexpr auto hangGuard = 5s;
+    auto released = std::make_shared<std::atomic<bool>>(false);
+    std::atomic<int> order = 0;
+    std::atomic<int> slowOrder = 0;
+    std::atomic<int> fastOrder = 0;
+    std::atomic<bool> slowDone = false;
+    std::atomic<bool> fastDone = false;
     communicator1.setOutgoingMessageCallback(
         [&](const RpcMessage& message,
             const std::string& /* requestId */,
             const ProtoCallContext& /* context */) -> void {
-            const auto ms =
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::steady_clock::now() - t0)
-                    .count();
             if (message.header().at("method") == "slow") {
-                slowDoneAt = ms;
+                slowOrder = ++order;
+                slowDone = true;
             } else {
-                fastDoneAt = ms;
+                fastOrder = ++order;
+                fastDone = true;
             }
         });
-    // A slow async handler (stands in for routing) ...
+    // A slow async handler (stands in for routing): it stays pending, yielding
+    // the worker thread on each poll, until the test releases it.
     communicator1.registerRpcMethodAsync<HelloRequest, HelloResponse>(
         "slow",
-        [](const HelloRequest& request, const ProtoCallContext& /* context */)
+        [released, pollInterval](
+            const HelloRequest& request, const ProtoCallContext& /* context */)
             -> folly::coro::Task<HelloResponse> {
-            co_await folly::coro::sleep(500ms);
+            while (!released->load()) {
+                co_await folly::coro::sleep(pollInterval);
+            }
             HelloResponse response;
             response.set_greeting("Hello, " + request.myname());
             co_return response;
@@ -581,13 +595,24 @@ TEST_F(RpcCommunicatorTest, TestOwnTrafficNotDelayedByInFlightSlowHandler) {
     communicator1.handleIncomingMessage(
         makeRequestMessage("fast", "B"), ProtoCallContext());
 
-    std::this_thread::sleep_for(900ms);
-    ASSERT_GT(fastDoneAt.load(), 0);
-    ASSERT_GT(slowDoneAt.load(), 0);
-    // The fast response came back promptly, long before the slow one — the
-    // in-flight slow handler did not delay our own traffic.
-    EXPECT_LT(fastDoneAt.load(), 200);
-    EXPECT_LT(fastDoneAt.load(), slowDoneAt.load());
+    // The fast response comes back while the slow handler is still gated.
+    const auto fastDeadline = std::chrono::steady_clock::now() + hangGuard;
+    while (!fastDone.load() &&
+           std::chrono::steady_clock::now() < fastDeadline) {
+        std::this_thread::sleep_for(pollInterval);
+    }
+    EXPECT_EQ(fastDone.load(), true);
+    EXPECT_EQ(slowDone.load(), false);
+
+    // Releasing the slow handler lets it complete; it responded after us.
+    released->store(true);
+    const auto slowDeadline = std::chrono::steady_clock::now() + hangGuard;
+    while (!slowDone.load() &&
+           std::chrono::steady_clock::now() < slowDeadline) {
+        std::this_thread::sleep_for(pollInterval);
+    }
+    EXPECT_EQ(slowDone.load(), true);
+    EXPECT_LT(fastOrder.load(), slowOrder.load());
 }
 
 } // namespace streamr::protorpc
