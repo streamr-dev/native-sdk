@@ -3,9 +3,12 @@
 // no-targets, duplicate, bad-payload) and the no-connections execute path.
 // The Router is substituted by callbacks (the C++ Router is concrete);
 // MockTransport / MockConnectionsView stand in for the transport.
+#include <chrono>
+#include <condition_variable>
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -62,9 +65,18 @@ constexpr uint32_t maxTtl = 3000;
 // A real RpcCommunicator with a helper to invoke a registered handler by
 // name; surfaces a handler exception as a thrown error (the response
 // carries errorType).
+//
+// The server now responds ASYNCHRONOUSLY (handleIncomingMessage schedules
+// the response on a worker and returns immediately), so the ack arrives on
+// another thread. The ack response carries the same requestid as the
+// request, so callRpcMethod waits for the matching response under a
+// condition variable.
 class FakeRpcCommunicator : public RpcCommunicator<DhtCallContext> {
 private:
-    bool capturing = false;
+    static constexpr std::chrono::seconds ackWaitTimeout{5};
+
+    std::mutex mutex;
+    std::condition_variable cv;
     std::string captureRequestId;
     std::optional<RpcMessage> captured;
 
@@ -75,9 +87,10 @@ public:
                 const RpcMessage& message,
                 const std::string& /*requestId*/,
                 const DhtCallContext& /*context*/) {
-                if (this->capturing &&
-                    message.requestid() == this->captureRequestId) {
+                std::lock_guard lock(this->mutex);
+                if (message.requestid() == this->captureRequestId) {
                     this->captured = message;
+                    this->cv.notify_all();
                 }
             });
     }
@@ -89,11 +102,17 @@ public:
         (*requestMessage.mutable_header())["method"] = methodName;
         (*requestMessage.mutable_header())["request"] = "request";
         requestMessage.set_requestid(Uuid::v4());
-        this->captured.reset();
-        this->captureRequestId = requestMessage.requestid();
-        this->capturing = true;
+        {
+            std::lock_guard lock(this->mutex);
+            this->captured.reset();
+            this->captureRequestId = requestMessage.requestid();
+        }
         this->handleIncomingMessage(requestMessage, DhtCallContext());
-        this->capturing = false;
+
+        std::unique_lock lock(this->mutex);
+        this->cv.wait_for(lock, ackWaitTimeout, [this]() {
+            return this->captured.has_value();
+        });
         Resp response;
         if (this->captured.has_value()) {
             if (this->captured->has_errortype()) {
