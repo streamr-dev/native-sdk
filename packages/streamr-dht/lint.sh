@@ -46,7 +46,11 @@ echo "Running clangd-tidy on $FILES"
 # through the RecursiveOperationSession coroutine cluster; the compiler
 # builds and runs it, clang-format still checks it. (RecursiveOperation-
 # ManagerTest.cpp imports the same cluster but does NOT trip it.)
-TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | grep -v 'test/unit/RecursiveOperationSessionTest.cpp' | tr '\n' ' ')
+# StoreRpcLocalTest.cpp and StoreManagerTest.cpp (phase A6) trip the same
+# false positive through the StoreRpcRemote / StoreManager coroutine
+# cluster; the compiler builds and runs both, clang-format still checks
+# them. (LocalDataStoreTest.cpp does NOT trip it.)
+TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | grep -v 'test/unit/RecursiveOperationSessionTest.cpp' | grep -v 'test/unit/StoreRpcLocalTest.cpp' | grep -v 'test/unit/StoreManagerTest.cpp' | tr '\n' ' ')
 clangd-tidy -p "$COMPILE_DB" $TIDY_FILES
 
 echo "Running clang-format --dry-run on $FILES"

@@ -217,6 +217,9 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/RouterTest.cpp
         test/unit/RecursiveOperationSessionTest.cpp
         test/unit/RecursiveOperationManagerTest.cpp
+        test/unit/LocalDataStoreTest.cpp
+        test/unit/StoreRpcLocalTest.cpp
+        test/unit/StoreManagerTest.cpp
     )
 
     target_include_directories(streamr-dht-test-unit
