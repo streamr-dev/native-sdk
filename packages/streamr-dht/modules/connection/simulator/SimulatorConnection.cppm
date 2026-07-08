@@ -6,16 +6,12 @@
 // made thread-safe (the Simulator dispatcher thread and user threads
 // both call in).
 module;
+#include <new>
 
-#include <cstddef>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.SimulatorConnection;
+
+import std;
 
 import streamr.dht.protos;
 

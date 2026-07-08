@@ -4,13 +4,12 @@
 // Ported from the TS SimulatorConnectorFacade
 // (packages/dht/src/connection/ConnectorFacade.ts, v103.8.0-rc.3).
 module;
-#include <exception>
+#include <new>
 
-#include <functional>
-#include <memory>
-#include <utility>
 
 export module streamr.dht.SimulatorConnectorFacade;
+
+import std;
 
 import streamr.dht.protos;
 

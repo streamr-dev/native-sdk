@@ -2,14 +2,13 @@
 // CONSOLIDATED from the former header streamr-proto-rpc/Errors.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <optional>
-#include <stdexcept>
-#include <string>
-#include <variant>
 #include <magic_enum/magic_enum.hpp>
 
 export module streamr.protorpc.Errors;
+
+import std;
 export namespace streamr::protorpc {
 
 // NOLINTBEGIN

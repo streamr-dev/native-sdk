@@ -10,14 +10,12 @@
 // callback that the manager wires to kick off the async replication itself,
 // so the local side calls it directly.
 module;
+#include <new>
 
-#include <algorithm>
-#include <chrono>
-#include <cstdint>
-#include <functional>
-#include <vector>
 
 export module streamr.dht.StoreRpcLocal;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -52,7 +50,7 @@ inline ::google::protobuf::Timestamp nowTimestamp() {
         sinceEpoch - seconds);
     ::google::protobuf::Timestamp timestamp;
     timestamp.set_seconds(seconds.count());
-    timestamp.set_nanos(static_cast<int32_t>(nanos.count()));
+    timestamp.set_nanos(static_cast<std::int32_t>(nanos.count()));
     return timestamp;
 }
 

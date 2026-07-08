@@ -3,10 +3,12 @@
 // streamr-utils/EnableSharedFromThis.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <memory>
 
 export module streamr.utils.EnableSharedFromThis;
+
+import std;
 
 export namespace streamr::utils {
 

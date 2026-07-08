@@ -2,11 +2,14 @@
 // CONSOLIDATED from the former header logic/ContentDeliveryRpcLocal.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.ContentDeliveryRpcLocal;
+
+import std;
 
 import streamr.trackerlessnetwork.NetworkRpcServer;
 import streamr.dht.DhtCallContext;

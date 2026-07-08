@@ -10,17 +10,12 @@
 // disconnect is a large win. TS uses the npm lru-cache (max 1000, 15 s
 // TTL); this file ports that with a small internal LRU-with-TTL.
 module;
+#include <new>
 
-#include <chrono>
-#include <cstddef>
-#include <list>
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <utility>
 
 export module streamr.dht.RoutingTablesCache;
+
+import std;
 
 import streamr.dht.Identifiers;
 import streamr.dht.RoutingRemoteContact;
@@ -52,7 +47,7 @@ private:
         std::chrono::steady_clock::time_point insertedAt;
     };
 
-    size_t maxSize;
+    std::size_t maxSize;
     std::chrono::milliseconds maxAge;
     std::list<Entry> entries; // front = most recently used
     std::unordered_map<std::string, typename std::list<Entry>::iterator> index;
@@ -63,7 +58,7 @@ private:
     }
 
 public:
-    LruCache(size_t maxSize, std::chrono::milliseconds maxAge)
+    LruCache(std::size_t maxSize, std::chrono::milliseconds maxAge)
         : maxSize(maxSize), maxAge(maxAge) {}
 
     std::optional<Value> get(const std::string& key) {
@@ -129,7 +124,7 @@ public:
 
 class RoutingTablesCache {
 private:
-    static constexpr size_t defaultMaxTables = 1000;
+    static constexpr std::size_t defaultMaxTables = 1000;
     static constexpr std::chrono::milliseconds defaultMaxAge{15000};
 
     detail::LruCache<RoutingTable> tables{defaultMaxTables, defaultMaxAge};

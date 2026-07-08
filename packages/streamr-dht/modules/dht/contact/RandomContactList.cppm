@@ -2,16 +2,12 @@
 // Ported from packages/dht/src/dht/contact/RandomContactList.ts
 // (v103.8.0-rc.3).
 module;
+#include <new>
 
-#include <algorithm>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <random>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.RandomContactList;
+
+import std;
 
 import streamr.dht.ContactList;
 import streamr.dht.Identifiers;
@@ -32,7 +28,7 @@ private:
 public:
     RandomContactList(
         DhtAddress localNodeId,
-        size_t maxSize,
+        std::size_t maxSize,
         double randomness = 0.20) // NOLINT(readability-magic-numbers)
         : ContactList<C>(std::move(localNodeId), maxSize),
           randomness(randomness) {}
@@ -72,14 +68,14 @@ public:
 
     [[nodiscard]] std::vector<std::shared_ptr<C>> getContacts(
         std::optional<int> limit = std::nullopt) const {
-        const size_t count = limit.has_value()
+        const std::size_t count = limit.has_value()
             ? std::min(
                   this->contactIds.size(),
-                  static_cast<size_t>(std::max(limit.value(), 0)))
+                  static_cast<std::size_t>(std::max(limit.value(), 0)))
             : this->contactIds.size();
         std::vector<std::shared_ptr<C>> result;
         result.reserve(count);
-        for (size_t i = 0; i < count; ++i) {
+        for (std::size_t i = 0; i < count; ++i) {
             result.push_back(this->contactsById.at(this->contactIds[i]));
         }
         return result;

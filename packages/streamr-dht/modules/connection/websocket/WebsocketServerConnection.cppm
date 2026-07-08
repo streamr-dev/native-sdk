@@ -3,11 +3,13 @@
 // streamr-dht/connection/websocket/WebsocketServerConnection.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <string>
 #include <rtc/rtc.hpp>
 
 export module streamr.dht.WebsocketServerConnection;
+
+import std;
 
 import streamr.dht.Connection;
 import streamr.eventemitter.EventEmitter;

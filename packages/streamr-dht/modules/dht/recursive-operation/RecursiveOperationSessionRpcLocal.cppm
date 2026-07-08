@@ -4,11 +4,12 @@
 // session registers this to receive the per-hop RecursiveOperationResponse
 // reports.
 module;
+#include <new>
 
-#include <functional>
-#include <vector>
 
 export module streamr.dht.RecursiveOperationSessionRpcLocal;
+
+import std;
 
 import streamr.dht.protos;
 

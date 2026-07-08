@@ -3,16 +3,13 @@
 // streamr-dht/connection/websocket/WebsocketServer.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <cstdint>
-#include <fstream>
-#include <ranges>
-#include <sstream>
-#include <string>
-#include <unordered_map>
 #include <rtc/rtc.hpp>
 
 export module streamr.dht.WebsocketServer;
+
+import std;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.dht.Connection;
@@ -51,7 +48,7 @@ struct WebsocketServerConfig {
     PortRange portRange;
     bool enableTls;
     std::optional<TlsCertificateFiles> tlsCertificateFiles;
-    std::optional<size_t> maxMessageSize;
+    std::optional<std::size_t> maxMessageSize;
 };
 
 namespace websocketserverevents {
@@ -62,13 +59,13 @@ struct Connected : Event<std::shared_ptr<WebsocketServerConnection>> {};
 
 using WebsocketServerEvents = std::tuple<websocketserverevents::Connected>;
 
-inline constexpr size_t defaultMaxMessageSize = 1048576;
+inline constexpr std::size_t defaultMaxMessageSize = 1048576;
 
 class WebsocketServer : public EventEmitter<WebsocketServerEvents> {
 private:
     std::shared_ptr<rtc::WebSocketServer> mServer;
     WebsocketServerConfig mConfig;
-    uint16_t mPort;
+    std::uint16_t mPort;
     bool mTls;
     std::unordered_map<std::string, std::shared_ptr<WebsocketServerConnection>>
         mHalfReadyConnections;
@@ -85,10 +82,10 @@ public:
         SLogger::trace("~WebsocketServer() stop() end");
     }
 
-    uint16_t start() {
-        uint32_t min = mConfig.portRange.min;
-        uint32_t max = mConfig.portRange.max + 1;
-        for (const uint16_t port : std::views::iota(min, max)) {
+    std::uint16_t start() {
+        std::uint32_t min = mConfig.portRange.min;
+        std::uint32_t max = mConfig.portRange.max + 1;
+        for (const std::uint16_t port : std::views::iota(min, max)) {
             try {
                 startServer(port, mConfig.enableTls, std::nullopt);
                 return port;
@@ -171,7 +168,7 @@ private:
         websocketServerConnection->on<
             Disconnected>([id, this](
                               bool /* gracefulLeave */,
-                              uint64_t /* code */,
+                              std::uint64_t /* code */,
                               const std::string& /* reason */) {
             SLogger::info(
                 "Half-ready WebSocketServerConnection emitted Disconnected event, erasing it");
@@ -204,7 +201,7 @@ private:
     }
 
     void startServer(
-        uint16_t port, bool tls, std::optional<TlsCertificate> certs) {
+        std::uint16_t port, bool tls, std::optional<TlsCertificate> certs) {
         mPort = port;
         mTls = tls;
 

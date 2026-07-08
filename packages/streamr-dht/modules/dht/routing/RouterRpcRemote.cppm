@@ -4,16 +4,14 @@
 // routeMessage (forward towards the target by distance) and forwardMessage
 // (forward towards a known reachable-through peer).
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in the TU that defines a coroutine.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
-#include <string>
-#include <utility>
 
 export module streamr.dht.RouterRpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 

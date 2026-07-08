@@ -3,15 +3,12 @@
 // streamr-dht/connection/PendingConnection.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <atomic>
-#include <chrono>
-#include <exception>
-#include <functional>
-#include <memory>
-#include <optional>
 
 export module streamr.dht.PendingConnection;
+
+import std;
 
 import streamr.dht.protos;
 

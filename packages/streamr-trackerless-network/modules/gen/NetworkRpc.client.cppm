@@ -2,18 +2,18 @@
 // generated from protobuf file "packages/network/protos/NetworkRpc.proto"
 
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
 #include "packages/network/protos/NetworkRpc.pb.h" // NOLINT
 
 
 export module streamr.trackerlessnetwork.NetworkRpcClient;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 

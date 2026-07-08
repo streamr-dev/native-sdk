@@ -2,18 +2,17 @@
 // CONSOLIDATED from the former header streamr-dht/helpers/Version.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <optional>
-#include <ranges>
-#include <string>
-#include <vector>
 
 export module streamr.dht.Version;
+
+import std;
 export namespace streamr::dht::helpers {
 
 struct VersionNumber {
-    size_t major;
-    size_t minor;
+    std::size_t major;
+    std::size_t minor;
 };
 
 class Version {
@@ -40,11 +39,11 @@ public:
             std::views::split('.') |
             std::ranges::to<std::vector<std::string>>();
         if (parts.size() == 2) {
-            const std::vector<size_t> values = parts |
+            const std::vector<std::size_t> values = parts |
                 std::views::transform([](const std::string& p) {
                                                    return std::stoul(p);
                                                }) |
-                std::ranges::to<std::vector<size_t>>();
+                std::ranges::to<std::vector<std::size_t>>();
 
             return VersionNumber{.major = values[0], .minor = values[1]};
         }

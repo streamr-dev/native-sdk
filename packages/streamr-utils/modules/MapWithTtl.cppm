@@ -9,15 +9,12 @@
 // hazard of a per-entry timer callback capturing a map that is not owned
 // through a shared_ptr.
 module;
+#include <new>
 
-#include <chrono>
-#include <cstddef>
-#include <functional>
-#include <map>
-#include <utility>
-#include <vector>
 
 export module streamr.utils.MapWithTtl;
+
+import std;
 
 export namespace streamr::utils {
 
@@ -91,7 +88,7 @@ public:
 
     void clear() { this->delegate.clear(); }
 
-    [[nodiscard]] size_t size() {
+    [[nodiscard]] std::size_t size() {
         this->purgeExpired();
         return this->delegate.size();
     }

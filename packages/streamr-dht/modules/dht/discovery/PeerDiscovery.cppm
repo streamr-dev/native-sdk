@@ -19,21 +19,13 @@
 // shared sets synchronised. This is exercised by the phase A8 integration
 // tests (DhtJoinPeerDiscovery, MultipleEntryPointJoining).
 module;
+#include <new>
 
-#include <chrono>
-#include <cstddef>
-#include <functional>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
-#include <coroutine> // IWYU pragma: keep
 
 export module streamr.dht.PeerDiscovery;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -93,9 +85,9 @@ inline DhtAddress createDistantDhtAddress(const DhtAddress& address) {
 
 struct PeerDiscoveryOptions {
     PeerDescriptor localPeerDescriptor;
-    size_t joinNoProgressLimit;
+    std::size_t joinNoProgressLimit;
     ServiceID serviceId;
-    size_t parallelism;
+    std::size_t parallelism;
     std::chrono::milliseconds joinTimeout;
     std::shared_ptr<ConnectionLocker> connectionLocker; // may be null
     PeerManager& peerManager;
@@ -264,7 +256,7 @@ private:
     }
 
     [[nodiscard]] std::vector<PeerDescriptor> getClosestNeighbors(
-        const DhtAddress& referenceId, size_t maxCount) {
+        const DhtAddress& referenceId, std::size_t maxCount) {
         std::vector<PeerDescriptor> neighborDescriptors;
         const auto neighbors = this->options.peerManager.getNeighbors();
         neighborDescriptors.reserve(neighbors.size());

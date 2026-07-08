@@ -2,19 +2,18 @@
 // CONSOLIDATED from the former header logic/propagation/RandomAccessQueue.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <cstddef>
-#include <map>
-#include <mutex>
-#include <optional>
 
 export module streamr.trackerlessnetwork.RandomAccessQueue;
+
+import std;
 export namespace streamr::trackerlessnetwork::propagation {
 
 class QueueToken {
 private:
-    size_t id;
-    explicit QueueToken(size_t id) : id(id) {}
+    std::size_t id;
+    explicit QueueToken(std::size_t id) : id(id) {}
 
 public:
     QueueToken() : id(0) {} // create a non-existent token by default
@@ -26,18 +25,18 @@ public:
     static QueueToken create() {
         // Use a "magic static"
         // https://blog.mbedded.ninja/programming/languages/c-plus-plus/magic-statics/
-        static size_t counter = 1;
+        static std::size_t counter = 1;
         static std::mutex queueTokenReferenceCounterMutex;
         std::lock_guard<std::mutex> lock{queueTokenReferenceCounterMutex};
         return QueueToken(counter++);
     }
-    [[nodiscard]] size_t getId() const { return this->id; }
+    [[nodiscard]] std::size_t getId() const { return this->id; }
 };
 
 template <typename ValueType>
 class RandomAccessQueue {
 private:
-    std::map<size_t, ValueType> queue;
+    std::map<std::size_t, ValueType> queue;
     std::recursive_mutex queueMutex;
 
 public:

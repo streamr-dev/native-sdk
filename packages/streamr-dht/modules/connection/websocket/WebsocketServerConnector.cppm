@@ -3,17 +3,13 @@
 // streamr-dht/connection/websocket/WebsocketServerConnector.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
-#include <functional>
-#include <map>
+#include <new>
 
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
 
-#include <mutex>
 
 export module streamr.dht.WebsocketServerConnector;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -67,7 +63,7 @@ struct WebsocketServerConnectorOptions {
     ListeningRpcCommunicator& rpcCommunicator;
     std::function<bool(DhtAddress)> hasConnection;
     std::optional<PortRange> portRange = std::nullopt;
-    std::optional<size_t> maxMessageSize = std::nullopt;
+    std::optional<std::size_t> maxMessageSize = std::nullopt;
     std::optional<std::string> host = std::nullopt;
     std::optional<std::vector<PeerDescriptor>> entrypoints = std::nullopt;
     std::optional<TlsCertificateFiles> tlsCertificateFiles = std::nullopt;
@@ -85,7 +81,7 @@ private:
     std::optional<std::string> host;
     std::optional<PeerDescriptor> localPeerDescriptor;
     AbortController abortController;
-    std::optional<uint16_t> selectedPort;
+    std::optional<std::uint16_t> selectedPort;
     std::map<std::string, std::shared_ptr<IncomingHandshaker>>
         connectingHandshakers;
     std::map<DhtAddress, std::shared_ptr<IPendingConnection>>
@@ -110,13 +106,13 @@ public:
 
     static std::string getActionFromUrl(const Url& resourceUrl) {
         std::string action;
-        size_t queryPos = resourceUrl.find("?");
+        std::size_t queryPos = resourceUrl.find("?");
         if (queryPos != std::string::npos) {
             std::string query = resourceUrl.substr(queryPos + 1);
-            size_t actionPos = query.find("action=");
+            std::size_t actionPos = query.find("action=");
             if (actionPos != std::string::npos) {
-                size_t valueStart = actionPos + 7; // NOLINT length of "action="
-                size_t valueEnd = query.find('&', valueStart);
+                std::size_t valueStart = actionPos + 7; // NOLINT length of "action="
+                std::size_t valueEnd = query.find('&', valueStart);
                 if (valueEnd == std::string::npos) {
                     valueEnd = query.length();
                 }

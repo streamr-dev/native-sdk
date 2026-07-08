@@ -10,22 +10,13 @@
 // setImmediate are dispatched onto a small worker executor here, so
 // StoreManager is owned through a shared_ptr.
 module;
+#include <new>
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.StoreManager;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -68,8 +59,8 @@ struct StoreManagerOptions {
     PeerDescriptor localPeerDescriptor;
     LocalDataStore& localDataStore;
     ServiceID serviceId;
-    uint32_t highestTtl;
-    size_t redundancyFactor;
+    std::uint32_t highestTtl;
+    std::size_t redundancyFactor;
     std::function<std::vector<PeerDescriptor>()> getNeighbors;
     std::function<std::shared_ptr<StoreRpcRemote>(const PeerDescriptor&)>
         createRpcRemote;
@@ -81,7 +72,7 @@ struct StoreManagerOptions {
 
 class StoreManager : public EnableSharedFromThis {
 private:
-    static constexpr size_t replicationWorkerThreads = 1;
+    static constexpr std::size_t replicationWorkerThreads = 1;
 
     StoreManagerOptions options;
     folly::CPUThreadPoolExecutor replicationExecutor{replicationWorkerThreads};
@@ -272,12 +263,12 @@ public:
             key, RecursiveOperation::FIND_CLOSEST_NODES);
         const auto& closestNodes = result.closestNodes;
         std::vector<PeerDescriptor> successfulNodes;
-        const uint32_t ttl = this->options.highestTtl;
+        const std::uint32_t ttl = this->options.highestTtl;
         const auto createdAt = nowTimestamp();
         const DhtAddressRaw keyRaw = Identifiers::getRawFromDhtAddress(key);
         const DhtAddressRaw creatorRaw =
             Identifiers::getRawFromDhtAddress(creator);
-        for (size_t i = 0; i < closestNodes.size() &&
+        for (std::size_t i = 0; i < closestNodes.size() &&
              successfulNodes.size() < this->options.redundancyFactor;
              ++i) {
             if (this->equalsLocal(closestNodes[i])) {

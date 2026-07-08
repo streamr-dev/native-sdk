@@ -28,22 +28,13 @@
 // (a positive nice value, best-effort per-platform) so routing yields the
 // CPU to our own work under contention.
 module;
+#include <new>
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <cstddef>
-#include <functional>
-#include <map>
-#include <memory>
-#include <optional>
-#include <set>
-#include <string>
-#include <utility>
-#include <variant>
-#include <vector>
 
 export module streamr.dht.Router;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -93,8 +84,8 @@ struct RouterOptions {
 
 class Router : public EnableSharedFromThis {
 private:
-    static constexpr size_t routingWorkerThreadCount = 1;
-    static constexpr size_t duplicateDetectorSize = 10000;
+    static constexpr std::size_t routingWorkerThreadCount = 1;
+    static constexpr std::size_t duplicateDetectorSize = 10000;
     static constexpr std::chrono::milliseconds forwardingEntryTtl{10000};
     static constexpr std::chrono::milliseconds sessionTimeout{10000};
     // Nice value for the routing worker thread: a positive value lowers its
@@ -253,9 +244,9 @@ private:
         for (const auto& nodeId : routedMessage.parallelrootnodeids()) {
             excludedNodeIds.insert(DhtAddress{nodeId});
         }
-        constexpr size_t sourceParallelism = 2;
-        constexpr size_t forwardParallelism = 1;
-        const size_t parallelism =
+        constexpr std::size_t sourceParallelism = 2;
+        constexpr std::size_t forwardParallelism = 1;
+        const std::size_t parallelism =
             Identifiers::areEqualPeerDescriptors(
                 this->options.localPeerDescriptor, routedMessage.sourcepeer())
             ? sourceParallelism

@@ -3,18 +3,15 @@
 // streamr-utils/waitForEvent.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <functional>
-#include <memory>
-#include <tuple>
-#include <utility>
 
 export module streamr.utils.waitForEvent;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.AbortController;

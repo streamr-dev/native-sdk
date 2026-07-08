@@ -3,17 +3,18 @@
 // streamr-dht/connection/websocket/WebsocketClientConnection.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
 #include <rtc/rtc.hpp>
 
-#include <string>
 
 export module streamr.dht.WebsocketClientConnection;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.dht.Connection;

@@ -3,14 +3,13 @@
 // streamr-dht/connection/IncomingHandshaker.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <memory>
-#include <optional>
-#include <string>
 
-#include <functional>
 
 export module streamr.dht.IncomingHandshaker;
+
+import std;
 
 import streamr.logger.SLogger;
 import streamr.eventemitter.EventEmitter;
@@ -96,7 +95,7 @@ public:
             this->connection->once<connectionevents::Disconnected>(
                 [weakSelf](
                     bool gracefulLeave,
-                    uint64_t /*code*/,
+                    std::uint64_t /*code*/,
                     const std::string& /*reason*/) {
                     if (auto self = weakSelf.lock()) {
                         if (self->pendingConnection) {

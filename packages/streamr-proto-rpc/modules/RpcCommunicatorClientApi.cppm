@@ -3,17 +3,16 @@
 // streamr-proto-rpc/RpcCommunicatorClientApi.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <exception>
-#include <map>
-#include <mutex>
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 export module streamr.protorpc.RpcCommunicatorClientApi;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.ExecutorHelper;
@@ -35,7 +34,7 @@ export namespace streamr::protorpc {
 using RpcMessage = ::protorpc::RpcMessage;
 using RpcErrorType = ::protorpc::RpcErrorType;
 
-inline constexpr size_t threadPoolSize = 20;
+inline constexpr std::size_t threadPoolSize = 20;
 
 template <typename CallContextType, typename OutgoingMessageCallbackType>
 class RpcCommunicatorClientApi {

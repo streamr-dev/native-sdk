@@ -2,10 +2,12 @@
 // CONSOLIDATED from the former header streamr-dht/transport/Transport.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <tuple>
 
 export module streamr.dht.Transport;
+
+import std;
 
 import streamr.dht.protos;
 

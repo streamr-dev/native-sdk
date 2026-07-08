@@ -3,17 +3,16 @@
 // streamr-utils/AbortController.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <string>
-#include <string_view>
-#include <tuple>
 
 export module streamr.utils.AbortController;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.eventemitter.EventEmitter;

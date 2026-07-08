@@ -3,12 +3,14 @@
 // streamr-dht/transport/RoutingRpcCommunicator.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
-#include <string>
 
 export module streamr.dht.RoutingRpcCommunicator;
+
+import std;
 
 import streamr.dht.protos;
 

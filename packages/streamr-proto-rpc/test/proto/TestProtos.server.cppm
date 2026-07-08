@@ -2,15 +2,17 @@
 // Generated from protobuf file "TestProtos.proto"
 
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
 #include "TestProtos.pb.h" // NOLINT
 
 export module streamr.protorpc.test.TestProtosServer;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 

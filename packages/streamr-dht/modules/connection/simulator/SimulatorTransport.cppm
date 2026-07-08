@@ -5,10 +5,12 @@
 // (packages/dht/src/connection/simulator/SimulatorTransport.ts,
 // v103.8.0-rc.3).
 module;
+#include <new>
 
-#include <memory>
 
 export module streamr.dht.SimulatorTransport;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -28,7 +30,7 @@ class SimulatorTransport : public ConnectionManager {
 public:
     // Same maxConnections default as the TS ConnectionManager applies
     // when SimulatorTransport passes none.
-    static constexpr size_t defaultMaxConnections = 80;
+    static constexpr std::size_t defaultMaxConnections = 80;
 
     SimulatorTransport(
         const PeerDescriptor& localPeerDescriptor, Simulator& simulator)

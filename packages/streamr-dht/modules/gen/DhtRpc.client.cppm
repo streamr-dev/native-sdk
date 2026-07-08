@@ -2,18 +2,18 @@
 // generated from protobuf file "packages/dht/protos/DhtRpc.proto"
 
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
 #include "packages/dht/protos/DhtRpc.pb.h" // NOLINT
 
 
 export module streamr.dht.DhtRpcClient;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 

@@ -3,14 +3,12 @@
 // streamr-utils/AbortableTimers.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <atomic>
-#include <chrono>
-#include <functional>
-#include <string>
-#include <utility>
 
 export module streamr.utils.AbortableTimers;
+
+import std;
 
 import streamr.utils.ExecutorHelper;
 import streamr.utils.AbortController;
@@ -71,8 +69,8 @@ public:
     }
 
 private:
-    static size_t getNextId() {
-        static std::atomic<size_t> id = 0;
+    static std::size_t getNextId() {
+        static std::atomic<std::size_t> id = 0;
         return id.fetch_add(1, std::memory_order_relaxed);
     }
 

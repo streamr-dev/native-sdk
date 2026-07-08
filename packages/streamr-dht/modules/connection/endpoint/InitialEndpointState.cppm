@@ -3,12 +3,12 @@
 // streamr-dht/connection/endpoint/InitialEndpointState.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <cstddef>
-#include <memory>
-#include <vector>
 
 export module streamr.dht.InitialEndpointState;
+
+import std;
 
 import streamr.logger.SLogger;
 import streamr.dht.Connection;

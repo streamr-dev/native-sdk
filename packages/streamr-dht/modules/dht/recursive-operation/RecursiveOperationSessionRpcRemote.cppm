@@ -4,16 +4,13 @@
 // a hop to report a recursive operation's result back to the initiator's
 // session (fire-and-forget sendResponse).
 module;
+#include <new>
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.RecursiveOperationSessionRpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 

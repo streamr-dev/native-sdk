@@ -3,14 +3,8 @@
 // streamr-logger/detail/StreamrLogFormatter.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <chrono>
-#include <cstddef>
-#include <cstdlib>
-#include <iterator>
-#include <string>
-#include <string_view>
-#include <variant>
 #include <folly/Format.h>
 #include <folly/logging/LogCategory.h>
 #include <folly/logging/LogFormatter.h>
@@ -18,6 +12,8 @@ module;
 #include <folly/logging/LogMessage.h>
 
 export module streamr.logger.StreamrLogFormatter;
+
+import std;
 
 import streamr.logger.LogLevelMap;
 import streamr.logger.StreamrLogColors;
@@ -32,9 +28,9 @@ constexpr const char* logColorsEnvVar = "LOG_COLORS";
 
 // If you change MaxFileNameAndLineNumberLength, then please change it in
 // nonTruncatedFormatterPart too
-constexpr size_t maxFileNameAndLineNumberLength{36};
+constexpr std::size_t maxFileNameAndLineNumberLength{36};
 constexpr std::string_view fileNameAndLineNumberSeparator = ": ";
-constexpr size_t separatorLength{std::ssize(fileNameAndLineNumberSeparator)};
+constexpr std::size_t separatorLength{std::ssize(fileNameAndLineNumberSeparator)};
 constexpr std::string_view firstPartOfLogMessageFormatter =
     "{}{}{} [{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{}] (";
 constexpr std::string_view nonTruncatedFormatterPart = "{:<36}";

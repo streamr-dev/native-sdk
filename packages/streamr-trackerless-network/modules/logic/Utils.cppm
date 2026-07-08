@@ -2,14 +2,14 @@
 // CONSOLIDATED from the former header logic/Utils.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <map>
-#include <optional>
-#include <string>
 #include <boost/algorithm/hex.hpp>
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.Utils;
+
+import std;
 
 import streamr.dht.Identifiers;
 import streamr.trackerlessnetwork.DuplicateMessageDetector;

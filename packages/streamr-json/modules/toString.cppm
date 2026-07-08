@@ -3,11 +3,12 @@
 // streamr-json/toString.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <initializer_list>
-#include <string>
 
 export module streamr.json.toString;
+
+import std;
 
 import streamr.json.jsonConcepts;
 import streamr.json.toJson;

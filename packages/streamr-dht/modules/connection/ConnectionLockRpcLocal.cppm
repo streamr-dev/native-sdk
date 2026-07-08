@@ -3,13 +3,13 @@
 // streamr-dht/connection/ConnectionLockRpcLocal.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <functional>
-#include <optional>
 
-#include <string>
 
 export module streamr.dht.ConnectionLockRpcLocal;
+
+import std;
 
 import streamr.dht.protos;
 

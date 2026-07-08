@@ -3,10 +3,12 @@
 // streamr-dht/connection/ConnectionsView.hpp (MODERNIZATION.md Phase 2.6): this
 // file is now the source of truth.
 module;
+#include <new>
 
-#include <string>
 
 export module streamr.dht.ConnectionsView;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -20,7 +22,7 @@ public:
     virtual ~ConnectionsView() = default;
 
     [[nodiscard]] virtual std::vector<PeerDescriptor> getConnections() = 0;
-    [[nodiscard]] virtual size_t getConnectionCount() = 0;
+    [[nodiscard]] virtual std::size_t getConnectionCount() = 0;
     [[nodiscard]] virtual bool hasConnection(const DhtAddress& nodeId) = 0;
 
 protected:

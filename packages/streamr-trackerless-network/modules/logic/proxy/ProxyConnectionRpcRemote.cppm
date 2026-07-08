@@ -2,15 +2,17 @@
 // CONSOLIDATED from the former header logic/proxy/ProxyConnectionRpcRemote.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.ProxyConnectionRpcRemote;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.trackerlessnetwork.NetworkRpcClient;

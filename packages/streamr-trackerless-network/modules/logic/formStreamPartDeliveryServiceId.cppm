@@ -2,14 +2,16 @@
 // CONSOLIDATED from the former header logic/formStreamPartDeliveryServiceId.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
 // The string concatenation below needs std::operator+ to be TEXTUALLY
 // visible: operators reached only through an imported module's global
 // module fragment are not reliably reachable. (The former header got
 // <string> transitively from the sibling headers it included.)
-#include <string>
 
 export module streamr.trackerlessnetwork.formStreamPartDeliveryServiceId;
+
+import std;
 
 import streamr.dht.Identifiers;
 import streamr.utils.StreamPartID;

@@ -5,11 +5,12 @@
 // operation onward (dropping duplicates), delegating the actual routing to
 // the manager's doRouteRequest.
 module;
+#include <new>
 
-#include <functional>
-#include <string>
 
 export module streamr.dht.RecursiveOperationRpcLocal;
+
+import std;
 
 import streamr.dht.protos;
 

@@ -3,13 +3,12 @@
 // streamr-utils/ReplayEventEmitterWrapper.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <memory>
-#include <optional>
-#include <tuple>
-#include <vector>
 
 export module streamr.utils.ReplayEventEmitterWrapper;
+
+import std;
 
 import streamr.eventemitter.EventEmitter;
 

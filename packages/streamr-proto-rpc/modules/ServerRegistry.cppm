@@ -12,18 +12,19 @@
 // The synchronous handleRequest() / registerRpcMethod() path is kept
 // unchanged for direct callers that still want an inline result.
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in every translation unit that
 // defines OR instantiates a coroutine; it cannot arrive through an
 // imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <optional>
 #include <google/protobuf/any.pb.h>
 #include <google/protobuf/empty.pb.h>
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 export module streamr.protorpc.ServerRegistry;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.logger.SLogger;
@@ -35,7 +36,7 @@ using Empty = google::protobuf::Empty;
 using RpcMessage = ::protorpc::RpcMessage;
 using SLogger = streamr::logger::SLogger;
 struct MethodOptions {
-    size_t timeout = 0;
+    std::size_t timeout = 0;
 };
 
 template <typename CallContextType>

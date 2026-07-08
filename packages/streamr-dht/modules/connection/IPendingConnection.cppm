@@ -3,11 +3,12 @@
 // streamr-dht/connection/IPendingConnection.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <exception>
-#include <memory>
 
 export module streamr.dht.IPendingConnection;
+
+import std;
 
 import streamr.dht.protos;
 

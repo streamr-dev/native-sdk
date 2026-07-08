@@ -3,11 +3,12 @@
 // streamr-logger/detail/StreamrLogColors.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <string>
-#include <string_view>
 
 export module streamr.logger.StreamrLogColors;
+
+import std;
 
 export namespace streamr::logger::detail::colors {
 

@@ -3,13 +3,14 @@
 // streamr-dht/connection/websocket/WebsocketConnection.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <functional>
 #include <rtc/rtc.hpp>
 
-#include <string>
 
 export module streamr.dht.WebsocketConnection;
+
+import std;
 
 import streamr.logger.SLogger;
 import streamr.utils.EnableSharedFromThis;
@@ -27,7 +28,7 @@ using streamr::dht::connection::connectionevents::Data;
 using streamr::dht::connection::connectionevents::Disconnected;
 using streamr::dht::connection::connectionevents::Error;
 
-inline constexpr size_t maxMessageSize = 1048576;
+inline constexpr std::size_t maxMessageSize = 1048576;
 
 class WebsocketConnection : public Connection, public EnableSharedFromThis {
 private:

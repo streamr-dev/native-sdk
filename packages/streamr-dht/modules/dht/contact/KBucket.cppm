@@ -9,17 +9,12 @@
 // `toIterable` generator are omitted. The events are wired to
 // streamr-eventemitter instead of Node's EventEmitter.
 module;
+#include <new>
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <optional>
-#include <tuple>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.KBucket;
+
+import std;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.dht.Identifiers;
@@ -72,10 +67,10 @@ using KBucketEvents = std::tuple<
 struct KBucketOptions {
     DhtAddressRaw localNodeId;
     // The number of nodes a k-bucket holds before it must split or ping.
-    std::optional<size_t> numberOfNodesPerKBucket;
+    std::optional<std::size_t> numberOfNodesPerKBucket;
     // The number of longest-uncontacted nodes offered in a `ping` event
     // when a non-splittable bucket is full.
-    std::optional<size_t> numberOfNodesToPing;
+    std::optional<std::size_t> numberOfNodesToPing;
 };
 
 template <KBucketContact C>
@@ -95,12 +90,12 @@ private:
         }
     };
 
-    static constexpr size_t defaultNodesPerKBucket = 20;
-    static constexpr size_t defaultNodesToPing = 3;
+    static constexpr std::size_t defaultNodesPerKBucket = 20;
+    static constexpr std::size_t defaultNodesToPing = 3;
 
     DhtAddressRaw localNodeId;
-    size_t numberOfNodesPerKBucket;
-    size_t numberOfNodesToPing;
+    std::size_t numberOfNodesPerKBucket;
+    std::size_t numberOfNodesToPing;
     Node root;
 
     // The default vectorClock arbiter: the contact with the larger vector
@@ -116,9 +111,9 @@ private:
     // Returns the child to descend into for `id` at `bitIndex`. An id too
     // short to have the bit is treated as having a 0 bit (goes left),
     // matching the library's out-of-range/undefined byte handling.
-    Node* determineNode(Node* node, const DhtAddressRaw& id, size_t bitIndex) {
-        const size_t bytesDescribedByBitIndex = bitIndex >> 3U;
-        const size_t bitIndexWithinByte = bitIndex % 8U;
+    Node* determineNode(Node* node, const DhtAddressRaw& id, std::size_t bitIndex) {
+        const std::size_t bytesDescribedByBitIndex = bitIndex >> 3U;
+        const std::size_t bitIndexWithinByte = bitIndex % 8U;
         if (bytesDescribedByBitIndex >= id.size()) {
             return node->left.get();
         }
@@ -132,7 +127,7 @@ private:
 
     // Index of the contact with `id` in a leaf node, or -1.
     static int indexOf(const Node* node, const DhtAddressRaw& id) {
-        for (size_t i = 0; i < node->contacts->size(); ++i) {
+        for (std::size_t i = 0; i < node->contacts->size(); ++i) {
             if ((*node->contacts)[i]->getId() == id) {
                 return static_cast<int>(i);
             }
@@ -143,7 +138,7 @@ private:
     // Splits a full leaf into two children, redistributes its contacts, and
     // marks the child NOT containing the local node id as dontSplit (the
     // "far away" bucket does not split further).
-    void split(Node* node, size_t bitIndex) {
+    void split(Node* node, std::size_t bitIndex) {
         node->left = std::make_unique<Node>();
         node->right = std::make_unique<Node>();
         for (const auto& contact : *node->contacts) {
@@ -161,7 +156,7 @@ private:
     // kept and the candidate is a different object, nothing changes;
     // otherwise the selection replaces it at the most-recently-contacted
     // (end) position and an `updated` event is emitted.
-    void update(Node* node, size_t index, const std::shared_ptr<C>& contact) {
+    void update(Node* node, std::size_t index, const std::shared_ptr<C>& contact) {
         const std::shared_ptr<C> incumbent = (*node->contacts)[index];
         const std::shared_ptr<C> selection = arbiter(incumbent, contact);
         if (selection == incumbent && incumbent != contact) {
@@ -185,14 +180,14 @@ public:
     // already present; otherwise appends it if there is room; otherwise
     // either pings (if the leaf cannot split) or splits and retries.
     void add(const std::shared_ptr<C>& contact) {
-        size_t bitIndex = 0;
+        std::size_t bitIndex = 0;
         Node* node = &this->root;
         while (node->isInner()) {
             node = this->determineNode(node, contact->getId(), bitIndex++);
         }
         const int index = indexOf(node, contact->getId());
         if (index >= 0) {
-            this->update(node, static_cast<size_t>(index), contact);
+            this->update(node, static_cast<std::size_t>(index), contact);
             return;
         }
         if (node->contacts->size() < this->numberOfNodesPerKBucket) {
@@ -201,7 +196,7 @@ public:
             return;
         }
         if (node->dontSplit) {
-            const size_t pingCount =
+            const std::size_t pingCount =
                 std::min(this->numberOfNodesToPing, node->contacts->size());
             std::vector<std::shared_ptr<C>> toPing(
                 node->contacts->begin(),
@@ -216,19 +211,19 @@ public:
 
     // The contact with the exact id, or nullptr.
     [[nodiscard]] std::shared_ptr<C> get(const DhtAddressRaw& id) {
-        size_t bitIndex = 0;
+        std::size_t bitIndex = 0;
         Node* node = &this->root;
         while (node->isInner()) {
             node = this->determineNode(node, id, bitIndex++);
         }
         const int index = indexOf(node, id);
-        return index >= 0 ? (*node->contacts)[static_cast<size_t>(index)]
+        return index >= 0 ? (*node->contacts)[static_cast<std::size_t>(index)]
                           : nullptr;
     }
 
     // Removes the contact with the id (emitting `removed` if it was present).
     void remove(const DhtAddressRaw& id) {
-        size_t bitIndex = 0;
+        std::size_t bitIndex = 0;
         Node* node = &this->root;
         while (node->isInner()) {
             node = this->determineNode(node, id, bitIndex++);
@@ -236,7 +231,7 @@ public:
         const int index = indexOf(node, id);
         if (index >= 0) {
             const std::shared_ptr<C> contact =
-                (*node->contacts)[static_cast<size_t>(index)];
+                (*node->contacts)[static_cast<std::size_t>(index)];
             node->contacts->erase(node->contacts->begin() + index);
             this->template emit<kbucketevents::Removed<C>>(contact);
         }
@@ -245,11 +240,11 @@ public:
     // The up-to-`n` closest contacts to `id` by the XOR metric, nearest
     // first. Without a limit, all contacts are returned in that order.
     [[nodiscard]] std::vector<std::shared_ptr<C>> closest(
-        const DhtAddressRaw& id, std::optional<size_t> n = std::nullopt) {
-        const size_t limit = n.value_or(SIZE_MAX);
+        const DhtAddressRaw& id, std::optional<std::size_t> n = std::nullopt) {
+        const std::size_t limit = n.value_or(std::numeric_limits<std::size_t>::max());
         std::vector<std::shared_ptr<C>> contacts;
         std::vector<Node*> nodes{&this->root};
-        size_t bitIndex = 0;
+        std::size_t bitIndex = 0;
         while (!nodes.empty() && contacts.size() < limit) {
             Node* node = nodes.back();
             nodes.pop_back();
@@ -279,8 +274,8 @@ public:
     }
 
     // The total number of contacts held in the tree.
-    [[nodiscard]] size_t count() {
-        size_t count = 0;
+    [[nodiscard]] std::size_t count() {
+        std::size_t count = 0;
         std::vector<Node*> nodes{&this->root};
         while (!nodes.empty()) {
             Node* node = nodes.back();

@@ -2,15 +2,14 @@
 // CONSOLIDATED from the former header streamr-dht/helpers/AddressTools.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <optional>
-#include <ranges>
-#include <string>
-#include <vector>
 #include <ipaddress/errors.hpp>
 #include <ipaddress/ipaddress.hpp>
 
 export module streamr.dht.AddressTools;
+
+import std;
 export namespace streamr::dht::helpers {
 
 class AddressTools {

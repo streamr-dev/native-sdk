@@ -3,17 +3,12 @@
 // (v103.8.0-rc.3). The TS OrderedMap<RingDistance, C> is a std::map here
 // (ascending key order, same neighbour semantics).
 module;
+#include <new>
 
-#include <concepts>
-#include <cstddef>
-#include <map>
-#include <memory>
-#include <optional>
-#include <set>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.RingContactList;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -48,7 +43,7 @@ struct RingContacts {
 template <HasGetPeerDescriptor C>
 class RingContactList : public EventEmitter<ContactListEvents<C>> {
 private:
-    static constexpr size_t numNeighborsPerSide = 5;
+    static constexpr std::size_t numNeighborsPerSide = 5;
     RingId referenceId;
     std::set<DhtAddress> excludedIds;
     // Ascending by distance; the closest neighbours are at the front.
@@ -155,7 +150,7 @@ public:
     }
 
     [[nodiscard]] RingContacts<C> getClosestContacts(
-        std::optional<size_t> limitPerSide = std::nullopt) const {
+        std::optional<std::size_t> limitPerSide = std::nullopt) const {
         RingContacts<C> result;
         for (const auto& [distance, contact] : this->leftNeighbors) {
             if (limitPerSide.has_value() &&

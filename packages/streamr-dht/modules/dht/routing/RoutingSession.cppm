@@ -18,21 +18,13 @@
 // RoutingRemoteContact) to break the RoutingTablesCache <-> RoutingSession
 // import cycle that TS tolerates but C++ modules cannot.
 module;
+#include <new>
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <cstddef>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <set>
-#include <string>
-#include <tuple>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.RoutingSession;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -91,7 +83,7 @@ struct RoutingSessionOptions {
     RpcCommunicator<DhtCallContext>& rpcCommunicator;
     PeerDescriptor localPeerDescriptor;
     RouteMessageWrapper routedMessage;
-    size_t parallelism;
+    std::size_t parallelism;
     RoutingMode mode;
     std::set<DhtAddress> excludedNodeIds;
     RoutingTablesCache& routingTablesCache;
@@ -291,7 +283,7 @@ public:
                     SortedContactListOptions{
                         .referenceId = targetId,
                         .allowToContainReferenceId = true,
-                        .maxSize = static_cast<size_t>(routingTableMaxSize),
+                        .maxSize = static_cast<std::size_t>(routingTableMaxSize),
                         .nodeIdDistanceLimit = previousId});
             std::vector<std::shared_ptr<RoutingRemoteContact>> contacts;
             for (const auto& peer : this->options.getConnections()) {
@@ -327,7 +319,7 @@ public:
             this->emitFailure();
             return;
         }
-        size_t index = 0;
+        std::size_t index = 0;
         while (this->ongoingRequests.size() < this->options.parallelism &&
                index < uncontacted.size() && !this->stopped) {
             const auto nextPeer = uncontacted[index];

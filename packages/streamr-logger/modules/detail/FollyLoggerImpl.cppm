@@ -3,13 +3,9 @@
 // streamr-logger/detail/FollyLoggerImpl.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
 #include <unistd.h>
-#include <memory>
-#include <source_location>
-#include <string>
-#include <string_view>
-#include <utility>
 #include <folly/logging/LogCategoryConfig.h>
 #include <folly/logging/LogConfig.h>
 #include <folly/logging/LogLevel.h>
@@ -24,6 +20,8 @@ module;
 extern "C" char** environ; // NOLINT
 
 export module streamr.logger.FollyLoggerImpl;
+
+import std;
 
 import streamr.logger.LogLevelMap;
 import streamr.logger.StreamrLogLevel;

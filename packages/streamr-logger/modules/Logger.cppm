@@ -3,15 +3,13 @@
 // streamr-logger/Logger.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <memory>
-#include <source_location>
-#include <string>
-#include <string_view>
-#include <utility>
 #include <nlohmann/json.hpp>
 
 export module streamr.logger.Logger;
+
+import std;
 
 import streamr.json.toJson;
 import streamr.logger.FollyLoggerImpl;

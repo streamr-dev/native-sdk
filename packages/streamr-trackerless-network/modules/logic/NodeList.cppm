@@ -2,12 +2,12 @@
 // CONSOLIDATED from the former header logic/NodeList.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <map>
-#include <ranges>
-#include <vector>
 
 export module streamr.trackerlessnetwork.NodeList;
+
+import std;
 
 import streamr.dht.Identifiers;
 import streamr.eventemitter.EventEmitter;
@@ -38,7 +38,7 @@ using NodeListEvents = std::tuple<NodeAdded, NodeRemoved>;
 class NodeList : public EventEmitter<NodeListEvents> {
 private:
     std::map<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> nodes;
-    size_t limit;
+    std::size_t limit;
     DhtAddress ownId;
 
     static std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>
@@ -63,7 +63,7 @@ private:
     }
 
 public:
-    NodeList(DhtAddress ownId, size_t limit)
+    NodeList(DhtAddress ownId, std::size_t limit)
         : limit(limit), ownId(std::move(ownId)) {}
 
     void add(const std::shared_ptr<ContentDeliveryRpcRemote>& remote) {
@@ -123,7 +123,7 @@ public:
         return this->nodes.at(id);
     }
 
-    [[nodiscard]] size_t size(
+    [[nodiscard]] std::size_t size(
         const std::vector<DhtAddress>& exclude = {}) const {
         return NodeList::getValuesOfIncludedKeys(this->nodes, exclude).size();
     }
@@ -135,7 +135,7 @@ public:
         if (values.empty()) {
             return std::nullopt;
         }
-        return values[rand() % values.size()];
+        return values[std::rand() % values.size()];
     }
 
     [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>>

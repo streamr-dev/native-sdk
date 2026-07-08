@@ -3,10 +3,12 @@
 // (v103.8.0-rc.3). The previous hop is the last entry appended to the
 // routed message's routingPath.
 module;
+#include <new>
 
-#include <optional>
 
 export module streamr.dht.getPreviousPeer;
+
+import std;
 
 import streamr.dht.protos;
 

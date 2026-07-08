@@ -3,24 +3,16 @@
 // streamr-dht/connection/ConnectionManager.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
-#include <algorithm>
-#include <atomic>
-#include <functional>
-#include <ranges>
+#include <new>
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <cstdint>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <utility>
 
-#include <string>
 
 export module streamr.dht.ConnectionManager;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -86,7 +78,7 @@ enum class ConnectionManagerState : std::uint8_t {
 };
 
 struct ConnectionManagerOptions {
-    size_t maxConnections;
+    std::size_t maxConnections;
     // MetricsContext metricsContext;
     std::function<std::shared_ptr<ConnectorFacade>()> createConnectorFacade;
     // Whether remote peers may mark their connection to us as private
@@ -112,7 +104,7 @@ private:
     // adopts pending connections in tie-break decision order even when the
     // setConnecting() calls race across threads; guarded by endpointsMutex.
     // See acceptNewConnection().
-    uint64_t connectingSequenceCounter = 0;
+    std::uint64_t connectingSequenceCounter = 0;
 
     // Constructs an Endpoint for the peer and wires its listeners; pure
     // construction with no call-outs, so acceptNewConnection() may run
@@ -399,7 +391,7 @@ public:
             throw SendFailed("No connection to target, connect flag is false");
         }
         SLogger::debug("Passed connection checks");
-        size_t nBytes = messageWithSource.ByteSizeLong();
+        std::size_t nBytes = messageWithSource.ByteSizeLong();
         SLogger::debug("Calculated message size");
         if (nBytes == 0) {
             SLogger::debug("Message size is zero, throwing exception");
@@ -434,7 +426,7 @@ public:
         return result;
     }
 
-    [[nodiscard]] size_t getConnectionCount() override {
+    [[nodiscard]] std::size_t getConnectionCount() override {
         SLogger::debug("ConnectionManager::getConnectionCount() start");
         auto result = this->getConnections().size();
         SLogger::debug("ConnectionManager::getConnectionCount() end");
@@ -535,15 +527,15 @@ public:
         this->locks.removeWeakLocked(nodeId, lockId);
     }
 
-    [[nodiscard]] size_t getLocalLockedConnectionCount() override {
+    [[nodiscard]] std::size_t getLocalLockedConnectionCount() override {
         return this->locks.getLocalLockedConnectionCount();
     }
 
-    [[nodiscard]] size_t getRemoteLockedConnectionCount() override {
+    [[nodiscard]] std::size_t getRemoteLockedConnectionCount() override {
         return this->locks.getRemoteLockedConnectionCount();
     }
 
-    [[nodiscard]] size_t getWeakLockedConnectionCount() override {
+    [[nodiscard]] std::size_t getWeakLockedConnectionCount() override {
         return this->locks.getWeakLockedConnectionCount();
     }
 
@@ -633,7 +625,7 @@ private:
         // without the state-machine mutex held).
         std::shared_ptr<Endpoint> existingEndpoint;
         std::shared_ptr<Endpoint> createdEndpoint;
-        uint64_t sequenceNumber = 0;
+        std::uint64_t sequenceNumber = 0;
         {
             SLogger::debug("ConnectionManager::acceptNewConnection() start");
             std::scoped_lock lock(this->endpointsMutex);

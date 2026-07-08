@@ -3,13 +3,12 @@
 // streamr-dht/connection/endpoint/EndpointStateInterface.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <cstddef>
-#include <memory>
-#include <mutex>
-#include <vector>
 
 export module streamr.dht.EndpointStateInterface;
+
+import std;
 
 import streamr.dht.Connection;
 import streamr.dht.IPendingConnection;

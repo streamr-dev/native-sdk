@@ -4,17 +4,12 @@
 // ContactList — it keeps its own contactsById/contactIds and only reuses
 // ContactList's event tuple (matching TS).
 module;
+#include <new>
 
-#include <algorithm>
-#include <cstddef>
-#include <map>
-#include <memory>
-#include <optional>
-#include <set>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.SortedContactList;
+
+import std;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.dht.ContactList;
@@ -35,7 +30,7 @@ struct SortedContactListOptions {
     // all contacts in this list are sorted by the distance to this id
     DhtAddress referenceId;
     bool allowToContainReferenceId;
-    std::optional<size_t> maxSize;
+    std::optional<std::size_t> maxSize;
     // if set, the list can't contain contacts further away than this limit
     std::optional<DhtAddress> nodeIdDistanceLimit;
     // if set, the list can't contain contacts with these ids
@@ -57,7 +52,7 @@ private:
 
     // Lowest index at which contactId keeps contactIds sorted ascending by
     // distance (lodash sortedIndexBy: leftmost position for equal keys).
-    [[nodiscard]] size_t sortedInsertionIndex(
+    [[nodiscard]] std::size_t sortedInsertionIndex(
         const DhtAddress& contactId) const {
         const double distance = this->distanceToReferenceId(contactId);
         const auto it = std::lower_bound(
@@ -67,7 +62,7 @@ private:
             [this](const DhtAddress& existing, double value) {
                 return this->distanceToReferenceId(existing) < value;
             });
-        return static_cast<size_t>(it - this->contactIds.begin());
+        return static_cast<std::size_t>(it - this->contactIds.begin());
     }
 
 public:
@@ -151,14 +146,14 @@ public:
     // Closest first, then others in ascending distance order.
     [[nodiscard]] std::vector<std::shared_ptr<C>> getClosestContacts(
         std::optional<int> limit = std::nullopt) const {
-        const size_t count = limit.has_value()
+        const std::size_t count = limit.has_value()
             ? std::min(
                   this->contactIds.size(),
-                  static_cast<size_t>(std::max(limit.value(), 0)))
+                  static_cast<std::size_t>(std::max(limit.value(), 0)))
             : this->contactIds.size();
         std::vector<std::shared_ptr<C>> result;
         result.reserve(count);
-        for (size_t i = 0; i < count; ++i) {
+        for (std::size_t i = 0; i < count; ++i) {
             result.push_back(this->contactsById.at(this->contactIds[i]));
         }
         return result;
@@ -172,8 +167,8 @@ public:
         if (!limit.has_value()) {
             return reversed;
         }
-        const size_t count = std::min(
-            reversed.size(), static_cast<size_t>(std::max(limit.value(), 0)));
+        const std::size_t count = std::min(
+            reversed.size(), static_cast<std::size_t>(std::max(limit.value(), 0)));
         reversed.resize(count);
         return reversed;
     }
@@ -209,10 +204,10 @@ public:
         return result;
     }
 
-    [[nodiscard]] size_t getSize(
+    [[nodiscard]] std::size_t getSize(
         const std::optional<std::set<DhtAddress>>& excludedNodeIds =
             std::nullopt) const {
-        size_t excludedCount = 0;
+        std::size_t excludedCount = 0;
         if (excludedNodeIds.has_value()) {
             for (const auto& nodeId : excludedNodeIds.value()) {
                 if (this->has(nodeId)) {

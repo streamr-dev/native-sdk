@@ -3,13 +3,12 @@
 // streamr-logger/StreamrLogLevel.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <string>
-#include <string_view>
-#include <type_traits>
-#include <variant>
 
 export module streamr.logger.StreamrLogLevel;
+
+import std;
 
 import streamr.logger.StreamrLogColors;
 

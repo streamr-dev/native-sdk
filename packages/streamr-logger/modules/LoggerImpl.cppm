@@ -3,12 +3,12 @@
 // streamr-logger/LoggerImpl.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <source_location>
-#include <string>
-#include <string_view>
 
 export module streamr.logger.LoggerImpl;
+
+import std;
 
 import streamr.logger.StreamrLogLevel;
 

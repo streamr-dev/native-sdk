@@ -2,19 +2,19 @@
 // CONSOLIDATED from the former header streamr-proto-rpc/RpcCommunicator.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
 #include <google/protobuf/any.pb.h>
 #include <magic_enum/magic_enum.hpp>
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 export module streamr.protorpc.RpcCommunicator;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.logger.SLogger;

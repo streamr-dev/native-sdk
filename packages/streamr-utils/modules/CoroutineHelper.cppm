@@ -17,8 +17,8 @@
 // merging miscompiled coroutine resumption. This module exists so that
 // no other unit needs the textual includes; do not reintroduce them.
 module;
+#include <new>
 
-#include <utility>
 
 #include <folly/CancellationToken.h>
 #include <folly/Unit.h>
@@ -35,6 +35,8 @@ module;
 #include <folly/futures/Future.h>
 
 export module streamr.utils.CoroutineHelper;
+
+import std;
 
 export namespace folly::coro {
 

@@ -3,16 +3,12 @@
 // streamr-dht/connection/endpoint/Endpoint.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <tuple>
-#include <vector>
 
 export module streamr.dht.Endpoint;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -72,7 +68,7 @@ private:
     std::recursive_mutex mutex;
     // Highest pending-connection sequence number adopted so far; guarded
     // by mutex. See setConnecting().
-    uint64_t lastConnectingSequence = 0;
+    std::uint64_t lastConnectingSequence = 0;
 
     // --- EndpointStateInterface (called by the state classes) ---
 
@@ -184,7 +180,7 @@ public:
     // still converge on the connection the tie-break chose.
     void setConnecting(
         const std::shared_ptr<IPendingConnection>& pendingConnection,
-        uint64_t sequenceNumber) {
+        std::uint64_t sequenceNumber) {
         SLogger::debug("Endpoint::setConnecting start");
         auto self = this->sharedFromThis<Endpoint>();
         std::function<void()> callout;

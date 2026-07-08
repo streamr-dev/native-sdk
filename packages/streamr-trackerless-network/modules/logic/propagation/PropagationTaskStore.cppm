@@ -3,14 +3,13 @@
 // logic/propagation/PropagationTaskStore.hpp (MODERNIZATION.md Phase 2.6): this
 // file is now the source of truth.
 module;
+#include <new>
 
-#include <chrono>
-#include <optional>
-#include <set>
-#include <string>
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.PropagationTaskStore;
+
+import std;
 
 import streamr.dht.Identifiers;
 import streamr.trackerlessnetwork.FifoMapWithTTL;
@@ -32,7 +31,7 @@ private:
     FifoMapWithTTL<MessageRef, PropagationTask> tasks;
 
 public:
-    PropagationTaskStore(std::chrono::milliseconds ttl, size_t maxTasks)
+    PropagationTaskStore(std::chrono::milliseconds ttl, std::size_t maxTasks)
         : tasks(
               FifoMapWithTtlOptions<MessageRef>{
                   .ttl = ttl,

@@ -2,17 +2,12 @@
 // CONSOLIDATED from the former header logic/proxy/ProxyClient.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <exception>
-#include <map>
-#include <optional>
-#include <random>
-#include <string>
 // Textual: entities reached only through an imported module's global
 // module fragment are not reliably reachable; this unit's code calls
 // streamr::utils::blockingWait and std::mt19937 directly. (The former
@@ -21,6 +16,8 @@ module;
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.ProxyClient;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.dht.DhtCallContext;
@@ -80,12 +77,12 @@ struct ProxyClientOptions {
     PeerDescriptor localPeerDescriptor;
     StreamPartID streamPartId;
     ConnectionLocker& connectionLocker;
-    std::optional<size_t> minPropagationTargets;
+    std::optional<std::size_t> minPropagationTargets;
 };
 
 struct ProxyDefinition {
     std::map<DhtAddress, PeerDescriptor> nodes;
-    size_t connectionCount;
+    std::size_t connectionCount;
     ProxyDirection direction;
     EthereumAddress userId;
 };
@@ -226,7 +223,7 @@ public:
         const std::vector<PeerDescriptor>& nodes,
         ProxyDirection direction,
         const EthereumAddress& userId,
-        std::optional<size_t> connectionCount = std::nullopt) {
+        std::optional<std::size_t> connectionCount = std::nullopt) {
         SLogger::trace(
             "Setting proxies",
             {{"streamPartId", this->options.streamPartId},
@@ -291,7 +288,7 @@ public:
     std::pair<
         std::vector<ConnectingToProxyError> /* connection errors */,
         std::vector<PeerDescriptor> /* successfully connected proxies */>
-    openRandomConnections(size_t connectionCount) {
+    openRandomConnections(std::size_t connectionCount) {
         const auto proxiesToAttempt =
             this->definition->nodes | std::views::keys |
             std::views::filter([this](const auto& id) {
@@ -364,7 +361,7 @@ public:
         }
     }
 
-    void closeRandomConnections(size_t connectionCount) {
+    void closeRandomConnections(std::size_t connectionCount) {
         std::vector<std::pair<DhtAddress, ProxyConnection>> proxiesToDisconnect;
         std::ranges::sample(
             this->connections,

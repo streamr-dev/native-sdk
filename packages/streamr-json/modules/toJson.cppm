@@ -3,14 +3,8 @@
 // streamr-json/toJson.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <cstddef>
-#include <initializer_list>
-#include <map>
-#include <string>
-#include <string_view>
-#include <type_traits>
-#include <vector>
 #include <boost/pfr.hpp>
 #include <boost/pfr/core.hpp>
 #include <boost/pfr/core_name.hpp>
@@ -19,6 +13,8 @@ module;
 #include <nlohmann/json.hpp>
 
 export module streamr.json.toJson;
+
+import std;
 
 import streamr.json.jsonConcepts;
 
@@ -199,7 +195,7 @@ public:
                 // the use of cast exists to avoid a warning on Windows
                 // (according to nlohmann)
                 return element.isArray() && element.getSize() == 2 &&
-                    element[static_cast<size_t>(0)].is_string();
+                    element[static_cast<std::size_t>(0)].is_string();
             });
 
         if (isObject) {
@@ -222,7 +218,7 @@ public:
 
     [[nodiscard]] json getJson() const { return jsonData; }
 
-    [[nodiscard]] const json& operator[](size_t index) const {
+    [[nodiscard]] const json& operator[](std::size_t index) const {
         return jsonData[index];
     }
 
@@ -230,11 +226,11 @@ public:
 
     [[nodiscard]] bool isArray() const { return jsonData.is_array(); }
 
-    [[nodiscard]] bool isString(size_t index) {
+    [[nodiscard]] bool isString(std::size_t index) {
         return jsonData[index].is_string();
     }
 
-    [[nodiscard]] size_t getSize() const { return jsonData.size(); }
+    [[nodiscard]] std::size_t getSize() const { return jsonData.size(); }
 };
 
 template <typename T>

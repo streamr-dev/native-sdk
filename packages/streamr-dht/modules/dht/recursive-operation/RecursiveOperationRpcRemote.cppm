@@ -7,15 +7,13 @@
 // these for every contact, so RoutingSession cannot compile without it.
 // Only the routeRequest client call is needed here.
 module;
+#include <new>
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
-#include <string>
-#include <utility>
 
 export module streamr.dht.RecursiveOperationRpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 

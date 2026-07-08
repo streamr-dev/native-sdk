@@ -12,22 +12,13 @@
 // DhtNodeRpcLocal, RouterRpcLocal) and letting the unit test substitute a
 // mock router.
 module;
+#include <new>
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <cstddef>
-#include <functional>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <stdexcept>
-#include <string>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.RecursiveOperationManager;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -106,7 +97,7 @@ struct RecursiveOperationManagerOptions {
 
 class RecursiveOperationManager : public EnableSharedFromThis {
 private:
-    static constexpr size_t closestConnectedNodesCount = 5;
+    static constexpr std::size_t closestConnectedNodesCount = 5;
     static constexpr std::chrono::milliseconds sessionRpcTimeout{10000};
     static constexpr std::chrono::milliseconds deleteWaitTime{50};
 
@@ -159,7 +150,7 @@ private:
     }
 
     [[nodiscard]] std::vector<PeerDescriptor> getClosestConnectedNodes(
-        const DhtAddress& referenceId, size_t limit) {
+        const DhtAddress& referenceId, std::size_t limit) {
         std::vector<std::shared_ptr<DhtNodeRpcRemote>> connectedNodes;
         for (const auto& connection :
              this->options.connectionsView.getConnections()) {
@@ -317,7 +308,7 @@ public:
             }
         }
         auto self = this->sharedFromThis<RecursiveOperationManager>();
-        const size_t waitedRoutingPathCompletions =
+        const std::size_t waitedRoutingPathCompletions =
             this->options.connectionsView.getConnectionCount() > 1 ? 2 : 1;
         auto session = RecursiveOperationSession::newInstance(
             RecursiveOperationSessionOptions{

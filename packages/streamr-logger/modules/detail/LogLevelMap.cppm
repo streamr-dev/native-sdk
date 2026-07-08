@@ -3,15 +3,13 @@
 // streamr-logger/detail/LogLevelMap.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <algorithm>
-#include <array>
-#include <string>
-#include <string_view>
-#include <variant>
 #include <folly/logging/LogLevel.h>
 
 export module streamr.logger.LogLevelMap;
+
+import std;
 
 import streamr.logger.StreamrLogLevel;
 
@@ -27,7 +25,7 @@ struct LogLevelMap {
     using StreamrLogLevel = streamr::logger::StreamrLogLevel;
     using Mapping = std::pair<StreamrLogLevel, folly::LogLevel>;
 
-    static constexpr size_t logLevelMapSize = 6;
+    static constexpr std::size_t logLevelMapSize = 6;
     std::array<
         Mapping,
         logLevelMapSize>

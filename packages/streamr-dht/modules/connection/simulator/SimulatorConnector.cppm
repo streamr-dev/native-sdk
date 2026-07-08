@@ -8,18 +8,13 @@
 // deviation rule of trackerless-network-completion-plan.md: the C++
 // connection architecture wins, the TS behavior is preserved).
 module;
+#include <new>
 
-#include <exception>
-#include <functional>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <utility>
 
-#include <string>
 
 export module streamr.dht.SimulatorConnector;
+
+import std;
 
 import streamr.dht.protos;
 

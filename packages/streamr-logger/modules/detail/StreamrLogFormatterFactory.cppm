@@ -3,11 +3,13 @@
 // streamr-logger/detail/StreamrLogFormatterFactory.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <memory>
 #include <folly/logging/StandardLogHandlerFactory.h>
 
 export module streamr.logger.StreamrLogFormatterFactory;
+
+import std;
 
 import streamr.logger.StreamrLogFormatter;
 

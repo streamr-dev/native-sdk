@@ -12,21 +12,13 @@
 // findClosestNodes awaits them under one folly timeout with a `done` flag
 // standing in for the TS Gate. See DiscoverySession for the rationale.
 module;
+#include <new>
 
-#include <algorithm>
-#include <chrono>
-#include <cstddef>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
-#include <coroutine> // IWYU pragma: keep
 
 export module streamr.dht.RingDiscoverySession;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -61,8 +53,8 @@ using streamr::dht::contact::RingIdRaw;
 
 struct RingDiscoverySessionOptions {
     RingIdRaw targetId;
-    size_t parallelism;
-    size_t noProgressLimit;
+    std::size_t parallelism;
+    std::size_t noProgressLimit;
     PeerManager& peerManager;
     // Mutated by this session (and sibling sessions that share the set); owned
     // by the caller and outlives findClosestNodes.
@@ -73,7 +65,7 @@ struct RingDiscoverySessionOptions {
 class RingDiscoverySession {
 private:
     std::string id = Uuid::v4();
-    size_t noProgressCounter = 0;
+    std::size_t noProgressCounter = 0;
     std::set<DhtAddress> ongoingRequests;
     bool done = false; // the single-shot Gate, guarded by the mutex
     std::recursive_mutex mutex;
@@ -182,9 +174,9 @@ private:
     mergeSides(const RingContacts<DhtNodeRpcRemote>& uncontacted) {
         std::vector<std::shared_ptr<DhtNodeRpcRemote>> merged;
         std::set<DhtAddress> alreadyInMerged;
-        const size_t length =
+        const std::size_t length =
             std::max(uncontacted.left.size(), uncontacted.right.size());
-        for (size_t i = 0; i < length; ++i) {
+        for (std::size_t i = 0; i < length; ++i) {
             if (i < uncontacted.left.size() &&
                 alreadyInMerged.insert(uncontacted.left[i]->getNodeId())
                     .second) {
@@ -267,7 +259,7 @@ public:
         }
         std::vector<folly::coro::Task<void>> workers;
         workers.reserve(this->options.parallelism);
-        for (size_t i = 0; i < this->options.parallelism; ++i) {
+        for (std::size_t i = 0; i < this->options.parallelism; ++i) {
             workers.push_back(this->worker());
         }
         co_await streamr::utils::co_withCancellation(

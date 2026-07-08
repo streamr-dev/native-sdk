@@ -3,14 +3,15 @@
 // streamr-utils/toCoroTask.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <type_traits>
 
 export module streamr.utils.toCoroTask;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 export namespace streamr::utils {

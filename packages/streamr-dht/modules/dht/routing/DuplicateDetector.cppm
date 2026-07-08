@@ -3,13 +3,12 @@
 // streamr-dht/dht/routing/DuplicateDetector.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <new>
 
-#include <mutex>
-#include <string>
-#include <unordered_set>
-#include <vector>
 
 export module streamr.dht.DuplicateDetector;
+
+import std;
 export namespace streamr::dht::routing {
 
 class DuplicateDetector {
@@ -18,10 +17,10 @@ private:
     std::recursive_mutex valuesMutex;
     std::vector<std::string> queue;
     std::recursive_mutex queueMutex;
-    size_t maxItemCount;
+    std::size_t maxItemCount;
 
 public:
-    explicit DuplicateDetector(size_t maxItemCount)
+    explicit DuplicateDetector(std::size_t maxItemCount)
         : maxItemCount(maxItemCount) {}
     virtual ~DuplicateDetector() = default;
 
@@ -41,7 +40,7 @@ public:
         return this->values.contains(value);
     }
 
-    [[nodiscard]] size_t size() {
+    [[nodiscard]] std::size_t size() {
         std::scoped_lock lock(this->valuesMutex);
         return this->values.size();
     }

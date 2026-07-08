@@ -2,16 +2,13 @@
 // CONSOLIDATED from the former header logic/propagation/FifoMapWithTTL.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new>
 
-#include <chrono>
-#include <functional>
-#include <map>
-#include <mutex>
-#include <optional>
-#include <ranges>
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.FifoMapWithTTL;
+
+import std;
 
 import streamr.trackerlessnetwork.RandomAccessQueue;
 // The MessageRef ordering operator moved to the
@@ -25,7 +22,7 @@ export namespace streamr::trackerlessnetwork::propagation {
 template <typename KeyType>
 struct FifoMapWithTtlOptions {
     std::chrono::milliseconds ttl;
-    size_t maxSize;
+    std::size_t maxSize;
     std::optional<std::function<void(KeyType)>> onItemDropped;
     std::optional<std::function<std::chrono::milliseconds()>> timeProvider;
 };
@@ -43,7 +40,7 @@ private:
     std::map<KeyType, Item> items;
     RandomAccessQueue<KeyType> dropQueue;
     std::chrono::milliseconds ttl;
-    size_t maxSize;
+    std::size_t maxSize;
     std::function<void(KeyType)> onItemDropped;
     std::function<std::chrono::milliseconds()> timeProvider;
 
