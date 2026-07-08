@@ -95,7 +95,7 @@ public:
             ConnectionType::SIMULATOR_CLIENT,
             this->simulator);
 
-        auto pendingConnection = std::make_shared<PendingConnection>(
+        auto pendingConnection = PendingConnection::newInstance(
             targetPeerDescriptor, std::move(errorCallback));
 
         auto outgoingHandshaker = OutgoingHandshaker::newInstance(

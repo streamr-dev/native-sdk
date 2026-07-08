@@ -126,7 +126,7 @@ public:
         const auto url = Connectivity::connectivityMethodToWebsocketUrl(
             targetPeerDescriptor.websocket());
 
-        auto pendingConnection = std::make_shared<PendingConnection>(
+        auto pendingConnection = PendingConnection::newInstance(
             targetPeerDescriptor, std::move(errorCallback));
 
         std::shared_ptr<OutgoingHandshaker> outgoingHandshaker =

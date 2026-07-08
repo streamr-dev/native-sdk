@@ -158,7 +158,7 @@ protected:
 
         if (!this->pendingConnection) {
             this->pendingConnection =
-                std::make_shared<PendingConnection>(source);
+                PendingConnection::newInstance(source);
             if (this->onNewConnectionCallback) {
                 if (!this->onNewConnectionCallback.value()(
                         this->pendingConnection)) {

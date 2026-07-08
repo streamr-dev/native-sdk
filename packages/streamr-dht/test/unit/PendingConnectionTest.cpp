@@ -39,13 +39,13 @@ public:
 class PendingConnectionTest : public ::testing::Test {
 protected:
     PeerDescriptor mockPeerDescriptor;
-    std::unique_ptr<PendingConnection> pendingConnection;
+    std::shared_ptr<PendingConnection> pendingConnection;
     static constexpr auto timeout = std::chrono::seconds(5);
     static constexpr auto retryInternal = std::chrono::milliseconds(100);
 
     void SetUp() override {
         mockPeerDescriptor = createMockPeerDescriptor();
-        pendingConnection = std::make_unique<PendingConnection>(
+        pendingConnection = PendingConnection::newInstance(
             mockPeerDescriptor,
             std::nullopt,
             std::chrono::milliseconds(500)); // NOLINT
@@ -126,6 +126,29 @@ TEST_F(PendingConnectionTest, ReplaysDisconnectedToLateListener) {
     pendingConnection->once<Disconnected>(
         [&](bool /* gracefulLeave */) { isEmitted = true; });
     EXPECT_TRUE(isEmitted);
+}
+
+// Regression test for the connect-timeout use-after-free: if the
+// PendingConnection is dropped (without close()/destroy()) before its timeout
+// fires, the timer must not touch the freed object. Before the weak-self fix,
+// the timer captured raw `this` and fired close() on freed memory, emitting
+// Disconnected on a destroyed EventEmitter ("mutex lock failed").
+TEST_F(PendingConnectionTest, DoesNotCrashIfDroppedBeforeTimeout) {
+    auto shortLived = PendingConnection::newInstance(
+        createMockPeerDescriptor(),
+        std::nullopt,
+        std::chrono::milliseconds(50)); // NOLINT
+    shortLived.reset(); // drop it with the timeout still pending
+    // Wait well past the timeout; the timer must be a no-op, not a UAF.
+    std::function<bool()> never = []() { return false; };
+    try {
+        streamr::utils::blockingWait(waitForCondition(
+            std::move(never), std::chrono::milliseconds(300), retryInternal));
+    } catch (...) {
+        // waitForCondition times out (the condition never becomes true); that
+        // is expected — we only care that no crash occurred meanwhile.
+    }
+    SUCCEED();
 }
 
 TEST_F(PendingConnectionTest, DoesNotEmitConnectedIfReplaced) {
