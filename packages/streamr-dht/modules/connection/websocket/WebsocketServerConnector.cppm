@@ -3,7 +3,6 @@
 // streamr-dht/connection/websocket/WebsocketServerConnector.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
-#include <new>
 
 
 

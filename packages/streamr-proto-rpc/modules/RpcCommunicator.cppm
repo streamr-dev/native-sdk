@@ -2,7 +2,6 @@
 // CONSOLIDATED from the former header streamr-proto-rpc/RpcCommunicator.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
-#include <new>
 
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through

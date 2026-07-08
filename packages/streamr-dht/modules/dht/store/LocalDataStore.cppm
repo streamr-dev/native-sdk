@@ -7,7 +7,6 @@
 // test constructs a real one. Each node can store one value per (data key,
 // creator) pair; entries expire after min(entry.ttl, maxTtl).
 module;
-#include <new>
 
 
 export module streamr.dht.LocalDataStore;

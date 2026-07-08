@@ -13,7 +13,6 @@
 // handlers) runs under one recursive mutex; PeerManager is owned through a
 // shared_ptr so the deferred ping handler can pin it.
 module;
-#include <new>
 
 
 

@@ -2,7 +2,6 @@
 // CONSOLIDATED from the former header logic/Utils.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
-#include <new>
 
 #include <boost/algorithm/hex.hpp>
 #include "packages/network/protos/NetworkRpc.pb.h"

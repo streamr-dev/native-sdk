@@ -12,7 +12,6 @@
 // findClosestNodes awaits them under one folly timeout with a `done` flag
 // standing in for the TS Gate. See DiscoverySession for the rationale.
 module;
-#include <new>
 
 
 

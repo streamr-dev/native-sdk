@@ -2,7 +2,6 @@
 // CONSOLIDATED from the former header streamr-dht/transport/FakeTransport.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
-#include <new>
 
 
 

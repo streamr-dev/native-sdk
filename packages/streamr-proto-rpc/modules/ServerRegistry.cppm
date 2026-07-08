@@ -12,7 +12,6 @@
 // The synchronous handleRequest() / registerRpcMethod() path is kept
 // unchanged for direct callers that still want an inline result.
 module;
-#include <new>
 
 // std::coroutine_traits must be visible in every translation unit that
 // defines OR instantiates a coroutine; it cannot arrive through an

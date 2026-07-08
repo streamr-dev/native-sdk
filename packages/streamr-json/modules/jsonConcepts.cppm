@@ -3,7 +3,6 @@
 // streamr-json/jsonConcepts.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
-#include <new>
 
 #include <boost/pfr/traits.hpp>
 #include <nlohmann/json.hpp>

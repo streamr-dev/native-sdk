@@ -24,7 +24,7 @@
 // the TS version throws for undefined regions, the C++ version treats
 // them as region 0. Regions > 15 throw in both.
 module;
-#include <new>
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
 
 

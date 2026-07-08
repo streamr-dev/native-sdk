@@ -10,7 +10,6 @@
 // setImmediate are dispatched onto a small worker executor here, so
 // StoreManager is owned through a shared_ptr.
 module;
-#include <new>
 
 
 

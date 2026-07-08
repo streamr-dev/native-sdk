@@ -9,7 +9,6 @@
 // hazard of a per-entry timer callback capturing a map that is not owned
 // through a shared_ptr.
 module;
-#include <new>
 
 
 export module streamr.utils.MapWithTtl;

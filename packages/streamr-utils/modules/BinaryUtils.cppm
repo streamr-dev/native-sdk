@@ -3,7 +3,6 @@
 // streamr-utils/BinaryUtils.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
-#include <new>
 
 #include <boost/algorithm/hex.hpp>
 

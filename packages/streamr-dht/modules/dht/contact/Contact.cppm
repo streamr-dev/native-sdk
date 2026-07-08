@@ -1,7 +1,6 @@
 // Module streamr.dht.Contact
 // Ported from packages/dht/src/dht/contact/Contact.ts (v103.8.0-rc.3).
 module;
-#include <new>
 
 
 export module streamr.dht.Contact;

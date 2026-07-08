@@ -4,7 +4,7 @@
 // a peer. storeData/replicateData are virtual so a test can substitute a
 // counting mock.
 module;
-#include <new>
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
 
 

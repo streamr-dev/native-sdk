@@ -10,7 +10,6 @@
 // disconnect is a large win. TS uses the npm lru-cache (max 1000, 15 s
 // TTL); this file ports that with a small internal LRU-with-TTL.
 module;
-#include <new>
 
 
 export module streamr.dht.RoutingTablesCache;

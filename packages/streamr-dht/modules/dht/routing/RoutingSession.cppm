@@ -18,7 +18,6 @@
 // RoutingRemoteContact) to break the RoutingTablesCache <-> RoutingSession
 // import cycle that TS tolerates but C++ modules cannot.
 module;
-#include <new>
 
 
 

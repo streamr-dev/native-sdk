@@ -6,7 +6,6 @@
 // the plan phase that first needs them
 // (trackerless-network-completion-plan.md, phase 0.2).
 module;
-#include <new>
 
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"

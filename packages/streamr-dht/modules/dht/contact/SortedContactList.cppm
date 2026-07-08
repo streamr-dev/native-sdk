@@ -4,7 +4,6 @@
 // ContactList — it keeps its own contactsById/contactIds and only reuses
 // ContactList's event tuple (matching TS).
 module;
-#include <new>
 
 
 export module streamr.dht.SortedContactList;

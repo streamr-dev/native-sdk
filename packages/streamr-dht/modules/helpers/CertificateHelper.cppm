@@ -2,7 +2,6 @@
 // CONSOLIDATED from the former header streamr-dht/helpers/CertificateHelper.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
-#include <new>
 
 #include <openssl/bio.h>
 #include <openssl/bn.h>

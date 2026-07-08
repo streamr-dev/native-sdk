@@ -9,7 +9,6 @@
 // `toIterable` generator are omitted. The events are wired to
 // streamr-eventemitter instead of Node's EventEmitter.
 module;
-#include <new>
 
 
 export module streamr.dht.KBucket;

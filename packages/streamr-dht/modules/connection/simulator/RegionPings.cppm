@@ -6,7 +6,6 @@
 // itself is a from-scratch implementation (see
 // trackerless-network-completion-plan.md, decision 3.1).
 module;
-#include <new>
 
 
 export module streamr.dht.RegionPings;

@@ -3,7 +3,6 @@
 // (v103.8.0-rc.3). The TS OrderedMap<RingDistance, C> is a std::map here
 // (ascending key order, same neighbour semantics).
 module;
-#include <new>
 
 
 export module streamr.dht.RingContactList;

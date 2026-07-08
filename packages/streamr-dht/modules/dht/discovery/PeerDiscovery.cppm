@@ -19,7 +19,6 @@
 // shared sets synchronised. This is exercised by the phase A8 integration
 // tests (DhtJoinPeerDiscovery, MultipleEntryPointJoining).
 module;
-#include <new>
 
 
 

@@ -3,7 +3,6 @@
 // The server-side handlers for the DhtNodeRpc service (peer discovery and
 // liveness): getClosestPeers, getClosestRingPeers, ping, leaveNotice.
 module;
-#include <new>
 
 
 export module streamr.dht.DhtNodeRpcLocal;

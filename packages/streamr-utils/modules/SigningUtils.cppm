@@ -3,7 +3,6 @@
 // streamr-utils/SigningUtils.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
-#include <new>
 
 #include <secp256k1.h>
 #include <secp256k1_ecdh.h>

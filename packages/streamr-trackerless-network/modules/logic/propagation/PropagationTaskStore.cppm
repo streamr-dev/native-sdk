@@ -3,7 +3,6 @@
 // logic/propagation/PropagationTaskStore.hpp (MODERNIZATION.md Phase 2.6): this
 // file is now the source of truth.
 module;
-#include <new>
 
 #include "packages/network/protos/NetworkRpc.pb.h"
 

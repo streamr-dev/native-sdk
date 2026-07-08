@@ -2,7 +2,6 @@
 // Ported from packages/dht/src/dht/contact/ringIdentifiers.ts
 // (v103.8.0-rc.3).
 module;
-#include <new>
 
 
 export module streamr.dht.ringIdentifiers;

@@ -10,7 +10,6 @@
 // RecursiveOperationManager) to break the Session <-> Manager import cycle
 // that C++ modules cannot express.
 module;
-#include <new>
 
 
 export module streamr.dht.RecursiveOperationSession;

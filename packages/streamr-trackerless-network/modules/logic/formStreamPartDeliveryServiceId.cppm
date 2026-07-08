@@ -2,7 +2,6 @@
 // CONSOLIDATED from the former header logic/formStreamPartDeliveryServiceId.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
-#include <new>
 
 // The string concatenation below needs std::operator+ to be TEXTUALLY
 // visible: operators reached only through an imported module's global

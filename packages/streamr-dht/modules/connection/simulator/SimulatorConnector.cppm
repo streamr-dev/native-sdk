@@ -8,7 +8,6 @@
 // deviation rule of trackerless-network-completion-plan.md: the C++
 // connection architecture wins, the TS behavior is preserved).
 module;
-#include <new>
 
 
 

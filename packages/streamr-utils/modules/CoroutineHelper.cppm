@@ -17,7 +17,6 @@
 // merging miscompiled coroutine resumption. This module exists so that
 // no other unit needs the textual includes; do not reintroduce them.
 module;
-#include <new>
 
 
 #include <folly/CancellationToken.h>

@@ -4,7 +4,6 @@
 // a hop to report a recursive operation's result back to the initiator's
 // session (fire-and-forget sendResponse).
 module;
-#include <new>
 
 
 

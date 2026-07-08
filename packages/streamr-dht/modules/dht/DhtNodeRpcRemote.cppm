@@ -3,7 +3,7 @@
 // The client-side wrapper for a peer's DhtNodeRpc service. Also serves as
 // the k-bucket contact for that peer (getId()/getVectorClock()).
 module;
-#include <new>
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.

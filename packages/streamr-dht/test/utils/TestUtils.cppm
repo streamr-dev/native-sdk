@@ -6,7 +6,6 @@
 // DhtNode etc.) are ported by the plan phase that first needs them
 // (trackerless-network-completion-plan.md, phase 0.2).
 module;
-#include <new>
 
 #include <gtest/gtest.h>
 #include "packages/dht/protos/DhtRpc.pb.h"

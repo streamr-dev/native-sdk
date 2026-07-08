@@ -13,7 +13,6 @@
 // and SUSPEND the response coroutine instead of blocking the shared
 // delivery thread. Notifications remain synchronous/inline.
 module;
-#include <new>
 
 // std::coroutine_traits must be visible in every translation unit that
 // defines OR instantiates a coroutine; it cannot arrive through an

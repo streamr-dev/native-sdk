@@ -2,7 +2,6 @@
 // CONSOLIDATED from the former header logic/proxy/ProxyConnectionRpcRemote.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
-#include <new>
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.

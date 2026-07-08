@@ -10,7 +10,6 @@
 // callback that the manager wires to kick off the async replication itself,
 // so the local side calls it directly.
 module;
-#include <new>
 
 
 export module streamr.dht.StoreRpcLocal;

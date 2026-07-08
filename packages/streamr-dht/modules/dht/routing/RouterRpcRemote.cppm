@@ -4,7 +4,7 @@
 // routeMessage (forward towards the target by distance) and forwardMessage
 // (forward towards a known reachable-through peer).
 module;
-#include <new>
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
 // std::coroutine_traits must be visible in the TU that defines a coroutine.
 

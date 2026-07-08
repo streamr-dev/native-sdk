@@ -6,7 +6,7 @@
 // made thread-safe (the Simulator dispatcher thread and user threads
 // both call in).
 module;
-#include <new>
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
 
 export module streamr.dht.SimulatorConnection;

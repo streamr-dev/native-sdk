@@ -5,7 +5,6 @@
 // Simulator depends only on these interfaces and the concrete classes
 // depend on the Simulator).
 module;
-#include <new>
 
 
 export module streamr.dht.SimulatorInterfaces;

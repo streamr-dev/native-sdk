@@ -3,7 +3,7 @@
 // streamr-dht/transport/ListeningRpcCommunicator.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
-#include <new>
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
 
 export module streamr.dht.ListeningRpcCommunicator;

@@ -22,7 +22,6 @@
 // a dedicated worker executor; the fan-out runs on whatever executor drives the
 // join and yields at every RPC await.
 module;
-#include <new>
 
 
 

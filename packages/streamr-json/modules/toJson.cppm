@@ -3,7 +3,6 @@
 // streamr-json/toJson.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
-#include <new>
 
 #include <boost/pfr.hpp>
 #include <boost/pfr/core.hpp>

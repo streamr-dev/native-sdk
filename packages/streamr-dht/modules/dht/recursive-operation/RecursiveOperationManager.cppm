@@ -12,7 +12,6 @@
 // DhtNodeRpcLocal, RouterRpcLocal) and letting the unit test substitute a
 // mock router.
 module;
-#include <new>
 
 
 

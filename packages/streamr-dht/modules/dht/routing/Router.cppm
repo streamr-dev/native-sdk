@@ -28,7 +28,6 @@
 // (a positive nice value, best-effort per-platform) so routing yields the
 // CPU to our own work under contention.
 module;
-#include <new>
 
 
 

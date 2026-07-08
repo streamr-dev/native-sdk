@@ -78,6 +78,39 @@ def qualify(text):
     return QUALIFY_RE.sub(repl, text)
 
 
+# Module units that instantiate a std container (or other libc++ allocation)
+# over a LOCALLY-DEFINED type need a textual <new> in their global module
+# fragment. Reason: `import std` re-exports the global operator new
+# unconditionally (libc++ std/new.inc: `export { using ::operator new; }`),
+# which is ambiguous with the compiler's implicit predeclared operator new when
+# libc++'s allocator is instantiated in the consuming TU ("call to 'operator
+# new' is ambiguous"). A textual <new> declares ::operator new in that unit's
+# own global module, merging the two candidates. This set is determined
+# EMPIRICALLY (strip <new> everywhere, build --keep-going, collect the failing
+# units, iterate). A future std-container-of-local-type in another unit will
+# fail the same way at compile time until it is added here.
+NEEDS_NEW = {
+    "streamr-dht/modules/connection/Handshaker.cppm",
+    "streamr-dht/modules/connection/endpoint/ConnectedEndpointState.cppm",
+    "streamr-dht/modules/connection/endpoint/ConnectingEndpointState.cppm",
+    "streamr-dht/modules/connection/endpoint/DisconnectedEndpointState.cppm",
+    "streamr-dht/modules/connection/endpoint/Endpoint.cppm",
+    "streamr-dht/modules/connection/endpoint/InitialEndpointState.cppm",
+    "streamr-dht/modules/connection/simulator/Simulator.cppm",
+    "streamr-dht/modules/connection/simulator/SimulatorConnection.cppm",
+    "streamr-dht/modules/dht/DhtNodeRpcRemote.cppm",
+    "streamr-dht/modules/dht/recursive-operation/RecursiveOperationRpcRemote.cppm",
+    "streamr-dht/modules/dht/routing/RouterRpcRemote.cppm",
+    "streamr-dht/modules/dht/store/StoreRpcRemote.cppm",
+    "streamr-dht/modules/transport/ListeningRpcCommunicator.cppm",
+    "streamr-trackerless-network/modules/logic/DuplicateMessageDetector.cppm",
+    "streamr-trackerless-network/modules/logic/NodeList.cppm",
+}
+
+NEW_INCLUDE = ("#include <new> // operator new ambiguity under import std "
+               "(local-type container allocation) — see convert-to-import-std.py\n")
+
+
 def convert(path: Path):
     text = path.read_text()
     lines = text.splitlines(keepends=True)
@@ -114,17 +147,16 @@ def convert(path: Path):
                 inserted = True
         body = "".join(out)
 
-    # 3. keep the global operator new visible. `import std` declares operator
-    #    new in module std; without a textual declaration too, it is ambiguous
-    #    with the implicit global one when a std container allocation is
-    #    instantiated with a locally-defined type ("call to 'operator new' is
-    #    ambiguous"). A textual <new> in the global module fragment resolves it.
-    if "import std;" in body and "#include <new>" not in body:
+    # 3. for the units that need it (see NEEDS_NEW), add a textual <new> to the
+    #    global module fragment to resolve the operator-new ambiguity.
+    key = path.as_posix().split("packages/", 1)[-1]
+    if (key in NEEDS_NEW and "import std;" in body
+            and "#include <new>" not in body):
         out2, done2 = [], False
         for ln in body.splitlines(keepends=True):
             out2.append(ln)
             if not done2 and ln.rstrip("\n") == "module;":
-                out2.append("#include <new>\n")
+                out2.append(NEW_INCLUDE)
                 done2 = True
         body = "".join(out2)
 

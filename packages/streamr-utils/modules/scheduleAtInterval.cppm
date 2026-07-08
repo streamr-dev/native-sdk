@@ -10,7 +10,6 @@
 // pool, so this maintenance work never runs on a caller/delivery thread —
 // stopping as soon as the abort signal requests cancellation.
 module;
-#include <new>
 
 
 
