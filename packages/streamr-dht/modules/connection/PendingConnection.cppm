@@ -10,12 +10,14 @@ module;
 #include <functional>
 #include <memory>
 #include <optional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.PendingConnection;
 
+import streamr.dht.protos;
+
 import streamr.utils.AbortController;
 import streamr.utils.AbortableTimers;
+import streamr.utils.EnableSharedFromThis;
 import streamr.logger.SLogger;
 import streamr.dht.Connection;
 import streamr.dht.IPendingConnection;
@@ -26,6 +28,7 @@ import streamr.dht.Identifiers;
 // at file scope than inside the package namespace.
 using streamr::utils::AbortableTimers;
 using streamr::utils::AbortController;
+using streamr::utils::EnableSharedFromThis;
 // Self-sufficient shorthand (was inherited textually from a
 // neighboring header before consolidation).
 using streamr::logger::SLogger;
@@ -36,7 +39,8 @@ using ::dht::PeerDescriptor;
 using streamr::dht::Identifiers;
 using streamr::dht::connection::Connection;
 
-class PendingConnection : public IPendingConnection {
+class PendingConnection : public IPendingConnection,
+                          public EnableSharedFromThis {
 private:
     AbortController connectingAbortController;
     PeerDescriptor remotePeerDescriptor;
@@ -45,20 +49,54 @@ private:
     bool replacedAsDuplicate = false;
     bool stopped = false;
 
-public:
+protected:
     explicit PendingConnection(
+        PeerDescriptor remotePeerDescriptor,
+        std::optional<std::function<void(std::exception_ptr)>> errorCallback =
+            std::nullopt)
+        : errorCallback(std::move(errorCallback)),
+          remotePeerDescriptor(std::move(remotePeerDescriptor)) {}
+
+    // The connect-timeout timer must capture a WEAK self, not `this`: the
+    // timer can outlive the PendingConnection (a connect that never completes,
+    // e.g. to an offline peer, is torn down while its timeout is still
+    // pending), and firing on a freed object would emit Disconnected on a
+    // destroyed EventEmitter. Scheduled from newInstance (after make_shared, so
+    // sharedFromThis works); the destructor aborts the timer as a backstop.
+    void scheduleConnectingTimeout(std::chrono::milliseconds timeout) {
+        std::weak_ptr<PendingConnection> weakSelf =
+            this->sharedFromThis<PendingConnection>();
+        AbortableTimers::setAbortableTimeout(
+            [weakSelf]() {
+                if (auto self = weakSelf.lock()) {
+                    self->close(false);
+                }
+            },
+            timeout,
+            this->connectingAbortController.getSignal());
+    }
+
+public:
+    [[nodiscard]] static std::shared_ptr<PendingConnection> newInstance(
         PeerDescriptor remotePeerDescriptor,
         std::optional<std::function<void(std::exception_ptr)>> errorCallback =
             std::nullopt,
         std::chrono::milliseconds timeout =
-            std::chrono::milliseconds(15 * 1000)) // NOLINT
-        : errorCallback(std::move(errorCallback)),
-          remotePeerDescriptor(std::move(remotePeerDescriptor)) {
-        AbortableTimers::setAbortableTimeout(
-            [this]() { this->close(false); },
-            timeout,
-            this->connectingAbortController.getSignal());
+            std::chrono::milliseconds(15 * 1000)) { // NOLINT
+        struct MakeSharedEnabler : public PendingConnection {
+            MakeSharedEnabler(
+                PeerDescriptor descriptor,
+                std::optional<std::function<void(std::exception_ptr)>> callback)
+                : PendingConnection(
+                      std::move(descriptor), std::move(callback)) {}
+        };
+        auto instance = std::make_shared<MakeSharedEnabler>(
+            std::move(remotePeerDescriptor), std::move(errorCallback));
+        instance->scheduleConnectingTimeout(timeout);
+        return instance;
     }
+
+    ~PendingConnection() override { this->connectingAbortController.abort(); }
 
     void replaceAsDuplicate() override {
         SLogger::trace(

@@ -8,9 +8,10 @@ module;
 
 #include <functional>
 #include <string>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.RecursiveOperationRpcLocal;
+
+import streamr.dht.protos;
 
 import streamr.logger.SLogger;
 import streamr.dht.DhtRpcServer;

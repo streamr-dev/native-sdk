@@ -7,9 +7,10 @@ module;
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.ringIdentifiers;
+
+import streamr.dht.protos;
 
 import streamr.utils.Branded;
 

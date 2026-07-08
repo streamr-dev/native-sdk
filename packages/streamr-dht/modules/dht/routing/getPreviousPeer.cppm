@@ -5,9 +5,10 @@
 module;
 
 #include <optional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.getPreviousPeer;
+
+import streamr.dht.protos;
 
 export namespace streamr::dht::routing {
 

@@ -22,9 +22,10 @@ module;
 #include <tuple>
 #include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.RecursiveOperationSession;
+
+import streamr.dht.protos;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.utils.AbortController;

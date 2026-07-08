@@ -6,9 +6,10 @@ module;
 #include <optional>
 #include <string>
 #include <tuple>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.Handshaker;
+
+import streamr.dht.protos;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;

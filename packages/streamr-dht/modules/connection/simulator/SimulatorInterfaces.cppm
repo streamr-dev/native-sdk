@@ -9,9 +9,10 @@ module;
 #include <memory>
 #include <optional>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.SimulatorInterfaces;
+
+import streamr.dht.protos;
 
 export namespace streamr::dht::connection::simulator {
 

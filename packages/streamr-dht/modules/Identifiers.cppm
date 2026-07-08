@@ -3,12 +3,14 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.Identifiers;
+
+import streamr.dht.protos;
 
 import streamr.utils.BinaryUtils;
 import streamr.utils.Branded;

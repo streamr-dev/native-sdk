@@ -30,11 +30,12 @@ module;
 #include <string>
 #include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <coroutine> // IWYU pragma: keep
 
 export module streamr.dht.PeerDiscovery;
+
+import streamr.dht.protos;
 
 import streamr.utils.AbortableTimers;
 import streamr.utils.AbortController;

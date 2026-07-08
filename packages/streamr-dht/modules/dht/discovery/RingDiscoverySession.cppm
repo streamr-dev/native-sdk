@@ -23,11 +23,12 @@ module;
 #include <string>
 #include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <coroutine> // IWYU pragma: keep
 
 export module streamr.dht.RingDiscoverySession;
+
+import streamr.dht.protos;
 
 import streamr.utils.AbortController;
 import streamr.utils.CoroutineHelper;

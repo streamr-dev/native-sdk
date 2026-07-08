@@ -5,11 +5,12 @@
 module;
 
 #include <cstddef>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.ConnectionLocker;
+
+import streamr.dht.protos;
 
 import streamr.dht.ConnectionLockStates;
 import streamr.dht.Identifiers;

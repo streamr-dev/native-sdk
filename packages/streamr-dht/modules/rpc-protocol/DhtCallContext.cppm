@@ -5,9 +5,10 @@
 module;
 
 #include <optional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.DhtCallContext;
+
+import streamr.dht.protos;
 export namespace streamr::dht::rpcprotocol {
 
 using ::dht::PeerDescriptor;

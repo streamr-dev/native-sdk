@@ -5,11 +5,12 @@
 module;
 
 #include <functional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.WebsocketClientConnectorRpcLocal;
+
+import streamr.dht.protos;
 
 import streamr.dht.DhtRpcServer;
 import streamr.utils.AbortController;

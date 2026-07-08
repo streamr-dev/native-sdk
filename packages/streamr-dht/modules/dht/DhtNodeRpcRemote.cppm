@@ -13,11 +13,12 @@ module;
 #include <optional>
 #include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.DhtNodeRpcRemote;
+
+import streamr.dht.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.Uuid;

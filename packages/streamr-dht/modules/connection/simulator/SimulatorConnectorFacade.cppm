@@ -4,13 +4,15 @@
 // Ported from the TS SimulatorConnectorFacade
 // (packages/dht/src/connection/ConnectorFacade.ts, v103.8.0-rc.3).
 module;
+#include <exception>
 
 #include <functional>
 #include <memory>
 #include <utility>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.SimulatorConnectorFacade;
+
+import streamr.dht.protos;
 
 import streamr.dht.ConnectorFacade;
 import streamr.dht.Identifiers;

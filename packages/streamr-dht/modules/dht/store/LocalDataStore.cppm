@@ -9,13 +9,15 @@
 module;
 
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <map>
 #include <optional>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.LocalDataStore;
+
+import streamr.dht.protos;
 
 import streamr.utils.MapWithTtl;
 import streamr.dht.Identifiers;

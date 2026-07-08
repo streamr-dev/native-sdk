@@ -42,9 +42,10 @@ module;
 #include <utility>
 #include <variant>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.Router;
+
+import streamr.dht.protos;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.utils.AbortController;

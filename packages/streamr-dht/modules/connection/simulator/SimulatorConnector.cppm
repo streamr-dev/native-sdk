@@ -16,11 +16,12 @@ module;
 #include <mutex>
 #include <optional>
 #include <utility>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.SimulatorConnector;
+
+import streamr.dht.protos;
 
 import streamr.dht.Connection;
 import streamr.dht.Handshaker;
@@ -94,7 +95,7 @@ public:
             ConnectionType::SIMULATOR_CLIENT,
             this->simulator);
 
-        auto pendingConnection = std::make_shared<PendingConnection>(
+        auto pendingConnection = PendingConnection::newInstance(
             targetPeerDescriptor, std::move(errorCallback));
 
         auto outgoingHandshaker = OutgoingHandshaker::newInstance(

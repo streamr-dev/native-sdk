@@ -7,9 +7,10 @@
 module;
 
 #include <memory>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.SimulatorTransport;
+
+import streamr.dht.protos;
 
 import streamr.dht.ConnectionManager;
 import streamr.dht.ConnectorFacade;

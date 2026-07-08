@@ -3,6 +3,10 @@
 // streamr-dht/connection/ConnectionManager.hpp (MODERNIZATION.md Phase 2.6):
 // this file is now the source of truth.
 module;
+#include <algorithm>
+#include <atomic>
+#include <functional>
+#include <ranges>
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
@@ -13,11 +17,12 @@ module;
 #include <memory>
 #include <mutex>
 #include <utility>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.ConnectionManager;
+
+import streamr.dht.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.protorpc.RpcCommunicator;

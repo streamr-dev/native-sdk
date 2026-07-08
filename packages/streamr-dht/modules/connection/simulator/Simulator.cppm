@@ -40,11 +40,12 @@ module;
 #include <stdexcept>
 #include <thread>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.Simulator;
+
+import streamr.dht.protos;
 
 import streamr.dht.Identifiers;
 import streamr.dht.RegionPings;

@@ -11,9 +11,10 @@ module;
 #include <mutex>
 #include <tuple>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.Endpoint;
+
+import streamr.dht.protos;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;

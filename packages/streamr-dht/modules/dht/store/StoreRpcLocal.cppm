@@ -16,9 +16,10 @@ module;
 #include <cstdint>
 #include <functional>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.StoreRpcLocal;
+
+import streamr.dht.protos;
 
 import streamr.logger.SLogger;
 import streamr.dht.DhtRpcServer;
