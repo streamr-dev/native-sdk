@@ -21,7 +21,7 @@ TEST(WebsocketClientConnectorRpcLocal, TestCanBeCreated) {
     WebsocketClientConnectorRpcLocalOptions options{
         .connect =
             [](const PeerDescriptor& peer) {
-                return std::make_shared<PendingConnection>(peer);
+                return PendingConnection::newInstance(peer);
             },
         .hasConnection = [](const DhtAddress& /*nodeId*/) { return false; },
         .onNewConnection =
