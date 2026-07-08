@@ -157,8 +157,7 @@ protected:
             Identifiers::getNodeIdFromPeerDescriptor(source));
 
         if (!this->pendingConnection) {
-            this->pendingConnection =
-                PendingConnection::newInstance(source);
+            this->pendingConnection = PendingConnection::newInstance(source);
             if (this->onNewConnectionCallback) {
                 if (!this->onNewConnectionCallback.value()(
                         this->pendingConnection)) {
