@@ -304,6 +304,20 @@ public:
             connector);
     }
 
+    // Deregister a stopped node's connector. A later connect() to it then
+    // hits the "Target connector not found" fast-fail in
+    // executeConnectOperation and the source's connectedCallback is invoked
+    // with an error immediately, instead of the connect hanging until the
+    // connection/RPC timeout. (Without this, joining a DHT through an offline
+    // entry point stalls the whole join, since
+    // ConnectionManager::lockConnection blockingWaits on the lock RPC to that
+    // peer.)
+    void removeConnector(const PeerDescriptor& peerDescriptor) {
+        std::scoped_lock lock(this->mMutex);
+        this->connectors.erase(
+            Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor));
+    }
+
     // Called by the target-side connector (from the dispatcher thread,
     // via handleIncomingConnection) once it has created the server-side
     // connection for an incoming connect.
