@@ -91,14 +91,21 @@ runs:
     # Saved from main-branch runs only, so entries rotate once per merge
     # instead of once per push, and a broken PR tree can never poison the
     # cache (lesson from the corrupted arm64-ios dependency cache).
+    # v2 generation: `import std` requires CMAKE_CXX_MODULE_STD to be set
+    # before project()/CXX detection, and CMake freezes that detection into
+    # the build tree's CMakeCache. A v1 tree cached before import std cannot
+    # be reconfigured into an import-std build ("__CMAKE::CXX26 ... not
+    # provided by the toolchain; must be set before CXX is enabled"), so the
+    # generation is bumped to force a clean configure. Post-merge, v2 trees
+    # are import-std-configured and incremental caching resumes.
     - name: cache build tree
       id: cache-buildtree
       uses: actions/cache/restore@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v1-${{ steps.keys.outputs.vcpkg_sha }}-${{ github.sha }}
+        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v2-${{ steps.keys.outputs.vcpkg_sha }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v1-${{ steps.keys.outputs.vcpkg_sha }}-
-          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v1-
+          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v2-${{ steps.keys.outputs.vcpkg_sha }}-
+          ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v2-
         path: |
           ./build
           !./build/vcpkg_installed
@@ -160,7 +167,7 @@ runs:
       if: github.ref == 'refs/heads/main' && steps.cache-buildtree.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v1-${{ steps.keys.outputs.vcpkg_sha }}-${{ github.sha }}
+        key: ${{ runner.arch }}-${{ runner.os }}-${{ steps.keys.outputs.platform }}-buildtree-v2-${{ steps.keys.outputs.vcpkg_sha }}-${{ github.sha }}
         path: |
           ./build
           !./build/vcpkg_installed
