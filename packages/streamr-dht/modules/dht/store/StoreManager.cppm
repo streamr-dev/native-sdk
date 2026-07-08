@@ -24,9 +24,10 @@ module;
 #include <string>
 #include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.StoreManager;
+
+import streamr.dht.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.EnableSharedFromThis;

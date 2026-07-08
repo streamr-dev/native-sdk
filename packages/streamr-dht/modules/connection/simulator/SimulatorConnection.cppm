@@ -14,9 +14,10 @@ module;
 #include <string>
 #include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.SimulatorConnection;
+
+import streamr.dht.protos;
 
 import streamr.dht.Connection;
 import streamr.dht.Identifiers;

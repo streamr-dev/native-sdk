@@ -11,9 +11,10 @@ module;
 #include <optional>
 #include <string>
 #include <utility>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.StoreRpcRemote;
+
+import streamr.dht.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.logger.SLogger;

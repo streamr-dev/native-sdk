@@ -12,6 +12,14 @@ module;
 
 export module streamr.dht.protos;
 
+// google.protobuf well-known types reached transitively through DhtRpc.pb.h
+// (DataEntry carries an Any; timestamps use Timestamp). Re-exported so the
+// modules that previously saw them via the textual include still can.
+export namespace google::protobuf {
+using ::google::protobuf::Any;
+using ::google::protobuf::Timestamp;
+} // namespace google::protobuf
+
 export namespace dht {
 
 // messages

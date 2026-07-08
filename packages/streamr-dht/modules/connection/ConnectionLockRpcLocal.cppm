@@ -6,11 +6,12 @@ module;
 
 #include <functional>
 #include <optional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.ConnectionLockRpcLocal;
+
+import streamr.dht.protos;
 
 import streamr.dht.DhtRpcServer;
 import streamr.logger.SLogger;

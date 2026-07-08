@@ -25,11 +25,12 @@ module;
 #include <tuple>
 #include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <coroutine> // IWYU pragma: keep
 
 export module streamr.dht.PeerManager;
+
+import streamr.dht.protos;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.utils.AbortController;

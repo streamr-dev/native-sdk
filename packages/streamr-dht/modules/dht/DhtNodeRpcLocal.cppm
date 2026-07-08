@@ -7,9 +7,10 @@ module;
 #include <cstddef>
 #include <functional>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.DhtNodeRpcLocal;
+
+import streamr.dht.protos;
 
 import streamr.logger.SLogger;
 import streamr.dht.DhtRpcServer;

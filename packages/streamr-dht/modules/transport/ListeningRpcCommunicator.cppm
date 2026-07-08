@@ -3,12 +3,14 @@
 // streamr-dht/transport/ListeningRpcCommunicator.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
-
-#include "packages/dht/protos/DhtRpc.pb.h"
+#include <functional>
+#include <optional>
 
 #include <string>
 
 export module streamr.dht.ListeningRpcCommunicator;
+
+import streamr.dht.protos;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.protorpc.Errors;

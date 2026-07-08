@@ -10,9 +10,10 @@ module;
 #include <functional>
 #include <memory>
 #include <optional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.PendingConnection;
+
+import streamr.dht.protos;
 
 import streamr.utils.AbortController;
 import streamr.utils.AbortableTimers;

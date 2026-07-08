@@ -10,11 +10,12 @@ module;
 
 #include <chrono>
 #include <optional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.ConnectionLockRpcRemote;
+
+import streamr.dht.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.dht.DhtRpcClient;

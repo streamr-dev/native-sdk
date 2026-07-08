@@ -4,12 +4,13 @@
 // Phase 2.6): this file is now the source of truth.
 module;
 
-#include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.RoutingRpcCommunicator;
+
+import streamr.dht.protos;
 
 import streamr.logger.SLogger;
 import streamr.protorpc.RpcCommunicator;

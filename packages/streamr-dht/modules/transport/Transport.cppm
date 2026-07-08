@@ -4,9 +4,10 @@
 module;
 
 #include <tuple>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.Transport;
+
+import streamr.dht.protos;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.dht.Errors;

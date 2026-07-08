@@ -5,9 +5,10 @@ module;
 
 #include <optional>
 #include <string>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.Connectivity;
+
+import streamr.dht.protos;
 
 import streamr.dht.AddressTools;
 import streamr.dht.Connection;

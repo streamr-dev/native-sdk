@@ -3,15 +3,19 @@
 // streamr-dht/connection/websocket/WebsocketClientConnector.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <exception>
+#include <map>
+#include <optional>
 
 #include <functional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 #include <mutex>
 
 export module streamr.dht.WebsocketClientConnector;
+
+import streamr.dht.protos;
 
 import streamr.dht.Handshaker;
 import streamr.dht.Connection;

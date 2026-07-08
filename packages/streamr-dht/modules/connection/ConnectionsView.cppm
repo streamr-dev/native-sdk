@@ -4,11 +4,11 @@
 // file is now the source of truth.
 module;
 
-#include "packages/dht/protos/DhtRpc.pb.h"
-
 #include <string>
 
 export module streamr.dht.ConnectionsView;
+
+import streamr.dht.protos;
 
 import streamr.dht.Identifiers;
 export namespace streamr::dht::connection {

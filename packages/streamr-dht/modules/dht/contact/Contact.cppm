@@ -3,9 +3,10 @@
 module;
 
 #include <utility>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.Contact;
+
+import streamr.dht.protos;
 
 import streamr.dht.Identifiers;
 

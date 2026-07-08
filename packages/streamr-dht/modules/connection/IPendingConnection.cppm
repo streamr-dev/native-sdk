@@ -4,10 +4,12 @@
 // this file is now the source of truth.
 module;
 
+#include <exception>
 #include <memory>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.IPendingConnection;
+
+import streamr.dht.protos;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.dht.Connection;

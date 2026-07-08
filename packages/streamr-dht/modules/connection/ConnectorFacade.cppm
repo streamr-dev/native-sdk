@@ -3,14 +3,16 @@
 // streamr-dht/connection/ConnectorFacade.hpp (MODERNIZATION.md Phase 2.6): this
 // file is now the source of truth.
 module;
+#include <functional>
 
 #include <chrono>
 #include <memory>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.ConnectorFacade;
+
+import streamr.dht.protos;
 
 import streamr.dht.Identifiers;
 import streamr.logger.SLogger;

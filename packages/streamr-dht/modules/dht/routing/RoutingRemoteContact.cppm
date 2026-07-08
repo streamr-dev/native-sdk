@@ -9,9 +9,9 @@
 // cycle.
 module;
 
-#include "packages/dht/protos/DhtRpc.pb.h"
-
 export module streamr.dht.RoutingRemoteContact;
+
+import streamr.dht.protos;
 
 import streamr.protorpc.RpcCommunicator;
 import streamr.dht.Contact;

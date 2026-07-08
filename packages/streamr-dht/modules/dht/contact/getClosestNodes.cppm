@@ -8,9 +8,10 @@ module;
 #include <optional>
 #include <set>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.getClosestNodes;
+
+import streamr.dht.protos;
 
 import streamr.dht.Contact;
 import streamr.dht.Identifiers;

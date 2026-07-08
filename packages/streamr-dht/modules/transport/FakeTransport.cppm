@@ -7,11 +7,12 @@ module;
 #include <map>
 #include <memory>
 #include <ranges>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <string>
 
 export module streamr.dht.FakeTransport;
+
+import streamr.dht.protos;
 
 import streamr.dht.ConnectionsView;
 import streamr.dht.Identifiers;

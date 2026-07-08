@@ -5,9 +5,10 @@ module;
 
 #include <chrono>
 #include <optional>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.dht.RpcRemote;
+
+import streamr.dht.protos;
 
 import streamr.dht.Connection;
 import streamr.dht.Connectivity;
