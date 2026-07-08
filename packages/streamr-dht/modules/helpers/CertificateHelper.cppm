@@ -3,8 +3,6 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <memory>
-#include <string>
 #include <openssl/bio.h>
 #include <openssl/bn.h>
 #include <openssl/err.h>
@@ -18,6 +16,8 @@ module;
 #include <openssl/x509v3.h>
 
 export module streamr.dht.CertificateHelper;
+
+import std;
 export namespace streamr::dht::helpers {
 
 struct TlsCertificate {
@@ -59,7 +59,7 @@ public:
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-    static TlsCertificate createSelfSignedCertificate(int64_t daysValid) {
+    static TlsCertificate createSelfSignedCertificate(std::int64_t daysValid) {
         bool result = false;
 
         std::unique_ptr<RSA, void (*)(RSA*)> rsa{RSA_new(), RSA_free}; // NOLINT

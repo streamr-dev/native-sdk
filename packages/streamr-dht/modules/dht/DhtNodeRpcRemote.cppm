@@ -3,20 +3,16 @@
 // The client-side wrapper for a peer's DhtNodeRpc service. Also serves as
 // the k-bucket contact for that peer (getId()/getVectorClock()).
 module;
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <cstdint>
-#include <optional>
-#include <utility>
-#include <vector>
 
-#include <string>
 
 export module streamr.dht.DhtNodeRpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -56,10 +52,10 @@ struct ClosestRingPeerDescriptors {
 
 class DhtNodeRpcRemote : public RpcRemote<DhtNodeRpcClient> {
 private:
-    inline static int64_t counter =
+    inline static std::int64_t counter =
         0; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
     DhtAddressRaw id;
-    int64_t vectorClock;
+    std::int64_t vectorClock;
     ServiceID serviceId;
 
 public:
@@ -89,7 +85,7 @@ public:
 
     // KBucketContact interface (see streamr.dht.KBucket).
     [[nodiscard]] DhtAddressRaw getId() const { return this->id; }
-    [[nodiscard]] int64_t getVectorClock() const { return this->vectorClock; }
+    [[nodiscard]] std::int64_t getVectorClock() const { return this->vectorClock; }
 
     [[nodiscard]] DhtAddress getNodeId() const {
         return Identifiers::getNodeIdFromPeerDescriptor(
@@ -107,7 +103,7 @@ public:
         const auto response = co_await this->getClient().getClosestPeers(
             std::move(request), std::move(options), timeout);
         std::vector<PeerDescriptor> peers;
-        peers.reserve(static_cast<size_t>(response.peers_size()));
+        peers.reserve(static_cast<std::size_t>(response.peers_size()));
         for (const auto& peer : response.peers()) {
             peers.push_back(peer);
         }
@@ -125,11 +121,11 @@ public:
         const auto response = co_await this->getClient().getClosestRingPeers(
             std::move(request), std::move(options), timeout);
         ClosestRingPeerDescriptors result;
-        result.left.reserve(static_cast<size_t>(response.leftpeers_size()));
+        result.left.reserve(static_cast<std::size_t>(response.leftpeers_size()));
         for (const auto& peer : response.leftpeers()) {
             result.left.push_back(peer);
         }
-        result.right.reserve(static_cast<size_t>(response.rightpeers_size()));
+        result.right.reserve(static_cast<std::size_t>(response.rightpeers_size()));
         for (const auto& peer : response.rightpeers()) {
             result.right.push_back(peer);
         }

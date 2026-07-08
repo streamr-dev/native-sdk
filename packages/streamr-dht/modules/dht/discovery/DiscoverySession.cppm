@@ -23,20 +23,11 @@
 // join and yields at every RPC await.
 module;
 
-#include <chrono>
-#include <cstddef>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
-#include <coroutine> // IWYU pragma: keep
 
 export module streamr.dht.DiscoverySession;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -69,8 +60,8 @@ using streamr::dht::helpers::getPeerDistance;
 
 struct DiscoverySessionOptions {
     DhtAddress targetId;
-    size_t parallelism;
-    size_t noProgressLimit;
+    std::size_t parallelism;
+    std::size_t noProgressLimit;
     PeerManager& peerManager;
     // Mutated by this session (and, when several entry points are joined at
     // once, by the sibling sessions that share the same set). Owned by the
@@ -84,7 +75,7 @@ struct DiscoverySessionOptions {
 class DiscoverySession {
 private:
     std::string id = Uuid::v4();
-    size_t noProgressCounter = 0;
+    std::size_t noProgressCounter = 0;
     std::set<DhtAddress> ongoingRequests;
     bool done = false; // the single-shot Gate, guarded by the mutex
     std::recursive_mutex mutex;
@@ -250,7 +241,7 @@ public:
         }
         std::vector<folly::coro::Task<void>> workers;
         workers.reserve(this->options.parallelism);
-        for (size_t i = 0; i < this->options.parallelism; ++i) {
+        for (std::size_t i = 0; i < this->options.parallelism; ++i) {
             workers.push_back(this->worker());
         }
         co_await streamr::utils::co_withCancellation(

@@ -2,15 +2,10 @@
 // Ported from packages/dht/src/dht/contact/ContactList.ts (v103.8.0-rc.3).
 module;
 
-#include <concepts>
-#include <cstddef>
-#include <map>
-#include <memory>
-#include <tuple>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.ContactList;
+
+import std;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.dht.Identifiers;
@@ -57,10 +52,10 @@ protected:
     // TODO (from TS) move this to SortedContactList
     std::vector<DhtAddress> contactIds;
     DhtAddress localNodeId;
-    size_t maxSize;
+    std::size_t maxSize;
 
 public:
-    ContactList(DhtAddress localNodeId, size_t maxSize)
+    ContactList(DhtAddress localNodeId, std::size_t maxSize)
         : localNodeId(std::move(localNodeId)), maxSize(maxSize) {}
 
     ~ContactList() override = default;
@@ -73,7 +68,7 @@ public:
         return it->second;
     }
 
-    [[nodiscard]] size_t getSize() const { return this->contactIds.size(); }
+    [[nodiscard]] std::size_t getSize() const { return this->contactIds.size(); }
 
     void clear() {
         this->contactsById.clear();

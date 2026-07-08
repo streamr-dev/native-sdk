@@ -4,10 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <initializer_list>
-#include <string>
 
 export module streamr.json.toString;
+
+import std;
 
 import streamr.json.jsonConcepts;
 import streamr.json.toJson;

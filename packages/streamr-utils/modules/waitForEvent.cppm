@@ -6,15 +6,11 @@ module;
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <functional>
-#include <memory>
-#include <tuple>
-#include <utility>
 
 export module streamr.utils.waitForEvent;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.AbortController;

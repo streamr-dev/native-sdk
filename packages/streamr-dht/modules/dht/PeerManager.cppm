@@ -14,21 +14,11 @@
 // shared_ptr so the deferred ping handler can pin it.
 module;
 
-#include <chrono>
-#include <cstddef>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <set>
-#include <string>
-#include <tuple>
-#include <utility>
-#include <vector>
 
-#include <coroutine> // IWYU pragma: keep
 
 export module streamr.dht.PeerManager;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -95,12 +85,12 @@ using PeerManagerEvents = std::tuple<
     peermanagerevents::KBucketEmpty>;
 
 struct PeerManagerOptions {
-    size_t numberOfNodesPerKBucket;
-    size_t maxContactCount;
+    std::size_t numberOfNodesPerKBucket;
+    std::size_t maxContactCount;
     DhtAddress localNodeId;
     PeerDescriptor localPeerDescriptor;
     std::shared_ptr<ConnectionLocker> connectionLocker; // may be null
-    std::optional<size_t> neighborPingLimit;
+    std::optional<std::size_t> neighborPingLimit;
     LockID lockId;
     std::function<std::shared_ptr<DhtNodeRpcRemote>(const PeerDescriptor&)>
         createDhtNodeRpcRemote;
@@ -412,18 +402,18 @@ public:
 
     [[nodiscard]] RingContacts<DhtNodeRpcRemote> getClosestRingContactsTo(
         const RingIdRaw& ringIdRaw,
-        std::optional<size_t> limit = std::nullopt,
+        std::optional<std::size_t> limit = std::nullopt,
         std::optional<std::set<DhtAddress>> excludedIds = std::nullopt) {
         std::scoped_lock lock(this->mutex);
         RingContactList<DhtNodeRpcRemote> closest(ringIdRaw, excludedIds);
         for (const auto& contact : this->ringContacts->getAllContacts()) {
             closest.addContact(contact);
         }
-        constexpr size_t defaultLimit = 8;
+        constexpr std::size_t defaultLimit = 8;
         return closest.getClosestContacts(limit.value_or(defaultLimit));
     }
 
-    [[nodiscard]] size_t getNearbyContactCount(
+    [[nodiscard]] std::size_t getNearbyContactCount(
         const std::optional<std::set<DhtAddress>>& excludedNodeIds =
             std::nullopt) {
         std::scoped_lock lock(this->mutex);
@@ -445,7 +435,7 @@ public:
         return result;
     }
 
-    [[nodiscard]] size_t getNeighborCount() {
+    [[nodiscard]] std::size_t getNeighborCount() {
         std::scoped_lock lock(this->mutex);
         return this->neighbors->count();
     }

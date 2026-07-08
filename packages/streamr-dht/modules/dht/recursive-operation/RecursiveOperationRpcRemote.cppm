@@ -7,15 +7,13 @@
 // these for every contact, so RoutingSession cannot compile without it.
 // Only the routeRequest client call is needed here.
 module;
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
-#include <string>
-#include <utility>
 
 export module streamr.dht.RecursiveOperationRpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 

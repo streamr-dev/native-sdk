@@ -3,14 +3,15 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <cstdint>
 
 export module streamr.dht.PortRange;
+
+import std;
 export namespace streamr::dht::types {
 
 struct PortRange {
-    uint16_t min;
-    uint16_t max;
+    std::uint16_t min;
+    std::uint16_t max;
 };
 
 } // namespace streamr::dht::types

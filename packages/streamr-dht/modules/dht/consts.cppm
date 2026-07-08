@@ -2,9 +2,10 @@
 // Ported from packages/dht/src/dht/consts.ts (v103.8.0-rc.3).
 module;
 
-#include <string>
 
 export module streamr.dht.consts;
+
+import std;
 
 import streamr.dht.Identifiers;
 

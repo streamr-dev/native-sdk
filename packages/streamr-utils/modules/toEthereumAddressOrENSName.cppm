@@ -4,11 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <string>
-#include <string_view>
-#include <variant>
 
 export module streamr.utils.toEthereumAddressOrENSName;
+
+import std;
 
 import streamr.utils.ENSName;
 import streamr.utils.EthereumAddress;

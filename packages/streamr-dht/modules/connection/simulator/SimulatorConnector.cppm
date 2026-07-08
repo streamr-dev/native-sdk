@@ -9,17 +9,11 @@
 // connection architecture wins, the TS behavior is preserved).
 module;
 
-#include <exception>
-#include <functional>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <utility>
 
-#include <string>
 
 export module streamr.dht.SimulatorConnector;
+
+import std;
 
 import streamr.dht.protos;
 

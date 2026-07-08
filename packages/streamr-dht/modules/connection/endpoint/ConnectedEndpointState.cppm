@@ -3,16 +3,13 @@
 // streamr-dht/connection/endpoint/ConnectedEndpointState.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
-#include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <mutex>
-#include <vector>
 
-#include <string>
 
 export module streamr.dht.ConnectedEndpointState;
+
+import std;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;
@@ -119,7 +116,7 @@ public:
             this->connection->on<connectionevents::Disconnected>(
                 [weakSelf, endpointPin, rawConnection](
                     bool /*gracefulLeave*/,
-                    uint64_t /*code*/,
+                    std::uint64_t /*code*/,
                     const std::string& /*reason*/) {
                     const auto pin = endpointPin.lock();
                     if (!pin) {

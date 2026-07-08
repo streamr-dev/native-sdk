@@ -4,14 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <atomic>
-#include <chrono>
-#include <exception>
-#include <functional>
-#include <memory>
-#include <optional>
 
 export module streamr.dht.PendingConnection;
+
+import std;
 
 import streamr.dht.protos;
 

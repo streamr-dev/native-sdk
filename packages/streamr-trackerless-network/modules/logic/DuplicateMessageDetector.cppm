@@ -2,14 +2,12 @@
 // CONSOLIDATED from the former header logic/DuplicateMessageDetector.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
-#include <optional>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <vector>
 
 export module streamr.trackerlessnetwork.DuplicateMessageDetector;
+
+import std;
 
 import streamr.logger.SLogger;
 
@@ -26,11 +24,11 @@ export namespace streamr::trackerlessnetwork {
  */
 class NumberPair {
 private:
-    int64_t a;
-    int64_t b;
+    std::int64_t a;
+    std::int64_t b;
 
 public:
-    NumberPair(int64_t a, int64_t b) : a(a), b(b) {} // NOLINT
+    NumberPair(std::int64_t a, std::int64_t b) : a(a), b(b) {} // NOLINT
 
     [[nodiscard]] bool greaterThanOrEqual(const NumberPair& otherPair) const {
         return this->greaterThan(otherPair) || this->equalTo(otherPair);
@@ -110,12 +108,12 @@ public:
 
 class DuplicateMessageDetector {
 private:
-    size_t maxGapCount;
+    std::size_t maxGapCount;
     std::vector<std::pair<NumberPair, NumberPair>> gaps;
 
 public:
     // NOLINTNEXTLINE
-    explicit DuplicateMessageDetector(size_t maxGapCount = 10000) {
+    explicit DuplicateMessageDetector(std::size_t maxGapCount = 10000) {
         this->maxGapCount = maxGapCount;
         this->gaps = {}; // ascending order of half-closed intervals (x,y]
                          // representing gaps that contain unseen message(s)

@@ -11,19 +11,10 @@
 // that C++ modules cannot express.
 module;
 
-#include <chrono>
-#include <cstddef>
-#include <functional>
-#include <map>
-#include <mutex>
-#include <optional>
-#include <set>
-#include <string>
-#include <tuple>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.RecursiveOperationSession;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -88,7 +79,7 @@ struct RecursiveOperationSessionOptions {
     Transport& transport;
     DhtAddress targetId;
     PeerDescriptor localPeerDescriptor;
-    size_t waitedRoutingPathCompletions;
+    std::size_t waitedRoutingPathCompletions;
     RecursiveOperation operation;
     std::function<RouteMessageAck(const RouteMessageWrapper&)> doRouteRequest;
 };
@@ -125,7 +116,7 @@ private:
               SortedContactList<Contact>(SortedContactListOptions{
                   .referenceId = this->options.targetId,
                   .allowToContainReferenceId = true,
-                  .maxSize = static_cast<size_t>(resultsMaxSize)})) {}
+                  .maxSize = static_cast<std::size_t>(resultsMaxSize)})) {}
 
     void registerLocalRpcMethods() {
         auto rpcLocal = std::make_shared<RecursiveOperationSessionRpcLocal>(

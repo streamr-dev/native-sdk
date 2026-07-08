@@ -17,20 +17,14 @@ module;
 // std::coroutine_traits must be visible in every translation unit that
 // defines OR instantiates a coroutine; it cannot arrive through an
 // imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <exception>
-#include <functional>
-#include <optional>
-#include <string>
-#include <type_traits>
-#include <typeinfo>
-#include <utility>
 #include <google/protobuf/any.pb.h>
 #include <magic_enum/magic_enum.hpp>
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 export module streamr.protorpc.RpcCommunicatorServerApi;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.ExecutorHelper;
@@ -47,7 +41,7 @@ private:
     // incoming requests (which all ran on the shared delivery thread), just
     // moved off that thread. The request coroutines are owned by mScope and
     // drained in the destructor so none outlives mExecutor.
-    static constexpr size_t serverWorkerThreadCount = 1;
+    static constexpr std::size_t serverWorkerThreadCount = 1;
 
     using AsyncHandler =
         std::function<folly::coro::Task<Any>(Any, CallContextType)>;

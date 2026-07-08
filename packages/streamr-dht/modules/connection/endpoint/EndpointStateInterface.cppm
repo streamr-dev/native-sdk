@@ -4,12 +4,10 @@
 // Phase 2.6): this file is now the source of truth.
 module;
 
-#include <cstddef>
-#include <memory>
-#include <mutex>
-#include <vector>
 
 export module streamr.dht.EndpointStateInterface;
+
+import std;
 
 import streamr.dht.Connection;
 import streamr.dht.IPendingConnection;

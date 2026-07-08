@@ -7,13 +7,11 @@ module;
 // std::coroutine_traits must be visible in every translation unit
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <tuple>
-#include <type_traits>
-#include <utility>
 
 export module streamr.utils.collect;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.toCoroTask;

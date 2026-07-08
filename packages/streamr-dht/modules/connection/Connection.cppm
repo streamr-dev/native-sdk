@@ -3,15 +3,12 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <cstddef>
-#include <cstdint>
-#include <tuple>
-#include <vector>
 #include <magic_enum/magic_enum.hpp>
 
-#include <string>
 
 export module streamr.dht.Connection;
+
+import std;
 
 import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;
@@ -47,7 +44,7 @@ namespace connectionevents {
 struct Data : Event<std::vector<std::byte> /*data*/> {};
 struct Connected : Event<> {};
 struct Disconnected
-    : Event<bool /*gracefulLeave*/, uint64_t /*code*/, std::string /*reason*/> {
+    : Event<bool /*gracefulLeave*/, std::uint64_t /*code*/, std::string /*reason*/> {
 };
 
 struct Error : Event<std::string /*name*/> {};

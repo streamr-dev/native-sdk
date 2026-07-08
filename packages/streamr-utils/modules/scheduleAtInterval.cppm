@@ -11,13 +11,11 @@
 // stopping as soon as the abort signal requests cancellation.
 module;
 
-#include <chrono>
-#include <functional>
-#include <utility>
 
-#include <coroutine> // IWYU pragma: keep
 
 export module streamr.utils.scheduleAtInterval;
+
+import std;
 
 import streamr.utils.AbortController;
 import streamr.utils.CoroutineHelper;

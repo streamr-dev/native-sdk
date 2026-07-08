@@ -2,9 +2,10 @@
 // Ported from packages/dht/src/dht/contact/Contact.ts (v103.8.0-rc.3).
 module;
 
-#include <utility>
 
 export module streamr.dht.Contact;
+
+import std;
 
 import streamr.dht.protos;
 

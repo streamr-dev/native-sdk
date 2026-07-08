@@ -4,9 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <memory>
 
 export module streamr.utils.EnableSharedFromThis;
+
+import std;
 
 export namespace streamr::utils {
 

@@ -3,10 +3,10 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <chrono>
-#include <optional>
 
 export module streamr.dht.RpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 

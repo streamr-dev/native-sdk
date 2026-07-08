@@ -4,11 +4,11 @@
 // this file is now the source of truth.
 module;
 
-#include <stdexcept>
-#include <string>
 #include <boost/algorithm/hex.hpp>
 
 export module streamr.utils.BinaryUtils;
+
+import std;
 
 export namespace streamr::utils {
 

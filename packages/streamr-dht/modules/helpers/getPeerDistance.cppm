@@ -3,11 +3,10 @@
 // (v103.8.0-rc.3).
 module;
 
-#include <algorithm>
-#include <cstddef>
-#include <string>
 
 export module streamr.dht.getPeerDistance;
+
+import std;
 
 import streamr.dht.Identifiers;
 
@@ -27,9 +26,9 @@ using streamr::dht::DhtAddressRaw;
 inline double getPeerDistance(
     const DhtAddressRaw& first, const DhtAddressRaw& second) {
     double distance = 0;
-    const size_t min = std::min(first.size(), second.size());
-    const size_t max = std::max(first.size(), second.size());
-    size_t i = 0;
+    const std::size_t min = std::min(first.size(), second.size());
+    const std::size_t max = std::max(first.size(), second.size());
+    std::size_t i = 0;
     for (; i < min; ++i) {
         const auto a = static_cast<unsigned char>(first[i]);
         const auto b = static_cast<unsigned char>(second[i]);

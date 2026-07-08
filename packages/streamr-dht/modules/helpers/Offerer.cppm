@@ -3,12 +3,12 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <cstdint>
-#include <string>
 #include <boost/endian/conversion.hpp>
 #include <boost/uuid/detail/md5.hpp>
 
 export module streamr.dht.Offerer;
+
+import std;
 
 import streamr.dht.Identifiers;
 export namespace streamr::dht::helpers {
@@ -34,7 +34,7 @@ public:
         boost::uuids::detail::md5::digest_type digest;
         hash.get_digest(digest);
         return boost::endian::little_to_native(
-            *reinterpret_cast<int32_t*>(digest));
+            *reinterpret_cast<std::int32_t*>(digest));
     }
 };
 

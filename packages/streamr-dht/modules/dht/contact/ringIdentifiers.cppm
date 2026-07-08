@@ -3,12 +3,10 @@
 // (v103.8.0-rc.3).
 module;
 
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <string>
 
 export module streamr.dht.ringIdentifiers;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -31,8 +29,8 @@ using RingId = double;
 using RingDistance = double;
 
 namespace ringidentifiers {
-inline constexpr size_t wordBytes = 4;
-inline constexpr size_t uniquePartBytes = 7;
+inline constexpr std::size_t wordBytes = 4;
+inline constexpr std::size_t uniquePartBytes = 7;
 inline constexpr int byteBits = 8;
 inline constexpr unsigned int byteMask = 0xFF;
 } // namespace ringidentifiers
@@ -64,8 +62,8 @@ inline RingIdRaw getRingIdRawFromPeerDescriptor(
     std::string raw;
     raw.reserve(
         2 * ringidentifiers::wordBytes + ringidentifiers::uniquePartBytes);
-    const auto appendBigEndian = [&raw](uint32_t value) {
-        for (size_t i = ringidentifiers::wordBytes; i-- > 0;) {
+    const auto appendBigEndian = [&raw](std::uint32_t value) {
+        for (std::size_t i = ringidentifiers::wordBytes; i-- > 0;) {
             raw.push_back(
                 static_cast<char>(
                     (value >> (ringidentifiers::byteBits * i)) &
@@ -76,7 +74,7 @@ inline RingIdRaw getRingIdRawFromPeerDescriptor(
     appendBigEndian(peerDescriptor.region());
     appendBigEndian(peerDescriptor.ipaddress());
     const std::string& nodeId = peerDescriptor.nodeid();
-    const size_t start = nodeId.size() >= ringidentifiers::uniquePartBytes
+    const std::size_t start = nodeId.size() >= ringidentifiers::uniquePartBytes
         ? nodeId.size() - ringidentifiers::uniquePartBytes
         : 0;
     raw.append(nodeId, start, ringidentifiers::uniquePartBytes);

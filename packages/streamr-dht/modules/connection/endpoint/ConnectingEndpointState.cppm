@@ -3,12 +3,12 @@
 // streamr-dht/connection/endpoint/ConnectingEndpointState.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
-#include <memory>
-#include <mutex>
-#include <vector>
 
 export module streamr.dht.ConnectingEndpointState;
+
+import std;
 
 import streamr.logger.SLogger;
 import streamr.dht.Connection;

@@ -8,6 +8,8 @@ module;
 
 export module streamr.trackerlessnetwork.ContentDeliveryRpcLocal;
 
+import std;
+
 import streamr.trackerlessnetwork.NetworkRpcServer;
 import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;

@@ -4,12 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <algorithm>
-#include <stdexcept>
-#include <string>
-#include <string_view>
 
 export module streamr.utils.EthereumAddress;
+
+import std;
 
 import streamr.utils.Branded;
 

@@ -3,13 +3,10 @@
 // (v103.8.0-rc.3).
 module;
 
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <set>
-#include <vector>
 
 export module streamr.dht.getClosestNodes;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -23,7 +20,7 @@ using ::dht::PeerDescriptor;
 using streamr::dht::DhtAddress;
 
 struct GetClosestNodesOptions {
-    std::optional<size_t> maxCount;
+    std::optional<std::size_t> maxCount;
     std::optional<std::set<DhtAddress>> excludedNodeIds;
 };
 

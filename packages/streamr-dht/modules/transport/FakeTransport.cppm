@@ -3,14 +3,11 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <functional>
-#include <map>
-#include <memory>
-#include <ranges>
 
-#include <string>
 
 export module streamr.dht.FakeTransport;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -65,7 +62,7 @@ public:
             std::ranges::to<std::vector>();
     }
 
-    [[nodiscard]] size_t getConnectionCount() override {
+    [[nodiscard]] std::size_t getConnectionCount() override {
         return this->connections.size();
     }
 

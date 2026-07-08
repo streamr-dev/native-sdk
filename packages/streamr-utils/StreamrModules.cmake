@@ -58,22 +58,39 @@ if(STREAMR_MODULES_SUPPORTED)
     cmake_policy(SET CMP0155 NEW)
 endif()
 
-# Opt-in `import std;` (experimental in CMake, OFF by default — see the
-# MODERNIZATION.md decision: no rollout now). CMake gates the feature behind
-# a per-version experimental UUID, so turning this on requires passing the
-# UUID for the CMake version in use:
-#   cmake -DSTREAMR_IMPORT_STD=ON \
-#         -DCMAKE_EXPERIMENTAL_CXX_IMPORT_STD=<uuid-for-your-cmake> ...
-option(STREAMR_IMPORT_STD "Build with experimental 'import std' support" OFF)
-if(STREAMR_IMPORT_STD)
-    if(NOT DEFINED CMAKE_EXPERIMENTAL_CXX_IMPORT_STD)
+# `import std` is MANDATORY: every module unit in this codebase imports the
+# standard library as a module (`import std.compat;`), so the build must always
+# provide it. CMake gates the standard-library module behind a per-CMake-version
+# experimental UUID; the value below is for the CMake 4.3 series (see
+# Help/dev/experimental.rst). A CMake upgrade requires bumping it — the build
+# fails clearly if the UUID does not match the CMake in use.
+#
+# Per-platform prerequisites, applied by install.sh at configure time (they must
+# be set before compiler detection, so they cannot live here):
+#   - macOS/iOS (Homebrew LLVM libc++): -DCMAKE_CXX_STDLIB_MODULES_JSON=...,
+#     because Homebrew's clang driver cannot locate its own libc++.modules.json.
+#   - Android (NDK r29+): the std module compiles against Bionic only with
+#     -D__BIONIC_CTYPE_INLINE=inline and -U_FORTIFY_SOURCE (Bionic ships
+#     internal-linkage ctype/fortify inlines that a module cannot re-export),
+#     plus --target=aarch64-none-linux-android<N> in CMAKE_CXX_FLAGS so CMake's
+#     cross-compile stdlib probe detects libc++. -pthread is already PUBLIC on
+#     the module targets below. NOTE: -U_FORTIFY_SOURCE disables a hardening
+#     feature on shipped Android binaries — an accepted trade-off (see
+#     MODERNIZATION.md, import std adoption).
+if(STREAMR_MODULES_SUPPORTED)
+    # Both CMAKE_CXX_MODULE_STD and the experimental UUID must be set BEFORE
+    # project()/CXX enablement (the toolchain's import-std support is decided
+    # then), so they are passed on the configure command line by install.sh, not
+    # set here. Fail early with a clear message if a raw `cmake` invocation
+    # forgot them.
+    if(NOT DEFINED CMAKE_EXPERIMENTAL_CXX_IMPORT_STD OR NOT CMAKE_CXX_MODULE_STD)
         message(FATAL_ERROR
-            "STREAMR_IMPORT_STD=ON needs "
-            "-DCMAKE_EXPERIMENTAL_CXX_IMPORT_STD=<uuid> (the experimental "
-            "feature UUID documented for your CMake version in "
-            "Help/dev/experimental.rst of the CMake source).")
+            "import std requires -DCMAKE_CXX_MODULE_STD=ON and "
+            "-DCMAKE_EXPERIMENTAL_CXX_IMPORT_STD=<uuid> on the cmake command "
+            "line (both must be set before project()). The UUID for the CMake "
+            "4.3 series is 451f2fe2-a8a2-47c3-bc32-94786d8fc91b; install.sh "
+            "passes both automatically.")
     endif()
-    set(CMAKE_CXX_MODULE_STD ON)
 endif()
 
 # streamr_add_module_library(<target> FILES <unit.cppm>...)

@@ -4,11 +4,11 @@
 // this file is now the source of truth.
 module;
 
-#include <memory>
-#include <utility>
 #include <folly/logging/StreamHandlerFactory.h>
 
 export module streamr.logger.StreamrWriterFactory;
+
+import std;
 
 export namespace streamr::logger::detail {
 

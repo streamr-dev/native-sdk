@@ -4,10 +4,11 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <string>
 #include <rtc/rtc.hpp>
 
 export module streamr.dht.WebsocketServerConnection;
+
+import std;
 
 import streamr.dht.Connection;
 import streamr.eventemitter.EventEmitter;

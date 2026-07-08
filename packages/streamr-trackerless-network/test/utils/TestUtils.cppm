@@ -7,14 +7,12 @@
 // (trackerless-network-completion-plan.md, phase 0.2).
 module;
 
-#include <chrono>
-#include <cstdint>
-#include <optional>
-#include <string>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.TestUtils;
+
+import std;
 
 import streamr.dht.ConnectionLocker;
 import streamr.dht.Identifiers;
@@ -40,8 +38,8 @@ inline StreamMessage createStreamMessage(
     const std::string& content,
     const StreamPartID& streamPartId,
     const EthereumAddress& publisherId,
-    std::optional<int64_t> timestamp = std::nullopt,
-    std::optional<int32_t> sequenceNumber = std::nullopt) {
+    std::optional<std::int64_t> timestamp = std::nullopt,
+    std::optional<std::int32_t> sequenceNumber = std::nullopt) {
     StreamMessage msg;
     auto* messageId = msg.mutable_messageid();
     messageId->set_streamid(StreamPartIDUtils::getStreamID(streamPartId));
@@ -81,9 +79,9 @@ public:
     void weakUnlockConnection(
         const DhtAddress& /*targetDescriptor*/,
         const LockID& /*lockId*/) override {}
-    [[nodiscard]] size_t getLocalLockedConnectionCount() override { return 0; }
-    [[nodiscard]] size_t getRemoteLockedConnectionCount() override { return 0; }
-    [[nodiscard]] size_t getWeakLockedConnectionCount() override { return 0; }
+    [[nodiscard]] std::size_t getLocalLockedConnectionCount() override { return 0; }
+    [[nodiscard]] std::size_t getRemoteLockedConnectionCount() override { return 0; }
+    [[nodiscard]] std::size_t getWeakLockedConnectionCount() override { return 0; }
 };
 
 } // namespace streamr::trackerlessnetwork::testutils

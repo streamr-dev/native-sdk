@@ -7,17 +7,13 @@
 // (trackerless-network-completion-plan.md, phase 0.2).
 module;
 
-#include <chrono>
-#include <cstdint>
-#include <optional>
-#include <sstream>
-#include <string>
-#include <vector>
 #include <gtest/gtest.h>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/proto-rpc/protos/ProtoRpc.pb.h"
 
 export module streamr.dht.TestUtils;
+
+import std;
 
 import streamr.dht.Identifiers;
 import streamr.utils.Uuid;
@@ -52,11 +48,11 @@ inline PeerDescriptor createMockPeerDescriptor() {
 struct MockDataEntryOptions {
     std::optional<DhtAddress> key;
     std::optional<DhtAddress> creator;
-    std::optional<uint32_t> ttl;
+    std::optional<std::uint32_t> ttl;
 };
 
 inline DataEntry createMockDataEntry(const MockDataEntryOptions& opts = {}) {
-    constexpr uint32_t defaultTtl = 10000;
+    constexpr std::uint32_t defaultTtl = 10000;
     DataEntry entry;
     entry.set_key(
         Identifiers::getRawFromDhtAddress(
@@ -72,7 +68,7 @@ inline DataEntry createMockDataEntry(const MockDataEntryOptions& opts = {}) {
         std::chrono::duration_cast<std::chrono::seconds>(sinceEpoch);
     entry.mutable_createdat()->set_seconds(seconds.count());
     entry.mutable_createdat()->set_nanos(
-        static_cast<int32_t>(
+        static_cast<std::int32_t>(
             std::chrono::duration_cast<std::chrono::nanoseconds>(
                 sinceEpoch - seconds)
                 .count()));

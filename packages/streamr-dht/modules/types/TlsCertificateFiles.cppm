@@ -3,9 +3,10 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <string>
 
 export module streamr.dht.TlsCertificateFiles;
+
+import std;
 export namespace streamr::dht::types {
 
 struct TlsCertificateFiles {

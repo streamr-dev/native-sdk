@@ -4,12 +4,11 @@
 // Phase 2.6): this file is now the source of truth.
 module;
 
-#include <functional>
-#include <optional>
 
-#include <string>
 
 export module streamr.dht.ConnectionLockRpcLocal;
+
+import std;
 
 import streamr.dht.protos;
 

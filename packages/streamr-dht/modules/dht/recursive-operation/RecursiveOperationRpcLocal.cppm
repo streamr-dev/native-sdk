@@ -6,10 +6,10 @@
 // the manager's doRouteRequest.
 module;
 
-#include <functional>
-#include <string>
 
 export module streamr.dht.RecursiveOperationRpcLocal;
+
+import std;
 
 import streamr.dht.protos;
 

@@ -4,13 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <algorithm>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <utility>
 
 export module streamr.utils.ENSName;
+
+import std;
 
 import streamr.utils.Branded;
 

@@ -4,11 +4,10 @@
 // liveness): getClosestPeers, getClosestRingPeers, ping, leaveNotice.
 module;
 
-#include <cstddef>
-#include <functional>
-#include <vector>
 
 export module streamr.dht.DhtNodeRpcLocal;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -41,9 +40,9 @@ using streamr::dht::rpcprotocol::DhtCallContext;
 using DhtNodeRpc = ::dht::DhtNodeRpc<DhtCallContext>;
 
 struct DhtNodeRpcLocalOptions {
-    size_t peerDiscoveryQueryBatchSize;
+    std::size_t peerDiscoveryQueryBatchSize;
     std::function<std::vector<PeerDescriptor>()> getNeighbors;
-    std::function<ClosestRingPeerDescriptors(const RingIdRaw&, size_t)>
+    std::function<ClosestRingPeerDescriptors(const RingIdRaw&, std::size_t)>
         getClosestRingContactsTo;
     std::function<void(const PeerDescriptor&)> addContact;
     std::function<void(const DhtAddress&)> removeContact;

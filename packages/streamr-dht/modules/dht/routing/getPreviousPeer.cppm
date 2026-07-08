@@ -4,9 +4,10 @@
 // routed message's routingPath.
 module;
 
-#include <optional>
 
 export module streamr.dht.getPreviousPeer;
+
+import std;
 
 import streamr.dht.protos;
 

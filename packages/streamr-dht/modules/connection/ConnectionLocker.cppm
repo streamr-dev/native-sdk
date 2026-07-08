@@ -4,11 +4,11 @@
 // this file is now the source of truth.
 module;
 
-#include <cstddef>
 
-#include <string>
 
 export module streamr.dht.ConnectionLocker;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -34,9 +34,9 @@ public:
         const DhtAddress& targetDescriptor, const LockID& lockId) = 0;
     virtual void weakUnlockConnection(
         const DhtAddress& targetDescriptor, const LockID& lockId) = 0;
-    [[nodiscard]] virtual size_t getLocalLockedConnectionCount() = 0;
-    [[nodiscard]] virtual size_t getRemoteLockedConnectionCount() = 0;
-    [[nodiscard]] virtual size_t getWeakLockedConnectionCount() = 0;
+    [[nodiscard]] virtual std::size_t getLocalLockedConnectionCount() = 0;
+    [[nodiscard]] virtual std::size_t getRemoteLockedConnectionCount() = 0;
+    [[nodiscard]] virtual std::size_t getWeakLockedConnectionCount() = 0;
 };
 
 } // namespace streamr::dht::connection

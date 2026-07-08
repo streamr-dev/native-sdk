@@ -16,6 +16,7 @@
 		410E69C92C81A4A100347AF3 /* gtest-all.cc in Sources */ = {isa = PBXBuildFile; fileRef = 410E69C72C81A4A100347AF3 /* gtest-all.cc */; };
 		410E69CC2C81B9E900347AF3 /* GoogleTestRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 410E69CA2C81B9E900347AF3 /* GoogleTestRunner.cpp */; };
 		410E6A592C81F0C500347AF3 /* streamr.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 410E6A582C81F0C500347AF3 /* streamr.xcframework */; };
+		FE510E6A592C0000ABCD0001 /* streamr.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 410E6A582C81F0C500347AF3 /* streamr.xcframework */; };
 		410E6A5C2C81F22000347AF3 /* libc++abi.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 410E6A5B2C81F22000347AF3 /* libc++abi.tbd */; };
 		410E6A5E2C81F2D000347AF3 /* libc++abi.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 410E6A5D2C81F2D000347AF3 /* libc++abi.tbd */; };
 		410E6AC02C82248400347AF3 /* EventEmitterTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 410E6ABF2C82248400347AF3 /* EventEmitterTest.cpp */; };
@@ -123,6 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				410E6A5C2C81F22000347AF3 /* libc++abi.tbd in Frameworks */,
+				FE510E6A592C0000ABCD0001 /* streamr.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

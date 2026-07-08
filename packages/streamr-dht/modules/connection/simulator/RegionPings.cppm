@@ -7,11 +7,10 @@
 // trackerless-network-completion-plan.md, decision 3.1).
 module;
 
-#include <array>
-#include <cstddef>
-#include <random>
 
 export module streamr.dht.RegionPings;
+
+import std;
 
 export namespace streamr::dht::connection::simulator {
 

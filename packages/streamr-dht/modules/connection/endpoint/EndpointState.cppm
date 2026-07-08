@@ -4,12 +4,10 @@
 // Phase 2.6): this file is now the source of truth.
 module;
 
-#include <cstddef>
-#include <functional>
-#include <memory>
-#include <vector>
 
 export module streamr.dht.EndpointState;
+
+import std;
 
 import streamr.logger.SLogger;
 import streamr.utils.EnableSharedFromThis;

@@ -4,9 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <optional>
 
 export module streamr.dht.DhtCallContext;
+
+import std;
 
 import streamr.dht.protos;
 export namespace streamr::dht::rpcprotocol {
@@ -17,7 +18,7 @@ struct DhtCallContext {
     // used by client
     std::optional<PeerDescriptor> targetDescriptor;
     std::optional<PeerDescriptor> sourceDescriptor;
-    std::optional<uint64_t> clientId;
+    std::optional<std::uint64_t> clientId;
     std::optional<bool> connect;
     std::optional<bool> sendIfStopped;
     // used in incoming calls

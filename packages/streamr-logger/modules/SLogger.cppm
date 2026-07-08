@@ -4,12 +4,11 @@
 // this file is now the source of truth.
 module;
 
-#include <source_location>
-#include <string>
-#include <string_view>
 #include <nlohmann/json.hpp>
 
 export module streamr.logger.SLogger;
+
+import std;
 
 import streamr.json.toJson;
 import streamr.logger.Logger;

@@ -3,11 +3,12 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <vector>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.Propagation;
+
+import std;
 
 import streamr.dht.Identifiers;
 import streamr.dht.protos;
@@ -26,12 +27,12 @@ using SendToNeighborFn =
 
 struct PropagationOptions {
     SendToNeighborFn sendToNeighbor;
-    size_t minPropagationTargets;
+    std::size_t minPropagationTargets;
     std::optional<std::chrono::milliseconds> ttl;
-    std::optional<size_t> maxMessages;
+    std::optional<std::size_t> maxMessages;
 };
 
-inline constexpr size_t DEFAULT_MAX_MESSAGES = 150; // NOLINT
+inline constexpr std::size_t DEFAULT_MAX_MESSAGES = 150; // NOLINT
 // NOLINTNEXTLINE
 inline constexpr std::chrono::milliseconds DEFAULT_TTL =
     std::chrono::seconds(10);
@@ -49,7 +50,7 @@ inline constexpr std::chrono::milliseconds DEFAULT_TTL =
 class Propagation {
 private:
     SendToNeighborFn sendToNeighbor;
-    size_t minPropagationTargets;
+    std::size_t minPropagationTargets;
     PropagationTaskStore activeTaskStore;
 
 public:

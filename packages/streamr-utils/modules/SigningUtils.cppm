@@ -7,8 +7,6 @@ module;
 #include <secp256k1.h>
 #include <secp256k1_ecdh.h>
 #include <secp256k1_recovery.h>
-#include <string>
-#include <string_view>
 #include <cryptopp/asn.h>
 #include <cryptopp/dsa.h>
 #include <cryptopp/eccrypto.h>
@@ -19,6 +17,8 @@ module;
 #include <cryptopp/sha.h>
 
 export module streamr.utils.SigningUtils;
+
+import std;
 
 import streamr.utils.BinaryUtils;
 
@@ -51,11 +51,11 @@ public:
             nullptr,
             nullptr);
         int recid;
-        uint8_t signatureData[65]; // NOLINT
+        std::uint8_t signatureData[65]; // NOLINT
 
         r = secp256k1_ecdsa_recoverable_signature_serialize_compact(
             secpContext, signatureData, &recid, &secpSignature);
-        signatureData[64] = static_cast<uint8_t>(27 + recid); // NOLINT
+        signatureData[64] = static_cast<std::uint8_t>(27 + recid); // NOLINT
 
         secp256k1_context_destroy(secpContext);
         return std::string(

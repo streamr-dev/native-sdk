@@ -6,11 +6,10 @@
 // depend on the Simulator).
 module;
 
-#include <memory>
-#include <optional>
-#include <vector>
 
 export module streamr.dht.SimulatorInterfaces;
+
+import std;
 
 import streamr.dht.protos;
 

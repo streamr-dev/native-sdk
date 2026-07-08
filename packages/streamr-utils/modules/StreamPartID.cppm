@@ -4,13 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <cstdint>
-#include <optional>
-#include <stdexcept>
-#include <string>
-#include <utility>
 
 export module streamr.utils.StreamPartID;
+
+import std;
 
 import streamr.utils.Branded;
 import streamr.utils.StreamID;
@@ -23,7 +20,7 @@ inline constexpr auto DELIMITER = "#"; // NOLINT
 using StreamPartID = Branded<std::string, struct StreamPartIDBrand>;
 
 inline StreamPartID toStreamPartID(
-    const StreamID& streamId, uint32_t streamPartition) {
+    const StreamID& streamId, std::uint32_t streamPartition) {
     ensureValidStreamPartitionIndex(streamPartition);
     return StreamPartID(streamId + DELIMITER + std::to_string(streamPartition));
 }
@@ -46,18 +43,18 @@ public:
         return StreamPartIDUtils::getStreamIDAndPartition(streamPartId).first;
     }
 
-    static std::optional<uint32_t> getStreamPartition(
+    static std::optional<std::uint32_t> getStreamPartition(
         const StreamPartID& streamPartId) {
         return StreamPartIDUtils::getStreamIDAndPartition(streamPartId).second;
     }
 
-    static std::pair<StreamID, std::optional<uint32_t>> getStreamIDAndPartition(
+    static std::pair<StreamID, std::optional<std::uint32_t>> getStreamIDAndPartition(
         const StreamPartID& streamPartId) {
         auto elements = StreamPartIDUtils::parseRawElements(streamPartId);
         return {StreamID(elements.first), elements.second};
     }
 
-    static std::pair<std::string, std::optional<uint32_t>> parseRawElements(
+    static std::pair<std::string, std::optional<std::uint32_t>> parseRawElements(
         const std::string& str) {
         const auto lastIdx = str.find_last_of(DELIMITER);
         if (lastIdx == std::string::npos || lastIdx == str.length() - 1) {

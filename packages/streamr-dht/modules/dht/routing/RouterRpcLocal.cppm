@@ -5,12 +5,11 @@
 // node is the target) and forwardMessage (forward towards a reachable-
 // through peer, or deliver). Both drop duplicates via the shared detector.
 module;
-#include <string>
 
-#include <functional>
-#include <optional>
 
 export module streamr.dht.RouterRpcLocal;
+
+import std;
 
 import streamr.dht.protos;
 

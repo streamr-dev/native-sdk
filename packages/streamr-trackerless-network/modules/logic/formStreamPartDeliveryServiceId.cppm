@@ -7,9 +7,10 @@ module;
 // visible: operators reached only through an imported module's global
 // module fragment are not reliably reachable. (The former header got
 // <string> transitively from the sibling headers it included.)
-#include <string>
 
 export module streamr.trackerlessnetwork.formStreamPartDeliveryServiceId;
+
+import std;
 
 import streamr.dht.Identifiers;
 import streamr.utils.StreamPartID;

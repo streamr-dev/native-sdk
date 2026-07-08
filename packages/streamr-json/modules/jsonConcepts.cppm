@@ -4,14 +4,12 @@
 // this file is now the source of truth.
 module;
 
-#include <initializer_list>
-#include <string>
-#include <string_view>
-#include <type_traits>
 #include <boost/pfr/traits.hpp>
 #include <nlohmann/json.hpp>
 
 export module streamr.json.jsonConcepts;
+
+import std;
 
 export namespace streamr::json {
 namespace suppresslint { // linter does not support concepts, and thinks this

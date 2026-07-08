@@ -4,12 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <memory>
-#include <optional>
-#include <tuple>
-#include <vector>
 
 export module streamr.utils.ReplayEventEmitterWrapper;
+
+import std;
 
 import streamr.eventemitter.EventEmitter;
 

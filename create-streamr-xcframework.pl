@@ -49,10 +49,30 @@ END_MODULE
 
 close $fh;
  
-# Find all include and lib directories and process them 
+# Find all include and lib directories and process them
 find(\&process_dir, "./build/vcpkg_installed/arm64-ios");
 dircopy("$abs_path/build/vcpkg_installed/arm64-ios/lib", $build_lib);
-`libtool -static -o $build_lib/libstreamr.a $build_lib/*.a packages/streamr-trackerless-network/build/CMakeFiles/streamr-trackerless-network.dir/src/proto/packages/network/protos/NetworkRpc.pb.cc.o packages/streamr-dht/build/CMakeFiles/streamr-dht.dir/src/proto/packages/dht/protos/DhtRpc.pb.cc.o packages/streamr-libstreamrproxyclient/build/CMakeFiles/streamrproxyclient.dir/src/streamrproxyclient.cpp.o packages/streamr-proto-rpc/build/CMakeFiles/streamr-proto-rpc.dir/src/proto/packages/proto-rpc/protos/ProtoRpc.pb.cc.o`;
+# Merge the vcpkg dependency archives with the monorepo's own per-package
+# static libraries. Since the C++ modules migration, each package compiles
+# to a real static lib (libstreamr-<pkg>.a) that carries the module object
+# files (previously these were header-only INTERFACE libs with nothing to
+# archive) — they MUST be included or the XCFramework is missing all streamr
+# code and nothing can link against it. The generated protobuf objects
+# (NetworkRpc/DhtRpc/ProtoRpc .pb.cc.o) are already inside these package
+# libs, so they are no longer listed explicitly (doing so would duplicate
+# symbols). streamrproxyclient.cpp.o stays explicit: that package builds a
+# shared library, not a static archive.
+my @package_libs = (
+    "packages/streamr-json/build/libstreamr-json.a",
+    "packages/streamr-logger/build/libstreamr-logger.a",
+    "packages/streamr-eventemitter/build/libstreamr-eventemitter.a",
+    "packages/streamr-utils/build/libstreamr-utils.a",
+    "packages/streamr-proto-rpc/build/libstreamr-proto-rpc.a",
+    "packages/streamr-dht/build/libstreamr-dht.a",
+    "packages/streamr-trackerless-network/build/libstreamr-trackerless-network.a",
+);
+my $package_libs_str = join(" ", @package_libs);
+`libtool -static -o $build_lib/libstreamr.a $build_lib/*.a $package_libs_str packages/streamr-libstreamrproxyclient/build/CMakeFiles/streamrproxyclient.dir/src/streamrproxyclient.cpp.o`;
 `xcodebuild -create-xcframework -library $build_lib/libstreamr.a -headers $build_include -output $dist_path/streamr.xcframework`; 
 print "\nstreamr.xcframework was created in the directory: dist/ios.\n";
 

@@ -24,26 +24,13 @@
 // the TS version throws for undefined regions, the C++ version treats
 // them as region 0. Regions > 15 throw in both.
 module;
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
-#include <array>
-#include <chrono>
-#include <condition_variable>
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <queue>
-#include <random>
-#include <stdexcept>
-#include <thread>
-#include <vector>
 
-#include <string>
 
 export module streamr.dht.Simulator;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -84,7 +71,7 @@ private:
 
     struct Operation {
         Clock::time_point executionTime;
-        uint64_t sequenceNumber;
+        std::uint64_t sequenceNumber;
         OperationType type;
         std::shared_ptr<Association> association;
         std::vector<std::byte> data; // SEND only
@@ -111,7 +98,7 @@ private:
     std::mutex mMutex;
     std::condition_variable mCondition;
     bool stopped = false;
-    uint64_t nextSequenceNumber = 0;
+    std::uint64_t nextSequenceNumber = 0;
     std::map<DhtAddress, std::shared_ptr<ISimulatorConnector>> connectors;
     std::map<const ISimulatorConnection*, std::shared_ptr<Association>>
         associations;
@@ -121,7 +108,7 @@ private:
     std::thread dispatcherThread;
 
     [[nodiscard]] double getLatencyMs(
-        uint32_t sourceRegion, uint32_t targetRegion) {
+        std::uint32_t sourceRegion, std::uint32_t targetRegion) {
         switch (this->latencyType) {
             case LatencyType::NONE:
                 return 0;
@@ -149,8 +136,8 @@ private:
     // never overtake each other (per-association FIFO).
     [[nodiscard]] Clock::time_point generateExecutionTime(
         const std::shared_ptr<Association>& association,
-        uint32_t sourceRegion,
-        uint32_t targetRegion) {
+        std::uint32_t sourceRegion,
+        std::uint32_t targetRegion) {
         auto executionTime =
             Clock::now() +
             std::chrono::duration_cast<Clock::duration>(

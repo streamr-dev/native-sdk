@@ -4,13 +4,11 @@
 // this file is now the source of truth.
 module;
 
-#include <map>
-#include <mutex>
-#include <set>
 
-#include <string>
 
 export module streamr.dht.ConnectionLockStates;
+
+import std;
 
 import streamr.utils.Branded;
 import streamr.dht.Identifiers;
@@ -37,17 +35,17 @@ private:
     std::recursive_mutex remotePrivateConnectionsMutex;
 
 public:
-    [[nodiscard]] size_t getLocalLockedConnectionCount() {
+    [[nodiscard]] std::size_t getLocalLockedConnectionCount() {
         std::scoped_lock lock(this->localLocksMutex);
         return this->localLocks.size();
     }
 
-    [[nodiscard]] size_t getRemoteLockedConnectionCount() {
+    [[nodiscard]] std::size_t getRemoteLockedConnectionCount() {
         std::scoped_lock lock(this->remoteLocksMutex);
         return this->remoteLocks.size();
     }
 
-    [[nodiscard]] size_t getWeakLockedConnectionCount() {
+    [[nodiscard]] std::size_t getWeakLockedConnectionCount() {
         std::scoped_lock lock(this->weakLocksMutex);
         return this->weakLocks.size();
     }

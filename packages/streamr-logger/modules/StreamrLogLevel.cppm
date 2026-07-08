@@ -4,12 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <string>
-#include <string_view>
-#include <type_traits>
-#include <variant>
 
 export module streamr.logger.StreamrLogLevel;
+
+import std;
 
 import streamr.logger.StreamrLogColors;
 

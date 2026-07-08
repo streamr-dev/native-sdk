@@ -3,12 +3,10 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
-#include <algorithm>
-#include <cstdint>
-#include <string>
-#include <vector>
 
 export module streamr.dht.Identifiers;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -27,7 +25,7 @@ using DhtAddressRaw =
 
 using ServiceID = streamr::utils::Branded<std::string, struct ServiceIDBrand>;
 
-inline constexpr size_t kademliaIdLengthInBytes = 20;
+inline constexpr std::size_t kademliaIdLengthInBytes = 20;
 
 struct Identifiers {
     using PeerDescriptor = ::dht::PeerDescriptor;
@@ -53,9 +51,9 @@ struct Identifiers {
 
     static DhtAddress createRandomDhtAddress() {
         return getDhtAddressFromRaw(DhtAddressRaw{[&]() {
-            std::vector<uint8_t> randomBytes(kademliaIdLengthInBytes);
+            std::vector<std::uint8_t> randomBytes(kademliaIdLengthInBytes);
             std::ranges::generate(randomBytes, []() {
-                return static_cast<uint8_t>(std::rand() % 256); // NOLINT
+                return static_cast<std::uint8_t>(std::rand() % 256); // NOLINT
             });
             return std::string(randomBytes.begin(), randomBytes.end());
         }()});

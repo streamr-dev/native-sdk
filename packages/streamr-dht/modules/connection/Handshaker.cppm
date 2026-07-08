@@ -2,12 +2,12 @@
 // CONSOLIDATED from the former header streamr-dht/connection/Handshaker.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
-#include <optional>
-#include <string>
-#include <tuple>
 
 export module streamr.dht.Handshaker;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -129,7 +129,7 @@ protected:
 
     void sendHandshakeRequest(const PeerDescriptor& remotePeerDescriptor) {
         const auto msg = createHandshakeRequest(remotePeerDescriptor);
-        size_t nBytes = msg.ByteSizeLong();
+        std::size_t nBytes = msg.ByteSizeLong();
         if (nBytes == 0) {
             SLogger::error(
                 "sendHandshakeRequest(): handshake request is empty");
@@ -148,7 +148,7 @@ protected:
     void sendHandshakeResponse(
         std::optional<HandshakeError> error = std::nullopt) {
         const auto msg = createHandshakeResponse(error);
-        size_t nBytes = msg.ByteSizeLong();
+        std::size_t nBytes = msg.ByteSizeLong();
         if (nBytes == 0) {
             SLogger::error(
                 "sendHandshakeResponse(): handshake response is empty");

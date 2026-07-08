@@ -8,14 +8,10 @@
 // creator) pair; entries expire after min(entry.ttl, maxTtl).
 module;
 
-#include <algorithm>
-#include <chrono>
-#include <cstdint>
-#include <map>
-#include <optional>
-#include <vector>
 
 export module streamr.dht.LocalDataStore;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -31,20 +27,20 @@ using streamr::utils::MapWithTtl;
 
 class LocalDataStore {
 private:
-    uint32_t maxTtl;
+    std::uint32_t maxTtl;
     // The outer key is the data key, the inner key is the creator's node id.
     std::map<DhtAddress, MapWithTtl<DhtAddress, DataEntry>> store;
 
     template <typename Timestamp>
-    [[nodiscard]] static int64_t toMillis(const Timestamp& timestamp) {
-        constexpr int64_t millisPerSecond = 1000;
-        constexpr int64_t nanosPerMilli = 1000000;
+    [[nodiscard]] static std::int64_t toMillis(const Timestamp& timestamp) {
+        constexpr std::int64_t millisPerSecond = 1000;
+        constexpr std::int64_t nanosPerMilli = 1000000;
         return (timestamp.seconds() * millisPerSecond) +
             (timestamp.nanos() / nanosPerMilli);
     }
 
 public:
-    explicit LocalDataStore(uint32_t maxTtl) : maxTtl(maxTtl) {}
+    explicit LocalDataStore(std::uint32_t maxTtl) : maxTtl(maxTtl) {}
 
     // Virtual so tests can substitute a mock store (StoreManager /
     // StoreRpcLocal hold it by reference).
@@ -60,7 +56,7 @@ public:
         const DhtAddress creatorNodeId = Identifiers::getDhtAddressFromRaw(
             DhtAddressRaw{dataEntry.creator()});
         if (!this->store.contains(key)) {
-            const uint32_t maxTtlCapture = this->maxTtl;
+            const std::uint32_t maxTtlCapture = this->maxTtl;
             this->store.emplace(
                 key,
                 MapWithTtl<DhtAddress, DataEntry>(
@@ -71,8 +67,8 @@ public:
         }
         auto& inner = this->store.at(key);
         if (inner.has(creatorNodeId)) {
-            const int64_t storedMillis = toMillis(dataEntry.createdat());
-            const int64_t oldStoredMillis =
+            const std::int64_t storedMillis = toMillis(dataEntry.createdat());
+            const std::int64_t oldStoredMillis =
                 toMillis(inner.get(creatorNodeId)->createdat());
             // Do nothing if the local entry is newer than the replicated one.
             if (oldStoredMillis >= storedMillis) {

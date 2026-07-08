@@ -4,11 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <cstdint>
-#include <type_traits>
-#include <utility>
 
 export module streamr.utils.Branded;
+
+import std;
 
 export namespace streamr::utils {
 

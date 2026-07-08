@@ -5,15 +5,11 @@
 // session (fire-and-forget sendResponse).
 module;
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
-#include <string>
-#include <utility>
-#include <vector>
 
 export module streamr.dht.RecursiveOperationSessionRpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 

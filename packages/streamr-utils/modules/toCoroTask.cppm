@@ -6,11 +6,11 @@ module;
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <type_traits>
 
 export module streamr.utils.toCoroTask;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 export namespace streamr::utils {

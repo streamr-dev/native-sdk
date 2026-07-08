@@ -4,10 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <exception>
-#include <memory>
 
 export module streamr.dht.IPendingConnection;
+
+import std;
 
 import streamr.dht.protos;
 

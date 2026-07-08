@@ -3,14 +3,12 @@
 // streamr-dht/connection/ConnectorFacade.hpp (MODERNIZATION.md Phase 2.6): this
 // file is now the source of truth.
 module;
-#include <functional>
 
-#include <chrono>
-#include <memory>
 
-#include <string>
 
 export module streamr.dht.ConnectorFacade;
+
+import std;
 
 import streamr.dht.protos;
 
@@ -75,7 +73,7 @@ struct DefaultConnectorFacadeOptions {
     // int webrtcDatachannelBufferThresholdHigh;
     // std::optional<std::string> externalIp;
     // PortRange webrtcPortRange;
-    std::optional<size_t> maxMessageSize;
+    std::optional<std::size_t> maxMessageSize;
     // TlsCertificate tlsCertificate;
     // bool websocketServerEnableTls;
     // std::optional<std::string> autoCertifierUrl;

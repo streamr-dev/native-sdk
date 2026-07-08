@@ -4,16 +4,10 @@
 // this file is now the source of truth.
 module;
 
-#include <cstddef>
-#include <functional>
-#include <list>
-#include <map>
-#include <mutex>
-#include <optional>
-#include <tuple>
-#include <type_traits>
 
 export module streamr.eventemitter.EventEmitter;
+
+import std;
 
 export namespace streamr::eventemitter {
 
@@ -30,12 +24,12 @@ struct Event {
 
     private:
         HandlerFunction mHandlerFunction;
-        size_t mId;
+        std::size_t mId;
         bool mOnce;
 
     public:
         explicit Handler(
-            HandlerFunction callback, size_t handlerId, bool once = false)
+            HandlerFunction callback, std::size_t handlerId, bool once = false)
             : mHandlerFunction(callback), mId(handlerId), mOnce(once) {}
 
         Handler() = default;
@@ -52,7 +46,7 @@ struct Event {
 
         [[nodiscard]] bool isOnce() const { return mOnce; }
 
-        [[nodiscard]] size_t getId() const { return mId; }
+        [[nodiscard]] std::size_t getId() const { return mId; }
     };
 };
 
@@ -92,8 +86,8 @@ concept MatchingCallbackType = std::
 // crash the program if iterators were used.
 class HandlerToken {
 private:
-    size_t mId;
-    explicit HandlerToken(size_t id) : mId(id) {}
+    std::size_t mId;
+    explicit HandlerToken(std::size_t id) : mId(id) {}
 
 public:
     HandlerToken() : mId(0) {} // create a non-existent token by default
@@ -105,12 +99,12 @@ public:
     static HandlerToken create() {
         // Use a "magic static"
         // https://blog.mbedded.ninja/programming/languages/c-plus-plus/magic-statics/
-        static size_t counter = 1;
+        static std::size_t counter = 1;
         static std::mutex handlerReferenceCounterMutex;
         std::lock_guard<std::mutex> lock{handlerReferenceCounterMutex};
         return HandlerToken(counter++);
     }
-    [[nodiscard]] size_t getId() const { return mId; }
+    [[nodiscard]] std::size_t getId() const { return mId; }
 };
 
 // Each event type gets generated its own EventEmitterImpl
@@ -132,7 +126,7 @@ private:
     // so that other threads can remove them
 
     std::mutex mExecutingEmitLoopHandlersMutex;
-    std::map<size_t, typename EmitterEventType::Handler>
+    std::map<std::size_t, typename EmitterEventType::Handler>
         mExecutingEmitLoopHandlers;
 
     std::optional<StoredEvent<typename EmitterEventType::ArgumentTypes>>
@@ -302,7 +296,7 @@ public:
      */
 
     template <MatchingEventType<EmitterEventType> EventType>
-    size_t listenerCount() {
+    std::size_t listenerCount() {
         std::lock_guard guard{mEventHandlersMutex};
         return mEventHandlers.size();
     }

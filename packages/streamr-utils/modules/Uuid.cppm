@@ -4,12 +4,13 @@
 // this file is now the source of truth.
 module;
 
-#include <string>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 export module streamr.utils.Uuid;
+
+import std;
 
 export namespace streamr::utils {
 

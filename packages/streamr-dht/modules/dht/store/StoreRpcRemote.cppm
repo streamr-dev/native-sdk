@@ -4,15 +4,13 @@
 // a peer. storeData/replicateData are virtual so a test can substitute a
 // counting mock.
 module;
+#include <new> // operator new ambiguity under import std (local-type container allocation) — see convert-to-import-std.py
 
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
-#include <string>
-#include <utility>
 
 export module streamr.dht.StoreRpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 

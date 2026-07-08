@@ -6,14 +6,12 @@ module;
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <optional>
 
-#include <string>
 
 export module streamr.dht.ConnectionLockRpcRemote;
+
+import std;
 
 import streamr.dht.protos;
 

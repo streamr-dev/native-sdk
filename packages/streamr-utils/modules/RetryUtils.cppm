@@ -6,15 +6,11 @@ module;
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
-#include <coroutine> // IWYU pragma: keep
 
-#include <chrono>
-#include <exception>
-#include <functional>
-#include <string>
-#include <utility>
 
 export module streamr.utils.RetryUtils;
+
+import std;
 
 import streamr.utils.CoroutineHelper;
 import streamr.logger.SLogger;
@@ -42,7 +38,7 @@ public:
             } catch (const std::exception& e) {
                 SLogger::warn(
                     "Failed " + description + ", retrying after " +
-                    std::to_string(static_cast<uint64_t>(delay.count())) +
+                    std::to_string(static_cast<std::uint64_t>(delay.count())) +
                     "ms delay: " + e.what());
             }
             auto cancelToken =
