@@ -23,18 +23,15 @@ set(ENV{CXX} "${CMAKE_CXX_COMPILER}")
 # annotations in the SDK's libc++ headers follow this value.
 set(DEPLOYMENT_TARGET "26.0")
 
-# Use the iPhoneOS SDK's libc++ HEADERS together with the SDK's libc++
-# RUNTIME. Headers and runtime stay consistent and availability-checked
-# against DEPLOYMENT_TARGET — this replaces the old arrangement (Homebrew
-# LLVM's libc++ headers against the device runtime), which needed hacks
-# like -D_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION=0 and -lc++abi.
-# -nostdinc++ removes the compiler's own libc++ header paths.
-execute_process(
-    COMMAND xcrun --sdk iphoneos --show-sdk-path
-    OUTPUT_VARIABLE STREAMR_IOS_SDK_PATH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    COMMAND_ERROR_IS_FATAL ANY)
-
+# TESTING (2026-07-08, pre-import-std validation): use HOMEBREW LLVM's libc++
+# HEADERS (not the iOS SDK's), linking against the device's libc++ RUNTIME.
+# This is the arrangement `import std` needs on iOS — the iOS SDK libc++ ships
+# no std module, Homebrew LLVM 22's does. It reverts the Phase 1.4 switch to
+# SDK libc++. At DEPLOYMENT_TARGET 26.0 the old availability hacks
+# (-D_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION=0, -lc++abi) are no longer
+# required: __cxa_init_primary_exception shipped in the device libc++ at
+# iOS 18.4, far below 26.0 (compile+link verified; gated on a real-device
+# iostest run before adopting).
 set(VCPKG_CMAKE_CONFIGURE_OPTIONS
     -DCMAKE_C_COMPILER=${LLVM_PREFIX}/bin/clang
     -DCMAKE_CXX_COMPILER=${LLVM_PREFIX}/bin/clang++
@@ -42,7 +39,7 @@ set(VCPKG_CMAKE_CONFIGURE_OPTIONS
     -DPLATFORM=OS64
     -DDEPLOYMENT_TARGET=${DEPLOYMENT_TARGET})
 
-set(VCPKG_CXX_FLAGS "-nostdinc++ -isystem ${STREAMR_IOS_SDK_PATH}/usr/include/c++/v1")
+set(VCPKG_CXX_FLAGS "-isystem ${LLVM_PREFIX}/include/c++/v1")
 set(VCPKG_C_FLAGS "")
 
 if(${PORT} MATCHES "usrsctp")
