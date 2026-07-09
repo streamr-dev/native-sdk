@@ -371,15 +371,30 @@ public:
                 this->connectorFacade->createConnection(peerDescriptor);
             SLogger::debug("Created new connection");
             // This connection is outgoing (locally initiated). If the
-            // tie-break rejects it — a concurrent incoming connection from
-            // the same peer already won and owns the endpoint — discard the
-            // outgoing one we just created and fall through to that
-            // endpoint. (Simultaneous connect; see acceptNewConnection.)
+            // tie-break rejects it — an endpoint for this peer already exists
+            // (created by a concurrent send whose connect is in flight, or by
+            // the peer's incoming connection that won the simultaneous-connect
+            // tie-break) — do NOT close the pending connection here: the
+            // connector deduplicates per target, so `connection` may be the
+            // very pending connection the existing endpoint is currently
+            // connecting with, and closing it would tear that endpoint down
+            // (phase-AA bug: the k-bucket ping and a discovery query racing to
+            // the same new peer shared one pending connection; the loser's
+            // close churned the winner's endpoint and dropped its buffered
+            // messages). A genuinely losing duplicate is torn down by the
+            // protocol instead: the peer rejects its handshake with
+            // DUPLICATE_CONNECTION and the outgoing handshaker silences it
+            // (replaceAsDuplicate) — matching TS, which ignores the
+            // onNewConnection return value in send(). Fall through and use
+            // the existing endpoint.
             const bool accepted =
                 this->onNewConnection(connection, /*isLocalInitiated=*/true);
             SLogger::debug("Handled new connection");
             if (!accepted) {
-                connection->close(false);
+                SLogger::trace(
+                    "send(): outgoing connection rejected by the tie-break,"
+                    " using the existing endpoint for " +
+                    nodeId);
             }
             {
                 std::scoped_lock lock(this->endpointsMutex);

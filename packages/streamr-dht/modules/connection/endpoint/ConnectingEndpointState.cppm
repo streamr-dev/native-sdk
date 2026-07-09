@@ -44,7 +44,13 @@ using streamr::dht::connection::IPendingConnection;
 class ConnectingEndpointState : public EndpointState {
 private:
     EndpointStateInterface& stateInterface;
-    std::vector<std::byte> buffer;
+    // One entry PER MESSAGE, flushed as one send() each: the receiving side
+    // parses every delivered blob as a single protobuf Message, so
+    // concatenating buffered messages into one flat byte vector (the previous
+    // implementation) merged them into one corrupt message on flush and
+    // silently destroyed all but the last RPC (phase-AA bug; TS buffers an
+    // array of messages the same way this does).
+    std::vector<std::vector<std::byte>> buffer;
     std::shared_ptr<IPendingConnection> pendingConnection;
     HandlerToken connectedHandlerToken;
     HandlerToken disconnectedHandlerToken;
@@ -193,11 +199,14 @@ public:
                         }
                         self->detachFromPendingConnection();
                         // Flushing under the mutex keeps the buffered
-                        // bytes ordered before any send() that observes
+                        // messages ordered before any send() that observes
                         // the connected state (connection->send() emits
-                        // nothing, so it is safe to call here).
+                        // nothing, so it is safe to call here). One send()
+                        // per message — boundaries must survive.
                         if (!self->buffer.empty()) {
-                            connection->send(self->buffer);
+                            for (const auto& message : self->buffer) {
+                                connection->send(message);
+                            }
                             self->buffer.clear();
                         }
                         self->stateInterface.enterConnectedState(connection);
@@ -243,7 +252,7 @@ public:
 
     void send(const std::vector<std::byte>& data) override {
         SLogger::debug("ConnectingEndpointState::send");
-        this->buffer.insert(this->buffer.end(), data.begin(), data.end());
+        this->buffer.push_back(data);
     }
 
     [[nodiscard]] DeferredCallout changeToConnectingState(
@@ -259,8 +268,12 @@ public:
         const std::shared_ptr<Connection>& connection) override {
         SLogger::debug("ConnectingEndpointState::changeToConnectedState");
         this->detachFromPendingConnection();
+        // One send() per message — boundaries must survive (see the buffer
+        // declaration).
         if (!this->buffer.empty()) {
-            connection->send(this->buffer);
+            for (const auto& message : this->buffer) {
+                connection->send(message);
+            }
             this->buffer.clear();
         }
         this->stateInterface.enterConnectedState(connection);

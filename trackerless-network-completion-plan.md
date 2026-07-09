@@ -435,55 +435,48 @@ use a layer-0 `DhtNode` as its transport, sharing one `ConnectionManager` and co
 
 *Milestone A exit criterion:* a network of simulated C++ `DhtNode`s joins via entry points,
 routes messages, and stores/fetches data — the full dht test pyramid below the connector level
-is green, **except** the one test quarantined for phase AA below.
+is green.
 
-**Phase AA — Concurrent-connect convergence (deferred; do AFTER the rest of Milestone A is
-merged and green).** Two multi-node join tests in `packages/streamr-dht/test/integration/
-MultipleEntryPointJoiningTest.cpp` are currently quarantined (`DISABLED_`), both failing on the
-same connection-establishment concurrency defect that only the threaded C++ runtime hits (TS is
-single-threaded and never does):
-- `DISABLED_NonEntryPointNodesCanJoin` — a fresh node joining a small already-formed
-  2-entry-point network (expects 3 neighbours); fails ~1/3 of runs.
-- `DISABLED_CanJoinEvenIfANodeIsOffline` — two nodes joining with one offline entry point
-  (expects 1 neighbour each). The `Simulator::removeConnector` fix cleanly fast-fails the offline
-  entry point, but the two *online* nodes still hit the same churn in ~20-30% of isolated runs
-  (fine in a warm back-to-back loop, but each CI run is a fresh isolated process); with only 1
-  expected neighbour there is no margin.
+**Phase AA — Concurrent-connect convergence. RESOLVED (2026-07-10).** The multi-node join
+flakiness (`NonEntryPointNodesCanJoin` failing ~1/3 of isolated runs, `CanJoinEvenIfANodeIsOffline`
+~20-30%, plus occasional teardown hangs) was root-caused by runtime instrumentation on both peers
+(per-decision logs with node ids and pending-connection identities, captured from failing runs)
+and fixed. It was **three distinct defects**, none of them the previously-suspected
+"two symmetric duplicate connections" problem:
 
-`CanJoinSimultaneously` (3 nodes joining at once, 2 neighbours each) is **reliable** (8/8 isolated)
-and stays enabled — simultaneous joins connect symmetrically, so each pair is a genuine
-simultaneous connect the tie-break already converges.
+1. *`ConnectionManager::send()` closed the connector-shared pending connection on a tie-break
+   rejection.* The connectors deduplicate outgoing connects per target (`connect()` to a peer with
+   a handshake already in flight returns the SAME `PendingConnection`), so when the k-bucket ping
+   and a discovery query raced to a new peer, both `send()`s held one shared pending connection;
+   the second `acceptNewConnection` was rejected by the offerer tie-break and `send()` then
+   `close(false)`d the shared connection — tearing down the endpoint the first send had just
+   created (log: `cache-HIT` same pc → `accept-REJECT` → `pc-close willEmitDisconnected=1` →
+   `endpoint-down` 1 ms after creation → ping `SEND_FAILED`). Each such churn also
+   `buffer.clear()`ed every other message buffered on the connecting endpoint (log: 5 requests
+   buffered, only the last delivered). **Fix:** never close on rejection — fall through and use
+   the existing endpoint; a genuinely losing duplicate is torn down by the DUPLICATE_CONNECTION
+   handshake protocol (`replaceAsDuplicate`), matching TS, which ignores the return value.
+2. *`ConnectingEndpointState` destroyed message boundaries on flush.* It buffered messages into
+   one flat byte vector and flushed them as ONE `connection->send()`, while the receiving
+   `onData()` parses each delivered blob as ONE protobuf `Message` — two buffered messages merged
+   into one corrupt message on the wire and all but one RPC request silently vanished (log:
+   `buffer-flush bytes=549 count=2` → receiver `blobBytes=549 msgBytes=295`, one message; the
+   lost ping then hit `RPC_TIMEOUT` after 5 s on a perfectly healthy connection). **Fix:** buffer
+   a vector of messages and flush one send per message (TS buffers an array the same way).
+3. *Teardown hang.* The detached k-bucket ping tasks pin `PeerManager` via `sharedFromThis`, so
+   destroying the owner's `shared_ptr` does not end them; `DhtNode` teardown then destroyed the
+   RPC communicator while a dangling ping still used it, and `~RpcCommunicatorClientApi` joined
+   its executor forever (proven by `sample` of a live hung process). **Fix:** the ping is wrapped
+   in `co_withCancellation` with `PeerManager`'s abort token, and `PeerManager::stop()` drains
+   `pingExecutor.join()` after the abort, outside the mutex.
 
-*Confirmed by traces:* the joining node discovers the earlier-joined peer (via an entry point's
-`getClosestPeers`), adds it to its k-bucket, then drops it — its `onKBucketAdded` ping to that
-peer fails with `SEND_FAILED: No connection to target, connection failed` and the handler
-`removeContact`s it. In the trace two **concurrent outgoing** connects to that same not-yet-
-connected peer are in flight (one from the PeerManager k-bucket ping on `pingExecutor`, one from
-the DiscoverySession `getClosestPeers` query on the join executor, on different threads); the
-endpoint is seen to adopt a pending connection then `detachFromPendingConnection` →
-`enterDisconnectedState` (the churn), erase itself, and the racing `send()` then finds no
-endpoint. `ConnectionManager::acceptNewConnection`'s offerer tie-break is built for a *simultaneous
-connect* (one incoming + one outgoing) and converges both sides order-independently on the
-offerer's connection, but it cannot disambiguate two **identical same-direction** duplicates —
-they are symmetric.
-
-*Two fixes were attempted and reverted (details in the session notes / auto-memory
-`blockingwait-cooperative-executor`):* (a) send()-level per-peer serialization of outgoing
-connects — **livelocked** under stress (a wait/retry cycle when a connection still churns; this
-also showed the churn is not fully explained by "two outgoing collide", since a deduped single
-outgoing should not churn yet the retry path still fired — the exact churn mechanism is not yet
-pinned down); (b) rejecting a same-direction duplicate in `acceptNewConnection` — **regressed**
-the test to always fail, because "first" is per-side (creation order at the initiator vs arrival
-order at the acceptor), so the two nodes settle on *different* connections and both fail.
-
-*Recommended approach for AA:* give each connection a **pair-stable id both peers can compare**
-(e.g. carry the initiator's connection/attempt id through the handshake to the acceptor, or derive
-one deterministically from the two node ids plus an exchanged nonce) and make the tie-break for
-two same-direction duplicates deterministically keep the same one on both sides (e.g. lowest id) —
-the only order-independent way for both peers to converge on the *same* duplicate. First reproduce
-and fully pin the churn mechanism (the open puzzle above) before committing to a design. Then
-re-enable the test and stress it (≥20 repeats) alongside the full connection integration suite.
-This is connection-layer (phase-A0) work independent of the DHT logic, hence deferred to here.
+*Verification:* with all three fixes, 25/25 isolated runs green under a hang watchdog
+(12× NonEntryPointNodesCanJoin, 8× CanJoinEvenIfANodeIsOffline, 5× CanJoinSimultaneously), plus
+a post-cleanup stress round; both formerly quarantined tests are re-enabled; full unit +
+integration suites green. Two earlier model-driven fix attempts (send-level connect
+serialization; same-direction duplicate rejection) had failed because the real defects were in
+the connector dedup cache and the buffer framing — subsystems the hypotheses did not cover; the
+instrumentation found them from two captured failing runs.
 
 ### Milestone B — Direct connectivity (real sockets, NAT, WebRTC)
 
