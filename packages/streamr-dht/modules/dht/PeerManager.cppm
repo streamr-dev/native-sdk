@@ -211,7 +211,16 @@ private:
                 [self, contact, nodeId]() -> folly::coro::Task<void> {
                     bool result = false;
                     try {
-                        result = co_await contact->ping();
+                        // Cancellable by stop(): a detached ping in flight at
+                        // teardown otherwise still references the owner's RPC
+                        // communicator while the owner is destroying it (the
+                        // phase-AA teardown hang: ~RpcCommunicatorClientApi
+                        // joins its executor while the dangling ping occupies
+                        // it). stop() aborts, then drains pingExecutor.
+                        result = co_await streamr::utils::co_withCancellation(
+                            self->abortController.getSignal()
+                                .getCancellationToken(),
+                            contact->ping());
                     } catch (const std::exception& err) {
                         SLogger::trace("ping threw " + std::string(err.what()));
                         result = false;
@@ -408,20 +417,32 @@ public:
     }
 
     void stop() {
-        std::scoped_lock lock(this->mutex);
-        this->stopped = true;
-        this->abortController.abort();
-        for (const auto& rpcRemote : this->neighbors->toArray()) {
-            rpcRemote->leaveNotice();
-            this->neighbors->remove(rpcRemote->getId());
+        {
+            std::scoped_lock lock(this->mutex);
+            this->stopped = true;
+            this->abortController.abort();
+            for (const auto& rpcRemote : this->neighbors->toArray()) {
+                rpcRemote->leaveNotice();
+                this->neighbors->remove(rpcRemote->getId());
+            }
+            this->neighbors->removeAllListeners();
+            for (const auto& rpcRemote : this->ringContacts->getAllContacts()) {
+                rpcRemote->leaveNotice();
+                this->ringContacts->removeContact(rpcRemote);
+            }
+            this->nearbyContacts->stop();
+            this->randomContacts->stop();
         }
-        this->neighbors->removeAllListeners();
-        for (const auto& rpcRemote : this->ringContacts->getAllContacts()) {
-            rpcRemote->leaveNotice();
-            this->ringContacts->removeContact(rpcRemote);
-        }
-        this->nearbyContacts->stop();
-        this->randomContacts->stop();
+        // Drain in-flight pings before returning (OUTSIDE the mutex: a
+        // draining ping's continuation takes it). The detached ping tasks
+        // pin `self`, so destroying the owner's shared_ptr does not end
+        // them — without this join a dangling ping still uses the RPC
+        // communicator while the owner destroys it (the phase-AA teardown
+        // hang). schedulePing enqueues under the mutex and onKBucketAdded
+        // checks `stopped`, so no new ping can be enqueued after the block
+        // above. The abort() cancels the in-flight RPCs, so the join
+        // returns promptly rather than waiting out the RPC timeout.
+        this->pingExecutor.join();
     }
 
     [[nodiscard]] RingContacts<DhtNodeRpcRemote> getClosestRingContactsTo(
