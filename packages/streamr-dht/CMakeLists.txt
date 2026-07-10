@@ -262,6 +262,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/integration/Layer1ScaleTest.cpp
         test/integration/DhtNodeExternalApiTest.cpp
         test/integration/KademliaCorrectnessTest.cpp
+        test/integration/ConnectivityCheckingTest.cpp
+        test/integration/WebsocketConnectionManagementTest.cpp
     )
 
     target_include_directories(streamr-dht-test-integration

@@ -1,3 +1,5 @@
+#include <cstdint>
+#include <string>
 #include <string_view>
 #include <gtest/gtest.h>
 #include <rtc/global.hpp>
@@ -100,6 +102,63 @@ TEST(WebsocketClientServerTest, TestClientCanTrasmitMessageToServer) {
     auto receivedMessage = messagePromise.get_future().get();
 
     ASSERT_EQ(message, receivedMessage);
+
+    client->close(false);
+    serverConnection->close(false);
+    server.stop();
+}
+
+// Ported from packages/dht/test/integration/Websocket.test.ts
+// (v103.8.0-rc.3) 'Happy path': the server sends first as soon as the
+// connection is up, the client echoes the payload back, and the server
+// asserts the round trip. Adaptations: the C++ connection events do not
+// replay to late listeners, so each side attaches its Data listener before
+// any send can race it (the TS event loop gives the same ordering for
+// free), and the port is unique to this suite instead of the TS 9977.
+TEST(WebsocketClientServerTest, TestServerClientRoundTripMessageExchange) {
+    rtc::InitLogger(rtc::LogLevel::Verbose);
+    constexpr uint16_t roundTripPort = 10002;
+    WebsocketServerConfig config{
+        .portRange = {.min = roundTripPort, .max = roundTripPort},
+        .enableTls = false,
+        .tlsCertificateFiles = std::nullopt,
+        .maxMessageSize = std::nullopt};
+
+    WebsocketServer server(std::move(config));
+
+    const std::vector<std::byte> payload{
+        std::byte{1}, std::byte{2}, std::byte{3}, std::byte{4}};
+
+    std::promise<std::vector<std::byte>> clientReceivedPromise;
+    std::promise<std::vector<std::byte>> serverReceivedPromise;
+
+    std::shared_ptr<WebsocketServerConnection> serverConnection;
+
+    server.on<websocketserverevents::Connected>(
+        [&](const std::shared_ptr<WebsocketServerConnection>& connection) {
+            serverConnection = connection;
+            serverConnection->on<Data>(
+                [&](const std::vector<std::byte>& message) {
+                    serverReceivedPromise.set_value(message);
+                });
+            serverConnection->send(payload);
+        });
+
+    server.start();
+
+    auto client = WebsocketClientConnection::newInstance();
+    client->on<Data>([&](const std::vector<std::byte>& message) {
+        clientReceivedPromise.set_value(message);
+        // Echo the payload back to the server.
+        client->send(message);
+    });
+
+    client->connect("ws://127.0.0.1:" + std::to_string(roundTripPort), false);
+
+    const auto clientReceived = clientReceivedPromise.get_future().get();
+    ASSERT_EQ(clientReceived, payload);
+    const auto serverReceived = serverReceivedPromise.get_future().get();
+    ASSERT_EQ(serverReceived, payload);
 
     client->close(false);
     serverConnection->close(false);

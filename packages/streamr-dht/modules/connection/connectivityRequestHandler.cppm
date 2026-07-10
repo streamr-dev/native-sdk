@@ -136,9 +136,17 @@ template <typename ConnectionType>
 inline void attachConnectivityRequestHandler(
     const std::shared_ptr<ConnectionType>& connectionToListenTo) {
     namespace detail = connectivityrequesthandlerdetail;
-    std::weak_ptr<ConnectionType> weakConnection = connectionToListenTo;
+    // The Data listener captures the connection STRONGLY: nothing else owns
+    // a server socket that arrived with the connectivityRequest action (the
+    // handshake path stores its socket in a handshaker; TS relies on GC).
+    // The cycle connection->listener->connection is broken when the remote
+    // side closes: WebsocketConnection::onClosed() removes all listeners.
+    // The executor task below still captures WEAKLY, so a connection that
+    // closes while the request waits for the worker is simply dropped.
     connectionToListenTo->template on<connectionevents::Data>(
-        [weakConnection](const std::vector<std::byte>& data) {
+        [strongConnection =
+             connectionToListenTo](const std::vector<std::byte>& data) {
+            std::weak_ptr<ConnectionType> weakConnection = strongConnection;
             SLogger::trace("server received data");
             Message message;
             if (!message.ParseFromArray(

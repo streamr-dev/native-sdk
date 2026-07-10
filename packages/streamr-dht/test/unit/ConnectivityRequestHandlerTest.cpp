@@ -100,7 +100,7 @@ protected:
     void SetUp() override {
         this->websocketServer.emplace(
             WebsocketServerConfig{
-                .portRange = {port, port},
+                .portRange = {.min = port, .max = port},
                 .enableTls = false,
                 .tlsCertificateFiles = std::nullopt,
                 .maxMessageSize = std::nullopt});
