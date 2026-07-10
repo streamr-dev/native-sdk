@@ -573,13 +573,21 @@ public:
             endpointsSnapshot = this->endpoints | std::views::values |
                 std::ranges::to<std::vector>();
         }
-        return endpointsSnapshot | std::views::filter([](const auto& endpoint) {
-                   return endpoint->isConnected();
-               }) |
-            std::views::transform([](const auto& endpoint) {
-                   return endpoint->getPeerDescriptor();
-               }) |
-            std::ranges::to<std::vector>();
+        // Materialized with a single-pass loop, NOT a views::filter |
+        // ranges::to pipeline: for a forward range libc++'s to<vector> walks
+        // the range twice (ranges::distance to size the allocation, then the
+        // copy), and isConnected() is live state — an endpoint connecting
+        // between the two passes made the copy pass yield MORE elements than
+        // were counted, overflowing the allocation (heap-buffer-overflow
+        // caught by ASan in the 48-node layer1-scale test).
+        std::vector<PeerDescriptor> connections;
+        connections.reserve(endpointsSnapshot.size());
+        for (const auto& endpoint : endpointsSnapshot) {
+            if (endpoint->isConnected()) {
+                connections.push_back(endpoint->getPeerDescriptor());
+            }
+        }
+        return connections;
     }
 
 private:

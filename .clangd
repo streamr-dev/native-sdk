@@ -5,3 +5,9 @@ InlayHints:
   ParameterNames: No
   DeducedTypes: Yes
   Designators: No
+# No background index: lint.sh runs several short-lived clangd processes
+# back-to-back (clangd-tidy chunks), and a clangd starting while the previous
+# one's index shards are mid-write crashes at startup (clangd-tidy aborts with
+# "Invalid header end"). The lint runs don't benefit from the index anyway.
+Index:
+  Background: Skip
