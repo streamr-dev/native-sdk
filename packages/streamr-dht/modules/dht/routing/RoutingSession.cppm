@@ -96,8 +96,9 @@ struct RoutingSessionOptions {
     std::set<DhtAddress> excludedNodeIds;
     RoutingTablesCache& routingTablesCache;
     std::function<std::vector<PeerDescriptor>()> getConnections;
-    // Worker executor the sends are dispatched onto (owned by the Router).
-    folly::CPUThreadPoolExecutor* executor;
+    // Worker executor the sends are dispatched onto (the Router's serial
+    // view of the shared low-priority pool).
+    folly::Executor* executor;
 };
 
 class RoutingSession : public EventEmitter<RoutingSessionEvents>,

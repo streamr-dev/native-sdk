@@ -30,6 +30,7 @@ export module streamr.dht.StoreManager;
 import streamr.dht.protos;
 
 import streamr.utils.CoroutineHelper;
+import streamr.utils.SharedExecutors;
 import streamr.utils.EnableSharedFromThis;
 import streamr.utils.ExecutorHelper;
 import streamr.logger.SLogger;
@@ -81,10 +82,12 @@ struct StoreManagerOptions {
 
 class StoreManager : public EnableSharedFromThis {
 private:
-    static constexpr size_t replicationWorkerThreads = 1;
-
     StoreManagerOptions options;
-    folly::CPUThreadPoolExecutor replicationExecutor{replicationWorkerThreads};
+    // Serial view of the shared worker pool (formerly a private
+    // single-thread pool — see streamr.utils.SharedExecutors); the detached
+    // replication tasks pin `self` (sharedFromThis), exactly as before.
+    streamr::utils::SharedSerialExecutor replicationExecutor{
+        streamr::utils::SharedExecutors::worker()};
     std::unique_ptr<StoreRpcLocal> rpcLocal;
 
     explicit StoreManager(StoreManagerOptions options)

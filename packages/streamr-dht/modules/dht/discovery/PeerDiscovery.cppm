@@ -40,6 +40,7 @@ import streamr.dht.protos;
 import streamr.utils.AbortableTimers;
 import streamr.utils.AbortController;
 import streamr.utils.CoroutineHelper;
+import streamr.utils.SharedExecutors;
 import streamr.utils.EnableSharedFromThis;
 import streamr.utils.ExecutorHelper;
 import streamr.utils.scheduleAtInterval;
@@ -126,8 +127,12 @@ private:
     bool recoveryIntervalStarted = false;
     std::recursive_mutex mutex;
     // Recovery / rejoin maintenance runs here — 2nd-class work kept off the
-    // caller/delivery threads.
-    folly::CPUThreadPoolExecutor recoveryExecutor{1};
+    // caller/delivery threads. Serial view of the shared worker pool
+    // (formerly a private single-thread pool — see
+    // streamr.utils.SharedExecutors); the detached tasks pin `self`
+    // (sharedFromThis) and bail on the abort signal, exactly as before.
+    streamr::utils::SharedSerialExecutor recoveryExecutor{
+        streamr::utils::SharedExecutors::worker()};
     PeerDiscoveryOptions options;
 
     explicit PeerDiscovery(PeerDiscoveryOptions options)

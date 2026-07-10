@@ -7,8 +7,8 @@
 // handled off the delivery thread. onIncomingMessage() copies everything
 // the response needs (the resolved handler, the outgoing callback, the
 // request message and call context — no `this`), builds a Task<void> that
-// awaits the handler and sends the response, and schedules it on a private
-// worker executor via a CancellableAsyncScope, returning immediately. A
+// awaits the handler and sends the response, and schedules it on the shared
+// worker pool via a CancellableAsyncScope, returning immediately. A
 // handler may therefore co_await a worker (e.g. the DHT routing worker)
 // and SUSPEND the response coroutine instead of blocking the shared
 // delivery thread. Notifications remain synchronous/inline.
@@ -34,6 +34,7 @@ export module streamr.protorpc.RpcCommunicatorServerApi;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.ExecutorHelper;
+import streamr.utils.SharedExecutors;
 import streamr.protorpc.Errors;
 import streamr.protorpc.ServerRegistry;
 export namespace streamr::protorpc {
@@ -43,18 +44,19 @@ using RpcErrorType = ::protorpc::RpcErrorType;
 template <typename CallContextType, typename OutgoingMessageCallbackType>
 class RpcCommunicatorServerApi {
 private:
-    // A single worker thread preserves the previous serial handling of
-    // incoming requests (which all ran on the shared delivery thread), just
-    // moved off that thread. The request coroutines are owned by mScope and
-    // drained in the destructor so none outlives mExecutor.
-    static constexpr size_t serverWorkerThreadCount = 1;
-
     using AsyncHandler =
         std::function<folly::coro::Task<Any>(Any, CallContextType)>;
 
     ServerRegistry<CallContextType> mServerRegistry;
     OutgoingMessageCallbackType mOutgoingMessageCallback;
-    folly::CPUThreadPoolExecutor mExecutor{serverWorkerThreadCount};
+    // A per-instance SERIAL view of the shared worker pool preserves the
+    // previous serial handling of incoming requests (formerly a private
+    // single-thread executor — one dedicated thread per communicator did
+    // not scale to hundreds of nodes in one process, see
+    // streamr.utils.SharedExecutors). The request coroutines are owned by
+    // mScope and drained in the destructor so none outlives this object.
+    streamr::utils::SharedSerialExecutor mSerialExecutor{
+        streamr::utils::SharedExecutors::worker()};
     folly::coro::CancellableAsyncScope mScope;
 
     struct RpcResponseParams {
@@ -101,7 +103,8 @@ private:
         return ret;
     }
 
-    // Handles one request and sends its response. Runs on mExecutor and may
+    // Handles one request and sends its response. Runs on the serial
+    // executor and may
     // suspend when the handler co_awaits a worker; every input is held by
     // value in the coroutine frame, so nothing here depends on the delivery
     // thread's stack or on `this` staying alive between suspension points.
@@ -176,14 +179,15 @@ private:
     }
 
     // Resolves the handler on the delivery thread (while `this` is alive),
-    // then schedules the response coroutine on mExecutor and returns
+    // then schedules the response coroutine on the serial executor and
+    // returns
     // immediately, so the delivery thread is never blocked by handler work.
     void handleRequest(
         const RpcMessage& rpcMessage, const CallContextType& callContext) {
         auto handler = mServerRegistry.getAsyncHandler(rpcMessage);
         mScope.add(
             streamr::utils::co_withExecutor(
-                &mExecutor,
+                &mSerialExecutor,
                 makeResponseTask(
                     std::move(handler),
                     mOutgoingMessageCallback,
@@ -203,9 +207,10 @@ private:
 public:
     RpcCommunicatorServerApi() = default;
 
-    // Drains any in-flight response coroutines before mExecutor and the
+    // Drains any in-flight response coroutines before the registry and the
     // registry are destroyed, so no detached coroutine outlives the state it
-    // uses. Must run on a thread other than mExecutor's worker (it always
+    // uses. Must run on a thread other than the serial executor's current
+    // worker (it always
     // does: the communicator is owned and destroyed by the transport/main
     // thread, never from inside a request handler).
     ~RpcCommunicatorServerApi() {

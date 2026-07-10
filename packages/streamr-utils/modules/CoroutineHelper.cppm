@@ -21,6 +21,7 @@ module;
 #include <utility>
 
 #include <folly/CancellationToken.h>
+#include <folly/ExceptionWrapper.h>
 #include <folly/Unit.h>
 #include <folly/experimental/coro/AsyncScope.h>
 #include <folly/experimental/coro/BlockingWait.h>
@@ -60,6 +61,7 @@ export namespace folly {
 // through the coroutine headers.
 using folly::CancellationSource;
 using folly::CancellationToken;
+using folly::exception_wrapper;
 using folly::FutureCancellation;
 using folly::FutureTimeout;
 using folly::OperationCancelled;

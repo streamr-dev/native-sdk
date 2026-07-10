@@ -22,10 +22,16 @@ namespace streamr::protorpc {
 using namespace std::chrono_literals;
 using streamr::logger::SLogger;
 using RpcCommunicatorType = RpcCommunicator<ProtoCallContext>;
+
+// The test's own pool for driving calls (formerly reused the client API's
+// threadPoolSize constant, which went away with the per-instance pools).
+constexpr size_t testThreadPoolSize = 20;
+
 class RpcCommunicatorTest : public ::testing::Test {
 public:
     RpcCommunicatorTest()
-        : executor(folly::CPUThreadPoolExecutor(threadPoolSize)) {} // NOLINT
+        : executor(folly::CPUThreadPoolExecutor(testThreadPoolSize)) {
+    } // NOLINT
 
     ~RpcCommunicatorTest() override try {
         SLogger::warn("Deleting executor of RpcCommunicatorTest");
