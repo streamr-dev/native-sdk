@@ -50,8 +50,48 @@ echo "Running clangd-tidy on $FILES"
 # false positive through the StoreRpcRemote / StoreManager coroutine
 # cluster; the compiler builds and runs both, clang-format still checks
 # them. (LocalDataStoreTest.cpp does NOT trip it.)
-TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | grep -v 'test/unit/RecursiveOperationSessionTest.cpp' | grep -v 'test/unit/StoreRpcLocalTest.cpp' | grep -v 'test/unit/StoreManagerTest.cpp' | tr '\n' ' ')
-clangd-tidy -p "$COMPILE_DB" $TIDY_FILES
+# MultipleEntryPointJoiningTest.cpp (phase A8) trips the same false
+# positive through the DhtNode import set (a spurious "no matching
+# constructor" for the branded ServiceID inside the included
+# DhtNodeTestUtils.hpp); the compiler builds and runs it, and the OTHER
+# A8 tests including the same header pass clangd — the variance is the
+# hallmark of the std-type unification issue. clang-format still checks it.
+# DhtNodeTestUtils.hpp (phase A8) is a plain header whose names come from
+# module imports done by the INCLUDING test (a module wrapping DhtNode's
+# interface exhausts clang's source locations, so it cannot be a module —
+# see the header comment); standalone clangd has no imports to resolve it
+# against, so every name errors (and processing it standalone can crash
+# clangd, aborting the whole batch). The including tests are clangd-tidied
+# and the compiler builds it on every platform; clang-format still checks
+# it.
+# The full-node integration tests (phase A8) each import the DhtNode
+# aggregate, whose BMI merge consumes most of clang's per-TU
+# source-location space (see module-sloc-dedup-plan.md); clangd does not
+# fully release that space between files, so batching several of them into
+# ONE clangd process exhausts it and kills clangd mid-session (clangd-tidy
+# aborts with "Invalid header end"). They lint clean individually, so each
+# gets its own clangd process below. (DhtNodeTest.cpp is excluded outright
+# instead: it trips the std-type unification false positive — gtest's own
+# CodeLocation/MakeAndRegisterTestInfo reported ambiguous — like the other
+# excluded files; the compiler builds and runs it on every platform and
+# clang-format still checks it.)
+HEAVY_TIDY_FILES='./test/integration/MockLayer1Layer0Test.cpp ./test/integration/Layer1ScaleTest.cpp ./test/integration/DhtNodeExternalApiTest.cpp ./test/integration/KademliaCorrectnessTest.cpp'
+TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | grep -v 'test/unit/RecursiveOperationSessionTest.cpp' | grep -v 'test/unit/StoreRpcLocalTest.cpp' | grep -v 'test/unit/StoreManagerTest.cpp' | grep -v 'test/integration/MultipleEntryPointJoiningTest.cpp' | grep -v 'test/utils/DhtNodeTestUtils.hpp' | grep -v 'test/integration/DhtNodeTest.cpp' | grep -v 'test/integration/MockLayer1Layer0Test.cpp' | grep -v 'test/integration/Layer1ScaleTest.cpp' | grep -v 'test/integration/DhtNodeExternalApiTest.cpp' | grep -v 'test/integration/KademliaCorrectnessTest.cpp' | tr '\n' ' ')
+# Chunked: one clangd process accumulates source-location space across the
+# files it serves and never releases it; with the phase-A8 module graph a
+# single process no longer survives the whole list (mid-batch the affected
+# files degrade to non-module parses — spurious "unknown type name 'import'"
+# — and clangd finally dies, aborting clangd-tidy with "Invalid header end").
+# Verified: every 13-file chunk passes clean where the one-shot batch dies.
+# The `< /dev/null` matters: a clangd-tidy spawned by xargs inherits the
+# exhausted file-list pipe as stdin, which kills clangd at startup (verified
+# both ways).
+echo "$TIDY_FILES" | tr ' ' '\n' | grep -v '^$' | \
+    xargs -n 13 sh -c 'clangd-tidy -p "$0" "$@" < /dev/null' "$COMPILE_DB"
+for heavy_file in $HEAVY_TIDY_FILES; do
+    echo "Running clangd-tidy (own process) on $heavy_file"
+    clangd-tidy -p "$COMPILE_DB" "$heavy_file" < /dev/null
+done
 
 echo "Running clang-format --dry-run on $FILES"
 ../../run-clang-format.py $FILES
