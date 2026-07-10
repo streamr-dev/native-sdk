@@ -90,6 +90,7 @@ TEST_F(KademliaCorrectnessTest, CanFindCorrectNeighbors) {
     size_t minimumCorrectNeighbors = numNodes;
     size_t sumCorrectNeighbors = 0;
     size_t sumKbucketSize = 1;
+    size_t sumKnownOfClosest = 0;
 
     for (size_t i = 0; i < numNodes; i++) {
         const auto nodeId = this->nodes[i]->node->getNodeId();
@@ -120,9 +121,24 @@ TEST_F(KademliaCorrectnessTest, CanFindCorrectNeighbors) {
         }
         minimumCorrectNeighbors =
             std::min(minimumCorrectNeighbors, correctNeighbors);
+        // Order-insensitive complement of the strict prefix metric above:
+        // how many of the true closest-8 the node knows AT ALL (anywhere in
+        // its top-8). Separates "does not know its closest peers" (a real
+        // discovery failure) from "knows them in slightly different order"
+        // (inherent to Kademlia's liveness-biased buckets).
+        size_t knownOfClosest = 0;
+        for (const auto& truth : groundTruth) {
+            for (const auto& neighbor : kademliaNeighbors) {
+                if (Identifiers::areEqualPeerDescriptors(truth, neighbor)) {
+                    knownOfClosest++;
+                    break;
+                }
+            }
+        }
         if (i > 0) {
             sumKbucketSize += this->nodes[i]->node->getNeighborCount();
             sumCorrectNeighbors += correctNeighbors;
+            sumKnownOfClosest += knownOfClosest;
         }
     }
 
@@ -130,6 +146,8 @@ TEST_F(KademliaCorrectnessTest, CanFindCorrectNeighbors) {
         static_cast<double>(sumKbucketSize) / (numNodes - 1);
     const double avgCorrectNeighbors =
         static_cast<double>(sumCorrectNeighbors) / (numNodes - 1);
+    const double avgKnownOfClosest =
+        static_cast<double>(sumKnownOfClosest) / (numNodes - 1);
 
     // TS prints these; keep them visible in the test log.
     streamr::logger::SLogger::info(
@@ -141,6 +159,9 @@ TEST_F(KademliaCorrectnessTest, CanFindCorrectNeighbors) {
         "Average correct neighbors: " + std::to_string(avgCorrectNeighbors));
     streamr::logger::SLogger::info(
         "Average Kbucket size: " + std::to_string(avgKbucketSize));
+    streamr::logger::SLogger::info(
+        "Average known-of-closest-8 (order-insensitive): " +
+        std::to_string(avgKnownOfClosest));
 
     // Adaptation: conservative correctness floors (the TS test asserts
     // nothing). A healthy 200-node Kademlia converges most nodes to their
