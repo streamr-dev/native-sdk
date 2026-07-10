@@ -288,7 +288,7 @@ public:
         const RequestType& notificationParam,
         const CallContextType& callContext,
         std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
-        SLogger::trace("notify() notificationName:", notificationName);
+        SLogger::info("DBG notify: entered");
 
         std::chrono::milliseconds timeoutValue = mRpcRequestTimeout;
         if (timeout.has_value()) {
@@ -300,9 +300,11 @@ public:
             notificationName);
         auto requestMessage = this->createRequestRpcMessage(
             notificationName, notificationParam, true);
+        SLogger::info("DBG notify: message created");
         auto&& promiseContract = folly::coro::makePromiseContract<void>();
 
         try {
+            SLogger::info("DBG notify: before scope.add");
             // The send callback may reach into the transport (it captures
             // the communicator owner), so it runs as an mScope task — the
             // scope drain in the destructor replaces the former private
@@ -318,11 +320,13 @@ public:
                              mOutgoingMessageCallback]() mutable
                             -> folly::coro::Task<void> {
                             try {
+                                SLogger::info("DBG notify-task: sending");
                                 outgoingMessageCallback(
                                     requestMessage,
                                     requestMessage.requestid(),
                                     callContext);
                                 promise.setValue();
+                                SLogger::info("DBG notify-task: sent");
                             } catch (
                                 const std::exception& clientSideException) {
                                 SLogger::debug(
@@ -334,6 +338,7 @@ public:
                             }
                             co_return;
                         })));
+            SLogger::info("DBG notify: awaiting contract");
             co_return co_await folly::coro::timeout(
                 folly::coro::detachOnCancel(std::move(promiseContract.second)),
                 timeoutValue);

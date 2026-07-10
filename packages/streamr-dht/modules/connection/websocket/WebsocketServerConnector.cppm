@@ -411,6 +411,7 @@ private:
                 this->ongoingConnectRequests.erase(nodeId);
             });
         this->ongoingConnectRequests.emplace(nodeId, pendingConnection);
+        SLogger::info("DBG rcfp: before scope.add");
         this->requestConnectionScope.add(
             streamr::utils::co_withExecutor(
                 &this->requestConnectionExecutor,
@@ -418,21 +419,23 @@ private:
                     [this, localPeerDescriptor, targetPeerDescriptor]()
                         -> folly::coro::Task<void> {
                         try {
+                            SLogger::info("DBG rcfp-task: entered");
                             WebsocketClientConnectorRpcClient client(
                                 this->options.rpcCommunicator);
+                            SLogger::info("DBG rcfp-task: client built");
                             WebsocketClientConnectorRpcRemote remoteConnector(
                                 PeerDescriptor(localPeerDescriptor),
                                 PeerDescriptor(targetPeerDescriptor),
                                 std::move(client));
+                            SLogger::info("DBG rcfp-task: remote built");
                             // Cancellable by destroy(): abort fires before the
                             // executor join drains this task.
                             co_await streamr::utils::co_withCancellation(
                                 this->abortController.getSignal()
                                     .getCancellationToken(),
                                 remoteConnector.requestConnection());
-                            SLogger::trace(
-                                "Sent WebsocketConnectionRequest notification"
-                                " to peer");
+                            SLogger::info(
+                                "DBG rcfp-task: notify co_await done");
                         } catch (const std::exception& err) {
                             SLogger::debug(
                                 "Failed to send WebsocketConnectionRequest"
