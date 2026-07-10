@@ -38,6 +38,8 @@ import streamr.dht.Errors;
 import streamr.logger.SLogger;
 import streamr.utils.AbortController;
 import streamr.utils.CoroutineHelper;
+import streamr.utils.GuardedAsyncScope;
+import streamr.utils.SharedExecutors;
 import streamr.utils.Ipv4Helper;
 import streamr.utils.Uuid;
 import streamr.dht.Handshaker;
@@ -116,9 +118,13 @@ private:
         connectingHandshakers;
     std::map<DhtAddress, std::shared_ptr<IPendingConnection>>
         ongoingConnectRequests;
-    // Runs the detached requestConnection notifications (TS setImmediate);
-    // destroy() joins it after abort.
-    folly::CPUThreadPoolExecutor requestConnectionExecutor{1};
+    // Runs the detached requestConnection notifications (TS setImmediate)
+    // on a serial view of the shared worker pool (per-instance pools are
+    // forbidden — see streamr.utils.SharedExecutors); destroy() drains the
+    // scope after abort, and the gate drops a connect() racing the drain.
+    streamr::utils::SharedSerialExecutor requestConnectionExecutor{
+        streamr::utils::SharedExecutors::worker()};
+    streamr::utils::GuardedAsyncScope requestConnectionScope;
     std::recursive_mutex mMutex;
 
 public:
@@ -373,8 +379,8 @@ public:
         // Drained OUTSIDE the mutex (the PeerManager::stop() pattern): a
         // detached requestConnection notification still in flight references
         // this object and the RPC communicator; abort above cancels it, the
-        // join makes destroy() wait for it without deadlocking on mMutex.
-        this->requestConnectionExecutor.join();
+        // drain makes destroy() wait for it without deadlocking on mMutex.
+        this->requestConnectionScope.close();
 
         SLogger::trace("WebsocketServerConnector::destroy() completed");
     }
@@ -405,36 +411,35 @@ private:
                 this->ongoingConnectRequests.erase(nodeId);
             });
         this->ongoingConnectRequests.emplace(nodeId, pendingConnection);
-        streamr::utils::co_withExecutor(
-            &this->requestConnectionExecutor,
-            folly::coro::co_invoke(
-                [this,
-                 localPeerDescriptor,
-                 targetPeerDescriptor]() -> folly::coro::Task<void> {
-                    try {
-                        WebsocketClientConnectorRpcClient client(
-                            this->options.rpcCommunicator);
-                        WebsocketClientConnectorRpcRemote remoteConnector(
-                            PeerDescriptor(localPeerDescriptor),
-                            PeerDescriptor(targetPeerDescriptor),
-                            std::move(client));
-                        // Cancellable by destroy(): abort fires before the
-                        // executor join drains this task.
-                        co_await streamr::utils::co_withCancellation(
-                            this->abortController.getSignal()
-                                .getCancellationToken(),
-                            remoteConnector.requestConnection());
-                        SLogger::trace(
-                            "Sent WebsocketConnectionRequest notification"
-                            " to peer");
-                    } catch (const std::exception& err) {
-                        SLogger::debug(
-                            "Failed to send WebsocketConnectionRequest"
-                            " notification to peer " +
-                            std::string(err.what()));
-                    }
-                }))
-            .start();
+        this->requestConnectionScope.add(
+            streamr::utils::co_withExecutor(
+                &this->requestConnectionExecutor,
+                folly::coro::co_invoke(
+                    [this, localPeerDescriptor, targetPeerDescriptor]()
+                        -> folly::coro::Task<void> {
+                        try {
+                            WebsocketClientConnectorRpcClient client(
+                                this->options.rpcCommunicator);
+                            WebsocketClientConnectorRpcRemote remoteConnector(
+                                PeerDescriptor(localPeerDescriptor),
+                                PeerDescriptor(targetPeerDescriptor),
+                                std::move(client));
+                            // Cancellable by destroy(): abort fires before the
+                            // executor join drains this task.
+                            co_await streamr::utils::co_withCancellation(
+                                this->abortController.getSignal()
+                                    .getCancellationToken(),
+                                remoteConnector.requestConnection());
+                            SLogger::trace(
+                                "Sent WebsocketConnectionRequest notification"
+                                " to peer");
+                        } catch (const std::exception& err) {
+                            SLogger::debug(
+                                "Failed to send WebsocketConnectionRequest"
+                                " notification to peer " +
+                                std::string(err.what()));
+                        }
+                    })));
         return pendingConnection;
     }
 
