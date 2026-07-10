@@ -18,7 +18,6 @@ module;
 
 export module streamr.utils.GuardedAsyncScope;
 
-import streamr.logger.SLogger;
 import streamr.utils.CoroutineHelper;
 
 export namespace streamr::utils {
@@ -40,9 +39,7 @@ public:
         if (this->closed) {
             return;
         }
-        streamr::logger::SLogger::info("DBG GuardedAsyncScope: adding");
         this->scope.add(std::forward<Awaitable>(awaitable));
-        streamr::logger::SLogger::info("DBG GuardedAsyncScope: added");
     }
 
     // Blocks until every added task has finished; further adds are
