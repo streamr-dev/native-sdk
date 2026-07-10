@@ -6,17 +6,22 @@ cmake --build build || exit 1
 
 cd build
 
-# --repeat until-pass:2 retries a failed test once, and --timeout 300
-# converts a hung test into a failure (which then gets the retry): the
-# networking integration tests (e.g. ConnectionLockingTest) are
-# timing-sensitive on shared CI runners and have both flaked and hung
-# there, on the old toolchain as well as the new one. A genuinely broken
-# test still fails both attempts. The whole suite normally runs in ~35 s;
-# 300 s per test is generous.
+# --repeat until-pass:2 retries a failed test once, and --timeout converts
+# a hung test into a failure (which then gets the retry): the networking
+# integration tests (e.g. ConnectionLockingTest) are timing-sensitive on
+# shared CI runners and have both flaked and hung there, on the old
+# toolchain as well as the new one. A genuinely broken test still fails
+# both attempts.
+# The timeout must clear the heavy DHT convergence tests from milestone A
+# (PR #73): Layer1ScaleTest.MultipleLayer1Dht runs 48 nodes x 4 layer-1
+# services and takes ~214 s on a fast 10-core dev machine — on the 3-core
+# macOS CI runners it exceeded the previous 300 s limit, so ctest killed
+# it (and KademliaCorrectnessTest), failed the retry the same way, and
+# the macOS leg went red while the faster Linux legs stayed green.
 if [ "$#" -gt 0 ]; then
-    ctest -V --repeat until-pass:2 --timeout 300 -R "$@"
+    ctest -V --repeat until-pass:2 --timeout 1200 -R "$@"
 else
-    ctest -V --repeat until-pass:2 --timeout 300
+    ctest -V --repeat until-pass:2 --timeout 1200
 fi
 
 CTEST_RETURN_CODE=$?
