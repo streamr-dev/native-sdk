@@ -208,6 +208,32 @@ TEST(SimulatorTest, ConnectToUnknownTargetReportsError) {
     EXPECT_EQ(result.error.value(), "Target connector not found");
 }
 
+TEST(SimulatorTest, ConnectToRemovedConnectorReportsError) {
+    // A stopped node deregisters its connector (SimulatorConnector::stop() ->
+    // Simulator::removeConnector); a later connect to it must fast-fail via the
+    // same "Target connector not found" path as an unknown target, instead of
+    // being accepted and then hanging until a connection/RPC timeout.
+    Simulator simulator;
+    const auto descriptor1 = createMockPeerDescriptor();
+    const auto descriptor2 = createMockPeerDescriptor();
+    auto connector2 = std::make_shared<StubConnector>(descriptor2, simulator);
+    simulator.addConnector(connector2);
+    simulator.removeConnector(descriptor2);
+
+    auto connection1 =
+        std::make_shared<StubConnection>(descriptor1, descriptor2);
+    ConnectResult result;
+    simulator.connect(
+        connection1,
+        descriptor2,
+        [&result](const std::optional<std::string>& error) {
+            result.set(error);
+        });
+    ASSERT_TRUE(result.wait(testTimeout));
+    ASSERT_TRUE(result.error.has_value());
+    EXPECT_EQ(result.error.value(), "Target connector not found");
+}
+
 TEST(SimulatorTest, SendDeliversDataInBothDirections) {
     Simulator simulator;
     const auto descriptor1 = createMockPeerDescriptor();

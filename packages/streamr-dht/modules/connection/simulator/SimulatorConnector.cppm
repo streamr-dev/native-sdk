@@ -170,13 +170,18 @@ public:
     }
 
     void stop() {
-        std::scoped_lock lock(this->mMutex);
-        this->stopped = true;
-        for (const auto& [_, handshaker] : this->connectingHandshakers) {
-            handshaker->getPendingConnection()->close(true);
+        {
+            std::scoped_lock lock(this->mMutex);
+            this->stopped = true;
+            for (const auto& [_, handshaker] : this->connectingHandshakers) {
+                handshaker->getPendingConnection()->close(true);
+            }
+            this->connectingHandshakers.clear();
+            this->incomingHandshakers.clear();
         }
-        this->connectingHandshakers.clear();
-        this->incomingHandshakers.clear();
+        // Deregister so connects to this now-stopped node fail fast (see
+        // Simulator::removeConnector) rather than hanging until a timeout.
+        this->simulator.removeConnector(this->localPeerDescriptor);
     }
 };
 

@@ -8,10 +8,11 @@
 // and replaced by the closest active nearby contact.
 //
 // Threading note (a C++ design point, since TS is single-threaded): the
-// ping is fired off the calling thread via AbortableTimers and its result
-// handled later, so every operation (and the k-bucket/contact-list event
-// handlers) runs under one recursive mutex; PeerManager is owned through a
-// shared_ptr so the deferred ping handler can pin it.
+// ping is co_awaited off the calling thread on a dedicated worker executor
+// (pingExecutor) and its result handled later, so every operation (and the
+// k-bucket/contact-list event handlers) runs under one recursive mutex;
+// PeerManager is owned through a shared_ptr so the deferred ping handler can
+// pin it.
 module;
 
 #include <chrono>
@@ -37,6 +38,7 @@ import streamr.utils.AbortController;
 import streamr.utils.AbortableTimers;
 import streamr.utils.CoroutineHelper;
 import streamr.utils.EnableSharedFromThis;
+import streamr.utils.ExecutorHelper;
 import streamr.logger.SLogger;
 import streamr.dht.ConnectionLocker;
 import streamr.dht.ConnectionLockStates;
@@ -115,6 +117,11 @@ private:
     AbortController abortController;
     bool stopped = false;
     std::set<DhtAddress> activeContacts;
+    // Neighbour pings run here, NOT on the AbortableTimers FunctionScheduler:
+    // that scheduler is single-threaded and also drives the RPC request
+    // timeouts, so blocking it on a ping to an unreachable peer would freeze
+    // every other timer (including the ping's own timeout) — see schedulePing.
+    folly::CPUThreadPoolExecutor pingExecutor{1};
 
     std::unique_ptr<KBucket<DhtNodeRpcRemote>> neighbors;
     std::unique_ptr<SortedContactList<DhtNodeRpcRemote>> nearbyContacts;
@@ -187,35 +194,42 @@ private:
     }
 
     // Fires the ping off this thread; on failure drops the contact and pulls
-    // in the closest active nearby contact.
+    // in the closest active nearby contact. The ping is co_awaited on a
+    // dedicated worker executor (NOT blockingWait'd on the AbortableTimers
+    // thread): that scheduler is single-threaded and also runs the RPC
+    // request-timeout timers, so blocking it on a ping to an unreachable peer
+    // deadlocked the ping's own timeout and stalled every other timer (the
+    // cause of CanJoinEvenIfANodeIsOffline leaving 0 neighbours). TS awaits the
+    // ping in an async context, which is what running it on pingExecutor does.
     void schedulePing(
         const std::shared_ptr<DhtNodeRpcRemote>& contact,
         const DhtAddress& nodeId) {
         auto self = this->sharedFromThis<PeerManager>();
-        AbortableTimers::setAbortableTimeout(
-            [self, contact, nodeId]() {
-                bool result = false;
-                try {
-                    result = streamr::utils::blockingWait(contact->ping());
-                } catch (const std::exception& err) {
-                    SLogger::trace("ping threw " + std::string(err.what()));
-                    result = false;
-                }
-                std::scoped_lock lock(self->mutex);
-                if (self->stopped) {
-                    return;
-                }
-                if (result) {
-                    SLogger::trace("Added new contact " + nodeId);
-                } else {
-                    SLogger::trace("ping failed " + nodeId);
-                    self->weakUnlock(nodeId);
-                    self->removeContact(nodeId);
-                    self->addNearbyContactToNeighbors();
-                }
-            },
-            std::chrono::milliseconds(0),
-            self->abortController.getSignal());
+        streamr::utils::co_withExecutor(
+            &this->pingExecutor,
+            folly::coro::co_invoke(
+                [self, contact, nodeId]() -> folly::coro::Task<void> {
+                    bool result = false;
+                    try {
+                        result = co_await contact->ping();
+                    } catch (const std::exception& err) {
+                        SLogger::trace("ping threw " + std::string(err.what()));
+                        result = false;
+                    }
+                    std::scoped_lock lock(self->mutex);
+                    if (self->stopped) {
+                        co_return;
+                    }
+                    if (result) {
+                        SLogger::trace("Added new contact " + nodeId);
+                    } else {
+                        SLogger::trace("ping failed " + nodeId);
+                        self->weakUnlock(nodeId);
+                        self->removeContact(nodeId);
+                        self->addNearbyContactToNeighbors();
+                    }
+                }))
+            .start();
     }
 
     void addNearbyContactToNeighbors() {
@@ -441,6 +455,46 @@ public:
         result.reserve(contacts.size());
         for (const auto& contact : contacts) {
             result.push_back(contact->getPeerDescriptor());
+        }
+        return result;
+    }
+
+    // The nearby contacts closest to the local node, as descriptors (TS:
+    // getNearbyContacts().getClosestContacts(limit)). Lock kept internal.
+    [[nodiscard]] std::vector<PeerDescriptor> getClosestContacts(
+        std::optional<size_t> limit = std::nullopt) {
+        std::scoped_lock lock(this->mutex);
+        std::vector<PeerDescriptor> result;
+        for (const auto& contact :
+             this->nearbyContacts->getClosestContacts(limit)) {
+            result.push_back(contact->getPeerDescriptor());
+        }
+        return result;
+    }
+
+    [[nodiscard]] std::vector<PeerDescriptor> getRandomContacts(
+        std::optional<size_t> limit = std::nullopt) {
+        std::scoped_lock lock(this->mutex);
+        std::vector<PeerDescriptor> result;
+        for (const auto& contact : this->randomContacts->getContacts(limit)) {
+            result.push_back(contact->getPeerDescriptor());
+        }
+        return result;
+    }
+
+    // The local node's ring neighbours (left/right) as descriptors (TS:
+    // getRingContacts().getClosestContacts()).
+    [[nodiscard]] ClosestRingPeerDescriptors getRingContacts() {
+        std::scoped_lock lock(this->mutex);
+        const auto closest = this->ringContacts->getClosestContacts();
+        ClosestRingPeerDescriptors result;
+        result.left.reserve(closest.left.size());
+        for (const auto& contact : closest.left) {
+            result.left.push_back(contact->getPeerDescriptor());
+        }
+        result.right.reserve(closest.right.size());
+        for (const auto& contact : closest.right) {
+            result.right.push_back(contact->getPeerDescriptor());
         }
         return result;
     }
