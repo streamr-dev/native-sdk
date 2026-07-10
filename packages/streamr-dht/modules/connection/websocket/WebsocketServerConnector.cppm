@@ -3,8 +3,17 @@
 // streamr-dht/connection/websocket/WebsocketServerConnector.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
+#include <algorithm>
+#include <chrono>
+// std::coroutine_traits must be visible in every translation unit
+// that defines OR instantiates a coroutine; it cannot arrive through
+// an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <functional>
 #include <map>
+#include <random>
+#include <thread>
 
 #include <memory>
 #include <optional>
@@ -13,13 +22,24 @@ module;
 
 #include <mutex>
 
+#include <folly/executors/CPUThreadPoolExecutor.h>
+
 export module streamr.dht.WebsocketServerConnector;
 
 import streamr.dht.protos;
 
 import streamr.dht.WebsocketServerConnection;
+import streamr.dht.Connection;
+import streamr.dht.Connectivity;
+import streamr.dht.WebsocketClientConnectorRpcRemote;
+import streamr.dht.connectivityChecker;
+import streamr.dht.connectivityRequestHandler;
+import streamr.dht.Errors;
 import streamr.logger.SLogger;
 import streamr.utils.AbortController;
+import streamr.utils.CoroutineHelper;
+import streamr.utils.GuardedAsyncScope;
+import streamr.utils.SharedExecutors;
 import streamr.utils.Ipv4Helper;
 import streamr.utils.Uuid;
 import streamr.dht.Handshaker;
@@ -46,13 +66,18 @@ using streamr::utils::Uuid;
 
 export namespace streamr::dht::connection::websocket {
 
+using ::dht::ConnectivityRequest;
 using ::dht::ConnectivityResponse;
 using streamr::dht::connection::IncomingHandshaker;
 using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::websocket::WebsocketClientConnectorRpcClient;
+using streamr::dht::connection::websocket::WebsocketClientConnectorRpcRemote;
 using streamr::dht::connection::websocket::WebsocketServer;
 using streamr::dht::connection::websocket::WebsocketServerConnection;
+using streamr::dht::helpers::Connectivity;
 using streamr::dht::helpers::Version;
+using streamr::dht::helpers::WebsocketServerStartError;
 using streamr::dht::transport::ListeningRpcCommunicator;
 using streamr::dht::transport::Transport;
 using streamr::dht::types::PortRange;
@@ -78,6 +103,9 @@ struct WebsocketServerConnectorOptions {
     std::optional<std::string> geoIpDatabaseFolder = std::nullopt;
 };
 
+inline constexpr std::chrono::milliseconds entrypointRetryDelay{2000};
+inline constexpr std::chrono::milliseconds abortablePollInterval{100};
+
 class WebsocketServerConnector {
 private:
     WebsocketServerConnectorOptions options;
@@ -90,6 +118,13 @@ private:
         connectingHandshakers;
     std::map<DhtAddress, std::shared_ptr<IPendingConnection>>
         ongoingConnectRequests;
+    // Runs the detached requestConnection notifications (TS setImmediate)
+    // on a serial view of the shared worker pool (per-instance pools are
+    // forbidden — see streamr.utils.SharedExecutors); destroy() drains the
+    // scope after abort, and the gate drops a connect() racing the drain.
+    streamr::utils::SharedSerialExecutor requestConnectionExecutor{
+        streamr::utils::SharedExecutors::worker()};
+    streamr::utils::GuardedAsyncScope requestConnectionScope;
     std::recursive_mutex mMutex;
 
 public:
@@ -143,14 +178,22 @@ public:
                      {"remoteAddress", serverSocket->getRemoteAddress()}});
 
                 if (action == "connectivityRequest") {
-                    SLogger::trace(
-                        "Connectivity request received, not implemented in native-sdk yet");
-                    // attachConnectivityRequestHandler(
-                    //     serverSocket, this.geoIpLocator)
+                    SLogger::trace("Connectivity request received");
+                    // GeoIP location lookup omitted (deferred to milestone
+                    // E with the rest of GeoIP).
+                    attachConnectivityRequestHandler(serverSocket);
                 } else if (action == "connectivityProbe") {
-                    SLogger::trace(
-                        "Connectivity probe received, not implemented in native-sdk yet");
-                    // no-op
+                    // The probe only needs the websocket connection to
+                    // open; the prober closes it (TS: no-op). The listener
+                    // pins the socket until then (same idiom as
+                    // attachConnectivityRequestHandler: onClosed drops all
+                    // listeners, releasing it).
+                    SLogger::trace("Connectivity probe received");
+                    serverSocket->on<connectionevents::Disconnected>(
+                        [serverSocket](
+                            bool /*gracefulLeave*/,
+                            uint64_t /*code*/,
+                            const std::string& /*reason*/) {});
                 } else {
                     // The localPeerDescriptor can be undefined here as the
                     // WS server is used for connectivity checks before the
@@ -177,33 +220,124 @@ public:
         }
     }
 
-    ConnectivityResponse checkConnectivity(
-        bool /* allowSelfSignedCertificate */) {
-        std::scoped_lock lock(this->mMutex);
+    // TS: wait(2000, abortSignal) between entry-point attempts.
+    void waitAbortable(std::chrono::milliseconds duration) {
+        const auto deadline = std::chrono::steady_clock::now() + duration;
+        while (std::chrono::steady_clock::now() < deadline &&
+               !this->abortController.getSignal().aborted) {
+            std::this_thread::sleep_for(abortablePollInterval);
+        }
+    }
+
+    // The state is snapshotted under the lock and the network runs without
+    // it: a connectivity round trip blocks for seconds and the connector
+    // must stay operable meanwhile (TS holds no lock either).
+    ConnectivityResponse checkConnectivity(bool allowSelfSignedCertificate) {
+        std::optional<std::string> hostSnapshot;
+        std::optional<uint16_t> portSnapshot;
+        bool serverStarted = false;
+        std::vector<PeerDescriptor> entrypoints;
+        {
+            std::scoped_lock lock(this->mMutex);
+            hostSnapshot = this->host;
+            portSnapshot = this->selectedPort;
+            serverStarted = (this->websocketServer != nullptr);
+            if (this->options.entrypoints.has_value()) {
+                entrypoints = this->options.entrypoints.value();
+            }
+        }
 
         ConnectivityResponse response;
-
-        // if already aborted or websocket server not started
-        if (this->abortController.getSignal().aborted ||
-            !this->selectedPort.has_value()) {
+        if (this->abortController.getSignal().aborted) {
             response.set_host("127.0.0.1");
             response.set_nattype(NatType::UNKNOWN);
             response.set_ipaddress(Ipv4Helper::ipv4ToNumber("127.0.0.1"));
             response.set_protocolversion(Version::localProtocolVersion);
-        } else {
-            // return connectivity info given in options
-
-            response.set_host(this->host.value());
+            return response;
+        }
+        if (entrypoints.empty()) {
+            // Return connectivity info given in options. A connector with
+            // no websocket server and no host reports empty host/port here
+            // (TS returns undefined fields); callers in that configuration
+            // provide their own peer descriptor and ignore the response.
+            response.set_host(hostSnapshot.value_or(""));
             response.set_nattype(NatType::OPEN_INTERNET);
+            // TODO: Resolve the given host name or use as is if IP was
+            // given (mirrors the TS TODO).
             response.set_ipaddress(Ipv4Helper::ipv4ToNumber("127.0.0.1"));
             response.set_protocolversion(Version::localProtocolVersion);
-            response.mutable_websocket()->set_host(this->host.value());
-            response.mutable_websocket()->set_port(this->selectedPort.value());
+            response.mutable_websocket()->set_host(hostSnapshot.value_or(""));
+            response.mutable_websocket()->set_port(portSnapshot.value_or(0));
             response.mutable_websocket()->set_tls(
                 this->options.tlsCertificateFiles.has_value());
+            return response;
         }
+        // Do real connectivity checking against the entry points, in random
+        // order, until one answers.
+        std::shuffle(
+            entrypoints.begin(),
+            entrypoints.end(),
+            std::mt19937{std::random_device{}()});
+        for (size_t i = 0; i < entrypoints.size() &&
+             !this->abortController.getSignal().aborted;
+             i++) {
+            const auto& entryPoint = entrypoints[i];
+            try {
+                ConnectivityRequest connectivityRequest;
+                connectivityRequest.set_port(
+                    portSnapshot.value_or(DISABLE_CONNECTIVITY_PROBE));
+                if (hostSnapshot.has_value()) {
+                    connectivityRequest.set_host(hostSnapshot.value());
+                }
+                connectivityRequest.set_tls(
+                    serverStarted &&
+                    this->options.serverEnableTls.value_or(false));
+                connectivityRequest.set_allowselfsignedcertificate(
+                    allowSelfSignedCertificate);
+                return sendConnectivityRequest(connectivityRequest, entryPoint);
+            } catch (const std::exception& err) {
+                SLogger::error(
+                    "Failed to connect to entrypoint with id " +
+                    Identifiers::getNodeIdFromPeerDescriptor(entryPoint) + " " +
+                    std::string(err.what()));
+                this->waitAbortable(entrypointRetryDelay);
+            }
+        }
+        std::string attemptedHosts;
+        for (const auto& entryPoint : entrypoints) {
+            if (!attemptedHosts.empty()) {
+                attemptedHosts += ", ";
+            }
+            attemptedHosts += entryPoint.websocket().host() + ":" +
+                std::to_string(entryPoint.websocket().port());
+        }
+        throw WebsocketServerStartError(
+            "Failed to connect to the entrypoints after " +
+            std::to_string(entrypoints.size()) +
+            " attempts\nAttempted hosts: " + attemptedHosts);
+    }
 
-        return response;
+    bool isPossibleToFormConnection(
+        const PeerDescriptor& targetPeerDescriptor) {
+        std::scoped_lock lock(this->mMutex);
+        const auto connectionType = Connectivity::expectedConnectionType(
+            this->localPeerDescriptor.value(), targetPeerDescriptor);
+        return connectionType == ConnectionType::WEBSOCKET_SERVER;
+    }
+
+    // Ask the target (which has no websocket server) to open a websocket
+    // back to this node; the returned pending connection completes when the
+    // incoming handshake matches ongoingConnectRequests (attachHandshaker).
+    std::shared_ptr<IPendingConnection> connect(
+        const PeerDescriptor& targetPeerDescriptor) {
+        std::scoped_lock lock(this->mMutex);
+        const auto nodeId =
+            Identifiers::getNodeIdFromPeerDescriptor(targetPeerDescriptor);
+        if (this->ongoingConnectRequests.contains(nodeId)) {
+            return this->ongoingConnectRequests.at(nodeId);
+        }
+        return this->requestConnectionFromPeer(
+            this->localPeerDescriptor.value(), targetPeerDescriptor);
     }
 
     void setLocalPeerDescriptor(const PeerDescriptor& localPeerDescriptor) {
@@ -213,38 +347,102 @@ public:
 
     void destroy() {
         SLogger::trace("WebsocketServerConnector::destroy() called");
-        std::scoped_lock lock(this->mMutex);
-        this->abortController.abort();
+        {
+            std::scoped_lock lock(this->mMutex);
+            this->abortController.abort();
 
-        SLogger::trace("Closing ongoing connect requests");
-        for (const auto& request : this->ongoingConnectRequests) {
-            if (request.second) {
-                request.second->close(true);
+            SLogger::trace("Closing ongoing connect requests");
+            for (const auto& request : this->ongoingConnectRequests) {
+                if (request.second) {
+                    request.second->close(true);
+                }
+            }
+
+            SLogger::trace("Closing connecting handshakers");
+            for (const auto& handshaker : this->connectingHandshakers) {
+                if (handshaker.second &&
+                    handshaker.second->getPendingConnection()) {
+                    handshaker.second->getPendingConnection()->close(true);
+                }
+            }
+
+            SLogger::trace("Clearing maps");
+            this->connectingHandshakers.clear();
+            this->ongoingConnectRequests.clear();
+
+            SLogger::trace("Stopping websocket server");
+            if (this->websocketServer) {
+                this->websocketServer->stop();
+                this->websocketServer.reset();
             }
         }
-
-        SLogger::trace("Closing connecting handshakers");
-        for (const auto& handshaker : this->connectingHandshakers) {
-            if (handshaker.second &&
-                handshaker.second->getPendingConnection()) {
-                handshaker.second->getPendingConnection()->close(true);
-            }
-        }
-
-        SLogger::trace("Clearing maps");
-        this->connectingHandshakers.clear();
-        this->ongoingConnectRequests.clear();
-
-        SLogger::trace("Stopping websocket server");
-        if (this->websocketServer) {
-            this->websocketServer->stop();
-            this->websocketServer.reset();
-        }
+        // Drained OUTSIDE the mutex (the PeerManager::stop() pattern): a
+        // detached requestConnection notification still in flight references
+        // this object and the RPC communicator; abort above cancels it, the
+        // drain makes destroy() wait for it without deadlocking on mMutex.
+        this->requestConnectionScope.close();
 
         SLogger::trace("WebsocketServerConnector::destroy() completed");
     }
 
 private:
+    // TS requestConnectionFromPeer. The caller holds mMutex. TS defers the
+    // notification with setImmediate; here it runs on a dedicated worker
+    // executor so connect() never blocks on RPC I/O.
+    std::shared_ptr<IPendingConnection> requestConnectionFromPeer(
+        const PeerDescriptor& localPeerDescriptor,
+        const PeerDescriptor& targetPeerDescriptor) {
+        auto pendingConnection =
+            PendingConnection::newInstance(targetPeerDescriptor);
+        const auto nodeId =
+            Identifiers::getNodeIdFromPeerDescriptor(targetPeerDescriptor);
+        // TS delFunc: drop the ongoing request once it settles either way
+        // (erasing an already-erased key is a no-op).
+        pendingConnection->on<pendingconnectionevents::Connected>(
+            [this, nodeId](
+                const PeerDescriptor& /*peerDescriptor*/,
+                const std::shared_ptr<Connection>& /*connection*/) {
+                std::scoped_lock lock(this->mMutex);
+                this->ongoingConnectRequests.erase(nodeId);
+            });
+        pendingConnection->on<pendingconnectionevents::Disconnected>(
+            [this, nodeId](bool /*gracefulLeave*/) {
+                std::scoped_lock lock(this->mMutex);
+                this->ongoingConnectRequests.erase(nodeId);
+            });
+        this->ongoingConnectRequests.emplace(nodeId, pendingConnection);
+        this->requestConnectionScope.add(
+            streamr::utils::co_withExecutor(
+                &this->requestConnectionExecutor,
+                folly::coro::co_invoke(
+                    [this, localPeerDescriptor, targetPeerDescriptor]()
+                        -> folly::coro::Task<void> {
+                        try {
+                            WebsocketClientConnectorRpcClient client(
+                                this->options.rpcCommunicator);
+                            WebsocketClientConnectorRpcRemote remoteConnector(
+                                PeerDescriptor(localPeerDescriptor),
+                                PeerDescriptor(targetPeerDescriptor),
+                                std::move(client));
+                            // Cancellable by destroy(): abort fires before the
+                            // executor join drains this task.
+                            co_await streamr::utils::co_withCancellation(
+                                this->abortController.getSignal()
+                                    .getCancellationToken(),
+                                remoteConnector.requestConnection());
+                            SLogger::trace(
+                                "Sent WebsocketConnectionRequest notification"
+                                " to peer");
+                        } catch (const std::exception& err) {
+                            SLogger::debug(
+                                "Failed to send WebsocketConnectionRequest"
+                                " notification to peer " +
+                                std::string(err.what()));
+                        }
+                    })));
+        return pendingConnection;
+    }
+
     void attachHandshaker(
         const std::shared_ptr<WebsocketServerConnection>& serverSocket) {
         std::scoped_lock lock(this->mMutex);

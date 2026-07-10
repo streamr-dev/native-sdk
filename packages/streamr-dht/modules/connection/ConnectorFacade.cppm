@@ -7,6 +7,8 @@ module;
 
 #include <chrono>
 #include <memory>
+#include <optional>
+#include <vector>
 
 #include <string>
 
@@ -68,7 +70,7 @@ struct DefaultConnectorFacadeOptions {
     Transport& transport;
     std::optional<std::string> websocketHost = std::nullopt;
     std::optional<PortRange> websocketPortRange = std::nullopt;
-    // std::vector<PeerDescriptor> entryPoints;
+    std::optional<std::vector<PeerDescriptor>> entryPoints = std::nullopt;
     // std::vector<IceServer> iceServers;
     // bool webrtcAllowPrivateAddresses;
     // int webrtcDatachannelBufferThresholdLow;
@@ -136,7 +138,7 @@ public:
             .portRange = this->options.websocketPortRange,
             .maxMessageSize = this->options.maxMessageSize,
             .host = this->options.websocketHost,
-            //.entrypoints = options.entryPoints,
+            .entrypoints = this->options.entryPoints,
             //.tlsCertificate = options.tlsCertificate,
             .serverEnableTls = false,
             //.autoCertifierUrl = options.autoCertifierUrl,
@@ -172,7 +174,11 @@ public:
                 peerDescriptor)) {
             return this->websocketClientConnector->connect(peerDescriptor);
         }
-
+        if (this->websocketServerConnector->isPossibleToFormConnection(
+                peerDescriptor)) {
+            return this->websocketServerConnector->connect(peerDescriptor);
+        }
+        // TS falls through to the WebrtcConnector here (milestone B2).
         return nullptr;
     }
 
@@ -184,7 +190,11 @@ public:
             return this->websocketClientConnector->connect(
                 peerDescriptor, std::move(errorCallback));
         }
-
+        if (this->websocketServerConnector->isPossibleToFormConnection(
+                peerDescriptor)) {
+            return this->websocketServerConnector->connect(peerDescriptor);
+        }
+        // TS falls through to the WebrtcConnector here (milestone B2).
         return nullptr;
     }
 

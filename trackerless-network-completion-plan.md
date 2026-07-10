@@ -433,6 +433,20 @@ use a layer-0 `DhtNode` as its transport, sharing one `ConnectionManager` and co
 `integration/Layer1-scale.test.ts`, `integration/DhtNodeExternalAPI.test.ts`,
 `benchmark/KademliaCorrectness.test.ts` (as a slow correctness test, not a benchmark).
 
+*Open follow-up (owner, manual): compare KademliaCorrectness against the TypeScript
+implementation.* The C++ port at 200 nodes measures **6.40/8** average prefix-exact neighbours
+(the strict TS metric: matching prefix of the exact global XOR ordering, truncated at the first
+mismatch) and **6.98/8** order-insensitive known-of-closest-8, i.e. ~0.6 of the gap is ordering
+and ~1 true-closest peer is on average genuinely absent (sequential joins learn later-joining
+closer peers only passively, and the measurement runs before any recovery cycle). Whether these
+numbers match the TS implementation is unverified: the TS benchmark is bit-rotted at the pinned
+commit (`prepare-kademlia-simulation` does not exist and no code writes `test/data/*.json`), and
+the reference checkout's jest/ts-jest setup does not run. Compatible ground-truth data can be
+generated (the format is just XOR-ordered indices; a generator script exists from the 2026-07-10
+session) — the owner will run the TS benchmark manually and compare against the C++ numbers
+above. If TS scores materially higher, investigate the C++ ping/eviction and contact-ordering
+paths for a port deficiency.
+
 *Milestone A exit criterion:* a network of simulated C++ `DhtNode`s joins via entry points,
 routes messages, and stores/fetches data — the full dht test pyramid below the connector level
 is green.

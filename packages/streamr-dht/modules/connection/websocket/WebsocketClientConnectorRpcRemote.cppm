@@ -60,7 +60,11 @@ public:
             Identifiers::getNodeIdFromPeerDescriptor(getLocalPeerDescriptor()));
         WebsocketConnectionRequest request{};
         auto options = this->formDhtRpcOptions();
-        return this->getClient().requestConnection(
+        // co_await (not `return`): the client's notify() is a LAZY coroutine
+        // that holds request/options by reference — a plain return would
+        // destroy these locals before the task first runs (SEGV in
+        // Any::PackFrom); the co_await keeps them alive in this frame.
+        co_await this->getClient().requestConnection(
             std::move(request), std::move(options), this->getTimeout());
     }
 };
