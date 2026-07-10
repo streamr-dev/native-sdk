@@ -37,6 +37,8 @@ import streamr.dht.protos;
 import streamr.eventemitter.EventEmitter;
 import streamr.utils.AbortController;
 import streamr.utils.CoroutineHelper;
+import streamr.utils.GuardedAsyncScope;
+import streamr.utils.SharedExecutors;
 import streamr.utils.ExecutorHelper;
 import streamr.utils.waitForCondition;
 import streamr.logger.SLogger;
@@ -167,8 +169,12 @@ private:
     bool started = false;
     AbortController abortController;
     // Detaches the k-bucket-empty rejoin off the delivery thread that raised
-    // the event.
-    folly::CPUThreadPoolExecutor recoveryExecutor{1};
+    // the event. Serial view of the shared worker pool (formerly a private
+    // single-thread pool — see streamr.utils.SharedExecutors); the scope is
+    // drained in stop() so no rejoin outlives this node.
+    streamr::utils::SharedSerialExecutor recoveryExecutor{
+        streamr::utils::SharedExecutors::worker()};
+    streamr::utils::GuardedAsyncScope recoveryScope;
     HandlerToken messageToken;
     HandlerToken connectedToken;
     HandlerToken disconnectedToken;
@@ -267,16 +273,17 @@ private:
                 const auto token =
                     this->abortController.getSignal().getCancellationToken();
                 for (const auto& entryPoint : this->options.entryPoints) {
-                    streamr::utils::co_withExecutor(
-                        &this->recoveryExecutor,
-                        streamr::utils::co_withCancellation(
-                            token,
-                            folly::coro::co_invoke(
-                                [discovery,
-                                 entryPoint]() -> folly::coro::Task<void> {
-                                    co_await discovery->rejoinDht(entryPoint);
-                                })))
-                        .start();
+                    this->recoveryScope.add(
+                        streamr::utils::co_withExecutor(
+                            &this->recoveryExecutor,
+                            streamr::utils::co_withCancellation(
+                                token,
+                                folly::coro::co_invoke(
+                                    [discovery,
+                                     entryPoint]() -> folly::coro::Task<void> {
+                                        co_await discovery->rejoinDht(
+                                            entryPoint);
+                                    }))));
                 }
             }
         });
@@ -549,6 +556,11 @@ public:
         }
         SLogger::trace("DhtNode::stop()");
         this->abortController.abort();
+        // Drain detached rejoins before tearing the components down (the
+        // abort above cancels them; this replaces the former private
+        // recovery executor's destructor join). A KBucketEmpty still firing
+        // mid-join is dropped by the scope's close() gate.
+        this->recoveryScope.close();
         this->transportPtr->off<transportevents::Message>(this->messageToken);
         this->transportPtr->off<Connected>(this->connectedToken);
         this->transportPtr->off<Disconnected>(this->disconnectedToken);

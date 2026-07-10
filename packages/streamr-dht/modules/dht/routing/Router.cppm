@@ -51,6 +51,7 @@ import streamr.eventemitter.EventEmitter;
 import streamr.utils.AbortController;
 import streamr.utils.AbortableTimers;
 import streamr.utils.CoroutineHelper;
+import streamr.utils.SharedExecutors;
 import streamr.utils.EnableSharedFromThis;
 import streamr.utils.ExecutorHelper;
 import streamr.utils.Uuid;
@@ -93,16 +94,9 @@ struct RouterOptions {
 
 class Router : public EnableSharedFromThis {
 private:
-    static constexpr size_t routingWorkerThreadCount = 1;
     static constexpr size_t duplicateDetectorSize = 10000;
     static constexpr std::chrono::milliseconds forwardingEntryTtl{10000};
     static constexpr std::chrono::milliseconds sessionTimeout{10000};
-    // Nice value for the routing worker thread: a positive value lowers its
-    // OS priority so routing runs "whenever we have time" relative to our
-    // own traffic. Lowering priority (raising nice) is unprivileged; the
-    // effect is best-effort per platform (honoured on Linux/Android, weaker
-    // on Darwin, where per-thread nice is not fully applied).
-    static constexpr int routingWorkerThreadNice = 10;
 
     struct ForwardingTableEntry {
         std::vector<PeerDescriptor> peerDescriptors;
@@ -110,11 +104,14 @@ private:
     };
 
     RouterOptions options;
-    folly::CPUThreadPoolExecutor routingExecutor{
-        routingWorkerThreadCount,
-        std::make_shared<folly::PriorityThreadFactory>(
-            std::make_shared<folly::NamedThreadFactory>("DhtRouting"),
-            routingWorkerThreadNice)};
+    // Serial view of the shared LOW-PRIORITY pool (formerly a private
+    // single-thread nice-10 pool — see streamr.utils.SharedExecutors, which
+    // keeps the "routing runs whenever we have time" priority). The SERIAL
+    // ordering is load-bearing: forwardingTable, ongoingRoutingSessions and
+    // `stopped` are synchronized by everything running one-at-a-time on
+    // this executor, not by a mutex.
+    streamr::utils::SharedSerialExecutor routingExecutor{
+        streamr::utils::SharedExecutors::background()};
     AbortController abortController; // cancels the session-cleanup timeouts
     std::map<DhtAddress, ForwardingTableEntry> forwardingTable;
     RoutingTablesCache routingTablesCache;
@@ -126,10 +123,9 @@ private:
 
     explicit Router(RouterOptions options) : options(std::move(options)) {}
 
-    // Runs `fn` on the routing worker and blocks for its result. Callers must
-    // NOT already be on the worker thread (that would self-deadlock the
-    // single-thread executor); every caller here is an off-worker entry
-    // point.
+    // Runs `fn` on the routing worker and blocks for its result. Callers
+    // must NOT already be on this serial executor (that would self-deadlock
+    // it); every caller here is an off-worker entry point.
     template <typename Fn>
     auto runOnWorker(Fn fn) -> decltype(fn()) {
         using Ret = decltype(fn());

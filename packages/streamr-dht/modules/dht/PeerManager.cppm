@@ -37,6 +37,7 @@ import streamr.eventemitter.EventEmitter;
 import streamr.utils.AbortController;
 import streamr.utils.AbortableTimers;
 import streamr.utils.CoroutineHelper;
+import streamr.utils.SharedExecutors;
 import streamr.utils.EnableSharedFromThis;
 import streamr.utils.ExecutorHelper;
 import streamr.logger.SLogger;
@@ -117,11 +118,17 @@ private:
     AbortController abortController;
     bool stopped = false;
     std::set<DhtAddress> activeContacts;
-    // Neighbour pings run here, NOT on the AbortableTimers FunctionScheduler:
-    // that scheduler is single-threaded and also drives the RPC request
-    // timeouts, so blocking it on a ping to an unreachable peer would freeze
-    // every other timer (including the ping's own timeout) — see schedulePing.
-    folly::CPUThreadPoolExecutor pingExecutor{1};
+    // Neighbour pings run on a serial view of the shared worker pool, NOT
+    // on the AbortableTimers FunctionScheduler: that scheduler is
+    // single-threaded and also drives the RPC request timeouts, so blocking
+    // it on a ping to an unreachable peer would freeze every other timer
+    // (including the ping's own timeout) — see schedulePing. The serial
+    // view keeps the former single-thread pool's one-ping-at-a-time
+    // ordering; pingScope keeps the former pool destructor's teardown
+    // guarantee (see streamr.utils.SharedExecutors).
+    streamr::utils::SharedSerialExecutor pingExecutor{
+        streamr::utils::SharedExecutors::worker()};
+    folly::coro::CancellableAsyncScope pingScope;
 
     std::unique_ptr<KBucket<DhtNodeRpcRemote>> neighbors;
     std::unique_ptr<SortedContactList<DhtNodeRpcRemote>> nearbyContacts;
@@ -205,40 +212,43 @@ private:
         const std::shared_ptr<DhtNodeRpcRemote>& contact,
         const DhtAddress& nodeId) {
         auto self = this->sharedFromThis<PeerManager>();
-        streamr::utils::co_withExecutor(
-            &this->pingExecutor,
-            folly::coro::co_invoke(
-                [self, contact, nodeId]() -> folly::coro::Task<void> {
-                    bool result = false;
-                    try {
-                        // Cancellable by stop(): a detached ping in flight at
-                        // teardown otherwise still references the owner's RPC
-                        // communicator while the owner is destroying it (the
-                        // phase-AA teardown hang: ~RpcCommunicatorClientApi
-                        // joins its executor while the dangling ping occupies
-                        // it). stop() aborts, then drains pingExecutor.
-                        result = co_await streamr::utils::co_withCancellation(
-                            self->abortController.getSignal()
-                                .getCancellationToken(),
-                            contact->ping());
-                    } catch (const std::exception& err) {
-                        SLogger::trace("ping threw " + std::string(err.what()));
-                        result = false;
-                    }
-                    std::scoped_lock lock(self->mutex);
-                    if (self->stopped) {
-                        co_return;
-                    }
-                    if (result) {
-                        SLogger::trace("Added new contact " + nodeId);
-                    } else {
-                        SLogger::trace("ping failed " + nodeId);
-                        self->weakUnlock(nodeId);
-                        self->removeContact(nodeId);
-                        self->addNearbyContactToNeighbors();
-                    }
-                }))
-            .start();
+        this->pingScope.add(
+            streamr::utils::co_withExecutor(
+                &this->pingExecutor,
+                folly::coro::co_invoke(
+                    [self, contact, nodeId]() -> folly::coro::Task<void> {
+                        bool result = false;
+                        try {
+                            // Cancellable by stop(): a detached ping in flight
+                            // at teardown otherwise still references the
+                            // owner's RPC communicator while the owner is
+                            // destroying it (the phase-AA teardown hang:
+                            // ~RpcCommunicatorClientApi joins its executor
+                            // while the dangling ping occupies it). stop()
+                            // aborts, then drains pingExecutor.
+                            result =
+                                co_await streamr::utils::co_withCancellation(
+                                    self->abortController.getSignal()
+                                        .getCancellationToken(),
+                                    contact->ping());
+                        } catch (const std::exception& err) {
+                            SLogger::trace(
+                                "ping threw " + std::string(err.what()));
+                            result = false;
+                        }
+                        std::scoped_lock lock(self->mutex);
+                        if (self->stopped) {
+                            co_return;
+                        }
+                        if (result) {
+                            SLogger::trace("Added new contact " + nodeId);
+                        } else {
+                            SLogger::trace("ping failed " + nodeId);
+                            self->weakUnlock(nodeId);
+                            self->removeContact(nodeId);
+                            self->addNearbyContactToNeighbors();
+                        }
+                    })));
     }
 
     void addNearbyContactToNeighbors() {
@@ -442,7 +452,7 @@ public:
         // checks `stopped`, so no new ping can be enqueued after the block
         // above. The abort() cancels the in-flight RPCs, so the join
         // returns promptly rather than waiting out the RPC timeout.
-        this->pingExecutor.join();
+        streamr::utils::blockingWait(this->pingScope.joinAsync());
     }
 
     [[nodiscard]] RingContacts<DhtNodeRpcRemote> getClosestRingContactsTo(
