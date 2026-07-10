@@ -221,9 +221,16 @@ public:
                 -> folly::coro::Task<ReturnType> {
                 // The `this`-touching work runs as an mScope task on the
                 // shared pool; the caller awaits only the contract future,
-                // which holds no `this`, so a timeout can abandon it
-                // (detachOnCancel) while the scope task keeps running and
-                // is drained in the destructor.
+                // which holds no `this`, so an abandoned caller cannot leave
+                // a dangling reference. The TIMEOUT lives INSIDE the scope
+                // task, wrapped around the request-future await: a timed-out
+                // request erases its map entry (below), after which nothing
+                // could ever resolve that future — an unbounded await here
+                // would then hold the scope task forever and deadlock the
+                // destructor's drain (seen as a 300 s teardown hang on the
+                // linux-arm64 CI runner when gracefullyDisconnect left a
+                // pending request behind). Bounded by the timeout, every
+                // scope task settles.
                 auto&& contract =
                     folly::coro::makePromiseContract<ReturnType>();
                 mScope.add(
@@ -232,6 +239,7 @@ public:
                         folly::coro::co_invoke(
                             [requestMessage,
                              callContext,
+                             timeoutValue,
                              this,
                              promise = std::move(contract.first)]() mutable
                                 -> folly::coro::Task<void> {
@@ -240,8 +248,10 @@ public:
                                         this->makeRpcRequest<ReturnType>(
                                             requestMessage, callContext);
                                     promise.setValue(
-                                        co_await std::move(
-                                            ongoingRequest->getFuture()));
+                                        co_await folly::coro::timeout(
+                                            std::move(
+                                                ongoingRequest->getFuture()),
+                                            timeoutValue));
                                 } catch (...) {
                                     promise.setException(
                                         folly::exception_wrapper(
@@ -250,9 +260,8 @@ public:
                             })));
 
                 try {
-                    co_return co_await folly::coro::timeout(
-                        folly::coro::detachOnCancel(std::move(contract.second)),
-                        timeoutValue);
+                    co_return co_await folly::coro::detachOnCancel(
+                        std::move(contract.second));
                 } catch (const folly::FutureTimeout& e) {
                     SLogger::trace(
                         "request() caught folly::FutureTimeout", e.what());
