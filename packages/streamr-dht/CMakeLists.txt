@@ -171,6 +171,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/ConnectionManagerTest.cpp
         test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
         test/unit/IdentifiersTest.cpp
+        test/unit/CreatePeerDescriptorTest.cpp
+        test/unit/ConnectivityRequestHandlerTest.cpp
         test/unit/ConnectionLockRpcRemoteTest.cpp
         test/unit/ConnectorFacadeTest.cpp
         test/unit/ConnectionsViewTest.cpp

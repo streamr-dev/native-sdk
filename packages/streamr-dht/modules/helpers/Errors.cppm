@@ -17,7 +17,9 @@ enum class ErrorCode {
     STARTING_WEBSOCKET_SERVER_FAILED,
     COULD_NOT_START,
     CANNOT_CONNECT_TO_SELF,
-    SEND_FAILED
+    SEND_FAILED,
+    CONNECTION_FAILED,
+    CONNECTIVITY_RESPONSE_TIMEOUT
 };
 // NOLINTEND
 
@@ -57,6 +59,24 @@ private:
                 ", originalErrorInfo: " + originalErrorInfo.value();
         }
     }
+};
+
+// Ported from the TS Err.ConnectionFailed / Err.ConnectivityResponseTimeout
+// (phase B1, connectivityChecker).
+struct ConnectionFailed : public Err {
+    explicit ConnectionFailed(
+        const std::string& message,
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
+        : Err(ErrorCode::CONNECTION_FAILED, message, originalErrorInfo) {}
+};
+
+struct ConnectivityResponseTimeout : public Err {
+    explicit ConnectivityResponseTimeout(
+        const std::string& message,
+        const std::optional<std::string>& originalErrorInfo = std::nullopt)
+        : Err(ErrorCode::CONNECTIVITY_RESPONSE_TIMEOUT,
+              message,
+              originalErrorInfo) {}
 };
 
 struct WebsocketServerStartError : public Err {
