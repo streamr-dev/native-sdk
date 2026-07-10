@@ -254,6 +254,12 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/integration/ConnectionManagerIntegrationTest.cpp
         test/integration/DhtNodeRpcRemoteTest.cpp
         test/integration/RouterRpcRemoteTest.cpp
+        test/integration/MultipleEntryPointJoiningTest.cpp
+        test/integration/DhtNodeTest.cpp
+        test/integration/MockLayer1Layer0Test.cpp
+        test/integration/Layer1ScaleTest.cpp
+        test/integration/DhtNodeExternalApiTest.cpp
+        test/integration/KademliaCorrectnessTest.cpp
     )
 
     target_include_directories(streamr-dht-test-integration
