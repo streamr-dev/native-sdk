@@ -59,6 +59,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: install
         uses: ./.github/workflows/reusable/cached-install
+      # The C++<->TS interop test (streamr-dht-test-ts-interop) runs the
+      # pinned @streamr/dht npm package in a child node process and needs a
+      # node runtime >= 20 on PATH.
+      - name: setup node for TS interop tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: check proto sync with pinned TS reference
         run:
           ./check-proto-sync.sh

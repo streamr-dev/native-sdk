@@ -2,7 +2,10 @@
 
 set -e
 
-FILES=$(find . -type d \( -name src -o -name test -o -name include \) ! -path '*/build/*' ! -path '*/proto/*' -print0 | xargs -0 -I{} find {} -type f \( -name "*.hpp" -o -name "*.cpp" \) -print0 | xargs -0 echo)
+# node_modules is excluded because the TS interop harness (test/ts-interop)
+# npm-installs packages that vendor third-party C++ sources
+# (node-datachannel's napi wrappers etc.) — not our code.
+FILES=$(find . -type d \( -name src -o -name test -o -name include \) ! -path '*/build/*' ! -path '*/proto/*' -print0 | xargs -0 -I{} find {} -type f \( -name "*.hpp" -o -name "*.cpp" \) ! -path '*/node_modules/*' -print0 | xargs -0 echo)
 # Compile database: the standalone build dir when present, else the root
 # tree's (the Linux CI legs skip the standalone builds — MODERNIZATION.md
 # "After the consolidation: CI speed" — and lint against the root tree,
@@ -98,8 +101,13 @@ echo "Running clangd-tidy on $FILES"
 # exclusion in phase B3: DhtNode's BMI grew with the ConnectionManager-path
 # imports and the TU now trips the branded-ServiceID false positive
 # documented for MultipleEntryPointJoiningTest above.)
+# TsInteropTest.cpp (phase B3, C++<->TS interop) imports the DhtNode
+# aggregate like the end-to-end tests and trips the same std-type
+# unification false positive (std::string-vs-std::string mismatches on its
+# own std::string locals); the compiler builds and runs it, clang-format
+# still checks it.
 HEAVY_TIDY_FILES='./test/integration/Layer1ScaleTest.cpp ./test/integration/DhtNodeExternalApiTest.cpp ./test/integration/KademliaCorrectnessTest.cpp'
-TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | grep -v 'test/unit/RecursiveOperationSessionTest.cpp' | grep -v 'test/unit/StoreRpcLocalTest.cpp' | grep -v 'test/unit/StoreManagerTest.cpp' | grep -v 'test/integration/MultipleEntryPointJoiningTest.cpp' | grep -v 'test/utils/DhtNodeTestUtils.hpp' | grep -v 'test/integration/DhtNodeTest.cpp' | grep -v 'test/integration/MockLayer1Layer0Test.cpp' | grep -v 'test/integration/Layer1ScaleTest.cpp' | grep -v 'test/integration/DhtNodeExternalApiTest.cpp' | grep -v 'test/integration/KademliaCorrectnessTest.cpp' | grep -v 'test/unit/CreatePeerDescriptorTest.cpp' | grep -v 'test/unit/ConnectivityRequestHandlerTest.cpp' | grep -v 'test/integration/WebsocketConnectionManagementTest.cpp' | grep -v 'test/unit/WebrtcConnectionTest.cpp' | grep -v 'test/unit/WebrtcConnectorTest.cpp' | grep -v 'test/integration/RpcConnectionsOverWebrtcTest.cpp' | grep -v 'test/integration/WebrtcConnectorRpcTest.cpp' | grep -v 'test/integration/WebrtcConnectionManagementTest.cpp' | grep -v 'test/end-to-end/Layer0Test.cpp' | grep -v 'test/end-to-end/Layer0WebrtcTest.cpp' | grep -v 'test/end-to-end/Layer0MixedConnectionTypesTest.cpp' | grep -v 'test/end-to-end/Layer0Layer1Test.cpp' | grep -v 'test/end-to-end/Layer0WebrtcLayer1Test.cpp' | tr '\n' ' ')
+TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | grep -v 'test/unit/RecursiveOperationSessionTest.cpp' | grep -v 'test/unit/StoreRpcLocalTest.cpp' | grep -v 'test/unit/StoreManagerTest.cpp' | grep -v 'test/integration/MultipleEntryPointJoiningTest.cpp' | grep -v 'test/utils/DhtNodeTestUtils.hpp' | grep -v 'test/integration/DhtNodeTest.cpp' | grep -v 'test/integration/MockLayer1Layer0Test.cpp' | grep -v 'test/integration/Layer1ScaleTest.cpp' | grep -v 'test/integration/DhtNodeExternalApiTest.cpp' | grep -v 'test/integration/KademliaCorrectnessTest.cpp' | grep -v 'test/unit/CreatePeerDescriptorTest.cpp' | grep -v 'test/unit/ConnectivityRequestHandlerTest.cpp' | grep -v 'test/integration/WebsocketConnectionManagementTest.cpp' | grep -v 'test/unit/WebrtcConnectionTest.cpp' | grep -v 'test/unit/WebrtcConnectorTest.cpp' | grep -v 'test/integration/RpcConnectionsOverWebrtcTest.cpp' | grep -v 'test/integration/WebrtcConnectorRpcTest.cpp' | grep -v 'test/integration/WebrtcConnectionManagementTest.cpp' | grep -v 'test/end-to-end/Layer0Test.cpp' | grep -v 'test/end-to-end/Layer0WebrtcTest.cpp' | grep -v 'test/end-to-end/Layer0MixedConnectionTypesTest.cpp' | grep -v 'test/end-to-end/Layer0Layer1Test.cpp' | grep -v 'test/end-to-end/Layer0WebrtcLayer1Test.cpp' | grep -v 'test/ts-interop/TsInteropTest.cpp' | tr '\n' ' ')
 # Chunked: one clangd process accumulates source-location space across the
 # files it serves and never releases it; with the phase-A8 module graph a
 # single process no longer survives the whole list (mid-batch the affected

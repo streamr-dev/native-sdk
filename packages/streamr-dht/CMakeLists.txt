@@ -310,10 +310,35 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         PUBLIC GTest::gtest
         PUBLIC streamr-dht-test-main
     )
+    # C++<->TS interop: the C++ node joins a DHT whose entry point is the
+    # pinned TypeScript implementation from npm, run in a child node
+    # process (test/ts-interop/entryPoint.js). Skips when no node runtime
+    # >= 20 is available.
+    add_executable(streamr-dht-test-ts-interop
+        test/ts-interop/TsInteropTest.cpp
+    )
+    target_compile_definitions(streamr-dht-test-ts-interop
+        PRIVATE TS_INTEROP_HARNESS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test/ts-interop"
+    )
+    target_include_directories(streamr-dht-test-ts-interop
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
+    )
+    streamr_enable_imports(streamr-dht-test-ts-interop)
+    target_link_libraries(streamr-dht-test-ts-interop
+        PUBLIC streamr-dht
+        PUBLIC streamr-dht-test-utils
+        PUBLIC streamr::streamr-logger
+        PUBLIC streamr::streamr-eventemitter
+        PUBLIC streamr::streamr-utils
+        PUBLIC streamr::streamr-proto-rpc
+        PUBLIC GTest::gtest
+        PUBLIC streamr-dht-test-main
+    )
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
         include(GoogleTest)
         gtest_discover_tests(streamr-dht-test-unit)
         gtest_discover_tests(streamr-dht-test-integration)
         gtest_discover_tests(streamr-dht-test-end-to-end)
+        gtest_discover_tests(streamr-dht-test-ts-interop)
     endif()
 endif()

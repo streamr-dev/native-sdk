@@ -1,0 +1,8 @@
+{
+    "name": "streamr-dht-ts-interop-harness",
+    "private": true,
+    "description": "TS side of the C++<->TS DHT interop test: the pinned @streamr/dht from npm, driven by entryPoint.js",
+    "dependencies": {
+        "@streamr/dht": "103.8.0-rc.3"
+    }
+}
