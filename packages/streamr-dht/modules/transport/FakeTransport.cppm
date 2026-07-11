@@ -28,7 +28,10 @@ using streamr::dht::transport::Transport;
 class FakeTransport : public Transport, public ConnectionsView {
 private:
     std::function<void(const Message&)> onSend;
-    const PeerDescriptor& localPeerDescriptor;
+    // By VALUE: a reference member dangled when callers passed a temporary
+    // descriptor into FakeEnvironment::createTransport (BUS error in send()
+    // the first time the source descriptor was stamped).
+    const PeerDescriptor localPeerDescriptor;
     // currently adds a peerDescription to the connections array when a
     // "connect" option is seen in in send() call and never disconnects (TODO
     // could add some disconnection logic? and maybe the connection should be

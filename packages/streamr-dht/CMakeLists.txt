@@ -172,6 +172,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/WebsocketClientConnectorRpcRemoteTest.cpp
         test/unit/IdentifiersTest.cpp
         test/unit/CreatePeerDescriptorTest.cpp
+        test/unit/WebrtcConnectionTest.cpp
+        test/unit/WebrtcConnectorTest.cpp
         test/unit/ConnectivityRequestHandlerTest.cpp
         test/unit/ConnectionLockRpcRemoteTest.cpp
         test/unit/ConnectorFacadeTest.cpp
@@ -264,6 +266,9 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/integration/KademliaCorrectnessTest.cpp
         test/integration/ConnectivityCheckingTest.cpp
         test/integration/WebsocketConnectionManagementTest.cpp
+        test/integration/WebrtcConnectorRpcTest.cpp
+        test/integration/WebrtcConnectionManagementTest.cpp
+        test/integration/RpcConnectionsOverWebrtcTest.cpp
     )
 
     target_include_directories(streamr-dht-test-integration
