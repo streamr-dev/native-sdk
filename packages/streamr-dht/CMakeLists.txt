@@ -286,9 +286,34 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         PUBLIC GTest::gtest
         PUBLIC streamr-dht-test-main
     )
+
+    # End-to-end tests: real sockets on 127.0.0.1, nodes owning their
+    # ConnectionManagers (milestone B exit criterion).
+    add_executable(streamr-dht-test-end-to-end
+        test/end-to-end/Layer0Test.cpp
+        test/end-to-end/Layer0WebrtcTest.cpp
+        test/end-to-end/Layer0MixedConnectionTypesTest.cpp
+        test/end-to-end/Layer0Layer1Test.cpp
+        test/end-to-end/Layer0WebrtcLayer1Test.cpp
+    )
+    target_include_directories(streamr-dht-test-end-to-end
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test/utils>
+    )
+    streamr_enable_imports(streamr-dht-test-end-to-end)
+    target_link_libraries(streamr-dht-test-end-to-end
+        PUBLIC streamr-dht
+        PUBLIC streamr-dht-test-utils
+        PUBLIC streamr::streamr-logger
+        PUBLIC streamr::streamr-eventemitter
+        PUBLIC streamr::streamr-utils
+        PUBLIC streamr::streamr-proto-rpc
+        PUBLIC GTest::gtest
+        PUBLIC streamr-dht-test-main
+    )
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
         include(GoogleTest)
         gtest_discover_tests(streamr-dht-test-unit)
         gtest_discover_tests(streamr-dht-test-integration)
+        gtest_discover_tests(streamr-dht-test-end-to-end)
     endif()
 endif()
