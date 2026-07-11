@@ -43,6 +43,8 @@ find_package(Protobuf REQUIRED)
 find_package(Boost CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 find_package(folly REQUIRED)
+# streamPartIdToDataKey derives DHT data keys with SHA1 (OpenSSL EVP).
+find_package(OpenSSL REQUIRED)
 
 if(NOT TARGET Boost::uuid)
   add_library(Boost::uuid INTERFACE IMPORTED)
@@ -95,6 +97,7 @@ target_link_libraries(streamr-trackerless-network
     PUBLIC Boost::uuid
     PUBLIC magic_enum::magic_enum
     PUBLIC Folly::folly
+    PUBLIC OpenSSL::Crypto
     )
 
 export(TARGETS streamr-trackerless-network
@@ -113,6 +116,7 @@ file(WRITE "${CMAKE_BINARY_DIR}/streamr-trackerless-network-config.cmake"
     "find_package(Boost CONFIG REQUIRED)\n"
     "find_package(magic_enum CONFIG REQUIRED)\n"
     "find_package(folly REQUIRED)\n"
+    "find_package(OpenSSL REQUIRED)\n"
     "if(NOT TARGET Boost::uuid)\n"
     "  add_library(Boost::uuid INTERFACE IMPORTED)\n"
     "  set_target_properties(Boost::uuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})\n"
@@ -162,6 +166,9 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/ContentDeliveryRpcRemoteTest.cpp
         test/unit/ContentDeliveryRpcLocalTest.cpp
         test/unit/DuplicateMessageDetectorTest.cpp
+        test/unit/NumberPairTest.cpp
+        test/unit/StreamPartIdToDataKeyTest.cpp
+        test/unit/TemporaryConnectionRpcLocalTest.cpp
     )
 
     target_include_directories(streamr-trackerless-network-test-unit
@@ -177,6 +184,11 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         PUBLIC streamr-trackerless-network
         PUBLIC streamr-trackerless-network-test-utils
         PUBLIC streamr::streamr-logger
+        # The C1 tests import streamr.dht.* and streamr.protorpc.*
+        # modules directly; imported modules are usable only by DIRECT
+        # consumers, so the owning targets are linked here.
+        PUBLIC streamr::streamr-dht
+        PUBLIC streamr::streamr-proto-rpc
         PUBLIC GTest::gtest
         streamr-trackerless-network-test-main
         PUBLIC Folly::folly

@@ -118,9 +118,14 @@ public:
             std::ranges::to<std::vector<PeerDescriptor>>();
     }
 
+    // TS getNode() returns undefined for unknown ids; map::at would
+    // throw instead, so look up with find.
     [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> get(
         const DhtAddress& id) const {
-        return this->nodes.at(id);
+        if (const auto it = this->nodes.find(id); it != this->nodes.end()) {
+            return it->second;
+        }
+        return std::nullopt;
     }
 
     [[nodiscard]] size_t size(
