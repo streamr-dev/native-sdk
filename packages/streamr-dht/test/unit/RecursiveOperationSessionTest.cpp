@@ -67,11 +67,13 @@ protected:
             mockPeerDescriptor,
             this->localPeerDescriptor,
             RecursiveOperationSessionRpcClient(communicator));
-        remote.sendResponse(
+        // sendResponse is now a coroutine (fire-and-forget notify);
+        // blocking here is fine, the test thread is not a pool worker.
+        blockingWait(remote.sendResponse(
             {createMockPeerDescriptor(), createMockPeerDescriptor()},
             {createMockPeerDescriptor(), createMockPeerDescriptor()},
             {},
-            true);
+            true));
     }
 
     void TearDown() override {

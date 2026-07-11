@@ -281,8 +281,10 @@ TEST_F(RecursiveOperationManagerTest, NoTargets) {
                              "routeRequest", this->createRoutedMessage());
     ASSERT_TRUE(ack.has_error());
     EXPECT_EQ(ack.error(), RouteMessageError::NO_TARGETS);
-    EXPECT_EQ(this->transport.sendCount, 1U);
+    // The response send is a detached task; stop() drains it, so the
+    // sendCount observation after stop() is deterministic.
     manager->stop();
+    EXPECT_EQ(this->transport.sendCount, 1U);
 }
 
 TEST_F(RecursiveOperationManagerTest, Error) {
@@ -293,6 +295,8 @@ TEST_F(RecursiveOperationManagerTest, Error) {
                              "routeRequest", this->createRoutedMessage());
     ASSERT_TRUE(ack.has_error());
     EXPECT_EQ(ack.error(), RouteMessageError::DUPLICATE);
-    EXPECT_EQ(this->transport.sendCount, 0U);
+    // stop() drains the detached response-send scope first, so a zero
+    // sendCount after it proves no response was (or will be) sent.
     manager->stop();
+    EXPECT_EQ(this->transport.sendCount, 0U);
 }

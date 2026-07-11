@@ -51,10 +51,23 @@ public:
               std::move(client),
               timeout) {}
 
-    void sendResponse(
-        const std::vector<PeerDescriptor>& routingPath,
-        const std::vector<PeerDescriptor>& closestConnectedNodes,
-        const std::vector<DataEntry>& dataEntries,
+    // Fire-and-forget (TS parity): builds the report, co_awaits the
+    // generated client notify (bounded by the RpcRemote timeout) and
+    // swallows send failures. Returning a Task instead of blocking keeps
+    // the caller's thread free — the former blockingWait here parked a
+    // shared worker-pool thread for up to the RPC timeout under pool
+    // saturation (see RecursiveOperationManager::sendResponse).
+    //
+    // NOTE the repo-wide lazy-task rule: the generated client call below
+    // returns a LAZY task whose request locals (report/options) live in
+    // THIS frame, so it must be co_awaited here — plain-returning it would
+    // dangle the locals (SEGV in Any::PackFrom). `this` and the
+    // communicator behind the client must stay alive until the returned
+    // task completes.
+    folly::coro::Task<void> sendResponse(
+        std::vector<PeerDescriptor> routingPath,
+        std::vector<PeerDescriptor> closestConnectedNodes,
+        std::vector<DataEntry> dataEntries,
         bool noCloserNodesFound) {
         RecursiveOperationResponse report;
         for (const auto& peer : routingPath) {
@@ -69,8 +82,8 @@ public:
         report.set_noclosernodesfound(noCloserNodesFound);
         auto options = this->formDhtRpcOptions();
         try {
-            streamr::utils::blockingWait(this->getClient().sendResponse(
-                std::move(report), std::move(options), this->getTimeout()));
+            co_await this->getClient().sendResponse(
+                std::move(report), std::move(options), this->getTimeout());
         } catch (const std::exception& /*err*/) {
             SLogger::trace("Failed to send RecursiveOperationResponse");
         }

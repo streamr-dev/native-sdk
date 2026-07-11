@@ -33,6 +33,8 @@ import streamr.dht.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.EnableSharedFromThis;
+import streamr.utils.GuardedAsyncScope;
+import streamr.utils.SharedExecutors;
 import streamr.utils.waitForEvent;
 import streamr.logger.SLogger;
 import streamr.protorpc.RpcCommunicator;
@@ -116,20 +118,25 @@ private:
         ongoingSessions;
     bool stopped = false;
     std::unique_ptr<RecursiveOperationRpcLocal> rpcLocal;
-    // sendResponse()'s per-session communicators, kept alive until their
-    // fire-and-forget send task settles. sendResponse runs on shared
-    // worker-pool threads (RPC server handlers); destroying the
-    // communicator there joins its async scope, and that join parks the
-    // pool thread waiting for the communicator's own queued send task,
-    // which needs a pool thread — with every worker parked in such a join
-    // the queued sends can never run and the pool deadlocks permanently
-    // (linux-arm64 CI: DhtNodeExternalApiTest.ExternalStoreDataHappyPath
-    // hung its 1200 s timeout; reproduced deterministically with a
-    // 1-thread pool). Retired communicators are destroyed only once their
-    // scopes are empty (an empty-scope join needs no pool thread) or in
-    // stop(), which runs on the owner's thread, never on the pool.
+    // sendResponse()'s per-session communicators whose internal scopes
+    // were still non-empty when their detached send task finished with
+    // them. Destroying a communicator joins its async scope; doing that on
+    // a shared worker-pool thread while the scope still holds a task parks
+    // the pool thread waiting for work that itself needs a pool thread —
+    // with every worker parked in such a join the pool deadlocks
+    // permanently (linux-arm64 CI: the former in-handler destruction hung
+    // DhtNodeExternalApiTest.ExternalStoreDataHappyPath for its 1200 s
+    // timeout; reproduced deterministically with a 1-thread pool). Retired
+    // communicators are destroyed only once their scopes are empty (an
+    // empty-scope join needs no pool thread) or in stop(), which runs on
+    // the owner's thread, never on the pool.
     std::vector<std::shared_ptr<ListeningRpcCommunicator>>
         retiredSessionCommunicators;
+    // Runs sendResponse()'s detached fire-and-forget send tasks. Declared
+    // AFTER retiredSessionCommunicators so that its destructor (which
+    // joins the tasks) runs BEFORE the list dies: a draining task may
+    // still retire its communicator into the list.
+    streamr::utils::GuardedAsyncScope sendResponseScope;
 
     // Called under this->mutex. Frees every retired communicator whose
     // send task has settled; the rest stay retired until the next call or
@@ -236,30 +243,107 @@ private:
                 dataEntries,
                 noCloserNodesFound);
         } else {
-            auto remoteCommunicator =
-                std::make_shared<ListeningRpcCommunicator>(
-                    ServiceID{serviceId},
-                    this->options.sessionTransport,
-                    RpcCommunicatorOptions{
-                        .rpcRequestTimeout = sessionRpcTimeout});
-            RecursiveOperationSessionRpcRemote rpcRemote(
-                this->options.localPeerDescriptor,
-                targetPeerDescriptor,
-                RecursiveOperationSessionRpcClient(*remoteCommunicator),
-                sessionRpcTimeout);
-            rpcRemote.sendResponse(
-                routingPath,
-                closestConnectedNodes,
-                dataEntries,
-                noCloserNodesFound);
-            remoteCommunicator->destroy();
-            // Do NOT destroy the communicator here: this runs on a worker
-            // pool thread and the destructor's scope join would park it
-            // (see retiredSessionCommunicators).
-            std::scoped_lock lock(this->mutex);
-            this->pruneRetiredSessionCommunicators();
-            this->retiredSessionCommunicators.push_back(
-                std::move(remoteCommunicator));
+            // Fire-and-forget response send. This method runs on shared
+            // worker-pool threads (RPC server handlers via doRouteRequest),
+            // so nothing here may park the thread: neither a blockingWait
+            // on the notify (a park bounded by sessionRpcTimeout, but a
+            // real thread lost for its duration under pool saturation) nor
+            // the per-session communicator's destructor (whose scope join
+            // once parked every worker permanently, see
+            // retiredSessionCommunicators). The whole send therefore runs
+            // as a detached task on sendResponseScope: it co_awaits the
+            // notify (suspends instead of parking) and then disposes of
+            // the communicator without ever joining a non-empty scope from
+            // a pool thread.
+            //
+            // Everything, including the communicator, is constructed
+            // INSIDE the task: if the scope has already been closed by
+            // stop(), the dropped lambda destroys only plain values
+            // (vectors and protobuf messages) here at the add() call site
+            // — dropping a response after stop is correct for a
+            // fire-and-forget send, and the drop cannot block.
+            std::weak_ptr<RecursiveOperationManager> weakSelf =
+                this->sharedFromThis<RecursiveOperationManager>();
+            this->sendResponseScope.add(
+                streamr::utils::co_withExecutor(
+                    &streamr::utils::SharedExecutors::worker(),
+                    folly::coro::co_invoke(
+                        [weakSelf,
+                         serviceId,
+                         targetPeerDescriptor,
+                         routingPath,
+                         closestConnectedNodes,
+                         dataEntries,
+                         noCloserNodesFound]() mutable
+                            -> folly::coro::Task<void> {
+                            // The manager outlives every task here: its
+                            // owner keeps a reference across stop(), whose
+                            // close() drains this scope. The lock can only
+                            // fail if the manager is torn down without
+                            // stop() (the scope member's destructor join),
+                            // in which case nothing has been created yet
+                            // and dropping the response is correct.
+                            auto self = weakSelf.lock();
+                            if (!self) {
+                                co_return;
+                            }
+                            std::shared_ptr<ListeningRpcCommunicator>
+                                remoteCommunicator;
+                            try {
+                                remoteCommunicator =
+                                    std::make_shared<ListeningRpcCommunicator>(
+                                        ServiceID{serviceId},
+                                        self->options.sessionTransport,
+                                        RpcCommunicatorOptions{
+                                            .rpcRequestTimeout =
+                                                sessionRpcTimeout});
+                                RecursiveOperationSessionRpcRemote rpcRemote(
+                                    self->options.localPeerDescriptor,
+                                    targetPeerDescriptor,
+                                    RecursiveOperationSessionRpcClient(
+                                        *remoteCommunicator),
+                                    sessionRpcTimeout);
+                                co_await rpcRemote.sendResponse(
+                                    std::move(routingPath),
+                                    std::move(closestConnectedNodes),
+                                    std::move(dataEntries),
+                                    noCloserNodesFound);
+                            } catch (...) {
+                                // The scope requires tasks that never
+                                // complete with an exception; a lost
+                                // response is fine (fire-and-forget).
+                                SLogger::debug(
+                                    "sendResponse task failed to send "
+                                    "RecursiveOperationResponse");
+                            }
+                            if (remoteCommunicator) {
+                                remoteCommunicator->destroy();
+                                // Dispose of the communicator. The notify
+                                // has completed, but the send task it
+                                // queued on the communicator's own scope
+                                // may still have a tiny unfinished tail —
+                                // and this coroutine may even have been
+                                // resumed from inside that very task, so
+                                // joining a non-empty scope here could
+                                // self-deadlock. A zero count proves both
+                                // that the join is a no-op and that we are
+                                // not running inside one of its tasks, so
+                                // the communicator may die on this thread;
+                                // destroy() above detached the transport
+                                // listeners, so the count can no longer
+                                // grow and the zero observation is stable.
+                                // Otherwise retire it; the pruning in
+                                // later sendResponse calls and stop() is
+                                // the backstop.
+                                if (remoteCommunicator
+                                        ->pendingAsyncTaskCount() != 0) {
+                                    std::scoped_lock lock(self->mutex);
+                                    self->pruneRetiredSessionCommunicators();
+                                    self->retiredSessionCommunicators.push_back(
+                                        std::move(remoteCommunicator));
+                                }
+                            }
+                        })));
         }
     }
 
@@ -424,7 +508,6 @@ public:
     }
 
     void stop() {
-        std::vector<std::shared_ptr<ListeningRpcCommunicator>> retiredToDestroy;
         {
             std::scoped_lock lock(this->mutex);
             this->stopped = true;
@@ -432,11 +515,26 @@ public:
                 session->stop();
             }
             this->ongoingSessions.clear();
+        }
+        // Drain the detached response sends BEFORE destroying the retired
+        // communicators: a draining task may still retire its communicator
+        // into the list (it takes this->mutex to do so, which is why the
+        // close runs outside the lock). close() blocks — bounded by
+        // sessionRpcTimeout, the cap on every send task — and runs on the
+        // owner's thread (DhtNode::stop() calls this while the session
+        // transport is still alive), never on a pool worker, so the join
+        // may safely wait for tasks running on the pool. sendResponse
+        // calls racing this close are dropped by the scope's gate, which
+        // is correct for a fire-and-forget response after stop.
+        this->sendResponseScope.close();
+        std::vector<std::shared_ptr<ListeningRpcCommunicator>> retiredToDestroy;
+        {
+            std::scoped_lock lock(this->mutex);
             retiredToDestroy.swap(this->retiredSessionCommunicators);
         }
         // Destroyed outside the mutex on the stopper's thread (never a
-        // pool worker), where the scope joins may safely wait for the
-        // in-flight send tasks to settle on the pool.
+        // pool worker), where the destructors' scope joins may safely wait
+        // for the send-task tails to settle on the pool.
         retiredToDestroy.clear();
     }
 };
