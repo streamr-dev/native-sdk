@@ -38,18 +38,6 @@ namespace {
 
 constexpr size_t nodeCount = 48;
 
-std::vector<std::string> toNodeIds(
-    const std::vector<PeerDescriptor>& descriptors) {
-    std::vector<std::string> ids;
-    ids.reserve(descriptors.size());
-    for (const auto& descriptor : descriptors) {
-        ids.push_back(
-            static_cast<std::string>(
-                Identifiers::getNodeIdFromPeerDescriptor(descriptor)));
-    }
-    return ids;
-}
-
 // Promise.all(nodes.map((node) => node.joinDht([entryPoint])))
 void joinAllInParallel(
     const std::vector<std::shared_ptr<MockDhtNode>>& nodes,
@@ -118,14 +106,17 @@ TEST_F(Layer1ScaleTest, SingleLayer1Dht) {
         const auto& layer0Node = this->nodes[i]->node;
         const auto& layer1Node = layer1Nodes[i]->node;
         EXPECT_EQ(layer1Node->getNodeId(), layer0Node->getNodeId());
+        // TS compares the two views' connection counts and connection
+        // lists; both are reads of the SAME live view object (the layer-1
+        // node is constructed with the layer-0 node's ConnectionsView), so
+        // in single-threaded TS the equalities hold trivially. In C++ the
+        // background connection churn (e.g. trailing k-bucket pings) can
+        // mutate the view between two reads, so assert the identity that
+        // makes the TS equalities true instead of racing two snapshots.
         EXPECT_EQ(
-            layer1Node->getConnectionsView()->getConnectionCount(),
-            layer0Node->getConnectionsView()->getConnectionCount());
+            layer1Node->getConnectionsView(), layer0Node->getConnectionsView());
         EXPECT_GE(
             layer1Node->getNeighborCount(), numberOfNodesPerKBucketDefault / 2);
-        EXPECT_EQ(
-            toNodeIds(layer1Node->getConnectionsView()->getConnections()),
-            toNodeIds(layer0Node->getConnectionsView()->getConnections()));
     }
 }
 
@@ -155,11 +146,12 @@ TEST_F(Layer1ScaleTest, MultipleLayer1Dht) {
     for (size_t i = 0; i < nodeCount; i++) {
         const auto& layer0Node = this->nodes[i]->node;
         for (size_t s = 0; s < serviceIds.size(); s++) {
+            // Same live-view identity as in SingleLayer1Dht: TS compares
+            // counts of the same object; two C++ reads would race the
+            // background connection churn.
             EXPECT_EQ(
-                layer0Node->getConnectionsView()->getConnectionCount(),
-                streams[s][i]
-                    ->node->getConnectionsView()
-                    ->getConnectionCount());
+                layer0Node->getConnectionsView(),
+                streams[s][i]->node->getConnectionsView());
         }
     }
 }

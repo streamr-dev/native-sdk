@@ -51,6 +51,7 @@ import streamr.dht.Identifiers;
 import streamr.dht.RegionPings;
 import streamr.dht.SimulatorInterfaces;
 import streamr.logger.SLogger;
+import streamr.utils.SharedExecutors;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified: relative namespace names resolve differently
@@ -78,6 +79,20 @@ private:
             connectedCallback; // only on the connecting side
         Clock::time_point lastOperationAt{};
         bool closing = false;
+        // Operations on ONE association execute in order on this serial
+        // view of the shared worker pool; different associations deliver
+        // concurrently. The dispatcher thread only sequences deadlines —
+        // it must not execute the receivers' processing itself: with all
+        // deliveries serialized behind one thread, a 49-node join wave
+        // (~59k deliveries) backs the queue up thousands deep and delivery
+        // latency grows to ~8-14s, past every RPC timeout in the system,
+        // so discovery/ping timeout-pruning tears down live neighbours as
+        // fast as they are found (the Layer1ScaleTest flake). TS runs the
+        // deliveries on its single event loop — where they cost little —
+        // and nothing in the protocol depends on cross-association order:
+        // the real transports (websocket, WebRTC datachannel) guarantee
+        // only per-connection FIFO, which is exactly what is kept here.
+        std::shared_ptr<streamr::utils::SharedSerialExecutor> executor;
     };
 
     enum class OperationType : std::uint8_t { CONNECT, SEND, CLOSE };
@@ -112,6 +127,10 @@ private:
     std::condition_variable mCondition;
     bool stopped = false;
     uint64_t nextSequenceNumber = 0;
+    // Operations handed off to association executors but not yet finished;
+    // stop() waits for this to drain so no call-out races teardown (and no
+    // posted lambda touches a destroyed Simulator).
+    size_t inFlightOperations = 0;
     std::map<DhtAddress, std::shared_ptr<ISimulatorConnector>> connectors;
     std::map<const ISimulatorConnection*, std::shared_ptr<Association>>
         associations;
@@ -167,74 +186,93 @@ private:
         this->mCondition.notify_all();
     }
 
-    // Called with the lock held; unlocks around call-outs.
-    void executeConnectOperation(
-        const Operation& operation, std::unique_lock<std::mutex>& lock) {
-        const auto targetNodeId = Identifiers::getNodeIdFromPeerDescriptor(
-            operation.targetDescriptor);
-        const auto connectorIterator = this->connectors.find(targetNodeId);
-        if (connectorIterator == this->connectors.end()) {
+    // Runs on the association's serial executor; takes the lock only for
+    // the shared-state reads and makes the call-outs without it.
+    void executeConnectOperation(const Operation& operation) {
+        std::shared_ptr<ISimulatorConnector> connector;
+        std::shared_ptr<ISimulatorConnection> sourceConnection;
+        std::function<void(const std::optional<std::string>&)> errorCallback;
+        {
+            std::scoped_lock lock(this->mMutex);
+            if (this->stopped) {
+                return;
+            }
+            const auto targetNodeId = Identifiers::getNodeIdFromPeerDescriptor(
+                operation.targetDescriptor);
+            const auto connectorIterator = this->connectors.find(targetNodeId);
+            if (connectorIterator == this->connectors.end()) {
+                errorCallback = operation.association->connectedCallback;
+            } else {
+                connector = connectorIterator->second;
+                sourceConnection = operation.association->sourceConnection;
+            }
+        }
+        if (!connector) {
             SLogger::error(
                 "Target connector not found when executing connect operation");
-            const auto callback = operation.association->connectedCallback;
-            lock.unlock();
-            if (callback) {
-                callback("Target connector not found");
+            if (errorCallback) {
+                errorCallback("Target connector not found");
             }
-            lock.lock();
             return;
         }
-        const auto connector = connectorIterator->second;
-        const auto sourceConnection = operation.association->sourceConnection;
-        lock.unlock();
         connector->handleIncomingConnection(sourceConnection);
-        lock.lock();
     }
 
-    // Called with the lock held; unlocks around call-outs. Mirrors the
-    // TS close/ack sequence: the first CloseOperation disconnects the
-    // counterpart and schedules a CloseOperation back (the 'ack'), which
-    // finally removes both associations.
-    void executeCloseOperation(
-        const Operation& operation, std::unique_lock<std::mutex>& lock) {
-        const auto target = operation.association->destinationConnection;
-        std::shared_ptr<Association> counterAssociation;
-        if (target) {
-            const auto counterIterator = this->associations.find(target.get());
-            if (counterIterator != this->associations.end()) {
-                counterAssociation = counterIterator->second;
+    // Runs on the association's serial executor. Mirrors the TS close/ack
+    // sequence: the first CloseOperation disconnects the counterpart and
+    // schedules a CloseOperation back (the 'ack'), which finally removes
+    // both associations.
+    void executeCloseOperation(const Operation& operation) {
+        std::shared_ptr<ISimulatorConnection> target;
+        {
+            std::scoped_lock lock(this->mMutex);
+            if (this->stopped) {
+                return;
+            }
+            target = operation.association->destinationConnection;
+            std::shared_ptr<Association> counterAssociation;
+            if (target) {
+                const auto counterIterator =
+                    this->associations.find(target.get());
+                if (counterIterator != this->associations.end()) {
+                    counterAssociation = counterIterator->second;
+                }
+            }
+            if (!target || !counterAssociation) {
+                this->associations.erase(
+                    operation.association->sourceConnection.get());
+                return;
+            }
+            if (counterAssociation->closing) {
+                // this is the 'ack' of the CloseOperation to the original
+                // closer
+                this->associations.erase(target.get());
+                this->associations.erase(
+                    operation.association->sourceConnection.get());
+                return;
             }
         }
-        if (!target || !counterAssociation) {
-            this->associations.erase(
-                operation.association->sourceConnection.get());
-        } else if (!counterAssociation->closing) {
-            lock.unlock();
-            target->handleIncomingDisconnection();
-            this->close(*target);
-            lock.lock();
-        } else {
-            // this is the 'ack' of the CloseOperation to the original
-            // closer
-            this->associations.erase(target.get());
-            this->associations.erase(
-                operation.association->sourceConnection.get());
-        }
+        target->handleIncomingDisconnection();
+        this->close(*target);
     }
 
-    // Called with the lock held; unlocks around call-outs.
-    void executeSendOperation(
-        const Operation& operation, std::unique_lock<std::mutex>& lock) {
-        const auto destination = operation.association->destinationConnection;
+    // Runs on the association's serial executor.
+    void executeSendOperation(const Operation& operation) {
+        std::shared_ptr<ISimulatorConnection> destination;
+        {
+            std::scoped_lock lock(this->mMutex);
+            if (this->stopped) {
+                return;
+            }
+            destination = operation.association->destinationConnection;
+        }
         if (!destination) {
             SLogger::error(
                 "send operation executed on an association with no"
                 " destination, dropping the message");
             return;
         }
-        lock.unlock();
         destination->handleIncomingData(operation.data);
-        lock.lock();
     }
 
     void dispatchLoop() {
@@ -255,17 +293,33 @@ private:
             }
             const Operation operation = this->operationQueue.top();
             this->operationQueue.pop();
-            switch (operation.type) {
-                case OperationType::CONNECT:
-                    this->executeConnectOperation(operation, lock);
-                    break;
-                case OperationType::CLOSE:
-                    this->executeCloseOperation(operation, lock);
-                    break;
-                case OperationType::SEND:
-                    this->executeSendOperation(operation, lock);
-                    break;
-            }
+            // Hand the operation to its association's serial executor:
+            // per-association FIFO is preserved (this loop is the only
+            // poster and pops in deadline order), while different
+            // associations deliver concurrently on the worker pool.
+            const auto executor = operation.association->executor;
+            this->inFlightOperations++;
+            lock.unlock();
+            executor->add([this, operation]() {
+                switch (operation.type) {
+                    case OperationType::CONNECT:
+                        this->executeConnectOperation(operation);
+                        break;
+                    case OperationType::CLOSE:
+                        this->executeCloseOperation(operation);
+                        break;
+                    case OperationType::SEND:
+                        this->executeSendOperation(operation);
+                        break;
+                }
+                // Notify under the lock: once stop()'s drain-wait sees the
+                // count hit zero the Simulator may be destroyed, so this
+                // lambda must not touch members after releasing it.
+                std::scoped_lock finishLock(this->mMutex);
+                this->inFlightOperations--;
+                this->mCondition.notify_all();
+            });
+            lock.lock();
         }
     }
 
@@ -337,6 +391,9 @@ public:
             auto targetAssociation = std::make_shared<Association>();
             targetAssociation->sourceConnection = targetConnection;
             targetAssociation->destinationConnection = sourceConnection;
+            targetAssociation->executor =
+                std::make_shared<streamr::utils::SharedSerialExecutor>(
+                    streamr::utils::SharedExecutors::worker());
             this->associations.emplace(
                 targetConnection.get(), std::move(targetAssociation));
             callback = sourceIterator->second->connectedCallback;
@@ -359,6 +416,9 @@ public:
         auto association = std::make_shared<Association>();
         association->sourceConnection = sourceConnection;
         association->connectedCallback = std::move(connectedCallback);
+        association->executor =
+            std::make_shared<streamr::utils::SharedSerialExecutor>(
+                streamr::utils::SharedExecutors::worker());
         this->associations[sourceConnection.get()] = association;
 
         const auto executionTime = this->generateExecutionTime(
@@ -450,6 +510,15 @@ public:
         if (this->dispatcherThread.joinable() &&
             std::this_thread::get_id() != this->dispatcherThread.get_id()) {
             this->dispatcherThread.join();
+        }
+        // Drain the operations already handed to association executors —
+        // their lambdas skip the call-out once `stopped` is set, so this
+        // completes promptly, and afterwards nothing references this
+        // Simulator (safe to destroy).
+        {
+            std::unique_lock<std::mutex> lock(this->mMutex);
+            this->mCondition.wait(
+                lock, [this]() { return this->inFlightOperations == 0; });
         }
     }
 };
