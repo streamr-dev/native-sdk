@@ -128,8 +128,13 @@ private:
     std::recursive_mutex mMutex;
 
 public:
+    // Members initialize in DECLARATION order (options first), so `host`
+    // must read from the already-moved-into MEMBER, not the parameter — the
+    // old `host(options.host)` read the moved-from parameter and produced an
+    // empty host, which surfaced as a `ws://:port` connectivity URL once the
+    // end-to-end path used the advertised descriptor.
     explicit WebsocketServerConnector(WebsocketServerConnectorOptions&& options)
-        : host(options.host), options(std::move(options)) {
+        : options(std::move(options)), host(this->options.host) {
         if (this->options.portRange.has_value()) {
             this->websocketServer = std::make_unique<WebsocketServer>(std::move(
                 WebsocketServerConfig{

@@ -43,7 +43,12 @@ import streamr.utils.ExecutorHelper;
 import streamr.utils.waitForCondition;
 import streamr.logger.SLogger;
 import streamr.dht.ConnectionLocker;
+import streamr.dht.ConnectionManager;
+import streamr.dht.ConnectorFacade;
 import streamr.dht.ConnectionsView;
+import streamr.dht.createPeerDescriptor;
+import streamr.dht.PortRange;
+import streamr.dht.webrtcTypes;
 import streamr.dht.consts;
 import streamr.dht.DhtCallContext;
 import streamr.dht.DhtNodeRpcLocal;
@@ -135,13 +140,31 @@ struct DhtNodeOptions {
     std::optional<size_t> neighborPingLimit;
     std::optional<std::chrono::milliseconds> rpcRequestTimeout;
 
-    // Given transport (required in this phase). The three roles are the same
-    // object for a SimulatorTransport / ConnectionManager.
+    // Given transport. When null (TS: options.transport === undefined) the
+    // node creates and owns a ConnectionManager over a
+    // DefaultConnectorFacade using the connectivity options below, with
+    // ITSELF as the connectors' signalling transport (TS `transport: this`).
     Transport* transport = nullptr;
     ConnectionsView* connectionsView = nullptr;
     ConnectionLocker* connectionLocker = nullptr; // may be null
     std::optional<PeerDescriptor> peerDescriptor;
     std::vector<PeerDescriptor> entryPoints;
+
+    // Connectivity options for the owned-ConnectionManager path (TS
+    // DhtNodeOptions). websocketServerEnableTls/TLS certificates and the
+    // GeoIP region fallback stay deferred (milestones D/E); region defaults
+    // to 0 when not given.
+    std::optional<std::string> websocketHost;
+    std::optional<streamr::dht::types::PortRange> websocketPortRange;
+    std::optional<DhtAddress> nodeId;
+    std::optional<uint32_t> region;
+    std::vector<streamr::dht::connection::webrtc::IceServer> iceServers;
+    std::optional<bool> webrtcAllowPrivateAddresses;
+    std::optional<size_t> webrtcDatachannelBufferThresholdLow;
+    std::optional<size_t> webrtcDatachannelBufferThresholdHigh;
+    std::optional<streamr::dht::types::PortRange> webrtcPortRange;
+    std::optional<std::string> externalIp;
+    std::optional<size_t> maxMessageSize;
 };
 
 class DhtNode : public Transport {
@@ -154,6 +177,10 @@ private:
     LocalDataStore localDataStore;
     std::unique_ptr<RoutingRpcCommunicator> rpcCommunicator;
     Transport* transportPtr = nullptr;
+    // Set only on the owned-ConnectionManager path (options.transport null);
+    // stop() stops it last, like TS.
+    std::shared_ptr<streamr::dht::connection::ConnectionManager>
+        ownedConnectionManager;
     ConnectionsView* connectionsView = nullptr;
     ConnectionLocker* connectionLocker = nullptr;
     std::shared_ptr<ConnectionLocker>
@@ -411,14 +438,64 @@ public:
             co_return;
         }
         this->started = true;
-        if (this->options.transport == nullptr) {
-            throw std::runtime_error(
-                "DhtNode requires a transport in this build (the "
-                "ConnectionManager path arrives in milestone B)");
+        if (this->options.transport != nullptr) {
+            this->transportPtr = this->options.transport;
+            this->connectionsView = this->options.connectionsView;
+            this->connectionLocker = this->options.connectionLocker;
+        } else {
+            // TS: no transport given — create and own a ConnectionManager
+            // whose connectors signal through THIS node (routed messages).
+            using streamr::dht::connection::ConnectionManager;
+            using streamr::dht::connection::ConnectionManagerOptions;
+            using streamr::dht::connection::DefaultConnectorFacade;
+            using streamr::dht::connection::DefaultConnectorFacadeOptions;
+            DefaultConnectorFacadeOptions facadeOptions{
+                .transport = *this,
+                .entryPoints = this->options.entryPoints,
+                .iceServers = this->options.iceServers,
+                .webrtcAllowPrivateAddresses =
+                    this->options.webrtcAllowPrivateAddresses,
+                .webrtcDatachannelBufferThresholdLow =
+                    this->options.webrtcDatachannelBufferThresholdLow,
+                .webrtcDatachannelBufferThresholdHigh =
+                    this->options.webrtcDatachannelBufferThresholdHigh,
+                .externalIp = this->options.externalIp,
+                .webrtcPortRange = this->options.webrtcPortRange,
+                .maxMessageSize = this->options.maxMessageSize,
+                .createLocalPeerDescriptor =
+                    [this](const ::dht::ConnectivityResponse& response) {
+                        return this->generatePeerDescriptorCallBack(response);
+                    }};
+            // If an own PeerDescriptor with a websocket is given, serve on
+            // exactly that port; else use the configured port range (the
+            // websocketHost may be undefined then). (TS DhtNode lines
+            // 231-243.)
+            if (this->options.peerDescriptor.has_value() &&
+                this->options.peerDescriptor->has_websocket()) {
+                facadeOptions.websocketHost =
+                    this->options.peerDescriptor->websocket().host();
+                const auto port = static_cast<uint16_t>(
+                    this->options.peerDescriptor->websocket().port());
+                facadeOptions.websocketPortRange =
+                    streamr::dht::types::PortRange{.min = port, .max = port};
+            } else if (this->options.websocketPortRange.has_value()) {
+                facadeOptions.websocketHost = this->options.websocketHost;
+                facadeOptions.websocketPortRange =
+                    this->options.websocketPortRange;
+            }
+            this->ownedConnectionManager =
+                std::make_shared<ConnectionManager>(ConnectionManagerOptions{
+                    .createConnectorFacade = [facadeOptions =
+                                                  std::move(facadeOptions)]()
+                        -> std::shared_ptr<DefaultConnectorFacade> {
+                        return std::make_shared<DefaultConnectorFacade>(
+                            facadeOptions);
+                    }});
+            this->ownedConnectionManager->start();
+            this->transportPtr = this->ownedConnectionManager.get();
+            this->connectionsView = this->ownedConnectionManager.get();
+            this->connectionLocker = this->ownedConnectionManager.get();
         }
-        this->transportPtr = this->options.transport;
-        this->connectionsView = this->options.connectionsView;
-        this->connectionLocker = this->options.connectionLocker;
         if (this->connectionLocker != nullptr) {
             this->connectionLockerShared = std::shared_ptr<ConnectionLocker>(
                 this->connectionLocker, [](ConnectionLocker*) {});
@@ -550,6 +627,23 @@ public:
         return *this->localPeerDescriptor;
     }
 
+    // TS generatePeerDescriptorCallBack: build (or adopt) the local peer
+    // descriptor from the connectivity response. The GeoIP/CDN region
+    // fallbacks are deferred (milestone E) — region comes from options or
+    // defaults to 0.
+    PeerDescriptor generatePeerDescriptorCallBack(
+        const ::dht::ConnectivityResponse& connectivityResponse) {
+        if (this->options.peerDescriptor.has_value()) {
+            this->localPeerDescriptor = this->options.peerDescriptor;
+        } else {
+            const uint32_t region = this->options.region.value_or(0);
+            this->localPeerDescriptor =
+                streamr::dht::helpers::createPeerDescriptor(
+                    connectivityResponse, region, this->options.nodeId);
+        }
+        return this->localPeerDescriptor.value();
+    }
+
     void stop() override {
         if (this->abortController.getSignal().aborted || !this->started) {
             return;
@@ -571,7 +665,18 @@ public:
         }
         this->router->stop();
         this->recursiveOperationManager->stop();
-        // The transport was given, not created here, so it is not stopped.
+        if (this->ownedConnectionManager) {
+            // The transport was created in start(), so this component is
+            // responsible for stopping it (TS: options.transport
+            // undefined). A transport given in options is NOT stopped.
+            // The shared_ptr is deliberately KEPT (and transportPtr left
+            // pointing at it): straggler detached tasks are only drained at
+            // the communicators' destruction, and a send into a STOPPED
+            // ConnectionManager is a guarded no-op while a send into a
+            // destroyed one is a use-after-free (TS keeps the stopped
+            // object alive through GC).
+            this->ownedConnectionManager->stop();
+        }
         this->connectionLocker = nullptr;
     }
 
