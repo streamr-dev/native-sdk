@@ -235,6 +235,12 @@ public:
         SLogger::debug("~ConnectionManager() start");
         SLogger::trace("~ConnectionManager()");
         this->stop();
+        // Drain the lock-RPC communicator's straggler coroutines while the
+        // members they reach (endpoints, endpointsMutex, state) are still
+        // alive — rpcCommunicator is declared before them, so its own
+        // destructor drain would run after they are destroyed, and
+        // sendIfStopped responses bypass the stopped-state guard in send().
+        this->rpcCommunicator.drainAsyncTasks();
         SLogger::debug("~ConnectionManager() end");
     };
 
