@@ -175,12 +175,17 @@ private:
 
     DhtNodeOptions options;
     LocalDataStore localDataStore;
-    std::unique_ptr<RoutingRpcCommunicator> rpcCommunicator;
-    Transport* transportPtr = nullptr;
     // Set only on the owned-ConnectionManager path (options.transport null);
-    // stop() stops it last, like TS.
+    // stop() stops it last, like TS. Declared BEFORE rpcCommunicator so it
+    // is destroyed AFTER it: the communicator's destructor drains straggler
+    // request/response coroutines that send through transportPtr, and a
+    // send into a STOPPED ConnectionManager is a guarded no-op while a send
+    // into a destroyed one is a use-after-free (the Layer0 end-to-end
+    // teardown SIGSEGV, macOS crash report 2026-07-11 16:33).
     std::shared_ptr<streamr::dht::connection::ConnectionManager>
         ownedConnectionManager;
+    std::unique_ptr<RoutingRpcCommunicator> rpcCommunicator;
+    Transport* transportPtr = nullptr;
     ConnectionsView* connectionsView = nullptr;
     ConnectionLocker* connectionLocker = nullptr;
     std::shared_ptr<ConnectionLocker>
@@ -437,7 +442,6 @@ public:
         if (this->started || this->abortController.getSignal().aborted) {
             co_return;
         }
-        this->started = true;
         if (this->options.transport != nullptr) {
             this->transportPtr = this->options.transport;
             this->connectionsView = this->options.connectionsView;
@@ -607,6 +611,14 @@ public:
                             key, operation);
                     }});
         this->bindRpcLocalMethods();
+        // Set only after everything above succeeded: if start() throws
+        // (e.g. the websocket server port is taken), transportPtr is still
+        // null — a `started` node in that state would make stop() call
+        // off() through the null pointer (SIGSEGV at a near-null address
+        // inside the emitter mutex). A node whose start failed has nothing
+        // to stop; the owned ConnectionManager's destructor stops whatever
+        // did come up.
+        this->started = true;
         co_return;
     }
 

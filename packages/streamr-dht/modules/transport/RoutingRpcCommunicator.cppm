@@ -114,6 +114,21 @@ public:
             this->sendFn(message, sendOpts);
         });
     }
+
+    // Drain the in-flight client/server coroutines while this object's
+    // members are still alive: the outgoing callback above reads
+    // ownServiceId and calls sendFn, and the base subobjects' own
+    // destructor drains only run AFTER those members are destroyed — a
+    // straggler request drained that late runs against destroyed members
+    // and a possibly-destroyed transport (observed as the Layer0
+    // end-to-end teardown SIGSEGV, macOS crash reports 2026-07-11).
+    ~RoutingRpcCommunicator() { this->drainAsyncTasks(); }
+
+    RoutingRpcCommunicator(const RoutingRpcCommunicator&) = delete;
+    RoutingRpcCommunicator& operator=(const RoutingRpcCommunicator&) = delete;
+    RoutingRpcCommunicator(RoutingRpcCommunicator&&) = delete;
+    RoutingRpcCommunicator& operator=(RoutingRpcCommunicator&&) = delete;
+
     void handleMessageFromPeer(const Message& message) {
         if (message.serviceid() == this->ownServiceId &&
             message.body_case() == Message::BodyCase::kRpcMessage) {

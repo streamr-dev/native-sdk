@@ -86,6 +86,17 @@ public:
     }
 
     /**
+     * @brief Cancel and join all in-flight client/server coroutines.
+     * Idempotent (the client/server API destructors re-run it as a no-op).
+     * Owners must call this before tearing down anything their outgoing
+     * message callback reaches (see RoutingRpcCommunicator's destructor).
+     */
+    void drainAsyncTasks() noexcept {
+        mRpcCommunicatorClientApi.drainAsyncTasks();
+        mRpcCommunicatorServerApi.drainAsyncTasks();
+    }
+
+    /**
      * @brief Set a callback for sending outgoing messages to the network
      *
      * @param callback callback to be called when a message is ready to be sent.

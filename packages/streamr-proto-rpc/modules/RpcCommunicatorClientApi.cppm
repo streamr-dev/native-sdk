@@ -8,6 +8,7 @@ module;
 // translation unit; it cannot arrive through an imported BMI.
 #include <coroutine> // IWYU pragma: keep
 
+#include <atomic>
 #include <exception>
 #include <map>
 #include <mutex>
@@ -140,23 +141,35 @@ private:
     // scale to hundreds of nodes in one process, see
     // streamr.utils.SharedExecutors).
     folly::coro::CancellableAsyncScope mScope;
+    // drainAsyncTasks() must run the cancel-and-join exactly once (folly
+    // AsyncScope forbids a second join).
+    std::atomic<bool> mDrained = false;
 
 public:
     explicit RpcCommunicatorClientApi(
         std::chrono::milliseconds rpcRequestTimeout)
         : mRpcRequestTimeout(rpcRequestTimeout) {}
 
-    // Drains in-flight request/notify coroutines while all members are
-    // still alive. Must run on a thread other than the shared pool worker
-    // currently executing one of this instance's tasks (it always does:
-    // the communicator is owned and destroyed by the transport/main
+    // Drains in-flight request/notify coroutines. Idempotent. Owners whose
+    // straggler tasks reach through members that die before this subobject
+    // (RoutingRpcCommunicator's sendFn, ConnectionManager's endpoints) must
+    // call this BEFORE those members are destroyed — the destructor drain
+    // below is only a backstop that runs after the owning object's members
+    // are already gone. Must run on a thread other than the shared pool
+    // worker currently executing one of this instance's tasks (it always
+    // does: the communicator is owned and destroyed by the transport/main
     // thread, never from inside its own request path).
-    ~RpcCommunicatorClientApi() {
+    void drainAsyncTasks() noexcept {
+        if (mDrained.exchange(true)) {
+            return;
+        }
         try {
             streamr::utils::blockingWait(mScope.cancelAndJoinAsync());
-        } catch (...) { // NOLINT(bugprone-empty-catch) dtor must not throw
+        } catch (...) { // NOLINT(bugprone-empty-catch) must not throw
         }
     }
+
+    ~RpcCommunicatorClientApi() { this->drainAsyncTasks(); }
 
     RpcCommunicatorClientApi(const RpcCommunicatorClientApi&) = delete;
     RpcCommunicatorClientApi& operator=(const RpcCommunicatorClientApi&) =

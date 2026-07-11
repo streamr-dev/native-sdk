@@ -19,6 +19,7 @@ module;
 // imported BMI.
 #include <coroutine> // IWYU pragma: keep
 
+#include <atomic>
 #include <exception>
 #include <functional>
 #include <optional>
@@ -58,6 +59,9 @@ private:
     streamr::utils::SharedSerialExecutor mSerialExecutor{
         streamr::utils::SharedExecutors::worker()};
     folly::coro::CancellableAsyncScope mScope;
+    // drainAsyncTasks() must run the cancel-and-join exactly once (folly
+    // AsyncScope forbids a second join).
+    std::atomic<bool> mDrained = false;
 
     struct RpcResponseParams {
         RpcMessage request;
@@ -207,18 +211,26 @@ private:
 public:
     RpcCommunicatorServerApi() = default;
 
-    // Drains any in-flight response coroutines before the registry and the
-    // registry are destroyed, so no detached coroutine outlives the state it
-    // uses. Must run on a thread other than the serial executor's current
-    // worker (it always
-    // does: the communicator is owned and destroyed by the transport/main
-    // thread, never from inside a request handler).
-    ~RpcCommunicatorServerApi() {
+    // Drains any in-flight response coroutines before the registry is
+    // destroyed, so no detached coroutine outlives the state it uses.
+    // Idempotent; owners whose straggler responses reach through members
+    // that die before this subobject call it early (see
+    // RoutingRpcCommunicator's destructor), the destructor drain is the
+    // backstop. Must run on a thread other than the serial executor's
+    // current worker (it always does: the communicator is owned and
+    // destroyed by the transport/main thread, never from inside a request
+    // handler).
+    void drainAsyncTasks() noexcept {
+        if (mDrained.exchange(true)) {
+            return;
+        }
         try {
             streamr::utils::blockingWait(mScope.cancelAndJoinAsync());
-        } catch (...) { // NOLINT(bugprone-empty-catch) dtor must not throw
+        } catch (...) { // NOLINT(bugprone-empty-catch) must not throw
         }
     }
+
+    ~RpcCommunicatorServerApi() { this->drainAsyncTasks(); }
 
     RpcCommunicatorServerApi(const RpcCommunicatorServerApi&) = delete;
     RpcCommunicatorServerApi& operator=(const RpcCommunicatorServerApi&) =
