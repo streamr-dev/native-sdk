@@ -74,9 +74,8 @@ protected:
                 .fetchDataFromDht = [this](auto /*key*/)
                     -> folly::coro::Task<std::vector<DataEntry>> {
                     co_return std::vector<DataEntry>{
-                        this->createFakeData(this->peerDescriptor, false),
-                        this->createFakeData(
-                            this->deletedPeerDescriptor, true)};
+                        createFakeData(this->peerDescriptor, false),
+                        createFakeData(this->deletedPeerDescriptor, true)};
                 },
                 .storeDataToDht = storeDataToDht,
                 .deleteDataFromDht = deleteDataFromDht});
