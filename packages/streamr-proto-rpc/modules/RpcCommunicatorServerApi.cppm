@@ -230,6 +230,12 @@ public:
         }
     }
 
+    // Number of response coroutines still owned by the scope (see
+    // RpcCommunicatorClientApi::pendingTaskCount()).
+    [[nodiscard]] std::size_t pendingTaskCount() const noexcept {
+        return mScope.remaining();
+    }
+
     ~RpcCommunicatorServerApi() { this->drainAsyncTasks(); }
 
     RpcCommunicatorServerApi(const RpcCommunicatorServerApi&) = delete;

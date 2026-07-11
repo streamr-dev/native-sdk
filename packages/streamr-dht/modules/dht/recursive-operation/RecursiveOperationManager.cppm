@@ -116,6 +116,32 @@ private:
         ongoingSessions;
     bool stopped = false;
     std::unique_ptr<RecursiveOperationRpcLocal> rpcLocal;
+    // sendResponse()'s per-session communicators, kept alive until their
+    // fire-and-forget send task settles. sendResponse runs on shared
+    // worker-pool threads (RPC server handlers); destroying the
+    // communicator there joins its async scope, and that join parks the
+    // pool thread waiting for the communicator's own queued send task,
+    // which needs a pool thread — with every worker parked in such a join
+    // the queued sends can never run and the pool deadlocks permanently
+    // (linux-arm64 CI: DhtNodeExternalApiTest.ExternalStoreDataHappyPath
+    // hung its 1200 s timeout; reproduced deterministically with a
+    // 1-thread pool). Retired communicators are destroyed only once their
+    // scopes are empty (an empty-scope join needs no pool thread) or in
+    // stop(), which runs on the owner's thread, never on the pool.
+    std::vector<std::shared_ptr<ListeningRpcCommunicator>>
+        retiredSessionCommunicators;
+
+    // Called under this->mutex. Frees every retired communicator whose
+    // send task has settled; the rest stay retired until the next call or
+    // stop(). Growth is bounded: each pending entry settles within
+    // sessionRpcTimeout.
+    void pruneRetiredSessionCommunicators() {
+        std::erase_if(
+            this->retiredSessionCommunicators,
+            [](const std::shared_ptr<ListeningRpcCommunicator>& communicator) {
+                return communicator->pendingAsyncTaskCount() == 0;
+            });
+    }
 
     explicit RecursiveOperationManager(RecursiveOperationManagerOptions options)
         : options(std::move(options)) {}
@@ -210,21 +236,30 @@ private:
                 dataEntries,
                 noCloserNodesFound);
         } else {
-            ListeningRpcCommunicator remoteCommunicator(
-                ServiceID{serviceId},
-                this->options.sessionTransport,
-                RpcCommunicatorOptions{.rpcRequestTimeout = sessionRpcTimeout});
+            auto remoteCommunicator =
+                std::make_shared<ListeningRpcCommunicator>(
+                    ServiceID{serviceId},
+                    this->options.sessionTransport,
+                    RpcCommunicatorOptions{
+                        .rpcRequestTimeout = sessionRpcTimeout});
             RecursiveOperationSessionRpcRemote rpcRemote(
                 this->options.localPeerDescriptor,
                 targetPeerDescriptor,
-                RecursiveOperationSessionRpcClient(remoteCommunicator),
+                RecursiveOperationSessionRpcClient(*remoteCommunicator),
                 sessionRpcTimeout);
             rpcRemote.sendResponse(
                 routingPath,
                 closestConnectedNodes,
                 dataEntries,
                 noCloserNodesFound);
-            remoteCommunicator.destroy();
+            remoteCommunicator->destroy();
+            // Do NOT destroy the communicator here: this runs on a worker
+            // pool thread and the destructor's scope join would park it
+            // (see retiredSessionCommunicators).
+            std::scoped_lock lock(this->mutex);
+            this->pruneRetiredSessionCommunicators();
+            this->retiredSessionCommunicators.push_back(
+                std::move(remoteCommunicator));
         }
     }
 
@@ -389,12 +424,20 @@ public:
     }
 
     void stop() {
-        std::scoped_lock lock(this->mutex);
-        this->stopped = true;
-        for (auto& [sessionId, session] : this->ongoingSessions) {
-            session->stop();
+        std::vector<std::shared_ptr<ListeningRpcCommunicator>> retiredToDestroy;
+        {
+            std::scoped_lock lock(this->mutex);
+            this->stopped = true;
+            for (auto& [sessionId, session] : this->ongoingSessions) {
+                session->stop();
+            }
+            this->ongoingSessions.clear();
+            retiredToDestroy.swap(this->retiredSessionCommunicators);
         }
-        this->ongoingSessions.clear();
+        // Destroyed outside the mutex on the stopper's thread (never a
+        // pool worker), where the scope joins may safely wait for the
+        // in-flight send tasks to settle on the pool.
+        retiredToDestroy.clear();
     }
 };
 

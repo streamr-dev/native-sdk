@@ -78,6 +78,13 @@ public:
 
     void destroy() {
         transport.off<transportevents::Message>(this->onMessageHandlerToken);
+        // Also detach the Disconnected listener: leaving it registered
+        // dangles `this` on the transport after destruction, and a live
+        // listener could still add client errors while a retired
+        // communicator waits to be destroyed (see
+        // RecursiveOperationManager::retiredSessionCommunicators).
+        transport.off<transportevents::Disconnected>(
+            this->onDisconnectedHandlerToken);
     }
     using RpcCommunicator::registerRpcMethod;
     using RpcCommunicator::registerRpcNotification;

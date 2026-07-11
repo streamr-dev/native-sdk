@@ -169,6 +169,14 @@ public:
         }
     }
 
+    // Number of request/notify coroutines still owned by the scope. When
+    // zero, drainAsyncTasks()/the destructor complete without needing any
+    // pool thread — the probe owners use to decide whether a retired
+    // communicator can be destroyed from a worker thread.
+    [[nodiscard]] std::size_t pendingTaskCount() const noexcept {
+        return mScope.remaining();
+    }
+
     ~RpcCommunicatorClientApi() { this->drainAsyncTasks(); }
 
     RpcCommunicatorClientApi(const RpcCommunicatorClientApi&) = delete;
