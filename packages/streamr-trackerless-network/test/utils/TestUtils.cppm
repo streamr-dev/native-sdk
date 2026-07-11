@@ -64,6 +64,18 @@ inline StreamMessage createStreamMessage(
     return msg;
 }
 
+// Ported from createMockPeerDescriptor() (test/utils/utils.ts): a
+// descriptor with a random node id, sufficient for tests that only need
+// identity (mirrors the streamr-dht test util of the same name).
+inline PeerDescriptor createMockPeerDescriptor() {
+    PeerDescriptor descriptor;
+    descriptor.set_nodeid(
+        streamr::dht::Identifiers::getRawFromDhtAddress(
+            streamr::dht::Identifiers::createRandomDhtAddress()));
+    descriptor.set_type(::dht::NodeType::NODEJS);
+    return descriptor;
+}
+
 // Ported from mockConnectionLocker (test/utils/utils.ts): a no-op
 // ConnectionLocker for components that require one but whose locking
 // behavior is irrelevant to the test.

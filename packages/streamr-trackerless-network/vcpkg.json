@@ -6,7 +6,8 @@
         "protobuf",
         "folly",
         "magic-enum",
-        "boost-algorithm"
+        "boost-algorithm",
+        "openssl"
     ],
     "features": {
         "monorepo": {
