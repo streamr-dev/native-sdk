@@ -3,11 +3,13 @@
 // discoverEntryPoints call grows the mock's k-bucket by one random peer;
 // the run-off runs all its attempts, so the final neighbor count exceeds
 // (not merely reaches) minNeighborCount.
+// The generated dht protos come ONLY from `import streamr.dht.protos` — a
+// textual DhtRpc.pb.h include alongside the BMI makes clangd flag every
+// member call on those types as ambiguous.
 #include <chrono>
 #include <memory>
 #include <vector>
 #include <gtest/gtest.h>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <coroutine> // IWYU pragma: keep
 

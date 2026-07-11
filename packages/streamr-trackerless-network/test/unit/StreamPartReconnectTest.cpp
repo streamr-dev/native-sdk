@@ -3,11 +3,13 @@
 // ported inline from test/utils/fake/FakePeerDescriptorStoreManager.ts
 // (its only user); the TS fake force-casts an unrelated class, here it
 // overrides the manager's virtual entry points.
+// The generated dht protos come ONLY from `import streamr.dht.protos` — a
+// textual DhtRpc.pb.h include alongside the BMI makes clangd flag every
+// member call on those types as ambiguous.
 #include <chrono>
 #include <memory>
 #include <vector>
 #include <gtest/gtest.h>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <coroutine> // IWYU pragma: keep
 
@@ -36,6 +38,7 @@ namespace {
 
 constexpr auto untilTimeout = std::chrono::seconds(15);
 constexpr auto untilPollInterval = std::chrono::milliseconds(50);
+constexpr auto testReconnectInterval = std::chrono::milliseconds(1000);
 
 class FakePeerDescriptorStoreManager : public PeerDescriptorStoreManager {
 private:
@@ -90,8 +93,7 @@ protected:
 };
 
 TEST_F(StreamPartReconnectTest, HappyPath) {
-    blockingWait(
-        this->streamPartReconnect->reconnect(std::chrono::milliseconds(1000)));
+    blockingWait(this->streamPartReconnect->reconnect(testReconnectInterval));
     EXPECT_EQ(this->streamPartReconnect->isRunning(), true);
     this->discoveryLayerNode.addNewRandomPeerToKBucket();
     EXPECT_NO_THROW(blockingWait(waitForCondition(

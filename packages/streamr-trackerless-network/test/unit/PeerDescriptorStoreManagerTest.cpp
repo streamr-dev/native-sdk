@@ -3,13 +3,15 @@
 // are fakes counting store calls; the last case is timing-based like the
 // TS original (storeInterval 2 s, wait 4.5 s → two extra keep-alive
 // stores).
+// The generated dht protos come ONLY from `import streamr.dht.protos` — a
+// textual DhtRpc.pb.h include alongside the BMI makes clangd flag every
+// member call on those types as ambiguous.
 #include <atomic>
 #include <chrono>
 #include <memory>
 #include <thread>
 #include <vector>
 #include <gtest/gtest.h>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 #include <coroutine> // IWYU pragma: keep
 
@@ -30,6 +32,9 @@ using streamr::utils::blockingWait;
 
 namespace {
 constexpr std::chrono::milliseconds testStoreInterval{2000};
+// TS waits 4.5 s: two keep-alive ticks of the 2 s interval fit.
+constexpr std::chrono::milliseconds keepAliveObservationTime{4500};
+constexpr uint32_t fakeDataTtlMs = 1000;
 } // namespace
 
 class PeerDescriptorStoreManagerTest : public ::testing::Test {
@@ -40,13 +45,13 @@ protected:
     std::unique_ptr<PeerDescriptorStoreManager> withData;
     std::unique_ptr<PeerDescriptorStoreManager> withoutData;
 
-    [[nodiscard]] DataEntry createFakeData(
-        const PeerDescriptor& descriptor, bool deleted) const {
+    [[nodiscard]] static DataEntry createFakeData(
+        const PeerDescriptor& descriptor, bool deleted) {
         DataEntry entry;
         entry.set_key("\x01\x02\x03");
         entry.mutable_data()->PackFrom(descriptor);
         entry.set_creator(descriptor.nodeid());
-        entry.set_ttl(1000); // NOLINT(readability-magic-numbers)
+        entry.set_ttl(fakeDataTtlMs);
         entry.set_stale(false);
         entry.set_deleted(deleted);
         return entry;
@@ -116,7 +121,7 @@ TEST_F(PeerDescriptorStoreManagerTest, WillKeepStoredUntilDestroyed) {
     EXPECT_EQ(this->withData->isLocalNodeStored(), true);
     // storeInterval is 2 s: after 4.5 s the keep-alive loop has stored two
     // more times (TS waits the same 4.5 s).
-    std::this_thread::sleep_for(std::chrono::milliseconds(4500));
+    std::this_thread::sleep_for(keepAliveObservationTime);
     blockingWait(this->withData->destroy());
     EXPECT_EQ(this->storeCalled, 3);
 }
