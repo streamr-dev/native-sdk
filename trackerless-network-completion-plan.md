@@ -565,6 +565,19 @@ New classes: `PeerDescriptorStoreManager` (store/fetch stream entry points under
 `integration/streamEntryPointReplacing.test.ts`,
 `integration/joining-streams-on-offline-peers.test.ts`.
 
+*Implemented (phase-C4 PR):* the three classes plus the
+`DiscoveryLayerNode` interface (`modules/discovery-layer/`, TS RingContacts
+= the dht package's `ClosestRingPeerDescriptors`) and a
+`MockDiscoveryLayerNode` test util; `unit/StreamPartReconnect.test.ts`
+(exists in TS though unlisted above) ported as well. Deviations: the TS
+classes detach their interval loops (`scheduleAtInterval`) and rely on GC —
+here the loops are owned by a per-instance `CancellableAsyncScope` drained
+in `destroy()` (awaited, so no pool-thread parking) with a blocking
+destructor backstop, per the teardown-drain-ordering lessons;
+`discoverEntryPoints` is a parameterless callback (TS declares an optional
+excluded-nodes parameter it never passes). The three integration tests
+require `NetworkNode`/`createNetworkNode` and move to milestone C6/C8.
+
 **Phase C5 — ContentDeliveryManager and proxy server side.**
 New/extended: `ContentDeliveryManager` (join/leave/broadcast per stream part, discovery-layer
 node creation, proxy setup, `suppressOwnMessageLoopback`), extend `ProxyConnectionRpcLocal` and
