@@ -24,6 +24,8 @@ import streamr.dht.ListeningRpcCommunicator;
 import streamr.dht.PendingConnection;
 import streamr.dht.PortRange;
 import streamr.dht.Transport;
+import streamr.dht.WebrtcConnector;
+import streamr.dht.webrtcTypes;
 import streamr.dht.WebsocketClientConnector;
 import streamr.dht.WebsocketServerConnector;
 
@@ -40,6 +42,9 @@ using namespace std::chrono_literals;
 using ::dht::ConnectivityResponse;
 using streamr::dht::connection::IPendingConnection;
 using streamr::dht::connection::PendingConnection;
+using streamr::dht::connection::webrtc::IceServer;
+using streamr::dht::connection::webrtc::WebrtcConnector;
+using streamr::dht::connection::webrtc::WebrtcConnectorOptions;
 using streamr::dht::connection::websocket::WebsocketClientConnector;
 using streamr::dht::connection::websocket::WebsocketClientConnectorOptions;
 using streamr::dht::connection::websocket::WebsocketServerConnector;
@@ -71,12 +76,12 @@ struct DefaultConnectorFacadeOptions {
     std::optional<std::string> websocketHost = std::nullopt;
     std::optional<PortRange> websocketPortRange = std::nullopt;
     std::optional<std::vector<PeerDescriptor>> entryPoints = std::nullopt;
-    // std::vector<IceServer> iceServers;
-    // bool webrtcAllowPrivateAddresses;
-    // int webrtcDatachannelBufferThresholdLow;
-    // int webrtcDatachannelBufferThresholdHigh;
-    // std::optional<std::string> externalIp;
-    // PortRange webrtcPortRange;
+    std::vector<IceServer> iceServers = {};
+    std::optional<bool> webrtcAllowPrivateAddresses = std::nullopt;
+    std::optional<size_t> webrtcDatachannelBufferThresholdLow = std::nullopt;
+    std::optional<size_t> webrtcDatachannelBufferThresholdHigh = std::nullopt;
+    std::optional<std::string> externalIp = std::nullopt;
+    std::optional<PortRange> webrtcPortRange = std::nullopt;
     std::optional<size_t> maxMessageSize;
     // TlsCertificate tlsCertificate;
     // bool websocketServerEnableTls;
@@ -97,11 +102,13 @@ private:
     ListeningRpcCommunicator websocketConnectorRpcCommunicator;
     std::unique_ptr<WebsocketClientConnector> websocketClientConnector;
     std::unique_ptr<WebsocketServerConnector> websocketServerConnector;
+    std::unique_ptr<WebrtcConnector> webrtcConnector;
 
     void setLocalPeerDescriptor(const PeerDescriptor& peerDescriptor) {
         this->localPeerDescriptor = peerDescriptor;
         this->websocketClientConnector->setLocalPeerDescriptor(peerDescriptor);
         this->websocketServerConnector->setLocalPeerDescriptor(peerDescriptor);
+        this->webrtcConnector->setLocalPeerDescriptor(peerDescriptor);
     }
 
 public:
@@ -151,6 +158,21 @@ public:
             std::make_unique<WebsocketServerConnector>(
                 std::move(webSocketServerConnectorOptions));
 
+        this->webrtcConnector =
+            std::make_unique<WebrtcConnector>(WebrtcConnectorOptions{
+                .onNewConnection = onNewConnection,
+                .transport = this->options.transport,
+                .iceServers = this->options.iceServers,
+                .allowPrivateAddresses =
+                    this->options.webrtcAllowPrivateAddresses,
+                .bufferThresholdLow =
+                    this->options.webrtcDatachannelBufferThresholdLow,
+                .bufferThresholdHigh =
+                    this->options.webrtcDatachannelBufferThresholdHigh,
+                .maxMessageSize = this->options.maxMessageSize,
+                .externalIp = this->options.externalIp,
+                .portRange = this->options.webrtcPortRange});
+
         this->websocketServerConnector->start();
         const auto connectivityResponse =
             this->websocketServerConnector->checkConnectivity(false);
@@ -178,8 +200,7 @@ public:
                 peerDescriptor)) {
             return this->websocketServerConnector->connect(peerDescriptor);
         }
-        // TS falls through to the WebrtcConnector here (milestone B2).
-        return nullptr;
+        return this->webrtcConnector->connect(peerDescriptor, false);
     }
 
     std::shared_ptr<IPendingConnection> createConnection(
@@ -194,8 +215,9 @@ public:
                 peerDescriptor)) {
             return this->websocketServerConnector->connect(peerDescriptor);
         }
-        // TS falls through to the WebrtcConnector here (milestone B2).
-        return nullptr;
+        // The TS PendingConnection carries no per-call error callback on the
+        // WebRTC path either.
+        return this->webrtcConnector->connect(peerDescriptor, false);
     }
 
     PeerDescriptor getLocalPeerDescriptor() const override {
@@ -205,8 +227,9 @@ public:
     void stop() override {
         SLogger::info("DefaultConnectorFacade::stop start");
         this->websocketConnectorRpcCommunicator.destroy();
-        this->websocketClientConnector->destroy();
         this->websocketServerConnector->destroy();
+        this->websocketClientConnector->destroy();
+        this->webrtcConnector->stop();
         SLogger::info("DefaultConnectorFacade::stop end");
     }
 };

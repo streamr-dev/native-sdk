@@ -76,6 +76,13 @@ public:
     ~Connection() override { SLogger::trace("~Connection()"); }
 
     [[nodiscard]] ConnectionID getConnectionID() const { return mID; }
+
+    // TS IConnection.connectionId is publicly assignable; used by the WebRTC
+    // answerer to adopt the offerer's connection id (WebrtcConnectorRpcLocal
+    // rtcOffer).
+    void setConnectionId(ConnectionID connectionId) {
+        this->mID = std::move(connectionId);
+    }
     [[nodiscard]] ConnectionType getConnectionType() const { return mType; }
     [[nodiscard]] std::string getConnectionTypeString() const {
         return std::string(magic_enum::enum_name(mType));

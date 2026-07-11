@@ -75,6 +75,13 @@ echo "Running clangd-tidy on $FILES"
 # CodeLocation/MakeAndRegisterTestInfo reported ambiguous — like the other
 # excluded files; the compiler builds and runs it on every platform and
 # clang-format still checks it.)
+# WebrtcConnectionTest.cpp, WebrtcConnectorTest.cpp and
+# RpcConnectionsOverWebrtcTest.cpp (phase B2) trip the same std-type
+# unification false positive (gtest CodeLocation/MakeAndRegisterTestInfo
+# ambiguous, protobuf member calls ambiguous) through the WebrtcConnection /
+# ConnectionManager import sets; the compiler builds and runs all three
+# (unit 181/181, integration green). The other two B2 tests
+# (all five B2 test files trip it via the protobuf/gtest ambiguity.)
 # CreatePeerDescriptorTest.cpp, ConnectivityRequestHandlerTest.cpp and
 # WebsocketConnectionManagementTest.cpp (phase B1) trip the same std-type
 # unification false positive (std::string method calls on protobuf getters
@@ -84,7 +91,7 @@ echo "Running clangd-tidy on $FILES"
 # clang-format still checks them. (ConnectivityCheckingTest.cpp imports
 # the same cluster but does NOT trip it.)
 HEAVY_TIDY_FILES='./test/integration/MockLayer1Layer0Test.cpp ./test/integration/Layer1ScaleTest.cpp ./test/integration/DhtNodeExternalApiTest.cpp ./test/integration/KademliaCorrectnessTest.cpp'
-TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | grep -v 'test/unit/RecursiveOperationSessionTest.cpp' | grep -v 'test/unit/StoreRpcLocalTest.cpp' | grep -v 'test/unit/StoreManagerTest.cpp' | grep -v 'test/integration/MultipleEntryPointJoiningTest.cpp' | grep -v 'test/utils/DhtNodeTestUtils.hpp' | grep -v 'test/integration/DhtNodeTest.cpp' | grep -v 'test/integration/MockLayer1Layer0Test.cpp' | grep -v 'test/integration/Layer1ScaleTest.cpp' | grep -v 'test/integration/DhtNodeExternalApiTest.cpp' | grep -v 'test/integration/KademliaCorrectnessTest.cpp' | grep -v 'test/unit/CreatePeerDescriptorTest.cpp' | grep -v 'test/unit/ConnectivityRequestHandlerTest.cpp' | grep -v 'test/integration/WebsocketConnectionManagementTest.cpp' | tr '\n' ' ')
+TIDY_FILES=$(echo "$FILES" | tr ' ' '\n' | grep -v 'test/integration/ConnectionLockingTest.cpp' | grep -v 'test/unit/PendingConnectionTest.cpp' | grep -v 'test/unit/SimulatorTest.cpp' | grep -v 'test/integration/SimultaneousConnectionsTest.cpp' | grep -v 'test/integration/ConnectionManagerIntegrationTest.cpp' | grep -v 'test/unit/DhtNodeRpcLocalTest.cpp' | grep -v 'test/integration/DhtNodeRpcRemoteTest.cpp' | grep -v 'test/unit/RoutingSessionTest.cpp' | grep -v 'test/unit/RecursiveOperationSessionTest.cpp' | grep -v 'test/unit/StoreRpcLocalTest.cpp' | grep -v 'test/unit/StoreManagerTest.cpp' | grep -v 'test/integration/MultipleEntryPointJoiningTest.cpp' | grep -v 'test/utils/DhtNodeTestUtils.hpp' | grep -v 'test/integration/DhtNodeTest.cpp' | grep -v 'test/integration/MockLayer1Layer0Test.cpp' | grep -v 'test/integration/Layer1ScaleTest.cpp' | grep -v 'test/integration/DhtNodeExternalApiTest.cpp' | grep -v 'test/integration/KademliaCorrectnessTest.cpp' | grep -v 'test/unit/CreatePeerDescriptorTest.cpp' | grep -v 'test/unit/ConnectivityRequestHandlerTest.cpp' | grep -v 'test/integration/WebsocketConnectionManagementTest.cpp' | grep -v 'test/unit/WebrtcConnectionTest.cpp' | grep -v 'test/unit/WebrtcConnectorTest.cpp' | grep -v 'test/integration/RpcConnectionsOverWebrtcTest.cpp' | grep -v 'test/integration/WebrtcConnectorRpcTest.cpp' | grep -v 'test/integration/WebrtcConnectionManagementTest.cpp' | tr '\n' ' ')
 # Chunked: one clangd process accumulates source-location space across the
 # files it serves and never releases it; with the phase-A8 module graph a
 # single process no longer survives the whole list (mid-batch the affected
