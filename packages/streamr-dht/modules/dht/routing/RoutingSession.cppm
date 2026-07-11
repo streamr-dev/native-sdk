@@ -280,13 +280,14 @@ public:
         const DhtAddress targetId = Identifiers::getDhtAddressFromRaw(
             DhtAddressRaw{this->options.routedMessage.target()});
 
-        RoutingTable routingTable;
-        if (this->options.routingTablesCache.has(targetId, previousId) &&
-            this->options.routingTablesCache.get(targetId, previousId)
-                    ->getSize() > 0) {
-            routingTable =
-                this->options.routingTablesCache.get(targetId, previousId);
-        } else {
+        // Fetch the cached table ONCE: every lookup re-evaluates the cache's
+        // 15s TTL, so a second get() microseconds after a successful has()/
+        // get() can expire the entry and return null — dereferencing that
+        // null table SEGV'd here (observed crash: updateAndGetRoutablePeers
+        // → getClosestContacts on a null RoutingTable).
+        RoutingTable routingTable =
+            this->options.routingTablesCache.get(targetId, previousId);
+        if (routingTable == nullptr || routingTable->getSize() == 0) {
             routingTable =
                 std::make_shared<SortedContactList<RoutingRemoteContact>>(
                     SortedContactListOptions{
