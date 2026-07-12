@@ -158,6 +158,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/PeerDescriptorStoreManagerTest.cpp
         test/unit/StreamPartNetworkSplitAvoidanceTest.cpp
         test/unit/StreamPartReconnectTest.cpp
+        test/unit/InspectSessionTest.cpp
+        test/unit/InspectorTest.cpp
         test/unit/ProxyClientTest.cpp
         test/unit/ProxyConnectionRpcLocalTest.cpp
         test/unit/ProxyConnectionRpcRemoteTest.cpp

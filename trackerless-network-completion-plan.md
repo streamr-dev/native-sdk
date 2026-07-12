@@ -602,6 +602,16 @@ decision 3.3.)
 *Tests to port:* `unit/InspectSession.test.ts`, `unit/Inspector.test.ts`,
 `integration/Inspect.test.ts`, `end-to-end/inspect.test.ts`.
 
+*Implemented (phase-C7 PR, out of order — C7 has no C2/C3 dependency, only
+C1's temporary-connection RPC):* both classes in `modules/logic/inspection/`
+(namespace `...::inspection`; the package keeps TS's content-delivery-layer
+classes under `modules/logic/`). Deviations: session/inspector maps are
+mutex-guarded (markMessage arrives from delivery threads), Done is emitted
+outside the locks; TS `toUserId(publisherId)` in the message key becomes
+lowercase-hex via BinaryUtils. `integration/Inspect.test.ts` and
+`end-to-end/inspect.test.ts` need `NetworkStack`/full node and move to
+C6/C8.
+
 **Phase C8 — Full-node end-to-end and TS interop.**
 *Tests to port:* `end-to-end/websocket-full-node-network.test.ts`,
 `end-to-end/webrtc-full-node-network.test.ts`,
