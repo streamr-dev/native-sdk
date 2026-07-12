@@ -35,8 +35,11 @@ fi
 # HandshakerTest.cpp (phase C2) trips the same std-type unification
 # false positive inside an included header ("no viable conversion from
 # const std::string to __self_view"); the compiler builds and runs it.
+# ContentDeliveryLayerNodeTest.cpp (phase C3) trips the std-type
+# unification false positive on its own std::string locals; the
+# compiler builds and runs it.
 TESTFILES=$(find test -type f \( -name "*.hpp" -o -name "*.cpp" \) -not -path '*/ts-integration/*' | sort | uniq | tr '\n' ' ')
-TIDY_TESTFILES=$(echo "$TESTFILES" | tr ' ' '\n' | grep -v 'test/unit/ContentDeliveryRpcRemoteTest.cpp' | grep -v 'test/unit/TemporaryConnectionRpcLocalTest.cpp' | grep -v 'test/unit/HandshakerTest.cpp' | tr '\n' ' ')
+TIDY_TESTFILES=$(echo "$TESTFILES" | tr ' ' '\n' | grep -v 'test/unit/ContentDeliveryRpcRemoteTest.cpp' | grep -v 'test/unit/TemporaryConnectionRpcLocalTest.cpp' | grep -v 'test/unit/HandshakerTest.cpp' | grep -v 'test/unit/ContentDeliveryLayerNodeTest.cpp' | tr '\n' ' ')
 echo "Running clangd-tidy on $TIDY_TESTFILES"
 
 clangd-tidy -p "$COMPILE_DB" $TIDY_TESTFILES < /dev/null

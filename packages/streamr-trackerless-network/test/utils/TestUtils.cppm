@@ -7,17 +7,23 @@
 // (trackerless-network-completion-plan.md, phase 0.2).
 module;
 
+// Coroutine definitions need std::coroutine_traits declared in THIS
+// translation unit; it cannot arrive through an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <chrono>
 #include <cstdint>
 #include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <vector>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.TestUtils;
 
+import streamr.utils.CoroutineHelper;
 import streamr.protorpc.RpcCommunicator;
 import streamr.protorpc.protos;
 import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;

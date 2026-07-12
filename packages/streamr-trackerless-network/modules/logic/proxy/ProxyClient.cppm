@@ -155,7 +155,9 @@ public:
                   .localPeerDescriptor = options.localPeerDescriptor,
                   .streamPartId = options.streamPartId,
                   .markAndCheckDuplicate =
-                      [this](const MessageID& msg, const MessageRef& prev) {
+                      [this](
+                          const MessageID& msg,
+                          const std::optional<MessageRef>& prev) {
                           return Utils::markAndCheckDuplicate(
                               this->duplicateDetectors, msg, prev);
                       },
@@ -184,16 +186,15 @@ public:
                   .sendToNeighbor =
                       [this](
                           const DhtAddress& neighborId,
-                          const StreamMessage& msg) {
-                          const auto remote = this->neighbors.get(neighborId);
-                          if (remote.has_value()) {
-                              streamr::utils::blockingWait(
-                                  remote.value()->sendStreamMessage(msg));
-                          } else {
-                              throw std::runtime_error(
-                                  "Propagation target not found");
-                          }
-                      },
+                          const StreamMessage& msg) -> folly::coro::Task<void> {
+                      const auto remote = this->neighbors.get(neighborId);
+                      if (remote.has_value()) {
+                          co_await remote.value()->sendStreamMessage(msg);
+                      } else {
+                          throw std::runtime_error(
+                              "Propagation target not found");
+                      }
+                  },
                   .minPropagationTargets =
                       options.minPropagationTargets.has_value()
                       ? options.minPropagationTargets.value()
@@ -431,8 +432,23 @@ public:
         this->emit<Message>(msg);
         SLogger::debug(
             "ProxyClient::broadcast() calling propagation.feedUnseenMessage()");
-        return this->propagation.feedUnseenMessage(
-            msg, this->neighbors.getPeerDescriptors(), previousNode);
+        // feedUnseenMessage speaks node ids (TS parity); this public API
+        // reports full descriptors, so map the ids back through the
+        // neighbor list.
+        const auto [failedIds, successfulIds] = streamr::utils::blockingWait(
+            this->propagation.feedUnseenMessageAndCollect(
+                msg, this->neighbors.getIds(), previousNode));
+        const auto toDescriptors = [this](const std::vector<DhtAddress>& ids) {
+            std::vector<PeerDescriptor> descriptors;
+            for (const auto& id : ids) {
+                const auto remote = this->neighbors.get(id);
+                if (remote.has_value()) {
+                    descriptors.push_back(remote.value()->getPeerDescriptor());
+                }
+            }
+            return descriptors;
+        };
+        return {toDescriptors(failedIds), toDescriptors(successfulIds)};
     }
 
     [[nodiscard]] bool hasConnection(

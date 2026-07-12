@@ -3,6 +3,8 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
+#include <optional>
+
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
@@ -32,7 +34,11 @@ using ContentDeliveryRpc =
 struct ContentDeliveryRpcLocalOptions {
     PeerDescriptor localPeerDescriptor;
     StreamPartID streamPartId;
-    std::function<bool(const MessageID&, const MessageRef&)>
+    // TS passes `undefined` when the message has no previousMessageRef;
+    // the proto3 default instance (0, 0) must not be forwarded (it
+    // violates the DuplicateMessageDetector invariant when the current
+    // ref is also (0, 0)).
+    std::function<bool(const MessageID&, const std::optional<MessageRef>&)>
         markAndCheckDuplicate;
     std::function<void(const StreamMessage&, const DhtAddress&)> broadcast;
     std::function<void(const DhtAddress&, bool)> onLeaveNotice;
@@ -54,7 +60,10 @@ public:
             context.incomingSourceDescriptor.value());
         this->options.markForInspection(previousNode, message.messageid());
         if (this->options.markAndCheckDuplicate(
-                message.messageid(), message.previousmessageref())) {
+                message.messageid(),
+                message.has_previousmessageref()
+                    ? std::optional(message.previousmessageref())
+                    : std::nullopt)) {
             this->options.broadcast(message, previousNode);
         }
     }

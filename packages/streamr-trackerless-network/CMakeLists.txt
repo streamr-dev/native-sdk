@@ -182,6 +182,9 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/NeighborFinderTest.cpp
         test/unit/NeighborUpdateRpcLocalTest.cpp
         test/unit/NeighborUpdateRpcRemoteTest.cpp
+        test/unit/ContentDeliveryLayerNodeTest.cpp
+        test/unit/ContentDeliveryLayerNodeLayer1Test.cpp
+        test/unit/PropagationScaleTest.cpp
     )
 
     target_include_directories(streamr-trackerless-network-test-unit

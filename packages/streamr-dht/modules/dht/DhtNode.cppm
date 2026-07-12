@@ -167,7 +167,34 @@ struct DhtNodeOptions {
     std::optional<size_t> maxMessageSize;
 };
 
-class DhtNode : public Transport {
+// TS DhtNode re-emits the PeerManager contact events as its own events
+// (nearbyContactAdded etc.); the trackerless-network discovery-layer
+// facade subscribes to them. Mirrored here as a second event-emitter
+// base, merged with the Transport events via using-declarations.
+using DhtNodeContactEvents = std::tuple<
+    peermanagerevents::NearbyContactAdded,
+    peermanagerevents::NearbyContactRemoved,
+    peermanagerevents::RandomContactAdded,
+    peermanagerevents::RandomContactRemoved,
+    peermanagerevents::RingContactAdded,
+    peermanagerevents::RingContactRemoved>;
+
+class DhtNode
+    : public Transport,
+      public streamr::eventemitter::EventEmitter<DhtNodeContactEvents> {
+public:
+    using ContactEventEmitter =
+        streamr::eventemitter::EventEmitter<DhtNodeContactEvents>;
+    using ContactEventEmitter::emit;
+    using ContactEventEmitter::off;
+    using ContactEventEmitter::on;
+    using ContactEventEmitter::once;
+    using Transport::emit;
+    using Transport::off;
+    using Transport::on;
+    using Transport::once;
+    using Transport::removeAllListeners;
+
 private:
     static constexpr std::chrono::milliseconds externalApiTimeout{10000};
     static constexpr std::chrono::milliseconds networkConnectivityPollInterval{
@@ -295,6 +322,36 @@ private:
         this->peerManager->on<peermanagerevents::NearbyContactAdded>(
             [this](const PeerDescriptor& peerDescriptor) {
                 this->storeManager->onContactAdded(peerDescriptor);
+            });
+        // TS re-emits every PeerManager contact event as a DhtNode event.
+        this->peerManager->on<peermanagerevents::NearbyContactAdded>(
+            [this](const PeerDescriptor& peerDescriptor) {
+                this->emit<peermanagerevents::NearbyContactAdded>(
+                    peerDescriptor);
+            });
+        this->peerManager->on<peermanagerevents::NearbyContactRemoved>(
+            [this](const PeerDescriptor& peerDescriptor) {
+                this->emit<peermanagerevents::NearbyContactRemoved>(
+                    peerDescriptor);
+            });
+        this->peerManager->on<peermanagerevents::RandomContactAdded>(
+            [this](const PeerDescriptor& peerDescriptor) {
+                this->emit<peermanagerevents::RandomContactAdded>(
+                    peerDescriptor);
+            });
+        this->peerManager->on<peermanagerevents::RandomContactRemoved>(
+            [this](const PeerDescriptor& peerDescriptor) {
+                this->emit<peermanagerevents::RandomContactRemoved>(
+                    peerDescriptor);
+            });
+        this->peerManager->on<peermanagerevents::RingContactAdded>(
+            [this](const PeerDescriptor& peerDescriptor) {
+                this->emit<peermanagerevents::RingContactAdded>(peerDescriptor);
+            });
+        this->peerManager->on<peermanagerevents::RingContactRemoved>(
+            [this](const PeerDescriptor& peerDescriptor) {
+                this->emit<peermanagerevents::RingContactRemoved>(
+                    peerDescriptor);
             });
         this->peerManager->on<peermanagerevents::KBucketEmpty>([this]() {
             if (!this->peerDiscovery->isJoinOngoing() &&
