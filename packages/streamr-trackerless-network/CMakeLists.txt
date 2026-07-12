@@ -143,7 +143,8 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
     # import streamr.trackerlessnetwork.TestUtils.
     streamr_add_module_library(streamr-trackerless-network-test-utils
         BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/test/utils
-        FILES ${CMAKE_CURRENT_SOURCE_DIR}/test/utils/TestUtils.cppm)
+        FILES ${CMAKE_CURRENT_SOURCE_DIR}/test/utils/TestUtils.cppm
+              ${CMAKE_CURRENT_SOURCE_DIR}/test/utils/MockDiscoveryLayerNode.cppm)
     target_include_directories(streamr-trackerless-network-test-utils
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/proto>)
     target_link_libraries(streamr-trackerless-network-test-utils
@@ -154,6 +155,9 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
 
     add_executable(streamr-trackerless-network-test-unit
         test/unit/TestUtilsTest.cpp
+        test/unit/PeerDescriptorStoreManagerTest.cpp
+        test/unit/StreamPartNetworkSplitAvoidanceTest.cpp
+        test/unit/StreamPartReconnectTest.cpp
         test/unit/ProxyClientTest.cpp
         test/unit/ProxyConnectionRpcLocalTest.cpp
         test/unit/ProxyConnectionRpcRemoteTest.cpp
