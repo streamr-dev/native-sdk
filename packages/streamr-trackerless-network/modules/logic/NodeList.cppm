@@ -1,9 +1,27 @@
 // Module streamr.trackerlessnetwork.NodeList
 // CONSOLIDATED from the former header logic/NodeList.hpp
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
+//
+// Storage is INSERTION-ORDERED (phase C3): the TS NodeList is a Map,
+// whose iteration order is insertion order, and the protocol depends on
+// it — getLast() must return the most recently added node (the handshake
+// interleave hands the newest neighbor over), not the id-largest one as
+// the earlier std::map-backed port did. Lookups are linear; the lists
+// are bounded by small limits (default 20).
+//
+// Thread safety (phase C3): TS runs single-threaded; here RPC handler
+// threads, the neighbor-finder chains, the neighbor-update interval and
+// discovery-event handlers all mutate the same lists concurrently (a
+// 64-node scale test crashed reading entries freed by a concurrent
+// replaceAll). All container access is mutex-guarded; NodeAdded /
+// NodeRemoved are emitted OUTSIDE the lock because their handlers make
+// blocking RPC sends.
 module;
 
-#include <map>
+#include <algorithm>
+#include <memory>
+#include <mutex>
+#include <optional>
 #include <ranges>
 #include <vector>
 
@@ -33,18 +51,32 @@ struct NodeRemoved
 
 using NodeListEvents = std::tuple<NodeAdded, NodeRemoved>;
 
-// The items in the list are in the insertion order
-
 class NodeList : public EventEmitter<NodeListEvents> {
 private:
-    std::map<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>> nodes;
+    using Entry =
+        std::pair<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>>;
+
+    mutable std::mutex mutex;
+    std::vector<Entry> nodes;
     size_t limit;
     DhtAddress ownId;
 
+    [[nodiscard]] std::vector<Entry>::const_iterator find(
+        const DhtAddress& nodeId) const {
+        return std::ranges::find_if(this->nodes, [&nodeId](const auto& entry) {
+            return entry.first == nodeId;
+        });
+    }
+
+    [[nodiscard]] std::vector<Entry>::iterator find(const DhtAddress& nodeId) {
+        return std::ranges::find_if(this->nodes, [&nodeId](const auto& entry) {
+            return entry.first == nodeId;
+        });
+    }
+
     static std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>
     getValuesOfIncludedKeys(
-        const std::map<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>>&
-            nodes,
+        const std::vector<Entry>& nodes,
         const std::vector<DhtAddress>& exclude,
         bool wsOnly = false) {
         return nodes | std::views::values |
@@ -69,48 +101,77 @@ public:
     void add(const std::shared_ptr<ContentDeliveryRpcRemote>& remote) {
         const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
             remote->getPeerDescriptor());
-        if ((this->ownId != nodeId) && (this->nodes.size() < this->limit)) {
-            const auto isExistingNode = this->nodes.contains(nodeId);
-            this->nodes[nodeId] = remote;
-
-            if (!isExistingNode) {
-                this->emit<NodeAdded>(nodeId, remote);
+        bool added = false;
+        {
+            std::scoped_lock lock(this->mutex);
+            if ((this->ownId != nodeId) && (this->nodes.size() < this->limit)) {
+                const auto it = this->find(nodeId);
+                if (it != this->nodes.end()) {
+                    it->second = remote;
+                } else {
+                    this->nodes.emplace_back(nodeId, remote);
+                    added = true;
+                }
             }
+        }
+        if (added) {
+            this->emit<NodeAdded>(nodeId, remote);
         }
     }
 
     void remove(const DhtAddress& nodeId) {
-        if (this->nodes.contains(nodeId)) {
-            const auto remote = this->nodes.at(nodeId);
-            this->nodes.erase(nodeId);
-            this->emit<NodeRemoved>(nodeId, remote);
+        std::shared_ptr<ContentDeliveryRpcRemote> removed;
+        {
+            std::scoped_lock lock(this->mutex);
+            const auto it = this->find(nodeId);
+            if (it != this->nodes.end()) {
+                removed = it->second;
+                this->nodes.erase(it);
+            }
+        }
+        if (removed) {
+            this->emit<NodeRemoved>(nodeId, removed);
         }
     }
 
     [[nodiscard]] bool has(const DhtAddress& nodeId) const {
-        return this->nodes.contains(nodeId);
+        std::scoped_lock lock(this->mutex);
+        return this->find(nodeId) != this->nodes.end();
     }
 
     // Replace nodes does not emit nodeRemoved events, use with caution
     void replaceAll(
         const std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>&
             neighbors) {
-        this->nodes.clear();
-        const auto limited =
-            neighbors | std::views::take(this->limit) |
-            std::ranges::to<
-                std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>>();
-        for (const auto& remote : limited) {
-            this->add(remote);
+        std::vector<Entry> addedEntries;
+        {
+            std::scoped_lock lock(this->mutex);
+            this->nodes.clear();
+            for (const auto& remote :
+                 neighbors | std::views::take(this->limit)) {
+                const auto nodeId = Identifiers::getNodeIdFromPeerDescriptor(
+                    remote->getPeerDescriptor());
+                if ((this->ownId != nodeId) &&
+                    (this->nodes.size() < this->limit) &&
+                    this->find(nodeId) == this->nodes.end()) {
+                    this->nodes.emplace_back(nodeId, remote);
+                    addedEntries.emplace_back(nodeId, remote);
+                }
+            }
+        }
+        for (const auto& [nodeId, remote] : addedEntries) {
+            this->emit<NodeAdded>(nodeId, remote);
         }
     }
 
     [[nodiscard]] std::vector<DhtAddress> getIds() const {
+        std::scoped_lock lock(this->mutex);
         return this->nodes | std::views::keys |
             std::ranges::to<std::vector<DhtAddress>>();
     }
 
     [[nodiscard]] std::vector<PeerDescriptor> getPeerDescriptors() const {
+        std::scoped_lock lock(this->mutex);
         return this->nodes | std::views::values |
             std::views::transform([](const auto& remote) {
                    return remote->getPeerDescriptor();
@@ -118,11 +179,11 @@ public:
             std::ranges::to<std::vector<PeerDescriptor>>();
     }
 
-    // TS getNode() returns undefined for unknown ids; map::at would
-    // throw instead, so look up with find.
+    // TS getNode() returns undefined for unknown ids.
     [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>> get(
         const DhtAddress& id) const {
-        if (const auto it = this->nodes.find(id); it != this->nodes.end()) {
+        std::scoped_lock lock(this->mutex);
+        if (const auto it = this->find(id); it != this->nodes.end()) {
             return it->second;
         }
         return std::nullopt;
@@ -130,11 +191,13 @@ public:
 
     [[nodiscard]] size_t size(
         const std::vector<DhtAddress>& exclude = {}) const {
+        std::scoped_lock lock(this->mutex);
         return NodeList::getValuesOfIncludedKeys(this->nodes, exclude).size();
     }
 
     [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>>
     getRandom(const std::vector<DhtAddress>& exclude) {
+        std::scoped_lock lock(this->mutex);
         const auto values =
             NodeList::getValuesOfIncludedKeys(this->nodes, exclude);
         if (values.empty()) {
@@ -145,6 +208,7 @@ public:
 
     [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>>
     getFirst(const std::vector<DhtAddress>& exclude, bool wsOnly = false) {
+        std::scoped_lock lock(this->mutex);
         const auto included =
             NodeList::getValuesOfIncludedKeys(this->nodes, exclude, wsOnly);
         return included.empty() ? std::nullopt
@@ -153,6 +217,7 @@ public:
 
     [[nodiscard]] std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>
     getFirstAndLast(const std::vector<DhtAddress>& exclude) {
+        std::scoped_lock lock(this->mutex);
         const auto included =
             NodeList::getValuesOfIncludedKeys(this->nodes, exclude);
         if (included.empty()) {
@@ -164,25 +229,19 @@ public:
         return {included.front()};
     }
 
-    [[nodiscard]] static std::optional<
-        std::shared_ptr<ContentDeliveryRpcRemote>>
-    getLast(
-        const std::map<DhtAddress, std::shared_ptr<ContentDeliveryRpcRemote>>&
-            nodes,
-        const std::vector<DhtAddress>& exclude) {
-        const auto included = NodeList::getValuesOfIncludedKeys(nodes, exclude);
+    // TS getLast(exclude): the insertion-order last node not excluded.
+    [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>>
+    getLast(const std::vector<DhtAddress>& exclude) const {
+        std::scoped_lock lock(this->mutex);
+        const auto included =
+            NodeList::getValuesOfIncludedKeys(this->nodes, exclude);
         return included.empty() ? std::nullopt
                                 : std::make_optional(included.back());
     }
 
-    // TS getLast(exclude): the insertion-order last node not excluded.
-    [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>>
-    getLast(const std::vector<DhtAddress>& exclude) const {
-        return NodeList::getLast(this->nodes, exclude);
-    }
-
     [[nodiscard]] std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>
     getAll() {
+        std::scoped_lock lock(this->mutex);
         return this->nodes | std::views::values |
             std::ranges::to<
                    std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>>();
