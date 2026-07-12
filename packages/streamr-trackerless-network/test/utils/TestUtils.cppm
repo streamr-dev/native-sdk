@@ -9,14 +9,22 @@ module;
 
 #include <chrono>
 #include <cstdint>
+#include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include "packages/dht/protos/DhtRpc.pb.h"
 #include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.TestUtils;
 
+import streamr.protorpc.RpcCommunicator;
+import streamr.protorpc.protos;
+import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;
+import streamr.trackerlessnetwork.HandshakeRpcRemote;
+import streamr.trackerlessnetwork.NetworkRpcClient;
 import streamr.dht.ConnectionLocker;
+import streamr.dht.DhtCallContext;
 import streamr.dht.Identifiers;
 import streamr.utils.BinaryUtils;
 import streamr.utils.EthereumAddress;
@@ -74,6 +82,59 @@ inline PeerDescriptor createMockPeerDescriptor() {
             streamr::dht::Identifiers::createRandomDhtAddress()));
     descriptor.set_type(::dht::NodeType::NODEJS);
     return descriptor;
+}
+
+// Shared transportless communicator behind the mock remote factories
+// (the TS factories pass `new RpcCommunicator()` per remote). Outgoing
+// messages fail immediately, so any RPC attempted on a mock remote
+// reports failure fast instead of waiting for a response timeout.
+// NOT leaked, deliberately: the communicator's serial executor holds a
+// KeepAlive on the shared worker pool, and a leaked KeepAlive makes the
+// pool's static destructor wait forever at process exit
+// (DefaultKeepAliveExecutor::joinKeepAlive). As a function-local static
+// it is constructed after the pool and therefore destroyed before it,
+// releasing the KeepAlive in time.
+inline streamr::protorpc::RpcCommunicator<
+    streamr::dht::rpcprotocol::DhtCallContext>&
+getMockRpcCommunicator() {
+    using streamr::dht::rpcprotocol::DhtCallContext;
+    static streamr::protorpc::RpcCommunicator<DhtCallContext> communicator;
+    static const bool initialized = []() {
+        communicator.setOutgoingMessageCallback(
+            [](const ::protorpc::RpcMessage& /*message*/,
+               const std::string& /*requestId*/,
+               const DhtCallContext& /*context*/) {
+                throw std::runtime_error(
+                    "mock rpc communicator has no transport");
+            });
+        return true;
+    }();
+    (void)initialized;
+    return communicator;
+}
+
+// Ported from createMockContentDeliveryRpcRemote() (test/utils/utils.ts).
+inline std::shared_ptr<streamr::trackerlessnetwork::ContentDeliveryRpcRemote>
+createMockContentDeliveryRpcRemote(
+    std::optional<PeerDescriptor> remotePeerDescriptor = std::nullopt) {
+    streamr::trackerlessnetwork::ContentDeliveryRpcClient client{
+        getMockRpcCommunicator()};
+    return std::make_shared<
+        streamr::trackerlessnetwork::ContentDeliveryRpcRemote>(
+        createMockPeerDescriptor(),
+        remotePeerDescriptor.value_or(createMockPeerDescriptor()),
+        client);
+}
+
+// Ported from createMockHandshakeRpcRemote() (test/utils/utils.ts).
+inline std::shared_ptr<
+    streamr::trackerlessnetwork::neighbordiscovery::HandshakeRpcRemote>
+createMockHandshakeRpcRemote() {
+    streamr::trackerlessnetwork::neighbordiscovery::HandshakeRpcClient client{
+        getMockRpcCommunicator()};
+    return std::make_shared<
+        streamr::trackerlessnetwork::neighbordiscovery::HandshakeRpcRemote>(
+        createMockPeerDescriptor(), createMockPeerDescriptor(), client);
 }
 
 // Ported from mockConnectionLocker (test/utils/utils.ts): a no-op

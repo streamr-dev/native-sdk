@@ -175,6 +175,12 @@ public:
                                 : std::make_optional(included.back());
     }
 
+    // TS getLast(exclude): the insertion-order last node not excluded.
+    [[nodiscard]] std::optional<std::shared_ptr<ContentDeliveryRpcRemote>>
+    getLast(const std::vector<DhtAddress>& exclude) const {
+        return NodeList::getLast(this->nodes, exclude);
+    }
+
     [[nodiscard]] std::vector<std::shared_ptr<ContentDeliveryRpcRemote>>
     getAll() {
         return this->nodes | std::views::values |
