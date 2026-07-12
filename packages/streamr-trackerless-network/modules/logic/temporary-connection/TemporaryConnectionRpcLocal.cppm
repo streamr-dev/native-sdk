@@ -6,12 +6,14 @@
 // and weak-locking the underlying connection while it is in use.
 module;
 
+#include <cstddef>
 #include <memory>
 #include <string>
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
+#include <utility>
 
 export module streamr.trackerlessnetwork.TemporaryConnectionRpcLocal;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.trackerlessnetwork.NetworkRpcServer;
 import streamr.trackerlessnetwork.NetworkRpcClient;

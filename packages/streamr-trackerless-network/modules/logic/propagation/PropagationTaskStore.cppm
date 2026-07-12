@@ -5,12 +5,15 @@
 module;
 
 #include <chrono>
+#include <cstddef>
 #include <optional>
 #include <set>
 #include <string>
-#include "packages/network/protos/NetworkRpc.pb.h"
+#include <vector>
 
 export module streamr.trackerlessnetwork.PropagationTaskStore;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.dht.Identifiers;
 import streamr.trackerlessnetwork.FifoMapWithTTL;

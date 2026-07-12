@@ -7,9 +7,10 @@ module;
 #include <optional>
 #include <string>
 #include <boost/algorithm/hex.hpp>
-#include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.Utils;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.dht.Identifiers;
 import streamr.trackerlessnetwork.DuplicateMessageDetector;

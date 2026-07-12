@@ -22,6 +22,7 @@ module;
 
 #include <coroutine> // IWYU pragma: keep
 
+#include <ranges>
 #include <google/protobuf/any.pb.h>
 
 export module streamr.trackerlessnetwork.PeerDescriptorStoreManager;

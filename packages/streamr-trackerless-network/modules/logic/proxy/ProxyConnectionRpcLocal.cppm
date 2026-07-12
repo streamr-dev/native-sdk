@@ -7,11 +7,18 @@ module;
 // that defines OR instantiates a coroutine; it cannot arrive through
 // an imported BMI.
 #include <coroutine> // IWYU pragma: keep
-
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
+#include <map>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 export module streamr.trackerlessnetwork.ProxyConnectionRpcLocal;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.trackerlessnetwork.NetworkRpcServer;

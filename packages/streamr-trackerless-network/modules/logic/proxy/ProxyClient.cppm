@@ -8,19 +8,27 @@ module;
 // an imported BMI.
 #include <coroutine> // IWYU pragma: keep
 
+#include <algorithm>
+#include <cstddef>
 #include <exception>
 #include <map>
+#include <memory>
 #include <optional>
 #include <random>
+#include <ranges>
+#include <stdexcept>
 #include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 // Textual: entities reached only through an imported module's global
 // module fragment are not reliably reachable; this unit's code calls
 // streamr::utils::blockingWait and std::mt19937 directly. (The former
 // header received both transitively from the headers it included.)
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.ProxyClient;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.dht.DhtCallContext;

@@ -11,6 +11,7 @@ module;
 #include <cstddef>
 #include <map>
 #include <mutex>
+#include <ranges>
 #include <string>
 #include <tuple>
 #include <utility>

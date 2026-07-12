@@ -10,10 +10,12 @@ module;
 // translation unit; it cannot arrive through an imported BMI.
 #include <coroutine> // IWYU pragma: keep
 
+#include <cstddef>
 #include <memory>
 #include <optional>
+#include <string>
+#include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
 
 export module streamr.trackerlessnetwork.DhtNodeDiscoveryLayer;
 

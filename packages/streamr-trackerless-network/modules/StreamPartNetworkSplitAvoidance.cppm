@@ -28,6 +28,7 @@ module;
 #include <vector>
 
 #include <coroutine> // IWYU pragma: keep
+#include <ranges>
 
 export module streamr.trackerlessnetwork.StreamPartNetworkSplitAvoidance;
 
