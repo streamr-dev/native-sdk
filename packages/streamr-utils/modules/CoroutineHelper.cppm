@@ -44,6 +44,7 @@ using folly::coro::CancellableAsyncScope;
 using folly::coro::co_invoke;
 using folly::coro::collectAll;
 using folly::coro::collectAllRange;
+using folly::coro::collectAllTryRange;
 using folly::coro::detachOnCancel;
 using folly::coro::Future;
 using folly::coro::makePromiseContract;

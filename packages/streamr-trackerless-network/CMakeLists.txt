@@ -175,6 +175,13 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/NumberPairTest.cpp
         test/unit/StreamPartIdToDataKeyTest.cpp
         test/unit/TemporaryConnectionRpcLocalTest.cpp
+        test/unit/HandshakeRpcLocalTest.cpp
+        test/unit/HandshakeRpcRemoteTest.cpp
+        test/unit/HandshakerTest.cpp
+        test/unit/HandshakesTest.cpp
+        test/unit/NeighborFinderTest.cpp
+        test/unit/NeighborUpdateRpcLocalTest.cpp
+        test/unit/NeighborUpdateRpcRemoteTest.cpp
     )
 
     target_include_directories(streamr-trackerless-network-test-unit

@@ -34,6 +34,9 @@ using ::dht::PeerDescriptor;
 using ContentDeliveryRpcClient =
     streamr::protorpc::ContentDeliveryRpcClient<DhtCallContext>;
 class ContentDeliveryRpcRemote : public RpcRemote<ContentDeliveryRpcClient> {
+private:
+    std::optional<int64_t> rtt;
+
 public:
     ContentDeliveryRpcRemote(
         PeerDescriptor localPeerDescriptor, // NOLINT
@@ -45,6 +48,10 @@ public:
               std::move(remotePeerDescriptor),
               client,
               timeout) {}
+
+    void setRtt(int64_t rttMilliseconds) { this->rtt = rttMilliseconds; }
+
+    [[nodiscard]] std::optional<int64_t> getRtt() const { return this->rtt; }
 
     folly::coro::Task<void> sendStreamMessage(StreamMessage msg) {
         auto options = this->formDhtRpcOptions({});
