@@ -4,12 +4,16 @@
 module;
 
 #include <chrono>
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <mutex>
 #include <optional>
 #include <ranges>
-#include "packages/network/protos/NetworkRpc.pb.h"
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 export module streamr.trackerlessnetwork.FifoMapWithTTL;
 

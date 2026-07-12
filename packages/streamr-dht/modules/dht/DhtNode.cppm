@@ -803,6 +803,18 @@ public:
         co_return co_await rpcRemote.storeData(key, data);
     }
 
+    // TS deleteDataFromDht: a DELETE_DATA recursive operation.
+    folly::coro::Task<void> deleteDataFromDht(
+        DhtAddress key, bool waitForCompletion) {
+        if (!this->abortController.getSignal().aborted) {
+            co_await this->recursiveOperationManager->execute(
+                std::move(key),
+                RecursiveOperation::DELETE_DATA,
+                std::nullopt,
+                waitForCompletion);
+        }
+    }
+
     folly::coro::Task<std::vector<DataEntry>> fetchDataFromDht(
         const DhtAddress& key) {
         co_return co_await this

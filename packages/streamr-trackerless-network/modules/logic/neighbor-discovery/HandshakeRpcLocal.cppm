@@ -16,15 +16,18 @@ module;
 // translation unit; it cannot arrive through an imported BMI.
 #include <coroutine> // IWYU pragma: keep
 
+#include <cstddef>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.HandshakeRpcLocal;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.utils.GuardedAsyncScope;

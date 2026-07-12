@@ -9,12 +9,15 @@ module;
 // translation unit; it cannot arrive through an imported BMI.
 #include <coroutine> // IWYU pragma: keep
 
+#include <chrono>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.NeighborUpdateRpcRemote;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.trackerlessnetwork.NetworkRpcClient;

@@ -7,13 +7,17 @@
 module;
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <ranges>
 #include <set>
+#include <string>
+#include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.NeighborUpdateRpcLocal;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;
 import streamr.trackerlessnetwork.NeighborFinder;

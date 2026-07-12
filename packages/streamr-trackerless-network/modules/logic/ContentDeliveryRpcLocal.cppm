@@ -3,12 +3,14 @@
 // (MODERNIZATION.md Phase 2.6): this file is now the source of truth.
 module;
 
+#include <functional>
 #include <optional>
-
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
+#include <string>
+#include <utility>
 
 export module streamr.trackerlessnetwork.ContentDeliveryRpcLocal;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.trackerlessnetwork.NetworkRpcServer;
 import streamr.dht.DhtCallContext;

@@ -12,15 +12,18 @@ module;
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
 
 export module streamr.trackerlessnetwork.Handshaker;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;

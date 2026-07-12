@@ -5,12 +5,15 @@ module;
 
 // Coroutine definitions need std::coroutine_traits declared in THIS
 // translation unit; it cannot arrive through an imported BMI.
+#include <chrono>
 #include <coroutine> // IWYU pragma: keep
-
-#include "packages/dht/protos/DhtRpc.pb.h"
-#include "packages/network/protos/NetworkRpc.pb.h"
+#include <optional>
+#include <string>
+#include <utility>
 
 export module streamr.trackerlessnetwork.ProxyConnectionRpcRemote;
+
+import streamr.trackerlessnetwork.protos;
 
 import streamr.utils.CoroutineHelper;
 import streamr.trackerlessnetwork.NetworkRpcClient;
