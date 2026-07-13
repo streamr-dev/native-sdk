@@ -2,7 +2,7 @@
 
 set -e
 
-FILES=$(find . -type d \( -name src -o -name include -o -name test \) ! -path '*/build/*' ! -path '*/android/*' ! -path '*/android-library-module/*' ! -path '*/ios/*' ! -path '*/proto/*' -print0 | xargs -0 -I{} find {} -type f \( -name "*.hpp" -o -name "*.cpp" \) -print0 | xargs -0 echo)
+FILES=$(find . -type d \( -name src -o -name include -o -name test \) ! -path '*/build/*' ! -path '*/android/*' ! -path '*/android-library-module/*' ! -path '*/ios/*' ! -path '*/proto/*' ! -path '*/node_modules/*' -print0 | xargs -0 -I{} find {} -type f \( -name "*.hpp" -o -name "*.cpp" \) ! -path '*/node_modules/*' -print0 | xargs -0 echo)
 # Compile database: the standalone build dir when present, else the root
 # tree's (the Linux CI legs skip the standalone builds — MODERNIZATION.md
 # "After the consolidation: CI speed" — and lint against the root tree,
