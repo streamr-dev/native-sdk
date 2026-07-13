@@ -194,6 +194,9 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/ExternalNetworkRpcTest.cpp
         test/unit/ProxyConnectionsTest.cpp
         test/unit/ProxyAndFullNodeTest.cpp
+        test/unit/WebsocketFullNodeNetworkTest.cpp
+        test/unit/WebrtcFullNodeNetworkTest.cpp
+        test/unit/ContentDeliveryLayerNodeRealConnectionsTest.cpp
     )
 
     target_include_directories(streamr-trackerless-network-test-unit
@@ -222,6 +225,27 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
      add_executable(streamr-trackerless-network-test-integration
          test/integration/ProxyClientTsIntegrationTest.cpp
      )
+
+    # C++<->TS stream interop (milestone C exit criterion): drives the
+    # pinned @streamr/trackerless-network npm package in a child node
+    # process (test/ts-interop/fullNode.js). Skips when no node runtime
+    # >= 20 is available.
+    add_executable(streamr-trackerless-network-test-ts-interop
+        test/ts-interop/TsInteropStreamTest.cpp
+    )
+    target_compile_definitions(streamr-trackerless-network-test-ts-interop
+        PRIVATE TS_INTEROP_HARNESS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test/ts-interop"
+    )
+    streamr_enable_imports(streamr-trackerless-network-test-ts-interop)
+    target_link_libraries(streamr-trackerless-network-test-ts-interop
+        PUBLIC streamr-trackerless-network
+        PUBLIC streamr::streamr-dht
+        PUBLIC streamr::streamr-logger
+        PUBLIC streamr::streamr-utils
+        PUBLIC streamr::streamr-proto-rpc
+        PUBLIC GTest::gtest
+        PUBLIC streamr-trackerless-network-test-main
+    )
      # The test imports modules, so its source needs module dependency
      # scanning; imported modules are usable only by DIRECT consumers, so
      # every directly-imported module is linked here.

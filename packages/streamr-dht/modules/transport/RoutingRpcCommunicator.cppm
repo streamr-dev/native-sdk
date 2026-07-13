@@ -122,10 +122,6 @@ public:
     // straggler request drained that late runs against destroyed members
     // and a possibly-destroyed transport (observed as the Layer0
     // end-to-end teardown SIGSEGV, macOS crash reports 2026-07-11).
-    [[nodiscard]] const ServiceID& getOwnServiceId() const {
-        return this->ownServiceId;
-    }
-
     ~RoutingRpcCommunicator() { this->drainAsyncTasks(); }
 
     RoutingRpcCommunicator(const RoutingRpcCommunicator&) = delete;
