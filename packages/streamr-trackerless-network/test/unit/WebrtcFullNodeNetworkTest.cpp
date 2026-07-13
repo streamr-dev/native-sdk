@@ -50,7 +50,9 @@ namespace {
 // down until the accept path is offloaded — see the follow-up task.
 constexpr size_t numOfNodes = 8;
 constexpr uint16_t entryPointPort = 14444;
-constexpr auto neighborTimeout = std::chrono::seconds(30);
+// Generous for the 3-core CI runners: the TS test tolerates up to its
+// 220 s jest budget for convergence.
+constexpr auto neighborTimeout = std::chrono::seconds(90);
 constexpr auto messageTimeout = std::chrono::seconds(15);
 
 inline PeerDescriptor createMockPeerDescriptor() {
@@ -135,14 +137,21 @@ protected:
     // still in TIME_WAIT), gtest still runs TearDown() with later
     // members never assigned.
     void TearDown() override {
+        // TS parity (Promise.all in afterEach) and a hard requirement on
+        // slow runners: stopping the stacks SEQUENTIALLY after a failed
+        // convergence stacks up each node's bounded stop timeouts into
+        // many minutes (seen as a 19-minute TearDown on the linux-arm64
+        // CI runner); concurrent stops bound it by the slowest stack.
+        std::vector<folly::coro::Task<void>> stops;
         for (const auto& node : this->nodes) {
             if (node) {
-                blockingWait(node->stop());
+                stops.push_back(node->stop());
             }
         }
         if (this->entryPoint) {
-            blockingWait(this->entryPoint->stop());
+            stops.push_back(this->entryPoint->stop());
         }
+        blockingWait(folly::coro::collectAllRange(std::move(stops)));
     }
 };
 
