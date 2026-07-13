@@ -1,0 +1,10 @@
+{
+    "name": "streamr-trackerless-network-ts-interop-harness",
+    "private": true,
+    "description": "TS side of the C++<->TS stream interop test: the pinned @streamr/trackerless-network from npm, driven by fullNode.js",
+    "dependencies": {
+        "@streamr/dht": "103.8.0-rc.3",
+        "@streamr/trackerless-network": "103.8.0-rc.3",
+        "@streamr/utils": "103.8.0-rc.3"
+    }
+}

@@ -47,8 +47,15 @@ fi
 # unification false positives (generated protobuf setter and
 # std::string member calls on own locals); the compiler builds and
 # runs all three.
-TESTFILES=$(find test -type f \( -name "*.hpp" -o -name "*.cpp" \) -not -path '*/ts-integration/*' | sort | uniq | tr '\n' ' ')
-TIDY_TESTFILES=$(echo "$TESTFILES" | tr ' ' '\n' | grep -v 'test/unit/ContentDeliveryRpcRemoteTest.cpp' | grep -v 'test/unit/TemporaryConnectionRpcLocalTest.cpp' | grep -v 'test/unit/HandshakerTest.cpp' | grep -v 'test/unit/ContentDeliveryLayerNodeTest.cpp' | grep -v 'test/unit/ContentDeliveryManagerTest.cpp' | grep -v 'test/unit/NetworkNodeTest.cpp' | grep -v 'test/unit/ProxyAndFullNodeTest.cpp' | grep -v 'test/unit/ProxyConnectionsTest.cpp' | tr '\n' ' ')
+# TsInteropStreamTest.cpp (phase C8) trips the same std-type
+# unification false positives on its own std::string locals (like the
+# dht package's TsInteropTest.cpp); the compiler builds and runs it.
+# WebsocketFullNodeNetworkTest.cpp, WebrtcFullNodeNetworkTest.cpp and
+# ContentDeliveryLayerNodeRealConnectionsTest.cpp (phase C8) trip the
+# generated-protobuf-setter variant (set_content ->
+# ArenaStringPtr::SetBytes); the compiler builds and runs all three.
+TESTFILES=$(find test -type f \( -name "*.hpp" -o -name "*.cpp" \) -not -path '*/ts-integration/*' -not -path '*/node_modules/*' | sort | uniq | tr '\n' ' ')
+TIDY_TESTFILES=$(echo "$TESTFILES" | tr ' ' '\n' | grep -v 'test/unit/ContentDeliveryRpcRemoteTest.cpp' | grep -v 'test/unit/TemporaryConnectionRpcLocalTest.cpp' | grep -v 'test/unit/HandshakerTest.cpp' | grep -v 'test/unit/ContentDeliveryLayerNodeTest.cpp' | grep -v 'test/unit/ContentDeliveryManagerTest.cpp' | grep -v 'test/unit/NetworkNodeTest.cpp' | grep -v 'test/unit/ProxyAndFullNodeTest.cpp' | grep -v 'test/unit/ProxyConnectionsTest.cpp' | grep -v 'test/ts-interop/TsInteropStreamTest.cpp' | grep -v 'test/unit/WebsocketFullNodeNetworkTest.cpp' | grep -v 'test/unit/WebrtcFullNodeNetworkTest.cpp' | grep -v 'test/unit/ContentDeliveryLayerNodeRealConnectionsTest.cpp' | tr '\n' ' ')
 echo "Running clangd-tidy on $TIDY_TESTFILES"
 
 clangd-tidy -p "$COMPILE_DB" $TIDY_TESTFILES < /dev/null
