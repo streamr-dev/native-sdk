@@ -17,6 +17,7 @@ module;
 
 #include <chrono>
 #include <cstddef>
+#include <deque>
 #include <functional>
 #include <map>
 #include <memory>
@@ -116,6 +117,16 @@ private:
     std::recursive_mutex mutex;
     std::map<std::string, std::shared_ptr<RecursiveOperationSession>>
         ongoingSessions;
+    // Completed sessions are RETIRED here instead of dying at the end of
+    // execute(): a routed message for the session may still be mid-flight
+    // through the session communicator's transport handler on another
+    // thread (or the execute() continuation may run inline inside that
+    // very handler), and destroying the session there is a
+    // use-after-free. The bounded ring defers destruction by
+    // retiredSessionCapacity completed sessions — long past any handler
+    // invocation. Guarded by this->mutex.
+    static constexpr size_t retiredSessionCapacity = 16;
+    std::deque<std::shared_ptr<RecursiveOperationSession>> retiredSessions;
     bool stopped = false;
     std::unique_ptr<RecursiveOperationRpcLocal> rpcLocal;
     // sendResponse()'s per-session communicators whose internal scopes
@@ -459,6 +470,19 @@ public:
                 {this->options.localPeerDescriptor},
                 dataEntries,
                 true);
+            // TS returns without stopping the session; its GC keeps the
+            // still-subscribed transport listener alive. Here the session
+            // dies with this frame, so the listeners MUST be detached
+            // first — skipping this leaves a dangling Message handler on
+            // the transport (use-after-free on the next routed message).
+            session->stop();
+            {
+                std::scoped_lock lock(this->mutex);
+                this->retiredSessions.push_back(session);
+                while (this->retiredSessions.size() > retiredSessionCapacity) {
+                    this->retiredSessions.pop_front();
+                }
+            }
             co_return session->getResults();
         }
         {
@@ -504,6 +528,13 @@ public:
             this->ongoingSessions.erase(session->getId());
         }
         session->stop();
+        {
+            std::scoped_lock lock(this->mutex);
+            this->retiredSessions.push_back(session);
+            while (this->retiredSessions.size() > retiredSessionCapacity) {
+                this->retiredSessions.pop_front();
+            }
+        }
         co_return session->getResults();
     }
 
@@ -515,6 +546,7 @@ public:
                 session->stop();
             }
             this->ongoingSessions.clear();
+            this->retiredSessions.clear();
         }
         // Drain the detached response sends BEFORE destroying the retired
         // communicators: a draining task may still retire its communicator

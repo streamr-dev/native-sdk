@@ -70,8 +70,9 @@ class ProxyConnectionRpcLocal
       public ProxyConnectionRpc {
 private:
     struct ProxyConnection {
-        ProxyDirection
-            direction; // Direction is from the client's point of view
+        // Direction is from the client's point of view; absent =
+        // bidirectional (TS parity).
+        std::optional<ProxyDirection> direction;
         EthereumAddress userId;
         ContentDeliveryRpcRemote remote;
     };
@@ -91,7 +92,8 @@ private:
     std::vector<DhtAddress> getSubscribers() const {
         return connections | std::views::keys |
             std::views::filter([&](const auto& nodeId) {
-                   return connections.at(nodeId)->direction ==
+                   return !connections.at(nodeId)->direction.has_value() ||
+                       connections.at(nodeId)->direction ==
                        ProxyDirection::SUBSCRIBE;
                }) |
             std::ranges::to<std::vector>();
@@ -166,7 +168,9 @@ public:
 
         this->connections[remoteNodeId] =
             std::make_shared<ProxyConnection>(ProxyConnection{
-                .direction = request.direction(),
+                .direction = request.has_direction()
+                    ? std::optional(request.direction())
+                    : std::nullopt,
                 .userId = toEthereumAddress(
                     BinaryUtils::binaryStringToHex(request.userid(), true)),
                 .remote = std::move(ContentDeliveryRpcRemote(

@@ -186,6 +186,14 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
         test/unit/ContentDeliveryManagerTest.cpp
         test/unit/ContentDeliveryLayerNodeLayer1Test.cpp
         test/unit/PropagationScaleTest.cpp
+        test/unit/NetworkNodeTest.cpp
+        test/unit/NetworkRpcTest.cpp
+        test/unit/NetworkNodeIntegrationTest.cpp
+        test/unit/NetworkStackTest.cpp
+        test/unit/NodeInfoRpcTest.cpp
+        test/unit/ExternalNetworkRpcTest.cpp
+        test/unit/ProxyConnectionsTest.cpp
+        test/unit/ProxyAndFullNodeTest.cpp
     )
 
     target_include_directories(streamr-trackerless-network-test-unit

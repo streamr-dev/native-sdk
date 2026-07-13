@@ -150,6 +150,10 @@ struct DhtNodeOptions {
     std::optional<PeerDescriptor> peerDescriptor;
     std::vector<PeerDescriptor> entryPoints;
 
+    // Whether remote peers may mark their connection to us as private
+    // (proxy clients do); passed through to the owned ConnectionManager.
+    // TS NetworkStack sets this from acceptProxyConnections.
+    bool allowIncomingPrivateConnections = false;
     // Connectivity options for the owned-ConnectionManager path (TS
     // DhtNodeOptions). websocketServerEnableTls/TLS certificates and the
     // GeoIP region fallback stay deferred (milestones D/E); region defaults
@@ -551,7 +555,9 @@ public:
                         -> std::shared_ptr<DefaultConnectorFacade> {
                         return std::make_shared<DefaultConnectorFacade>(
                             facadeOptions);
-                    }});
+                    },
+                    .allowIncomingPrivateConnections =
+                        this->options.allowIncomingPrivateConnections});
             this->ownedConnectionManager->start();
             this->transportPtr = this->ownedConnectionManager.get();
             this->connectionsView = this->ownedConnectionManager.get();
@@ -926,6 +932,14 @@ public:
 
     [[nodiscard]] bool hasJoined() {
         return this->peerDiscovery->isJoinCalled();
+    }
+
+    // The transport the node runs on (the owned ConnectionManager on
+    // the no-transport-given path); TS DhtNode.getTransport().
+    [[nodiscard]] Transport* getTransport() { return this->transportPtr; }
+
+    [[nodiscard]] ConnectionLocker* getConnectionLocker() {
+        return this->connectionLocker;
     }
 
     [[nodiscard]] ConnectionsView* getConnectionsView() {

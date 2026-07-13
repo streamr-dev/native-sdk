@@ -124,9 +124,11 @@ struct StreamPartitionInfo {
 
 class ContentDeliveryManager
     : public EventEmitter<ContentDeliveryManagerEvents> {
-private:
+public:
     // The TS StreamPartDelivery union: proxied=false carries the layer
-    // objects, proxied=true carries the client.
+    // objects, proxied=true carries the client. Public: the proxy
+    // end-to-end tests (and diagnostics) inspect it via
+    // getStreamPartDelivery().
     struct StreamPartDelivery {
         bool proxied = false;
         std::function<void(const StreamMessage&)> broadcast;
@@ -141,6 +143,7 @@ private:
         std::shared_ptr<ProxyClient> client;
     };
 
+private:
     ContentDeliveryManagerOptions options;
     ControlLayerNode* controlLayerNode = nullptr;
     Transport* transport = nullptr;
@@ -186,6 +189,22 @@ public:
             }
             SLogger::trace("Destroying ContentDeliveryManager");
             this->destroyed = true;
+        }
+        // Signal every part's split-avoidance and reconnect loops to
+        // abort BEFORE joining the scheduled tasks: close() joins the
+        // avoidNetworkSplit/reconnect coroutines, and without the abort
+        // they run their full exponential backoff (~a minute per part)
+        // before finishing.
+        {
+            std::scoped_lock lock(this->mutex);
+            for (const auto& [id, part] : this->streamParts) {
+                if (part->networkSplitAvoidance) {
+                    part->networkSplitAvoidance->destroy();
+                }
+                if (part->streamPartReconnect) {
+                    part->streamPartReconnect->destroy();
+                }
+            }
         }
         this->joinScope.close();
         std::vector<std::shared_ptr<StreamPartDelivery>> parts;
@@ -359,7 +378,7 @@ public:
     folly::coro::Task<void> setProxies(
         StreamPartID streamPartId,
         std::vector<PeerDescriptor> nodes,
-        ProxyDirection direction,
+        std::optional<ProxyDirection> direction,
         EthereumAddress userId,
         std::optional<size_t> connectionCount = std::nullopt) {
         // TS TODO preserved: explicit default value for
@@ -463,6 +482,13 @@ public:
         return it != this->streamParts.end() && it->second->proxied &&
             (!direction.has_value() ||
              it->second->client->getDirection() == direction.value());
+    }
+
+    [[nodiscard]] std::shared_ptr<StreamPartDelivery> getStreamPartDelivery(
+        const StreamPartID& streamPartId) const {
+        std::scoped_lock lock(this->mutex);
+        const auto it = this->streamParts.find(streamPartId);
+        return it != this->streamParts.end() ? it->second : nullptr;
     }
 
     [[nodiscard]] bool hasStreamPart(const StreamPartID& streamPartId) const {
