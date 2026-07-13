@@ -78,13 +78,21 @@ public:
     }
 
     void destroy() {
-        transport.off<transportevents::Message>(this->onMessageHandlerToken);
+        // The waiting variant: the owner destroys this communicator right
+        // after destroy() returns, and a Message/Disconnected handler
+        // mid-invocation on another thread would then dereference freed
+        // memory. offAndWait() returns only once no such invocation is
+        // running (unless destroy() itself is called from inside a
+        // handler invocation, where waiting could deadlock and the
+        // historical non-blocking semantics are kept).
+        transport.offAndWait<transportevents::Message>(
+            this->onMessageHandlerToken);
         // Also detach the Disconnected listener: leaving it registered
         // dangles `this` on the transport after destruction, and a live
         // listener could still add client errors while a retired
         // communicator waits to be destroyed (see
         // RecursiveOperationManager::retiredSessionCommunicators).
-        transport.off<transportevents::Disconnected>(
+        transport.offAndWait<transportevents::Disconnected>(
             this->onDisconnectedHandlerToken);
     }
     using RpcCommunicator::registerRpcMethod;

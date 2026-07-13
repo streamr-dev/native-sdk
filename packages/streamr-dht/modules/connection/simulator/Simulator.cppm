@@ -30,6 +30,7 @@ module;
 #include <condition_variable>
 #include <cstddef>
 #include <cstdint>
+#include <exception>
 #include <functional>
 #include <map>
 #include <memory>
@@ -301,16 +302,30 @@ private:
             this->inFlightOperations++;
             lock.unlock();
             executor->add([this, operation]() {
-                switch (operation.type) {
-                    case OperationType::CONNECT:
-                        this->executeConnectOperation(operation);
-                        break;
-                    case OperationType::CLOSE:
-                        this->executeCloseOperation(operation);
-                        break;
-                    case OperationType::SEND:
-                        this->executeSendOperation(operation);
-                        break;
+                // The decrement below must run even if the call-out
+                // throws: folly's SerialExecutor swallows task exceptions
+                // (SerialExecutor::worker invokeCatchingExns), so a
+                // propagated exception would silently skip the decrement
+                // and park stop()'s drain-wait forever.
+                try {
+                    switch (operation.type) {
+                        case OperationType::CONNECT:
+                            this->executeConnectOperation(operation);
+                            break;
+                        case OperationType::CLOSE:
+                            this->executeCloseOperation(operation);
+                            break;
+                        case OperationType::SEND:
+                            this->executeSendOperation(operation);
+                            break;
+                    }
+                } catch (const std::exception& e) {
+                    SLogger::error(
+                        "Simulator operation threw an exception: " +
+                        std::string(e.what()));
+                } catch (...) {
+                    SLogger::error(
+                        "Simulator operation threw a non-std exception");
                 }
                 // Notify under the lock: once stop()'s drain-wait sees the
                 // count hit zero the Simulator may be destroyed, so this

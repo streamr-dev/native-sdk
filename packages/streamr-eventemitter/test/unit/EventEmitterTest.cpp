@@ -1,3 +1,4 @@
+#include <atomic>
 #include <chrono>
 #include <cstddef>
 #include <future>
@@ -508,4 +509,133 @@ TEST_F(EventEmitterTest, TestEventMethod) {
 
     eventEmitter.emit<Greeting>("Hello, world!");
     ASSERT_EQ(promise1.get_future().get(), "Hello, world!");
+}
+
+// --- Regression tests for the destroy-vs-in-flight-handler race -------------
+// An owner that removes a listener and then frees the state its handler
+// captured must be able to rely on the handler no longer running:
+// offAndWait()/removeAllListenersAndWait() wait out an invocation in
+// flight on another thread — but only when called from OUTSIDE any
+// handler invocation: handlers legitimately remove each other's listeners
+// from within handler context, and waiting there deadlocks (two threads,
+// each inside a handler the other wants removed, waited on each other
+// forever in the Layer1 scale tests). Plain off()/removeAllListeners()
+// never wait.
+
+constexpr int inFlightHandlerDurationMs = 300;
+constexpr int deadlockWatchdogSeconds = 20;
+
+TEST_F(EventEmitterTest, OffWaitsForInFlightHandlerBeforeOwnerFreesState) {
+    struct TestEvent : Event<> {};
+    using Events = std::tuple<TestEvent>;
+
+    EventEmitter<Events> eventEmitter;
+
+    std::promise<void> handlerEntered;
+    // Stands in for owner state the handler dereferences right up to its
+    // last statement; pre-wait off() semantics let the owner free it while
+    // the handler was still running (use-after-free in real owners).
+    std::atomic<bool> handlerFinished{false};
+
+    auto token = eventEmitter.on<TestEvent>(
+        [&handlerEntered, &handlerFinished]() -> void {
+            handlerEntered.set_value();
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(inFlightHandlerDurationMs));
+            handlerFinished.store(true);
+        });
+
+    std::thread emitterThread(
+        [&eventEmitter]() { eventEmitter.emit<TestEvent>(); });
+
+    handlerEntered.get_future().wait();
+    eventEmitter.offAndWait<TestEvent>(token);
+    // offAndWait() returned from a non-handler thread: the in-flight
+    // invocation must be complete, so freeing the captured state is now
+    // safe.
+    EXPECT_EQ(handlerFinished.load(), true);
+
+    emitterThread.join();
+}
+
+TEST_F(EventEmitterTest, RemoveAllListenersWaitsForInFlightHandler) {
+    struct TestEvent : Event<> {};
+    using Events = std::tuple<TestEvent>;
+
+    EventEmitter<Events> eventEmitter;
+
+    std::promise<void> handlerEntered;
+    std::atomic<bool> handlerFinished{false};
+
+    eventEmitter.on<TestEvent>([&handlerEntered, &handlerFinished]() -> void {
+        handlerEntered.set_value();
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(inFlightHandlerDurationMs));
+        handlerFinished.store(true);
+    });
+
+    std::thread emitterThread(
+        [&eventEmitter]() { eventEmitter.emit<TestEvent>(); });
+
+    handlerEntered.get_future().wait();
+    eventEmitter.removeAllListenersAndWait();
+    EXPECT_EQ(handlerFinished.load(), true);
+
+    emitterThread.join();
+}
+
+TEST_F(EventEmitterTest, HandlersRemovingEachOtherAcrossThreadsDoNotDeadlock) {
+    // The exact shape that deadlocked the Layer1 scale tests: thread A is
+    // inside the Data handler and off()s the Disconnected listener while
+    // thread B is inside the Disconnected handler and off()s the Data
+    // listener. off() from handler context must not block on the foreign
+    // in-flight invocation.
+    struct EventA : Event<> {};
+    struct EventB : Event<> {};
+    using Events = std::tuple<EventA, EventB>;
+
+    EventEmitter<Events> eventEmitter;
+
+    std::atomic<bool> handlerAStarted{false};
+    std::atomic<bool> handlerBStarted{false};
+    HandlerToken tokenA;
+    HandlerToken tokenB;
+
+    tokenA = eventEmitter.on<EventA>(
+        [&eventEmitter, &handlerAStarted, &handlerBStarted, &tokenB]() -> void {
+            handlerAStarted.store(true);
+            while (!handlerBStarted.load()) {
+                std::this_thread::yield();
+            }
+            eventEmitter.offAndWait<EventB>(tokenB);
+        });
+    tokenB = eventEmitter.on<EventB>(
+        [&eventEmitter, &handlerAStarted, &handlerBStarted, &tokenA]() -> void {
+            handlerBStarted.store(true);
+            while (!handlerAStarted.load()) {
+                std::this_thread::yield();
+            }
+            eventEmitter.offAndWait<EventA>(tokenA);
+        });
+
+    auto futureA = std::async(
+        std::launch::async, [&eventEmitter]() { eventEmitter.emit<EventA>(); });
+    auto futureB = std::async(
+        std::launch::async, [&eventEmitter]() { eventEmitter.emit<EventB>(); });
+
+    // Both handlers are guaranteed concurrently in flight (each spins for
+    // the other's start flag), so pre-fix both off() calls waited forever.
+    ASSERT_EQ(
+        futureA.wait_for(std::chrono::seconds(deadlockWatchdogSeconds)),
+        std::future_status::ready)
+        << "deadlock: off() called from inside a handler blocked on a"
+           " foreign in-flight invocation";
+    ASSERT_EQ(
+        futureB.wait_for(std::chrono::seconds(deadlockWatchdogSeconds)),
+        std::future_status::ready)
+        << "deadlock: off() called from inside a handler blocked on a"
+           " foreign in-flight invocation";
+
+    ASSERT_EQ(eventEmitter.listenerCount<EventA>(), 0);
+    ASSERT_EQ(eventEmitter.listenerCount<EventB>(), 0);
 }
