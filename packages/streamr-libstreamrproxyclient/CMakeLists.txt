@@ -66,14 +66,18 @@ endif()
 if(NOT TARGET streamr::streamr-utils)
     find_package(streamr-utils CONFIG REQUIRED)
 endif()
+if(NOT TARGET streamr::streamr-eventemitter)
+    find_package(streamr-eventemitter CONFIG REQUIRED)
+endif()
 find_package(ada CONFIG REQUIRED)
 
 target_include_directories(streamrproxyclient PUBLIC include)
-target_link_libraries(streamrproxyclient 
+target_link_libraries(streamrproxyclient
     PRIVATE streamr::streamr-trackerless-network
     PRIVATE streamr::streamr-logger
     PRIVATE streamr::streamr-dht
     PRIVATE streamr::streamr-utils
+    PRIVATE streamr::streamr-eventemitter
     PRIVATE ada::ada
     PRIVATE Folly::folly
 )
@@ -125,6 +129,37 @@ if (NOT IOS)
         PRIVATE GTest::gtest_main
     )
 
+    add_executable(streamr-streamrnode-test-integration test/integration/StreamrNodeTest.cpp)
+    target_link_directories(streamr-streamrnode-test-integration PUBLIC ${SHAREDLIB_OUTPUT_DIRECTORY})
+
+    target_include_directories(streamr-streamrnode-test-integration PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
+
+    target_link_libraries(streamr-streamrnode-test-integration
+        PRIVATE streamrproxyclient
+        PRIVATE GTest::gtest
+        PRIVATE GTest::gtest_main
+    )
+
+    # streamrNode* C API <-> TS network end-to-end test (milestone D):
+    # drives the pinned @streamr/trackerless-network npm package in a
+    # child node process (test/ts-interop/entryPointNode.js). Skips when
+    # no node runtime >= 20 is available. Like the trackerless-network
+    # interop test this is a manual-run target (not registered with
+    # ctest): it downloads npm packages on first run.
+    add_executable(streamr-streamrnode-test-ts-interop test/ts-interop/StreamrNodeTsInteropTest.cpp)
+    target_compile_definitions(streamr-streamrnode-test-ts-interop
+        PRIVATE TS_INTEROP_HARNESS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test/ts-interop"
+    )
+    target_link_directories(streamr-streamrnode-test-ts-interop PUBLIC ${SHAREDLIB_OUTPUT_DIRECTORY})
+
+    target_include_directories(streamr-streamrnode-test-ts-interop PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
+
+    target_link_libraries(streamr-streamrnode-test-ts-interop
+        PRIVATE streamrproxyclient
+        PRIVATE GTest::gtest
+        PRIVATE GTest::gtest_main
+    )
+
     add_executable(streamr-streamrproxyclient-test-end-to-end test/end-to-end/PublishToTsServerTest.cpp)
     target_link_directories(streamr-streamrproxyclient-test-end-to-end PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
     
@@ -150,6 +185,9 @@ if (NOT IOS)
     if (NOT (${VCPKG_TARGET_TRIPLET} MATCHES "android"))
         include(GoogleTest)
         gtest_discover_tests(streamr-streamrproxyclient-test-integration)
+        # The networked streamrNode* tests need more than the 25 s
+        # default on the 3-core CI runners.
+        gtest_discover_tests(streamr-streamrnode-test-integration PROPERTIES TIMEOUT 600)
         gtest_discover_tests(streamrproxyclient-cpp-wrapper-test)
         # DISABLED: these tests build the whole streamr-dev/network TS
         # monorepo at a 2024 commit (ts-integration/install.sh), which no
@@ -170,8 +208,9 @@ if (NOT IOS)
         #     WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
         #     )
     endif()
-    # Install header to dist/target-triplet
+    # Install headers to dist/target-triplet
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrproxyclient.h
+                  ${CMAKE_CURRENT_SOURCE_DIR}/include/streamrnode.h
             DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/dist/${VCPKG_TARGET_TRIPLET}/include)
 
     # Install library to dist/target-triplet

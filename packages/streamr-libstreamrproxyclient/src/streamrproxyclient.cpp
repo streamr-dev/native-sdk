@@ -1,13 +1,21 @@
-// Implementation of the public C API (streamrproxyclient.h).
+// Implementation of the public C API (streamrproxyclient.h — the proxy
+// client — and streamrnode.h — the full network node; the two APIs
+// share the result registry and the library lifecycle, so they live in
+// one translation unit).
 //
 // CONSOLIDATED (MODERNIZATION.md Phase 2.6 consolidation): the former
 // internal header LibProxyClientApi.hpp was merged into this file and
 // the sibling streamr packages are consumed as C++ modules (import)
 // instead of textual includes. Only third-party libraries, the standard
-// library and the public C API header remain textual includes.
-#include "streamrproxyclient.h"
+// library and the public C API headers remain textual includes.
+
+// Coroutine definitions need std::coroutine_traits declared in THIS
+// translation unit; it cannot arrive through an imported BMI.
+#include <coroutine> // IWYU pragma: keep
+
 #include <ada.h>
 #include <stdint.h> // NOLINT
+#include <atomic>
 #include <chrono>
 #include <cstdlib>
 #include <map>
@@ -20,17 +28,24 @@
 #include <utility>
 #include <vector>
 #include <folly/Singleton.h>
+#include "streamrnode.h"
 
 import streamr.trackerlessnetwork.protos;
 import streamr.dht.ConnectionManager;
 import streamr.dht.Connectivity;
 import streamr.dht.ConnectorFacade;
+import streamr.dht.DhtNode;
 import streamr.dht.FakeTransport;
 import streamr.dht.Identifiers;
 import streamr.dht.protos;
+import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;
+import streamr.trackerlessnetwork.ContentDeliveryManager;
+import streamr.trackerlessnetwork.NetworkNode;
+import streamr.trackerlessnetwork.NetworkStack;
 import streamr.trackerlessnetwork.ProxyClient;
 import streamr.utils.BinaryUtils;
+import streamr.utils.CoroutineHelper;
 import streamr.utils.EthereumAddress;
 import streamr.utils.SigningUtils;
 import streamr.utils.StreamPartID;
@@ -41,6 +56,7 @@ using ::dht::ConnectivityMethod;
 using ::dht::ConnectivityResponse;
 using ::dht::NodeType;
 using ::dht::PeerDescriptor;
+using streamr::dht::DhtNodeOptions;
 using streamr::dht::Identifiers;
 using streamr::dht::connection::ConnectionManager;
 using streamr::dht::connection::ConnectionManagerOptions;
@@ -49,10 +65,16 @@ using streamr::dht::connection::DefaultConnectorFacadeOptions;
 using streamr::dht::helpers::Connectivity;
 using streamr::dht::transport::FakeEnvironment;
 using streamr::dht::transport::FakeTransport;
+using streamr::eventemitter::HandlerToken;
 using streamr::logger::SLogger;
+using streamr::trackerlessnetwork::ContentDeliveryManagerOptions;
+using streamr::trackerlessnetwork::createNetworkNode;
+using streamr::trackerlessnetwork::NetworkNode;
+using streamr::trackerlessnetwork::NetworkOptions;
 using streamr::trackerlessnetwork::proxy::ProxyClient;
 using streamr::trackerlessnetwork::proxy::ProxyClientOptions;
 using streamr::utils::BinaryUtils;
+using streamr::utils::blockingWait;
 using streamr::utils::EthereumAddress;
 using streamr::utils::SigningUtils;
 using streamr::utils::StreamPartID;
@@ -546,8 +568,12 @@ public:
         return successfullyConnected.size();
     }
 
-    static StreamMessage createStreamMessage(
-        const std::shared_ptr<ProxyClientWrapper>& proxyClient,
+    // Shared by proxyClientPublish and streamrNodePublish: the message
+    // layout and the signature payload are identical for both APIs.
+    static StreamMessage buildStreamMessage(
+        std::string publisherIdHex,
+        const StreamPartID& streamPartID,
+        int32_t sequenceNumber,
         const char* content,
         uint64_t contentLength,
         const char* ethereumPrivateKey) {
@@ -559,9 +585,6 @@ public:
         contentMessage->set_encryptiontype(EncryptionType::NONE);
 
         MessageID messageId;
-        std::string publisherIdHex =
-            proxyClient->getProxyClient()->getLocalEthereumAddress();
-
         if (!publisherIdHex.starts_with("0x")) {
             publisherIdHex = "0x" + publisherIdHex;
         }
@@ -572,9 +595,8 @@ public:
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch())
                 .count());
-        messageId.set_sequencenumber(proxyClient->getNextSequenceNumber());
+        messageId.set_sequencenumber(sequenceNumber);
 
-        auto streamPartID = proxyClient->getProxyClient()->getStreamPartID();
         messageId.set_streampartition(
             static_cast<int32_t>(
                 StreamPartIDUtils::getStreamPartition(streamPartID).value()));
@@ -623,6 +645,21 @@ public:
         }
         return message;
     }
+
+    static StreamMessage createStreamMessage(
+        const std::shared_ptr<ProxyClientWrapper>& proxyClient,
+        const char* content,
+        uint64_t contentLength,
+        const char* ethereumPrivateKey) {
+        return buildStreamMessage(
+            proxyClient->getProxyClient()->getLocalEthereumAddress(),
+            proxyClient->getProxyClient()->getStreamPartID(),
+            proxyClient->getNextSequenceNumber(),
+            content,
+            contentLength,
+            ethereumPrivateKey);
+    }
+
     uint64_t proxyClientPublish(
         const ProxyResult** proxyResult,
         uint64_t clientHandle,
@@ -679,6 +716,626 @@ public:
                     e.what(), ERROR_PROXY_BROADCAST_FAILED, std::nullopt)));
             *proxyResult = addResult(errorsCpp, {});
             return 0;
+        }
+    }
+
+    // --- streamrnode.h implementation (the full network node API; it
+    // --- shares the result registry and helpers of the proxy API) ------
+
+private:
+    class StreamrNodeWrapper {
+    private:
+        uint64_t handle;
+        std::shared_ptr<NetworkNode> networkNode;
+        std::string ownEthereumAddress;
+        std::atomic<int32_t> sequenceNumber = 1;
+        std::atomic<bool> started{false};
+        std::atomic<bool> stopped{false};
+        std::map<uint64_t, HandlerToken> subscriptions;
+        std::mutex subscriptionsMutex;
+
+    public:
+        StreamrNodeWrapper(
+            uint64_t handle,
+            std::shared_ptr<NetworkNode> networkNode,
+            std::string ownEthereumAddress)
+            : handle(handle),
+              networkNode(std::move(networkNode)),
+              ownEthereumAddress(std::move(ownEthereumAddress)) {}
+
+        // NOLINTNEXTLINE(bugprone-exception-escape)
+        ~StreamrNodeWrapper() {
+            try {
+                this->stop();
+            } catch (const std::exception& e) {
+                SLogger::error(
+                    "Exception while stopping streamr node in destructor: " +
+                    std::string(e.what()));
+            }
+        }
+
+        // Idempotent; only ever stops a node that reached started state.
+        void stop() {
+            if (this->started.load() && !this->stopped.exchange(true)) {
+                blockingWait(this->networkNode->stop());
+            }
+        }
+
+        std::shared_ptr<NetworkNode>& getNetworkNode() {
+            return this->networkNode;
+        }
+
+        [[nodiscard]] const std::string& getOwnEthereumAddress() const {
+            return this->ownEthereumAddress;
+        }
+
+        [[nodiscard]] bool isStarted() const { return this->started.load(); }
+        void setStarted() { this->started.store(true); }
+        [[nodiscard]] bool isStopped() const { return this->stopped.load(); }
+        void setStopped() { this->stopped.store(true); }
+
+        int32_t getNextSequenceNumber() {
+            return this->sequenceNumber.fetch_add(1);
+        }
+
+        void addSubscription(uint64_t subscriptionHandle, HandlerToken token) {
+            std::scoped_lock lock(this->subscriptionsMutex);
+            this->subscriptions.emplace(subscriptionHandle, token);
+        }
+
+        std::optional<HandlerToken> takeSubscription(
+            uint64_t subscriptionHandle) {
+            std::scoped_lock lock(this->subscriptionsMutex);
+            auto subscription = this->subscriptions.find(subscriptionHandle);
+            if (subscription == this->subscriptions.end()) {
+                return std::nullopt;
+            }
+            auto token = subscription->second;
+            this->subscriptions.erase(subscription);
+            return token;
+        }
+    };
+
+    std::map<uint64_t, std::shared_ptr<StreamrNodeWrapper>> streamrNodes;
+    std::recursive_mutex streamrNodesMutex;
+
+    std::shared_ptr<StreamrNodeWrapper> findStreamrNode(
+        const ProxyResult** result, uint64_t nodeHandle) {
+        std::scoped_lock lock(this->streamrNodesMutex);
+        auto node = this->streamrNodes.find(nodeHandle);
+        if (node == this->streamrNodes.end()) {
+            *result = addResult(
+                {ErrorCpp(
+                    "Streamr node not found with handle " +
+                        std::to_string(nodeHandle),
+                    ERROR_NODE_NOT_FOUND,
+                    std::nullopt)},
+                {});
+            return nullptr;
+        }
+        return node->second;
+    }
+
+    bool checkStreamrNodeRunning(
+        const ProxyResult** result,
+        const std::shared_ptr<StreamrNodeWrapper>& node) {
+        if (!node->isStarted()) {
+            *result = addResult(
+                {ErrorCpp(
+                    "The streamr node has not been started",
+                    ERROR_NODE_NOT_STARTED,
+                    std::nullopt)},
+                {});
+            return false;
+        }
+        if (node->isStopped()) {
+            *result = addResult(
+                {ErrorCpp(
+                    "The streamr node has been stopped",
+                    ERROR_NODE_STOPPED,
+                    std::nullopt)},
+                {});
+            return false;
+        }
+        return true;
+    }
+
+    std::optional<StreamPartID> parseStreamPartIdChecked(
+        const ProxyResult** result, const char* streamPartId) {
+        try {
+            const auto parsed = StreamPartIDUtils::parse(streamPartId);
+            // Canonicalize (e.g. "#01" becomes "#1"): the delivery layer
+            // keys stream parts by the canonical form derived from the
+            // message's INTEGER partition, so a non-canonical key here
+            // would put the subscription and the publishes of the same
+            // stream part into two different (and thus empty) overlays.
+            return streamr::utils::toStreamPartID(
+                StreamPartIDUtils::getStreamID(parsed),
+                StreamPartIDUtils::getStreamPartition(parsed).value());
+        } catch (const std::invalid_argument& e) {
+            *result = addResult(
+                {ErrorCpp(
+                    e.what(), ERROR_INVALID_STREAM_PART_ID, std::nullopt)},
+                {});
+            return std::nullopt;
+        }
+    }
+
+    // Translates (websocketUrl, ethereumAddress) pairs to peer
+    // descriptors; invalidUrlErrorCode distinguishes the entry-point and
+    // proxy flavors of the same validation failure.
+    std::optional<std::vector<PeerDescriptor>> parsePeerList(
+        const ProxyResult** result,
+        const Proxy* peers,
+        uint64_t numPeers,
+        const char* invalidUrlErrorCode) {
+        std::vector<PeerDescriptor> peerDescriptors;
+        peerDescriptors.reserve(numPeers);
+        for (uint64_t i = 0; i < numPeers; i++) {
+            const auto& peer = peers[i]; // NOLINT
+            try {
+                peerDescriptors.push_back(createProxyPeerDescriptor(
+                    peer.ethereumAddress, peer.websocketUrl));
+            } catch (const InvalidUrlException& e) {
+                *result = addResult(
+                    {ErrorCpp(
+                        e.what(),
+                        invalidUrlErrorCode,
+                        ProxyCpp(peer.ethereumAddress, peer.websocketUrl))},
+                    {});
+                return std::nullopt;
+            } catch (const std::runtime_error& e) {
+                *result = addResult(
+                    {ErrorCpp(
+                        e.what(),
+                        ERROR_INVALID_ETHEREUM_ADDRESS,
+                        ProxyCpp(peer.ethereumAddress, peer.websocketUrl))},
+                    {});
+                return std::nullopt;
+            }
+        }
+        return peerDescriptors;
+    }
+
+public:
+    uint64_t streamrNodeNew(
+        const ProxyResult** result,
+        const char* ownEthereumAddress,
+        const StreamrNodeConfig* config) {
+        std::string parsedOwnAddress;
+        try {
+            parsedOwnAddress =
+                std::string{toEthereumAddress(ownEthereumAddress)};
+        } catch (const std::runtime_error& e) {
+            SLogger::error("Error in streamrNodeNew: " + std::string(e.what()));
+            *result = addResult(
+                {ErrorCpp(
+                    e.what(), ERROR_INVALID_ETHEREUM_ADDRESS, std::nullopt)},
+                {});
+            return 0;
+        }
+        const StreamrNodeConfig defaultConfig{};
+        if (config == nullptr) {
+            config = &defaultConfig;
+        }
+        auto entryPoints = parsePeerList(
+            result,
+            config->entryPoints,
+            config->numEntryPoints,
+            ERROR_INVALID_ENTRY_POINT_URL);
+        if (!entryPoints.has_value()) {
+            return 0;
+        }
+
+        auto localPeerDescriptor = createLocalPeerDescriptor(parsedOwnAddress);
+        if (config->websocketPort != 0) {
+            auto* websocket = localPeerDescriptor.mutable_websocket();
+            websocket->set_host(
+                config->websocketHost != nullptr ? config->websocketHost
+                                                 : "127.0.0.1");
+            websocket->set_port(config->websocketPort);
+            websocket->set_tls(false);
+        }
+        if (entryPoints->empty() && config->websocketPort != 0) {
+            // First node of a new network: it is its own entry point and
+            // joins its own DHT (the connectivity self-check works
+            // against the node's own websocket server). A node with
+            // NEITHER entry points NOR a websocket server keeps an empty
+            // entry point list: the connectivity check then reports the
+            // local configuration without dialing anything, and
+            // streamrNodeStart joins the node's own DHT explicitly.
+            entryPoints->push_back(localPeerDescriptor);
+        }
+
+        auto networkNode = createNetworkNode(
+            NetworkOptions{
+                .layer0 =
+                    DhtNodeOptions{
+                        .peerDescriptor = localPeerDescriptor,
+                        .entryPoints = std::move(*entryPoints)},
+                .networkNode = ContentDeliveryManagerOptions{
+                    .acceptProxyConnections = config->acceptProxyConnections}});
+
+        uint64_t handle = createRandomHandle();
+        auto wrapper = std::make_shared<StreamrNodeWrapper>(
+            handle, std::move(networkNode), parsedOwnAddress);
+
+        std::scoped_lock lock(this->streamrNodesMutex);
+        this->streamrNodes[handle] = wrapper;
+        *result = addResult({}, {});
+        return handle;
+    }
+
+    void streamrNodeDelete(const ProxyResult** result, uint64_t nodeHandle) {
+        std::shared_ptr<StreamrNodeWrapper> node;
+        {
+            // Take the wrapper out of the map but stop it OUTSIDE the
+            // lock (stopping blocks on network teardown).
+            std::scoped_lock lock(this->streamrNodesMutex);
+            auto nodeIterator = this->streamrNodes.find(nodeHandle);
+            if (nodeIterator != this->streamrNodes.end()) {
+                node = nodeIterator->second;
+                this->streamrNodes.erase(nodeIterator);
+            }
+        }
+        node.reset();
+        *result = addResult({}, {});
+    }
+
+    void streamrNodeStart(const ProxyResult** result, uint64_t nodeHandle) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node) {
+            return;
+        }
+        if (node->isStopped()) {
+            *result = addResult(
+                {ErrorCpp(
+                    "The streamr node has been stopped and cannot be "
+                    "restarted",
+                    ERROR_NODE_STOPPED,
+                    std::nullopt)},
+                {});
+            return;
+        }
+        if (node->isStarted()) {
+            *result = addResult(
+                {ErrorCpp(
+                    "The streamr node has already been started",
+                    ERROR_NODE_ALREADY_STARTED,
+                    std::nullopt)},
+                {});
+            return;
+        }
+        try {
+            const auto& layer0Options =
+                node->getNetworkNode()->getOptions().layer0;
+            if (layer0Options.entryPoints.empty()) {
+                // Isolated node (no entry points, no websocket server):
+                // the doJoin path would wait for network connectivity
+                // that never comes, so join the node's own DHT
+                // explicitly (the pattern of the TS interop driver).
+                blockingWait(node->getNetworkNode()->start(false));
+                blockingWait(
+                    node->getNetworkNode()
+                        ->getStack()
+                        .getControlLayerNode()
+                        .joinDht({layer0Options.peerDescriptor.value()}));
+            } else {
+                blockingWait(node->getNetworkNode()->start(true));
+            }
+            node->setStarted();
+            *result = addResult({}, {});
+        } catch (const std::exception& e) {
+            SLogger::error(
+                "Exception in streamrNodeStart: " + std::string(e.what()));
+            // Best-effort teardown of the partially started stack, then
+            // mark the node unusable (start is not retryable).
+            try {
+                node->setStarted();
+                node->stop();
+            } catch (const std::exception& stopError) {
+                SLogger::error(
+                    "Exception while stopping partially started node: " +
+                    std::string(stopError.what()));
+            }
+            node->setStopped();
+            *result = addResult(
+                {ErrorCpp(e.what(), ERROR_NODE_OPERATION_FAILED, std::nullopt)},
+                {});
+        }
+    }
+
+    void streamrNodeStop(const ProxyResult** result, uint64_t nodeHandle) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node) {
+            return;
+        }
+        if (!node->isStarted()) {
+            *result = addResult(
+                {ErrorCpp(
+                    "The streamr node has not been started",
+                    ERROR_NODE_NOT_STARTED,
+                    std::nullopt)},
+                {});
+            return;
+        }
+        try {
+            node->stop();
+            *result = addResult({}, {});
+        } catch (const std::exception& e) {
+            SLogger::error(
+                "Exception in streamrNodeStop: " + std::string(e.what()));
+            *result = addResult(
+                {ErrorCpp(e.what(), ERROR_NODE_OPERATION_FAILED, std::nullopt)},
+                {});
+        }
+    }
+
+    void streamrNodeJoinStreamPart(
+        const ProxyResult** result,
+        uint64_t nodeHandle,
+        const char* streamPartId,
+        const StreamrEntryPoint* streamPartEntryPoints,
+        uint64_t numStreamPartEntryPoints) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node || !checkStreamrNodeRunning(result, node)) {
+            return;
+        }
+        auto parsedStreamPartId =
+            parseStreamPartIdChecked(result, streamPartId);
+        if (!parsedStreamPartId.has_value()) {
+            return;
+        }
+        auto entryPoints = parsePeerList(
+            result,
+            streamPartEntryPoints,
+            numStreamPartEntryPoints,
+            ERROR_INVALID_ENTRY_POINT_URL);
+        if (!entryPoints.has_value()) {
+            return;
+        }
+        try {
+            if (!entryPoints->empty()) {
+                node->getNetworkNode()->setStreamPartEntryPoints(
+                    *parsedStreamPartId, std::move(*entryPoints));
+            }
+            blockingWait(node->getNetworkNode()->join(*parsedStreamPartId));
+            *result = addResult({}, {});
+        } catch (const std::exception& e) {
+            SLogger::error(
+                "Exception in streamrNodeJoinStreamPart: " +
+                std::string(e.what()));
+            *result = addResult(
+                {ErrorCpp(e.what(), ERROR_NODE_OPERATION_FAILED, std::nullopt)},
+                {});
+        }
+    }
+
+    void streamrNodeLeaveStreamPart(
+        const ProxyResult** result,
+        uint64_t nodeHandle,
+        const char* streamPartId) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node || !checkStreamrNodeRunning(result, node)) {
+            return;
+        }
+        auto parsedStreamPartId =
+            parseStreamPartIdChecked(result, streamPartId);
+        if (!parsedStreamPartId.has_value()) {
+            return;
+        }
+        try {
+            blockingWait(node->getNetworkNode()->leave(*parsedStreamPartId));
+            *result = addResult({}, {});
+        } catch (const std::exception& e) {
+            SLogger::error(
+                "Exception in streamrNodeLeaveStreamPart: " +
+                std::string(e.what()));
+            *result = addResult(
+                {ErrorCpp(e.what(), ERROR_NODE_OPERATION_FAILED, std::nullopt)},
+                {});
+        }
+    }
+
+    void streamrNodePublish(
+        const ProxyResult** result,
+        uint64_t nodeHandle,
+        const char* streamPartId,
+        const char* content,
+        uint64_t contentLength,
+        const char* ethereumPrivateKey) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node || !checkStreamrNodeRunning(result, node)) {
+            return;
+        }
+        auto parsedStreamPartId =
+            parseStreamPartIdChecked(result, streamPartId);
+        if (!parsedStreamPartId.has_value()) {
+            return;
+        }
+        try {
+            auto message = buildStreamMessage(
+                node->getOwnEthereumAddress(),
+                *parsedStreamPartId,
+                node->getNextSequenceNumber(),
+                content,
+                contentLength,
+                ethereumPrivateKey);
+            blockingWait(node->getNetworkNode()->broadcast(message));
+            *result = addResult({}, {});
+        } catch (const std::exception& e) {
+            SLogger::error(
+                "Exception in streamrNodePublish: " + std::string(e.what()));
+            *result = addResult(
+                {ErrorCpp(e.what(), ERROR_NODE_OPERATION_FAILED, std::nullopt)},
+                {});
+        }
+    }
+
+    uint64_t streamrNodeSubscribe(
+        const ProxyResult** result,
+        uint64_t nodeHandle,
+        const char* streamPartId,
+        StreamrNodeMessageCallback callback,
+        void* userData) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node || !checkStreamrNodeRunning(result, node)) {
+            return 0;
+        }
+        if (callback == nullptr) {
+            *result = addResult(
+                {ErrorCpp(
+                    "The message callback must not be NULL",
+                    ERROR_NODE_OPERATION_FAILED,
+                    std::nullopt)},
+                {});
+            return 0;
+        }
+        auto parsedStreamPartId =
+            parseStreamPartIdChecked(result, streamPartId);
+        if (!parsedStreamPartId.has_value()) {
+            return 0;
+        }
+        try {
+            blockingWait(node->getNetworkNode()->join(*parsedStreamPartId));
+            const std::string streamPartIdString{*parsedStreamPartId};
+            const std::string streamId{
+                StreamPartIDUtils::getStreamID(*parsedStreamPartId)};
+            const auto streamPartition = static_cast<int32_t>(
+                StreamPartIDUtils::getStreamPartition(*parsedStreamPartId)
+                    .value());
+            auto token = node->getNetworkNode()->addMessageListener(
+                // The manager emits every received message; filter to the
+                // subscribed stream part here. Runs on an internal
+                // network thread (documented in streamrnode.h).
+                [nodeHandle,
+                 streamPartIdString,
+                 streamId,
+                 streamPartition,
+                 callback,
+                 userData](const StreamMessage& message) {
+                    if (message.messageid().streamid() != streamId ||
+                        message.messageid().streampartition() !=
+                            streamPartition ||
+                        !message.has_contentmessage()) {
+                        return;
+                    }
+                    const auto& messageContent =
+                        message.contentmessage().content();
+                    callback(
+                        nodeHandle,
+                        streamPartIdString.c_str(),
+                        messageContent.data(),
+                        messageContent.size(),
+                        userData);
+                });
+            uint64_t subscriptionHandle = createRandomHandle();
+            node->addSubscription(subscriptionHandle, token);
+            *result = addResult({}, {});
+            return subscriptionHandle;
+        } catch (const std::exception& e) {
+            SLogger::error(
+                "Exception in streamrNodeSubscribe: " + std::string(e.what()));
+            *result = addResult(
+                {ErrorCpp(e.what(), ERROR_NODE_OPERATION_FAILED, std::nullopt)},
+                {});
+            return 0;
+        }
+    }
+
+    void streamrNodeUnsubscribe(
+        const ProxyResult** result,
+        uint64_t nodeHandle,
+        uint64_t subscriptionHandle) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node) {
+            return;
+        }
+        auto token = node->takeSubscription(subscriptionHandle);
+        if (!token.has_value()) {
+            *result = addResult(
+                {ErrorCpp(
+                    "Subscription not found with handle " +
+                        std::to_string(subscriptionHandle),
+                    ERROR_SUBSCRIPTION_NOT_FOUND,
+                    std::nullopt)},
+                {});
+            return;
+        }
+        node->getNetworkNode()->removeMessageListener(*token);
+        *result = addResult({}, {});
+    }
+
+    uint64_t streamrNodeGetNeighborCount(
+        const ProxyResult** result,
+        uint64_t nodeHandle,
+        const char* streamPartId) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node || !checkStreamrNodeRunning(result, node)) {
+            return 0;
+        }
+        auto parsedStreamPartId =
+            parseStreamPartIdChecked(result, streamPartId);
+        if (!parsedStreamPartId.has_value()) {
+            return 0;
+        }
+        auto neighborCount =
+            node->getNetworkNode()->getNeighbors(*parsedStreamPartId).size();
+        *result = addResult({}, {});
+        return neighborCount;
+    }
+
+    void streamrNodeSetProxies(
+        const ProxyResult** result,
+        uint64_t nodeHandle,
+        const char* streamPartId,
+        const Proxy* proxies,
+        uint64_t numProxies,
+        StreamrProxyDirection direction,
+        uint64_t connectionCount) {
+        auto node = findStreamrNode(result, nodeHandle);
+        if (!node || !checkStreamrNodeRunning(result, node)) {
+            return;
+        }
+        auto parsedStreamPartId =
+            parseStreamPartIdChecked(result, streamPartId);
+        if (!parsedStreamPartId.has_value()) {
+            return;
+        }
+        if (direction != STREAMR_PROXY_DIRECTION_PUBLISH &&
+            direction != STREAMR_PROXY_DIRECTION_SUBSCRIBE) {
+            *result = addResult(
+                {ErrorCpp(
+                    "Invalid proxy direction " +
+                        std::to_string(static_cast<int>(direction)),
+                    ERROR_NODE_OPERATION_FAILED,
+                    std::nullopt)},
+                {});
+            return;
+        }
+        auto proxyPeerDescriptors =
+            parsePeerList(result, proxies, numProxies, ERROR_INVALID_PROXY_URL);
+        if (!proxyPeerDescriptors.has_value()) {
+            return;
+        }
+        const auto proxyDirection = direction == STREAMR_PROXY_DIRECTION_PUBLISH
+            ? ProxyDirection::PUBLISH
+            : ProxyDirection::SUBSCRIBE;
+        try {
+            blockingWait(node->getNetworkNode()->setProxies(
+                *parsedStreamPartId,
+                std::move(*proxyPeerDescriptors),
+                proxyDirection,
+                toEthereumAddress(node->getOwnEthereumAddress()),
+                connectionCount == 0 ? std::nullopt
+                                     : std::optional<size_t>{connectionCount}));
+            *result = addResult({}, {});
+        } catch (const std::exception& e) {
+            SLogger::error(
+                "Exception in streamrNodeSetProxies: " + std::string(e.what()));
+            *result = addResult(
+                {ErrorCpp(e.what(), ERROR_NODE_OPERATION_FAILED, std::nullopt)},
+                {});
         }
     }
 };
@@ -755,4 +1412,105 @@ uint64_t proxyClientPublish(
     const char* ethereumPrivateKey) {
     return getProxyClientApi().proxyClientPublish(
         proxyResult, clientHandle, content, contentLength, ethereumPrivateKey);
+}
+
+// --- streamrnode.h C shims ---------------------------------------------
+
+uint64_t streamrNodeNew(
+    const ProxyResult** result,
+    const char* ownEthereumAddress,
+    const StreamrNodeConfig* config) {
+    initFolly(); // this can be safely called multiple times
+    return getProxyClientApi().streamrNodeNew(
+        result, ownEthereumAddress, config);
+}
+
+void streamrNodeDelete(const ProxyResult** result, uint64_t nodeHandle) {
+    getProxyClientApi().streamrNodeDelete(result, nodeHandle);
+}
+
+void streamrNodeStart(const ProxyResult** result, uint64_t nodeHandle) {
+    getProxyClientApi().streamrNodeStart(result, nodeHandle);
+}
+
+void streamrNodeStop(const ProxyResult** result, uint64_t nodeHandle) {
+    getProxyClientApi().streamrNodeStop(result, nodeHandle);
+}
+
+void streamrNodeJoinStreamPart(
+    const ProxyResult** result,
+    uint64_t nodeHandle,
+    const char* streamPartId,
+    const StreamrEntryPoint* streamPartEntryPoints,
+    uint64_t numStreamPartEntryPoints) {
+    getProxyClientApi().streamrNodeJoinStreamPart(
+        result,
+        nodeHandle,
+        streamPartId,
+        streamPartEntryPoints,
+        numStreamPartEntryPoints);
+}
+
+void streamrNodeLeaveStreamPart(
+    const ProxyResult** result, uint64_t nodeHandle, const char* streamPartId) {
+    getProxyClientApi().streamrNodeLeaveStreamPart(
+        result, nodeHandle, streamPartId);
+}
+
+void streamrNodePublish(
+    const ProxyResult** result,
+    uint64_t nodeHandle,
+    const char* streamPartId,
+    const char* content,
+    uint64_t contentLength,
+    const char* ethereumPrivateKey) {
+    getProxyClientApi().streamrNodePublish(
+        result,
+        nodeHandle,
+        streamPartId,
+        content,
+        contentLength,
+        ethereumPrivateKey);
+}
+
+uint64_t streamrNodeSubscribe(
+    const ProxyResult** result,
+    uint64_t nodeHandle,
+    const char* streamPartId,
+    StreamrNodeMessageCallback callback,
+    void* userData) {
+    return getProxyClientApi().streamrNodeSubscribe(
+        result, nodeHandle, streamPartId, callback, userData);
+}
+
+void streamrNodeUnsubscribe(
+    const ProxyResult** result,
+    uint64_t nodeHandle,
+    uint64_t subscriptionHandle) {
+    getProxyClientApi().streamrNodeUnsubscribe(
+        result, nodeHandle, subscriptionHandle);
+}
+
+uint64_t streamrNodeGetNeighborCount(
+    const ProxyResult** result, uint64_t nodeHandle, const char* streamPartId) {
+    return getProxyClientApi().streamrNodeGetNeighborCount(
+        result, nodeHandle, streamPartId);
+}
+
+void streamrNodeSetProxies(
+    const ProxyResult** result,
+    uint64_t nodeHandle,
+    const char* streamPartId,
+    const Proxy* proxies,
+    uint64_t numProxies,
+    StreamrProxyDirection direction,
+    uint64_t connectionCount) {
+    getProxyClientApi().streamrNodeSetProxies(
+        result,
+        nodeHandle,
+        streamPartId,
+        proxies,
+        numProxies,
+        direction,
+        connectionCount);
 }
