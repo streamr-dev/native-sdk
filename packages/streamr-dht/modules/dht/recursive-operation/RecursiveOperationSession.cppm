@@ -339,12 +339,20 @@ public:
     }
 
     void stop() {
-        std::scoped_lock lock(this->mutex);
-        this->abortController.abort();
+        {
+            std::scoped_lock lock(this->mutex);
+            this->abortController.abort();
+        }
+        // NOT under this->mutex: destroy() waits out an in-flight
+        // transport Message handler, and that handler (onResponseReceived)
+        // takes this->mutex — holding it here is an ABBA deadlock.
         this->rpcCommunicator.destroy();
-        if (!this->completionEventEmitted) {
-            this->completionEventEmitted = true;
-            this->emit<recursiveoperationsessionevents::Completed>();
+        {
+            std::scoped_lock lock(this->mutex);
+            if (!this->completionEventEmitted) {
+                this->completionEventEmitted = true;
+                this->emit<recursiveoperationsessionevents::Completed>();
+            }
         }
     }
 };

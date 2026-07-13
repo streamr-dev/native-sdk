@@ -10,9 +10,11 @@ module;
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <exception>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <random>
 #include <ranges>
@@ -42,7 +44,6 @@ import streamr.eventemitter.EventEmitter;
 import streamr.logger.SLogger;
 import streamr.utils.AbortController;
 import streamr.utils.EthereumAddress;
-import streamr.utils.RetryUtils;
 import streamr.utils.StreamPartID;
 import streamr.trackerlessnetwork.ContentDeliveryRpcLocal;
 import streamr.trackerlessnetwork.ContentDeliveryRpcRemote;
@@ -67,7 +68,6 @@ using streamr::eventemitter::EventEmitter;
 using streamr::logger::SLogger;
 using streamr::utils::AbortController;
 using streamr::utils::EthereumAddress;
-using streamr::utils::RetryUtils;
 using streamr::utils::StreamPartID;
 
 using streamr::dht::Identifiers;
@@ -94,7 +94,8 @@ struct ProxyClientOptions {
 struct ProxyDefinition {
     std::map<DhtAddress, PeerDescriptor> nodes;
     size_t connectionCount;
-    ProxyDirection direction;
+    // TS parity: absent = bidirectional (accepts and publishes both ways).
+    std::optional<ProxyDirection> direction;
     EthereumAddress userId;
 };
 
@@ -127,7 +128,7 @@ class ProxyClient : public EventEmitter<ProxyClientEvents> {
 private:
     struct ProxyConnection {
         PeerDescriptor peerDescriptor;
-        ProxyDirection direction;
+        std::optional<ProxyDirection> direction;
     };
 
     struct ProxyConnectionError {
@@ -141,6 +142,18 @@ private:
     std::map<std::string, DuplicateMessageDetector> duplicateDetectors;
     std::optional<ProxyDefinition> definition;
     std::map<DhtAddress, ProxyConnection> connections;
+    // TS is single-threaded; here setProxies (API thread) races
+    // onNodeDisconnected (transport event threads, e.g. the rtc poll
+    // thread) over definition/connections/duplicateDetectors — seen as
+    // a use-after-free reading definition->nodes keys. The mutex guards
+    // STATE ONLY and is NEVER held across a blocking RPC wait: a
+    // transport event thread parked on it may be the very thread an
+    // in-flight send needs (deadlock). Snapshot under the lock, act
+    // outside, re-check under the lock when committing. Recursive:
+    // unlockConnection can emit Disconnected inline on the same thread,
+    // re-entering onNodeDisconnected.
+    mutable std::recursive_mutex mutex;
+    bool stopped = false; // guarded by mutex
     Propagation propagation;
     NodeList neighbors;
     AbortController abortController;
@@ -166,6 +179,7 @@ public:
                       [this](
                           const MessageID& msg,
                           const std::optional<MessageRef>& prev) {
+                          std::scoped_lock lock(this->mutex);
                           return Utils::markAndCheckDuplicate(
                               this->duplicateDetectors, msg, prev);
                       },
@@ -233,32 +247,33 @@ public:
         std::vector<PeerDescriptor> /* successfully connected proxies */>
     setProxies(
         const std::vector<PeerDescriptor>& nodes,
-        ProxyDirection direction,
+        std::optional<ProxyDirection> direction,
         const EthereumAddress& userId,
         std::optional<size_t> connectionCount = std::nullopt) {
         SLogger::trace(
             "Setting proxies",
             {{"streamPartId", this->options.streamPartId},
-             {"direction", direction},
              {"connectionCount", connectionCount}});
         if (connectionCount.has_value() &&
             connectionCount.value() > nodes.size()) {
             throw std::runtime_error(
                 "Cannot set connectionCount above the size of the configured array of nodes");
         }
-        std::map<DhtAddress, PeerDescriptor> nodesIds;
-        for (const auto& node : nodes) {
-            nodesIds[Identifiers::getNodeIdFromPeerDescriptor(node)] = node;
+        {
+            std::scoped_lock lock(this->mutex);
+            std::map<DhtAddress, PeerDescriptor> nodesIds;
+            for (const auto& node : nodes) {
+                nodesIds[Identifiers::getNodeIdFromPeerDescriptor(node)] = node;
+            }
+            this->definition = ProxyDefinition{
+                .nodes = std::move(nodesIds),
+                .connectionCount = connectionCount.has_value()
+                    ? connectionCount.value()
+                    : nodes.size(),
+                .direction = direction,
+                .userId = userId,
+            };
         }
-        this->definition = ProxyDefinition{
-            .nodes = nodesIds,
-            .connectionCount = connectionCount.has_value()
-                ? connectionCount.value()
-                : nodes.size(),
-            .direction = direction,
-            .userId = userId,
-        };
-
         return this->updateConnections();
     }
 
@@ -266,27 +281,41 @@ public:
         std::vector<ConnectingToProxyError> /* connection errors */,
         std::vector<PeerDescriptor> /* successfully connected proxies */>
     updateConnections() {
-        auto invalidConnections = this->getInvalidConnections();
+        std::vector<DhtAddress> invalidConnections;
+        {
+            std::scoped_lock lock(this->mutex);
+            invalidConnections = this->getInvalidConnections();
+        }
         for (const auto& id : invalidConnections) {
             this->closeConnection(id);
         }
         std::vector<ConnectingToProxyError> errors;
         std::vector<PeerDescriptor> successfullyConnected;
-        auto connectionCountDiff =
-            this->definition->connectionCount - this->connections.size();
+        // Signed on purpose: connectionCount below the current
+        // connection count must take the shrink branch (size_t
+        // subtraction would wrap).
+        std::int64_t connectionCountDiff = 0;
+        {
+            std::scoped_lock lock(this->mutex);
+            connectionCountDiff =
+                static_cast<std::int64_t>(this->definition->connectionCount) -
+                static_cast<std::int64_t>(this->connections.size());
+        }
         if (connectionCountDiff > 0) {
-            auto [errs, success] =
-                this->openRandomConnections(connectionCountDiff);
+            auto [errs, success] = this->openRandomConnections(
+                static_cast<size_t>(connectionCountDiff));
             errors.insert(errors.end(), errs.begin(), errs.end());
             successfullyConnected.insert(
                 successfullyConnected.end(), success.begin(), success.end());
         } else if (connectionCountDiff < 0) {
-            this->closeRandomConnections(-connectionCountDiff);
+            this->closeRandomConnections(
+                static_cast<size_t>(-connectionCountDiff));
         }
 
         return {errors, successfullyConnected};
     }
 
+    // Call under this->mutex.
     std::vector<DhtAddress> getInvalidConnections() {
         return this->connections | std::views::keys |
             std::views::filter([this](const auto& id) {
@@ -301,21 +330,30 @@ public:
         std::vector<ConnectingToProxyError> /* connection errors */,
         std::vector<PeerDescriptor> /* successfully connected proxies */>
     openRandomConnections(size_t connectionCount) {
-        const auto proxiesToAttempt =
-            this->definition->nodes | std::views::keys |
-            std::views::filter([this](const auto& id) {
-                return !this->connections.contains(id);
-            }) |
-            std::views::take(connectionCount) | std::ranges::to<std::vector>();
+        std::vector<DhtAddress> proxiesToAttempt;
+        std::optional<ProxyDirection> direction;
+        EthereumAddress userId{""};
+        {
+            std::scoped_lock lock(this->mutex);
+            proxiesToAttempt = this->definition->nodes | std::views::keys |
+                std::views::filter([this](const auto& id) {
+                                   return !this->connections.contains(id);
+                               }) |
+                std::views::take(connectionCount) |
+                std::ranges::to<std::vector>();
+            direction = this->definition->direction;
+            userId = this->definition->userId;
+        }
         std::vector<ConnectingToProxyError> errors;
         std::vector<PeerDescriptor> successfullyConnected;
         for (const auto& id : proxiesToAttempt) {
             try {
-                this->attemptConnection(
-                    id, this->definition->direction, this->definition->userId);
-                const auto peerDescriptor =
-                    this->connections.at(id).peerDescriptor;
-                successfullyConnected.push_back(peerDescriptor);
+                this->attemptConnection(id, direction, userId);
+                std::scoped_lock lock(this->mutex);
+                const auto it = this->connections.find(id);
+                if (it != this->connections.end()) {
+                    successfullyConnected.push_back(it->second.peerDescriptor);
+                }
             } catch (const ConnectingToProxyError& e) {
                 errors.push_back(std::move(ConnectingToProxyError(e)));
             }
@@ -325,9 +363,19 @@ public:
 
     void attemptConnection(
         const DhtAddress& nodeId,
-        const ProxyDirection& direction,
+        std::optional<ProxyDirection> direction,
         const EthereumAddress& userId) {
-        const auto peerDescriptor = this->definition->nodes.at(nodeId);
+        PeerDescriptor peerDescriptor;
+        {
+            std::scoped_lock lock(this->mutex);
+            const auto it = this->definition->nodes.find(nodeId);
+            if (it == this->definition->nodes.end()) {
+                // setProxies changed the definition while this attempt
+                // was queued.
+                return;
+            }
+            peerDescriptor = it->second;
+        }
         ProxyConnectionRpcClient client{this->rpcCommunicator};
         ProxyConnectionRpcRemote rpcRemote(
             this->options.localPeerDescriptor, peerDescriptor, client);
@@ -348,10 +396,19 @@ public:
             this->options.connectionLocker.lockConnection(
                 peerDescriptor, LockID{SERVICE_ID});
 
-            this->connections.emplace(
-                nodeId,
-                ProxyConnection{
-                    .peerDescriptor = peerDescriptor, .direction = direction});
+            {
+                std::scoped_lock lock(this->mutex);
+                if (this->stopped) {
+                    this->options.connectionLocker.unlockConnection(
+                        peerDescriptor, LockID{SERVICE_ID});
+                    return;
+                }
+                this->connections.emplace(
+                    nodeId,
+                    ProxyConnection{
+                        .peerDescriptor = peerDescriptor,
+                        .direction = direction});
+            }
 
             ContentDeliveryRpcClient client{this->rpcCommunicator};
             const auto remote = std::make_shared<ContentDeliveryRpcRemote>(
@@ -375,39 +432,40 @@ public:
 
     void closeRandomConnections(size_t connectionCount) {
         std::vector<std::pair<DhtAddress, ProxyConnection>> proxiesToDisconnect;
-        std::ranges::sample(
-            this->connections,
-            std::back_inserter(proxiesToDisconnect),
-            static_cast<std::ptrdiff_t>(connectionCount),
-            std::mt19937{std::random_device{}()});
-
+        {
+            std::scoped_lock lock(this->mutex);
+            std::ranges::sample(
+                this->connections,
+                std::back_inserter(proxiesToDisconnect),
+                static_cast<std::ptrdiff_t>(connectionCount),
+                std::mt19937{std::random_device{}()});
+        }
         for (const auto& nodeId : proxiesToDisconnect) {
             this->closeConnection(nodeId.first);
         }
     }
 
     void closeConnection(DhtAddress nodeId) {
-        if (this->connections.contains(nodeId)) {
-            SLogger::info(
-                "Close proxy connection",
-                {{"nodeId", nodeId},
-                 {"streamPartId", this->options.streamPartId}});
-            const auto server = this->neighbors.get(nodeId);
-            if (server.has_value()) {
-                streamr::utils::blockingWait(
-                    server.value()->leaveStreamPartNotice(
-                        this->options.streamPartId, false));
+        std::optional<PeerDescriptor> peerDescriptor;
+        {
+            std::scoped_lock lock(this->mutex);
+            const auto it = this->connections.find(nodeId);
+            if (it == this->connections.end()) {
+                return;
             }
-            this->removeConnection(this->connections.at(nodeId).peerDescriptor);
+            peerDescriptor = it->second.peerDescriptor;
+            this->connections.erase(it);
         }
-    }
-
-    void removeConnection(const PeerDescriptor& peerDescriptor) {
-        const auto nodeId =
-            Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
+        SLogger::info(
+            "Close proxy connection",
+            {{"nodeId", nodeId}, {"streamPartId", this->options.streamPartId}});
+        const auto server = this->neighbors.get(nodeId);
+        if (server.has_value()) {
+            streamr::utils::blockingWait(server.value()->leaveStreamPartNotice(
+                this->options.streamPartId, false));
+        }
         this->options.connectionLocker.unlockConnection(
-            peerDescriptor, LockID{SERVICE_ID});
-        this->connections.erase(nodeId);
+            peerDescriptor.value(), LockID{SERVICE_ID});
         this->neighbors.remove(nodeId);
     }
 
@@ -433,8 +491,11 @@ public:
             SLogger::debug(
                 "ProxyClient::broadcast() calling Utils::markAndCheckDuplicate() on message: " +
                 msg.DebugString());
-            Utils::markAndCheckDuplicate(
-                this->duplicateDetectors, msg.messageid(), std::nullopt);
+            {
+                std::scoped_lock lock(this->mutex);
+                Utils::markAndCheckDuplicate(
+                    this->duplicateDetectors, msg.messageid(), std::nullopt);
+            }
         }
         SLogger::debug("ProxyClient::broadcast() emitting Message event");
         this->emit<Message>(msg);
@@ -460,12 +521,16 @@ public:
     }
 
     [[nodiscard]] bool hasConnection(
-        const DhtAddress& nodeId, ProxyDirection direction) const {
+        const DhtAddress& nodeId,
+        std::optional<ProxyDirection> direction = std::nullopt) const {
+        std::scoped_lock lock(this->mutex);
         return this->connections.contains(nodeId) &&
-            this->connections.at(nodeId).direction == direction;
+            (!direction.has_value() ||
+             this->connections.at(nodeId).direction == direction);
     }
 
-    [[nodiscard]] ProxyDirection getDirection() const {
+    [[nodiscard]] std::optional<ProxyDirection> getDirection() const {
+        std::scoped_lock lock(this->mutex);
         return this->definition->direction;
     }
 
@@ -481,16 +546,22 @@ public:
     void onNodeDisconnected(const PeerDescriptor& peerDescriptor) {
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(peerDescriptor);
-        if (this->connections.contains(nodeId)) {
-            this->options.connectionLocker.unlockConnection(
-                peerDescriptor, LockID{SERVICE_ID});
-            this->removeConnection(peerDescriptor);
-            streamr::utils::blockingWait(
-                RetryUtils::constantRetry<void>(
-                    [this]() -> void { this->updateConnections(); },
-                    "updating proxy connections",
-                    this->abortController));
+        {
+            std::scoped_lock lock(this->mutex);
+            if (this->stopped || this->connections.erase(nodeId) == 0) {
+                return;
+            }
         }
+        this->options.connectionLocker.unlockConnection(
+            peerDescriptor, LockID{SERVICE_ID});
+        this->neighbors.remove(nodeId);
+        // Deviation from TS: no automatic reconnection attempt here. The
+        // TS single retry always fails in practice (the proxy that
+        // disconnected is gone or has left the stream part), and issuing
+        // blocking RPCs from transport event threads (this handler runs
+        // on websocket/rtc threads) deadlocks against the in-flight
+        // sends those threads service. Callers reconnect by re-issuing
+        // setProxies() — see the reconnect end-to-end test.
     }
 
     void start() {
@@ -507,6 +578,16 @@ public:
     }
 
     void stop() {
+        {
+            std::scoped_lock lock(this->mutex);
+            if (this->stopped) {
+                return;
+            }
+            this->stopped = true;
+            this->connections.clear();
+        }
+        // The blocking leave notices run OUTSIDE the mutex: a transport
+        // event thread parked on it may be the thread these sends need.
         auto allNeighbors = this->neighbors.getAll();
         for (const auto& remote : allNeighbors) {
             this->options.connectionLocker.unlockConnection(
@@ -517,7 +598,6 @@ public:
 
         this->neighbors.stop();
         this->rpcCommunicator.destroy();
-        this->connections.clear();
         this->abortController.abort();
         if (this->transportDisconnectedHandlerToken.has_value()) {
             this->options.transport

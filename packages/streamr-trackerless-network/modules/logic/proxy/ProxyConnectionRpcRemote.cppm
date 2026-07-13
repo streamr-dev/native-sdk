@@ -51,9 +51,13 @@ public:
               client,
               timeout) {}
     folly::coro::Task<bool> requestConnection(
-        ProxyDirection direction, const EthereumAddress& userId) {
+        std::optional<ProxyDirection> direction,
+        const EthereumAddress& userId) {
         ProxyConnectionRequest request;
-        request.set_direction(direction);
+        // Absent direction = bidirectional (TS sends undefined).
+        if (direction.has_value()) {
+            request.set_direction(direction.value());
+        }
         request.set_userid(BinaryUtils::hexToBinaryString(userId));
 
         auto options = this->formDhtRpcOptions();

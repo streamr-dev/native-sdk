@@ -3,6 +3,7 @@
 // streamr-dht/transport/ListeningRpcCommunicator.hpp (MODERNIZATION.md
 // Phase 2.6): this file is now the source of truth.
 module;
+#include <cstdint>
 #include <functional>
 #include <optional>
 
@@ -17,6 +18,7 @@ import streamr.protorpc.Errors;
 import streamr.protorpc.RpcCommunicator;
 import streamr.dht.RoutingRpcCommunicator;
 import streamr.dht.Transport;
+import streamr.logger.SLogger;
 
 // Hoisted from the former header (file scope, NOT exported);
 // fully qualified: relative namespace names resolve differently
@@ -26,6 +28,8 @@ using streamr::protorpc::RpcClientError;
 // Self-sufficient shorthand (was inherited textually from a
 // neighboring header before consolidation).
 using streamr::protorpc::RpcCommunicatorOptions;
+
+using streamr::logger::SLogger;
 
 export namespace streamr::dht::transport {
 
@@ -40,6 +44,8 @@ private:
     HandlerToken onDisconnectedHandlerToken;
 
 public:
+    std::string instrServiceId; // INSTR
+
     ListeningRpcCommunicator(
         ServiceID&& serviceId,
         Transport& transport,
@@ -54,6 +60,11 @@ public:
               this->handleMessageFromPeer(message);
           }),
           transport(transport) {
+        this->instrServiceId = this->getOwnServiceId();
+        SLogger::info(
+            "INSTR ListeningRpcCommunicator ctor",
+            {{"serviceId", this->instrServiceId},
+             {"ptr", reinterpret_cast<uintptr_t>(this)}});
         this->onMessageHandlerToken = transport.on<transportevents::Message>(
             [this](const Message& message) { this->listener(message); });
         this->onDisconnectedHandlerToken =
@@ -76,7 +87,18 @@ public:
                 });
     }
 
+    ~ListeningRpcCommunicator() {
+        SLogger::info(
+            "INSTR ~ListeningRpcCommunicator",
+            {{"serviceId", this->instrServiceId},
+             {"ptr", reinterpret_cast<uintptr_t>(this)}});
+    }
+
     void destroy() {
+        SLogger::info(
+            "INSTR ListeningRpcCommunicator::destroy",
+            {{"serviceId", this->instrServiceId},
+             {"ptr", reinterpret_cast<uintptr_t>(this)}});
         transport.off<transportevents::Message>(this->onMessageHandlerToken);
         // Also detach the Disconnected listener: leaving it registered
         // dangles `this` on the transport after destruction, and a live
