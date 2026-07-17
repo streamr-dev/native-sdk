@@ -4,12 +4,17 @@
 // this file is now the source of truth.
 module;
 
+#include <algorithm>
 #include <memory>
 #include <source_location>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <nlohmann/json.hpp>
+
+// The C symbol for the process environment: must be declared in the
+// global module fragment (see FollyLoggerImpl).
+extern "C" char** environ; // NOLINT
 
 export module streamr.logger.Logger;
 
@@ -31,6 +36,15 @@ private:
     std::shared_ptr<LoggerImpl> mLoggerImpl;
     StreamrLogLevel mLoggerLogLevel;
     nlohmann::json mContextBindings;
+    // Cheapest enabled level across this logger AND every
+    // LOG_LEVEL_<Category> env override (those can only raise verbosity
+    // for a file category). log() early-outs below this bound BEFORE
+    // marshalling the metadata to JSON: the marshalling (plus the
+    // per-call environment scan in FollyLoggerImpl) ran on every
+    // filtered-out trace/debug call and dominated the per-message cost
+    // of the connection delivery chains (measured 20-90 ms per network
+    // message in Debug builds under the full-node tests).
+    int mMinEnabledLogLevelValue{0};
 
 public:
     /**
@@ -66,6 +80,25 @@ public:
 
         mContextBindings =
             ensureJsonObject(toJson(contextBindings), "contextBindings");
+
+        // Snapshot the minimum enabled level once (see the member's
+        // comment). Env vars cannot meaningfully change mid-process, and
+        // FollyLoggerImpl re-reads them per message anyway for the
+        // messages that pass this bound.
+        int minEnabled = getStreamrLogLevelValue(mLoggerLogLevel);
+        for (char** env = environ; *env != nullptr; ++env) { // NOLINT
+            const std::string_view envVar{*env};
+            if (envVar.starts_with(detail::envCategoryLogLevelName)) {
+                const auto eq = envVar.find('=');
+                if (eq != std::string_view::npos) {
+                    const auto categoryLevel = getStreamrLogLevelByName(
+                        envVar.substr(eq + 1), mLoggerLogLevel);
+                    minEnabled = std::min(
+                        minEnabled, getStreamrLogLevelValue(categoryLevel));
+                }
+            }
+        }
+        mMinEnabledLogLevelValue = minEnabled;
 
         if (!loggerImpl) {
             mLoggerImpl = std::make_shared<detail::FollyLoggerImpl>();
@@ -209,6 +242,13 @@ private:
         std::string_view msg,
         MetadataType metadata,
         const std::source_location& location) {
+        // Early-out below the cheapest enabled level (see
+        // mMinEnabledLogLevelValue): no category could emit this message,
+        // so skip the metadata marshalling and the LoggerImpl call.
+        if (getStreamrLogLevelValue(messageLogLevel) <
+            mMinEnabledLogLevelValue) {
+            return;
+        }
         // Merge the possible metadata with the context bindings
 
         auto metadataJson = ensureJsonObject(toJson(metadata), "metadata");
