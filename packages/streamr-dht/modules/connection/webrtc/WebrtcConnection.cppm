@@ -83,6 +83,13 @@ private:
     streamr::eventemitter::EventEmitter<WebrtcSignallingEvents>
         signallingEvents;
     std::recursive_mutex mMutex;
+    // Per-connection FIFO dispatch of the datachannel open/message emit
+    // chains: the rtc worker pool is fixed-size and also runs ICE/DTLS
+    // processing for every connection in the process, so the emit chains
+    // must not run inline there (the WebsocketConnection idiom; see its
+    // mDispatchExecutor).
+    streamr::utils::SharedSerialExecutor mDispatchExecutor{
+        streamr::utils::SharedExecutors::worker()};
 
     explicit WebrtcConnection(WebrtcConnectionParams&& params)
         : Connection(ConnectionType::WEBRTC), params(std::move(params)) {}
@@ -368,7 +375,14 @@ private:
                 defaultBufferThresholdLow));
         this->dataChannel->onOpen([self]() {
             SLogger::trace("dc.onOpened");
-            self->onDataChannelOpen();
+            // The Connected emit chain (handshaker, connection manager)
+            // must not run on the rtc worker thread — it starves the
+            // fixed-size pool that also processes ICE/DTLS handshakes
+            // (the same starvation the websocket poll thread had). The
+            // per-connection serial executor keeps Connected ordered
+            // before the Data emits below.
+            self->mDispatchExecutor.add(
+                [self]() { self->onDataChannelOpen(); });
         });
         this->dataChannel->onClosed([self]() {
             SLogger::trace("dc.closed");
@@ -382,7 +396,15 @@ private:
         this->dataChannel->onMessage([self](rtc::message_variant message) {
             SLogger::trace("dc.onMessage");
             if (std::holds_alternative<rtc::binary>(message)) {
-                self->emit<Data>(std::get<rtc::binary>(std::move(message)));
+                // Thin enqueue (see onOpen above): the rtc worker thread
+                // only copies the frame; the emit<Data> chain runs on the
+                // per-connection serial executor in arrival order.
+                self->mDispatchExecutor.add(
+                    [self,
+                     data =
+                         std::get<rtc::binary>(std::move(message))]() mutable {
+                        self->emit<Data>(std::move(data));
+                    });
             }
         });
     }

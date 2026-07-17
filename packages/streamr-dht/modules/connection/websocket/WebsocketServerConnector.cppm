@@ -175,6 +175,18 @@ public:
                                    const std::shared_ptr<
                                        WebsocketServerConnection>&
                                        serverSocket) {
+                if (this->abortController.getSignal().aborted) {
+                    // destroy() has run (or is running): drop the late
+                    // connection instead of touching the cleared maps.
+                    try {
+                        serverSocket->close(false);
+                    } catch (...) {
+                        SLogger::debug(
+                            "Error closing incoming Websocket connection"
+                            " after abort");
+                    }
+                    return;
+                }
                 const auto resourceUrl = serverSocket->getResourceURL();
                 const auto action = getActionFromUrl(resourceUrl);
                 SLogger::trace(

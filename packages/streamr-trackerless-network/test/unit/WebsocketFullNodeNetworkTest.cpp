@@ -44,12 +44,8 @@ using streamr::utils::waitForCondition;
 
 namespace {
 
-// TS runs this with NUM_OF_NODES = 12; the C++ entry point's
-// websocket accept path degrades under a concurrent connectivity-check
-// storm (measured: ~9 accepts in the first second, then ~1/s), so the
-// late checks exceed the 1 s connect timeout beyond ~8 nodes. Scaled
-// down until the accept path is offloaded — see the follow-up task.
-constexpr size_t numOfNodes = 8;
+// TS parity: 12 nodes start concurrently against one entry point.
+constexpr size_t numOfNodes = 12;
 constexpr uint16_t entryPointPort = 15555;
 // Generous for the 3-core CI runners: the TS test tolerates up to its
 // 220 s jest budget for convergence.

@@ -37,6 +37,15 @@ private:
                 "WebsocketServerConnection() The half-ready socket is fully connected");
             mResourceURL = Url{mSocket->path().value()};
             mRemoteAddress = mSocket->remoteAddress().value();
+            // libdatachannel formats this as "<host>:<service>"; the
+            // consumers (TS-parity remoteAddress, the connectivity
+            // probe URL, ipv4ToNumber) need the bare host. The service
+            // is always the suffix after the LAST colon, so this also
+            // handles unbracketed IPv6 hosts.
+            const auto portSep = mRemoteAddress.rfind(':');
+            if (portSep != std::string::npos) {
+                mRemoteAddress = mRemoteAddress.substr(0, portSep);
+            }
             this->off<connectionevents::Connected>(
                 this->mHalfReadyConnectedHandlerToken);
         });
