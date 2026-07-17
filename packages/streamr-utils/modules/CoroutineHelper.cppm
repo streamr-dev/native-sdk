@@ -73,6 +73,11 @@ using folly::Unit;
 
 export namespace streamr::utils {
 
+// (Comment touch to invalidate stale CI build caches: the restored
+// macOS cache carried a pre-cancellation-shim BMI of this module and
+// ninja under-rebuilt, failing DiscoverySession/RingDiscoverySession
+// compiles on symbols that exist — the documented incremental-cache
+// trap.)
 // folly's blockingWait / co_withExecutor / co_withCancellation are
 // customization-point objects that cannot be re-exported by
 // using-declaration (internal linkage or conflicting redeclarations
