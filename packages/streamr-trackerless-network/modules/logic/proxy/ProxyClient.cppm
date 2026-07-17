@@ -171,57 +171,50 @@ public:
               Identifiers::getNodeIdFromPeerDescriptor(
                   options.localPeerDescriptor),
               1000), // NOLINT
-          contentDeliveryRpcLocal(
-              ContentDeliveryRpcLocalOptions{
-                  .localPeerDescriptor = options.localPeerDescriptor,
-                  .streamPartId = options.streamPartId,
-                  .markAndCheckDuplicate =
-                      [this](
-                          const MessageID& msg,
-                          const std::optional<MessageRef>& prev) {
-                          std::scoped_lock lock(this->mutex);
-                          return Utils::markAndCheckDuplicate(
-                              this->duplicateDetectors, msg, prev);
-                      },
-                  .broadcast =
-                      [this](
-                          const StreamMessage& message,
-                          const DhtAddress& previousNode) {
-                          this->broadcast(message, previousNode);
-                      },
-                  .onLeaveNotice =
-                      [this](
-                          const DhtAddress& remoteNodeId, bool /*isLeaving*/) {
-                          const auto contact =
-                              this->neighbors.get(remoteNodeId);
-                          if (contact.has_value()) {
-                              this->onNodeDisconnected(
-                                  contact.value()->getPeerDescriptor());
-                          }
-                      },
-
-                  .markForInspection = [](const DhtAddress& nodeId,
-                                          const MessageID& message) {},
-                  .rpcCommunicator = this->rpcCommunicator}),
-          propagation(
-              PropagationOptions{
-                  .sendToNeighbor =
-                      [this](
-                          const DhtAddress& neighborId,
-                          const StreamMessage& msg) -> folly::coro::Task<void> {
-                      const auto remote = this->neighbors.get(neighborId);
-                      if (remote.has_value()) {
-                          co_await remote.value()->sendStreamMessage(msg);
-                      } else {
-                          throw std::runtime_error(
-                              "Propagation target not found");
+          contentDeliveryRpcLocal(ContentDeliveryRpcLocalOptions{
+              .localPeerDescriptor = options.localPeerDescriptor,
+              .streamPartId = options.streamPartId,
+              .markAndCheckDuplicate =
+                  [this](
+                      const MessageID& msg,
+                      const std::optional<MessageRef>& prev) {
+                      std::scoped_lock lock(this->mutex);
+                      return Utils::markAndCheckDuplicate(
+                          this->duplicateDetectors, msg, prev);
+                  },
+              .broadcast =
+                  [this](
+                      const StreamMessage& message,
+                      const DhtAddress& previousNode) {
+                      this->broadcast(message, previousNode);
+                  },
+              .onLeaveNotice =
+                  [this](const DhtAddress& remoteNodeId, bool /*isLeaving*/) {
+                      const auto contact = this->neighbors.get(remoteNodeId);
+                      if (contact.has_value()) {
+                          this->onNodeDisconnected(
+                              contact.value()->getPeerDescriptor());
                       }
                   },
-                  .minPropagationTargets =
-                      options.minPropagationTargets.has_value()
-                      ? options.minPropagationTargets.value()
-                      : 2,
-              }),
+
+              .markForInspection = [](const DhtAddress& nodeId,
+                                      const MessageID& message) {},
+              .rpcCommunicator = this->rpcCommunicator}),
+          propagation(PropagationOptions{
+              .sendToNeighbor =
+                  [this](const DhtAddress& neighborId, const StreamMessage& msg)
+                  -> folly::coro::Task<void> {
+                  const auto remote = this->neighbors.get(neighborId);
+                  if (remote.has_value()) {
+                      co_await remote.value()->sendStreamMessage(msg);
+                  } else {
+                      throw std::runtime_error("Propagation target not found");
+                  }
+              },
+              .minPropagationTargets = options.minPropagationTargets.has_value()
+                  ? options.minPropagationTargets.value()
+                  : 2,
+          }),
           options(std::move(options)) {}
 
 private:
@@ -393,14 +386,20 @@ public:
                 std::current_exception(), peerDescriptor);
         }
         if (accepted) {
-            this->options.connectionLocker.lockConnection(
-                peerDescriptor, LockID{SERVICE_ID});
+            // ProxyClient's connection routine is synchronous today (it
+            // blockingWaits its RPCs above); keep that behavior for the
+            // now-asynchronous locker API. Async-ifying this whole path
+            // is a separate task.
+            streamr::utils::blockingWait(
+                this->options.connectionLocker.lockConnection(
+                    peerDescriptor, LockID{SERVICE_ID}));
 
             {
                 std::scoped_lock lock(this->mutex);
                 if (this->stopped) {
-                    this->options.connectionLocker.unlockConnection(
-                        peerDescriptor, LockID{SERVICE_ID});
+                    streamr::utils::blockingWait(
+                        this->options.connectionLocker.unlockConnection(
+                            peerDescriptor, LockID{SERVICE_ID}));
                     return;
                 }
                 this->connections.emplace(
@@ -464,8 +463,9 @@ public:
             streamr::utils::blockingWait(server.value()->leaveStreamPartNotice(
                 this->options.streamPartId, false));
         }
-        this->options.connectionLocker.unlockConnection(
-            peerDescriptor.value(), LockID{SERVICE_ID});
+        streamr::utils::blockingWait(
+            this->options.connectionLocker.unlockConnection(
+                peerDescriptor.value(), LockID{SERVICE_ID}));
         this->neighbors.remove(nodeId);
     }
 
@@ -552,8 +552,9 @@ public:
                 return;
             }
         }
-        this->options.connectionLocker.unlockConnection(
-            peerDescriptor, LockID{SERVICE_ID});
+        streamr::utils::blockingWait(
+            this->options.connectionLocker.unlockConnection(
+                peerDescriptor, LockID{SERVICE_ID}));
         this->neighbors.remove(nodeId);
         // Deviation from TS: no automatic reconnection attempt here. The
         // TS single retry always fails in practice (the proxy that
@@ -590,8 +591,9 @@ public:
         // event thread parked on it may be the thread these sends need.
         auto allNeighbors = this->neighbors.getAll();
         for (const auto& remote : allNeighbors) {
-            this->options.connectionLocker.unlockConnection(
-                remote->getPeerDescriptor(), LockID{SERVICE_ID});
+            streamr::utils::blockingWait(
+                this->options.connectionLocker.unlockConnection(
+                    remote->getPeerDescriptor(), LockID{SERVICE_ID}));
             streamr::utils::blockingWait(remote->leaveStreamPartNotice(
                 this->options.streamPartId, false));
         }

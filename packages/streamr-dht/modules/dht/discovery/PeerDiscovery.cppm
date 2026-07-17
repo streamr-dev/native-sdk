@@ -301,19 +301,17 @@ private:
         std::vector<folly::coro::Task<void>> fetches;
         fetches.reserve(nodes.size() + randomNodes.size());
         for (const auto& node : nodes) {
-            fetches.push_back(
-                folly::coro::co_invoke(
-                    [self, node, localNodeId]() -> folly::coro::Task<void> {
-                        co_await self->fetchAndAddContacts(node, localNodeId);
-                    }));
+            fetches.push_back(folly::coro::co_invoke(
+                [self, node, localNodeId]() -> folly::coro::Task<void> {
+                    co_await self->fetchAndAddContacts(node, localNodeId);
+                }));
         }
         for (const auto& node : randomNodes) {
-            fetches.push_back(
-                folly::coro::co_invoke(
-                    [self, node]() -> folly::coro::Task<void> {
-                        co_await self->fetchAndAddContacts(
-                            node, Identifiers::createRandomDhtAddress());
-                    }));
+            fetches.push_back(folly::coro::co_invoke(
+                [self, node]() -> folly::coro::Task<void> {
+                    co_await self->fetchAndAddContacts(
+                        node, Identifiers::createRandomDhtAddress());
+                }));
         }
         // collectAllRange, but each fetch swallows its own failure — the TS
         // uses Promise.allSettled, so one failed remote does not abort the
@@ -364,19 +362,15 @@ public:
         std::vector<folly::coro::Task<void>> joins;
         joins.reserve(entryPoints.size());
         for (const auto& entryPoint : entryPoints) {
-            joins.push_back(
-                folly::coro::co_invoke(
-                    [self,
-                     entryPoint,
-                     &contactedPeers,
-                     &distantJoinOptions,
-                     retry]() -> folly::coro::Task<void> {
-                        co_await self->joinThroughEntryPoint(
-                            entryPoint,
-                            contactedPeers,
-                            distantJoinOptions,
-                            retry);
-                    }));
+            joins.push_back(folly::coro::co_invoke(
+                [self,
+                 entryPoint,
+                 &contactedPeers,
+                 &distantJoinOptions,
+                 retry]() -> folly::coro::Task<void> {
+                    co_await self->joinThroughEntryPoint(
+                        entryPoint, contactedPeers, distantJoinOptions, retry);
+                }));
         }
         co_await folly::coro::collectAllRange(std::move(joins));
     }
@@ -401,7 +395,7 @@ public:
             co_return;
         }
         if (this->options.connectionLocker != nullptr) {
-            this->options.connectionLocker->lockConnection(
+            co_await this->options.connectionLocker->lockConnection(
                 entryPointDescriptor, this->joinLockId());
         }
         this->options.peerManager.addContact(entryPointDescriptor);
@@ -417,7 +411,7 @@ public:
         co_await this->runSessions(
             std::move(sessions), entryPointDescriptor, retry);
         if (this->options.connectionLocker != nullptr) {
-            this->options.connectionLocker->unlockConnection(
+            co_await this->options.connectionLocker->unlockConnection(
                 entryPointDescriptor, this->joinLockId());
         }
     }
