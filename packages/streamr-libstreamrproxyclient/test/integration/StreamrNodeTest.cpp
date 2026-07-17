@@ -82,13 +82,13 @@ protected:
 
     // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     static void expectSingleError(
-        const ProxyResult* result, const char* expectedCode) {
+        const StreamrResult* result, const char* expectedCode) {
         ASSERT_NE(result, nullptr);
         ASSERT_EQ(result->numErrors, 1);
         EXPECT_STREQ(result->errors[0].code, expectedCode);
     }
 
-    static void expectNoErrors(const ProxyResult* result) {
+    static void expectNoErrors(const StreamrResult* result) {
         ASSERT_NE(result, nullptr);
         EXPECT_EQ(result->numErrors, 0);
     }
@@ -98,32 +98,32 @@ public:
     // library up after every test; re-initialize here so consecutive
     // tests also work when the binary is run as a single process (under
     // ctest each test is its own process and this is a no-op).
-    StreamrNodeTest() { proxyClientInitLibrary(); }
-    ~StreamrNodeTest() override { proxyClientCleanupLibrary(); }
+    StreamrNodeTest() { streamrInitLibrary(); }
+    ~StreamrNodeTest() override { streamrCleanupLibrary(); }
 };
 
 TEST_F(StreamrNodeTest, InvalidEthereumAddress) {
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     uint64_t nodeHandle =
         streamrNodeNew(&result, invalidEthereumAddress, nullptr);
     EXPECT_EQ(nodeHandle, 0);
     expectSingleError(result, ERROR_INVALID_ETHEREUM_ADDRESS);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }
 
 TEST_F(StreamrNodeTest, InvalidEntryPointUrl) {
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     StreamrEntryPoint entryPoint{
         .websocketUrl = invalidUrl, .ethereumAddress = ethereumAddressB};
     StreamrNodeConfig config{.entryPoints = &entryPoint, .numEntryPoints = 1};
     uint64_t nodeHandle = streamrNodeNew(&result, ethereumAddressA, &config);
     EXPECT_EQ(nodeHandle, 0);
     expectSingleError(result, ERROR_INVALID_ENTRY_POINT_URL);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }
 
 TEST_F(StreamrNodeTest, InvalidEntryPointEthereumAddress) {
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     StreamrEntryPoint entryPoint{
         .websocketUrl = "ws://127.0.0.1:40000",
         .ethereumAddress = invalidEthereumAddress};
@@ -131,34 +131,34 @@ TEST_F(StreamrNodeTest, InvalidEntryPointEthereumAddress) {
     uint64_t nodeHandle = streamrNodeNew(&result, ethereumAddressA, &config);
     EXPECT_EQ(nodeHandle, 0);
     expectSingleError(result, ERROR_INVALID_ETHEREUM_ADDRESS);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }
 
 TEST_F(StreamrNodeTest, NodeNotFound) {
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
 
     streamrNodeStart(&result, nonExistentNodeHandle);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeStop(&result, nonExistentNodeHandle);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeJoinStreamPart(
         &result, nonExistentNodeHandle, validStreamPartId, nullptr, 0);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeLeaveStreamPart(
         &result, nonExistentNodeHandle, validStreamPartId);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodePublish(
         &result, nonExistentNodeHandle, validStreamPartId, "x", 1, nullptr);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     uint64_t subscriptionHandle = streamrNodeSubscribe(
         &result,
@@ -168,18 +168,18 @@ TEST_F(StreamrNodeTest, NodeNotFound) {
         nullptr);
     EXPECT_EQ(subscriptionHandle, 0);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeUnsubscribe(&result, nonExistentNodeHandle, 1);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeGetNeighborCount(
         &result, nonExistentNodeHandle, validStreamPartId);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
-    Proxy proxy{
+    StreamrPeer proxy{
         .websocketUrl = "ws://127.0.0.1:40000",
         .ethereumAddress = ethereumAddressB};
     streamrNodeSetProxies(
@@ -191,36 +191,36 @@ TEST_F(StreamrNodeTest, NodeNotFound) {
         STREAMR_PROXY_DIRECTION_PUBLISH,
         1);
     expectSingleError(result, ERROR_NODE_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }
 
 TEST_F(StreamrNodeTest, CanCreateAndDeleteWithoutStarting) {
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     uint64_t nodeHandle = streamrNodeNew(&result, ethereumAddressA, nullptr);
     EXPECT_NE(nodeHandle, 0);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
-    const ProxyResult* result2 = nullptr;
+    const StreamrResult* result2 = nullptr;
     streamrNodeDelete(&result2, nodeHandle);
     expectNoErrors(result2);
-    proxyClientResultDelete(result2);
+    streamrResultDelete(result2);
 }
 
 TEST_F(StreamrNodeTest, OperationsRequireStart) {
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     uint64_t nodeHandle = streamrNodeNew(&result, ethereumAddressA, nullptr);
     ASSERT_NE(nodeHandle, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeJoinStreamPart(
         &result, nodeHandle, validStreamPartId, nullptr, 0);
     expectSingleError(result, ERROR_NODE_NOT_STARTED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodePublish(&result, nodeHandle, validStreamPartId, "x", 1, nullptr);
     expectSingleError(result, ERROR_NODE_NOT_STARTED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     uint64_t subscriptionHandle = streamrNodeSubscribe(
         &result,
@@ -230,82 +230,82 @@ TEST_F(StreamrNodeTest, OperationsRequireStart) {
         nullptr);
     EXPECT_EQ(subscriptionHandle, 0);
     expectSingleError(result, ERROR_NODE_NOT_STARTED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeGetNeighborCount(&result, nodeHandle, validStreamPartId);
     expectSingleError(result, ERROR_NODE_NOT_STARTED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeStop(&result, nodeHandle);
     expectSingleError(result, ERROR_NODE_NOT_STARTED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeUnsubscribe(&result, nodeHandle, 1);
     expectSingleError(result, ERROR_SUBSCRIPTION_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeDelete(&result, nodeHandle);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }
 
 TEST_F(StreamrNodeTest, StartStopLifecycle) {
     // No entry points and no websocket server: the node starts an
     // isolated network of its own (it is its own entry point).
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     uint64_t nodeHandle = streamrNodeNew(&result, ethereumAddressA, nullptr);
     ASSERT_NE(nodeHandle, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeStart(&result, nodeHandle);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeStart(&result, nodeHandle);
     expectSingleError(result, ERROR_NODE_ALREADY_STARTED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     // The stream-part-id validation needs a running node because the
     // running-state check comes first.
     streamrNodeJoinStreamPart(
         &result, nodeHandle, invalidStreamPartId, nullptr, 0);
     expectSingleError(result, ERROR_INVALID_STREAM_PART_ID);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeStop(&result, nodeHandle);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     // Stopping is idempotent.
     streamrNodeStop(&result, nodeHandle);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     // A stopped node cannot be restarted or used.
     streamrNodeStart(&result, nodeHandle);
     expectSingleError(result, ERROR_NODE_STOPPED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodePublish(&result, nodeHandle, validStreamPartId, "x", 1, nullptr);
     expectSingleError(result, ERROR_NODE_STOPPED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeDelete(&result, nodeHandle);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }
 
 TEST_F(StreamrNodeTest, TwoNodesExchangeMessages) {
     // Node A runs a websocket server and acts as the entry point of a
     // new network; node B joins through it as a websocket client.
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     StreamrNodeConfig configA{.websocketPort = exchangeEntryPointPort};
     uint64_t nodeA = streamrNodeNew(&result, ethereumAddressA, &configA);
     ASSERT_NE(nodeA, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeStart(&result, nodeA);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     const std::string entryPointUrl =
         "ws://127.0.0.1:" + std::to_string(exchangeEntryPointPort);
@@ -315,10 +315,10 @@ TEST_F(StreamrNodeTest, TwoNodesExchangeMessages) {
     StreamrNodeConfig configB{.entryPoints = &entryPoint, .numEntryPoints = 1};
     uint64_t nodeB = streamrNodeNew(&result, ethereumAddressB, &configB);
     ASSERT_NE(nodeB, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeStart(&result, nodeB);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     // Both nodes subscribe (which also joins the stream part).
     ReceivedMessages receivedA;
@@ -330,7 +330,7 @@ TEST_F(StreamrNodeTest, TwoNodesExchangeMessages) {
         ReceivedMessages::callback,
         &receivedA);
     ASSERT_NE(subscriptionA, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     uint64_t subscriptionB = streamrNodeSubscribe(
         &result,
         nodeB,
@@ -338,18 +338,18 @@ TEST_F(StreamrNodeTest, TwoNodesExchangeMessages) {
         ReceivedMessages::callback,
         &receivedB);
     ASSERT_NE(subscriptionB, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     // Wait for the stream part topology to form between the two nodes.
     EXPECT_TRUE(waitUntil(
         [&]() {
-            const ProxyResult* pollResult = nullptr;
+            const StreamrResult* pollResult = nullptr;
             auto neighborsA = streamrNodeGetNeighborCount(
                 &pollResult, nodeA, validStreamPartId);
-            proxyClientResultDelete(pollResult);
+            streamrResultDelete(pollResult);
             auto neighborsB = streamrNodeGetNeighborCount(
                 &pollResult, nodeB, validStreamPartId);
-            proxyClientResultDelete(pollResult);
+            streamrResultDelete(pollResult);
             return neighborsA >= 1 && neighborsB >= 1;
         },
         topologyTimeout));
@@ -364,7 +364,7 @@ TEST_F(StreamrNodeTest, TwoNodesExchangeMessages) {
         messageFromA.size(),
         ethereumPrivateKey);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     EXPECT_TRUE(waitUntil(
         [&]() { return receivedB.contains(messageFromA); }, messageTimeout));
 
@@ -377,30 +377,30 @@ TEST_F(StreamrNodeTest, TwoNodesExchangeMessages) {
         messageFromB.size(),
         nullptr);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     EXPECT_TRUE(waitUntil(
         [&]() { return receivedA.contains(messageFromB); }, messageTimeout));
 
     streamrNodeUnsubscribe(&result, nodeB, subscriptionB);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeUnsubscribe(&result, nodeB, subscriptionB);
     expectSingleError(result, ERROR_SUBSCRIPTION_NOT_FOUND);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeUnsubscribe(&result, nodeA, subscriptionA);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeStop(&result, nodeB);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeStop(&result, nodeA);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeDelete(&result, nodeB);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeDelete(&result, nodeA);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }
 
 TEST_F(StreamrNodeTest, ProxyModePublishesToAcceptingNode) {
@@ -408,15 +408,15 @@ TEST_F(StreamrNodeTest, ProxyModePublishesToAcceptingNode) {
     // client-only node (own isolated DHT, no websocket server) that
     // proxy-publishes into A — the old proxy-client use case through
     // the node handle.
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     StreamrNodeConfig configA{
         .websocketPort = proxyServerPort, .acceptProxyConnections = true};
     uint64_t nodeA = streamrNodeNew(&result, ethereumAddressA, &configA);
     ASSERT_NE(nodeA, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeStart(&result, nodeA);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     ReceivedMessages receivedA;
     uint64_t subscriptionA = streamrNodeSubscribe(
@@ -426,12 +426,12 @@ TEST_F(StreamrNodeTest, ProxyModePublishesToAcceptingNode) {
         ReceivedMessages::callback,
         &receivedA);
     ASSERT_NE(subscriptionA, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     // A node that accepts proxy connections cannot itself use proxies.
     const std::string proxyUrl =
         "ws://127.0.0.1:" + std::to_string(proxyServerPort);
-    Proxy proxy{
+    StreamrPeer proxy{
         .websocketUrl = proxyUrl.c_str(), .ethereumAddress = ethereumAddressA};
     streamrNodeSetProxies(
         &result,
@@ -442,14 +442,14 @@ TEST_F(StreamrNodeTest, ProxyModePublishesToAcceptingNode) {
         STREAMR_PROXY_DIRECTION_PUBLISH,
         1);
     expectSingleError(result, ERROR_NODE_OPERATION_FAILED);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     uint64_t nodeB = streamrNodeNew(&result, ethereumAddressB, nullptr);
     ASSERT_NE(nodeB, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeStart(&result, nodeB);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeSetProxies(
         &result,
@@ -460,12 +460,12 @@ TEST_F(StreamrNodeTest, ProxyModePublishesToAcceptingNode) {
         STREAMR_PROXY_DIRECTION_PUBLISH,
         1);
     expectNoErrors(result);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     const std::string messageViaProxy = "hello via proxy";
     EXPECT_TRUE(waitUntil(
         [&]() {
-            const ProxyResult* publishResult = nullptr;
+            const StreamrResult* publishResult = nullptr;
             streamrNodePublish(
                 &publishResult,
                 nodeB,
@@ -473,17 +473,17 @@ TEST_F(StreamrNodeTest, ProxyModePublishesToAcceptingNode) {
                 messageViaProxy.data(),
                 messageViaProxy.size(),
                 nullptr);
-            proxyClientResultDelete(publishResult);
+            streamrResultDelete(publishResult);
             return receivedA.contains(messageViaProxy);
         },
         messageTimeout));
 
     streamrNodeStop(&result, nodeB);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeStop(&result, nodeA);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeDelete(&result, nodeB);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeDelete(&result, nodeA);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }

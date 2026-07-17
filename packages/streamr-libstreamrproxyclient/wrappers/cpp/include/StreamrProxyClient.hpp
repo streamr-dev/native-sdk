@@ -78,7 +78,7 @@ struct StreamrProxyAddress {
     std::string websocketUrl; /**< WebSocket URL of the proxy */
     std::string ethereumAddress; /**< Ethereum address of the proxy */
 
-    static StreamrProxyAddress fromCProxy(const Proxy* proxy) {
+    static StreamrProxyAddress fromCProxy(const StreamrPeer* proxy) {
         return StreamrProxyAddress{
             .websocketUrl = std::string(proxy->websocketUrl),
             .ethereumAddress = std::string(proxy->ethereumAddress)};
@@ -93,7 +93,7 @@ struct StreamrProxyError : public std::runtime_error {
     StreamrProxyErrorCode code; /**< The error code */
 
     // NOLINTNEXTLINE(google-explicit-constructor)
-    StreamrProxyError(const Error* error)
+    StreamrProxyError(const StreamrError* error)
         : std::runtime_error(error->message), code(getErrorCode(error->code)) {
         if (error->proxy) {
             proxy = StreamrProxyAddress::fromCProxy(error->proxy);
@@ -137,7 +137,7 @@ struct StreamrProxyResult {
         errors; /**< List of failed proxy operations */
 
     // NOLINTNEXTLINE(google-explicit-constructor)
-    StreamrProxyResult(const ProxyResult* result) {
+    StreamrProxyResult(const StreamrResult* result) {
         this->successful.reserve(result->numSuccessful);
         for (size_t i = 0; i < result->numSuccessful; i++) {
             this->successful.push_back(
@@ -152,8 +152,8 @@ struct StreamrProxyResult {
 
 class SharedLibraryWrapper {
 public:
-    SharedLibraryWrapper() { proxyClientInitLibrary(); }
-    ~SharedLibraryWrapper() { proxyClientCleanupLibrary(); }
+    SharedLibraryWrapper() { streamrInitLibrary(); }
+    ~SharedLibraryWrapper() { streamrCleanupLibrary(); }
 };
 
 /**
@@ -179,22 +179,22 @@ public:
         const std::string& ethereumPrivateKey, // NOLINT
         const std::string& streamPartId)
         : ethereumPrivateKey(ethereumPrivateKey) {
-        const ProxyResult* result;
+        const StreamrResult* result;
         this->proxyClientHandle = proxyClientNew(
             &result, ownEthereumAddress.c_str(), streamPartId.c_str());
         if (result->numErrors > 0) {
             auto error = StreamrProxyError(&result->errors[0]);
-            proxyClientResultDelete(result);
+            streamrResultDelete(result);
             throw error; // NOLINT
         }
-        proxyClientResultDelete(result);
+        streamrResultDelete(result);
     }
 
     ~StreamrProxyClient() {
         if (this->proxyClientHandle != 0) {
-            const ProxyResult* result;
+            const StreamrResult* result;
             proxyClientDelete(&result, this->proxyClientHandle);
-            proxyClientResultDelete(result);
+            streamrResultDelete(result);
         }
     }
 
@@ -205,7 +205,7 @@ public:
      */
     [[nodiscard]] StreamrProxyResult connect(
         const std::vector<StreamrProxyAddress>& proxies) const {
-        const ProxyResult* result;
+        const StreamrResult* result;
         std::vector<Proxy> cProxies;
         cProxies.reserve(proxies.size());
         for (const auto& proxy : proxies) {
@@ -216,7 +216,7 @@ public:
         proxyClientConnect(
             &result, this->proxyClientHandle, cProxies.data(), cProxies.size());
         StreamrProxyResult streamrProxyResult(result);
-        proxyClientResultDelete(result);
+        streamrResultDelete(result);
         return streamrProxyResult;
     }
 
@@ -226,7 +226,7 @@ public:
      * @return Result containing successful publications and errors
      */
     [[nodiscard]] StreamrProxyResult publish(const std::string& message) const {
-        const ProxyResult* result;
+        const StreamrResult* result;
         proxyClientPublish(
             &result,
             this->proxyClientHandle,
@@ -234,7 +234,7 @@ public:
             message.size(),
             this->ethereumPrivateKey.c_str());
         StreamrProxyResult streamrProxyResult(result);
-        proxyClientResultDelete(result);
+        streamrResultDelete(result);
         return streamrProxyResult;
     }
 };

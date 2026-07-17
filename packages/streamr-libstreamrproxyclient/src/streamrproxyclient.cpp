@@ -29,6 +29,7 @@
 #include <vector>
 #include <folly/Singleton.h>
 #include "streamrnode.h"
+#include "streamrproxyclient.h"
 
 import streamr.trackerlessnetwork.protos;
 import streamr.dht.ConnectionManager;
@@ -1356,17 +1357,17 @@ static LibProxyClientApi* libProxyClientApi = nullptr; // NOLINT
 
 static void initialize() { // NOLINT
     // std::cout << "initialize()" << "\n";
-    proxyClientInitLibrary();
+    streamrInitLibrary();
 }
 
-void proxyClientInitLibrary() { // NOLINT
+void streamrInitLibrary() { // NOLINT
     if (libProxyClientApi != nullptr) {
         return;
     }
     libProxyClientApi = new LibProxyClientApi();
 }
 
-void proxyClientCleanupLibrary() { // NOLINT
+void streamrCleanupLibrary() { // NOLINT
     if (libProxyClientApi == nullptr) {
         return;
     }
@@ -1384,9 +1385,27 @@ static LibProxyClientApi& getProxyClientApi() { // NOLINT
     return *libProxyClientApi;
 }
 
-void proxyClientResultDelete(const ProxyResult* proxyResult) {
-    getProxyClientApi().proxyClientResultDelete(proxyResult);
+void streamrResultDelete(const StreamrResult* streamrResult) {
+    getProxyClientApi().proxyClientResultDelete(streamrResult);
 }
+
+// Deprecated pre-3.0 symbols, kept exported for one release (see
+// streamrproxyclient.h). Defined here so existing binaries keep linking;
+// the pragma silences the self-referential deprecation warnings.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+void proxyClientInitLibrary() { // NOLINT
+    streamrInitLibrary();
+}
+
+void proxyClientCleanupLibrary() { // NOLINT
+    streamrCleanupLibrary();
+}
+
+void proxyClientResultDelete(const StreamrResult* proxyResult) {
+    streamrResultDelete(proxyResult);
+}
+#pragma clang diagnostic pop
 
 uint64_t proxyClientNew(
     const ProxyResult** proxyResult,
