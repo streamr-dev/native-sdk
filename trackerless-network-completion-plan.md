@@ -639,6 +639,22 @@ Client-only operation (no websocket server, WebRTC + outbound websocket only) ve
 iOS/Android builds via the existing `iostest.sh`/`androidtest.sh` harnesses; confirm
 libdatachannel WebRTC passes the iOS libc++ gate; document supported configurations.
 
+**Phase D3 — Language wrappers and proxy-type renaming.**
+Extend the language wrappers with the full-node `streamrNode*` functionality from D1: the C++
+wrapper (`wrappers/cpp`), the Swift package (`dist/ios-swift-package`), the Kotlin Android
+library module (`dist/android-library-module`), and the Python package (`wrappers/python`);
+decide whether the Go wrapper (`wrappers/go`) follows or is dropped. In the SAME breaking
+release, resolve the naming decision deferred from the D1 review (PR #90): rename the
+proxy-prefixed shared infrastructure that both APIs use to neutral `streamr*` names —
+`ProxyResult`, `Error`, `proxyClientResultDelete`, `proxyClientInitLibrary` /
+`proxyClientCleanupLibrary`, and `struct Proxy` (today aliased as `StreamrEntryPoint`) — so the
+wrappers are written against the final names once instead of being renamed later. Keep the old
+`proxyClient*` C symbols and type names as deprecated aliases for one release so existing
+wrapper consumers keep working, and bump the shared-library major version.
+*Tests:* per-wrapper tests mirroring `StreamrNodeTest` (create/start/join/publish/subscribe
+round-trip between two wrapper-created nodes), plus the existing per-wrapper proxy test suites
+compiled against the renamed types (aliases exercised in at least one test each).
+
 ### Milestone E — Deferred (explicitly out of scope for v1)
 
 - Autocertifier client (TLS certificates for public websocket servers) and GeoIP location.
@@ -699,5 +715,7 @@ The port is feature-complete for the goal of this plan when:
    Streamr network directly, subscribes to a stream part, receives messages published by TS
    nodes, and publishes messages that TS subscribers receive — over websocket and over WebRTC
    (NAT'd, client-only configuration).
-3. The shared library exposes the full-node API (milestone D1) alongside the unchanged proxy
-   API, and the mobile builds pass their platform test scripts.
+3. The shared library exposes the full-node API (milestone D1) alongside the proxy API (its
+   shared types renamed to `streamr*` per phase D3, with the previous `proxyClient*` names kept
+   as deprecated aliases for one release), the language wrappers (C++, Swift, Kotlin, Python)
+   expose the full-node functionality, and the mobile builds pass their platform test scripts.
