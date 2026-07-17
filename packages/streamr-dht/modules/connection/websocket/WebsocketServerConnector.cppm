@@ -136,8 +136,8 @@ public:
     explicit WebsocketServerConnector(WebsocketServerConnectorOptions&& options)
         : options(std::move(options)), host(this->options.host) {
         if (this->options.portRange.has_value()) {
-            this->websocketServer = std::make_unique<WebsocketServer>(std::move(
-                WebsocketServerConfig{
+            this->websocketServer = std::make_unique<WebsocketServer>(
+                std::move(WebsocketServerConfig{
                     .portRange = this->options.portRange.value(),
                     .enableTls = this->options.serverEnableTls.value_or(false),
                     .tlsCertificateFiles = this->options.tlsCertificateFiles,
@@ -171,10 +171,9 @@ public:
             this->websocketServer) {
             this->websocketServer->on<
                 websocketserverevents::
-                    Connected>([this](
-                                   const std::shared_ptr<
-                                       WebsocketServerConnection>&
-                                       serverSocket) {
+                    Connected>([this](const std::shared_ptr<
+                                      WebsocketServerConnection>&
+                                          serverSocket) {
                 const auto resourceUrl = serverSocket->getResourceURL();
                 const auto action = getActionFromUrl(resourceUrl);
                 SLogger::trace(
@@ -352,34 +351,41 @@ public:
 
     void destroy() {
         SLogger::trace("WebsocketServerConnector::destroy() called");
+        std::map<std::string, std::shared_ptr<IncomingHandshaker>> handshakers;
+        std::map<DhtAddress, std::shared_ptr<IPendingConnection>> requests;
+        std::unique_ptr<WebsocketServer> server;
         {
             std::scoped_lock lock(this->mMutex);
             this->abortController.abort();
-
-            SLogger::trace("Closing ongoing connect requests");
-            for (const auto& request : this->ongoingConnectRequests) {
-                if (request.second) {
-                    request.second->close(true);
-                }
+            handshakers.swap(this->connectingHandshakers);
+            requests.swap(this->ongoingConnectRequests);
+            server = std::move(this->websocketServer);
+        }
+        // Every call-out below runs OUTSIDE mMutex: close(true) fans out
+        // into Disconnected handlers that re-enter connection/connector
+        // code, and holding the lock across that deadlocks ABBA against a
+        // thread that holds a connection's mutex and needs mMutex (the
+        // shape sampled in WebsocketClientConnector::destroy(); same
+        // hazard here).
+        SLogger::trace("Closing ongoing connect requests");
+        for (const auto& request : requests) {
+            if (request.second) {
+                request.second->close(true);
             }
+        }
 
-            SLogger::trace("Closing connecting handshakers");
-            for (const auto& handshaker : this->connectingHandshakers) {
-                if (handshaker.second &&
-                    handshaker.second->getPendingConnection()) {
-                    handshaker.second->getPendingConnection()->close(true);
-                }
+        SLogger::trace("Closing connecting handshakers");
+        for (const auto& handshaker : handshakers) {
+            if (handshaker.second &&
+                handshaker.second->getPendingConnection()) {
+                handshaker.second->getPendingConnection()->close(true);
             }
+        }
 
-            SLogger::trace("Clearing maps");
-            this->connectingHandshakers.clear();
-            this->ongoingConnectRequests.clear();
-
-            SLogger::trace("Stopping websocket server");
-            if (this->websocketServer) {
-                this->websocketServer->stop();
-                this->websocketServer.reset();
-            }
+        SLogger::trace("Stopping websocket server");
+        if (server) {
+            server->stop();
+            server.reset();
         }
         // Drained OUTSIDE the mutex (the PeerManager::stop() pattern): a
         // detached requestConnection notification still in flight references
@@ -416,35 +422,34 @@ private:
                 this->ongoingConnectRequests.erase(nodeId);
             });
         this->ongoingConnectRequests.emplace(nodeId, pendingConnection);
-        this->requestConnectionScope.add(
-            streamr::utils::co_withExecutor(
-                &this->requestConnectionExecutor,
-                folly::coro::co_invoke(
-                    [this, localPeerDescriptor, targetPeerDescriptor]()
-                        -> folly::coro::Task<void> {
-                        try {
-                            WebsocketClientConnectorRpcClient client(
-                                this->options.rpcCommunicator);
-                            WebsocketClientConnectorRpcRemote remoteConnector(
-                                PeerDescriptor(localPeerDescriptor),
-                                PeerDescriptor(targetPeerDescriptor),
-                                std::move(client));
-                            // Cancellable by destroy(): abort fires before the
-                            // executor join drains this task.
-                            co_await streamr::utils::co_withCancellation(
-                                this->abortController.getSignal()
-                                    .getCancellationToken(),
-                                remoteConnector.requestConnection());
-                            SLogger::trace(
-                                "Sent WebsocketConnectionRequest notification"
-                                " to peer");
-                        } catch (const std::exception& err) {
-                            SLogger::debug(
-                                "Failed to send WebsocketConnectionRequest"
-                                " notification to peer " +
-                                std::string(err.what()));
-                        }
-                    })));
+        this->requestConnectionScope.add(streamr::utils::co_withExecutor(
+            &this->requestConnectionExecutor,
+            folly::coro::co_invoke(
+                [this, localPeerDescriptor, targetPeerDescriptor]()
+                    -> folly::coro::Task<void> {
+                    try {
+                        WebsocketClientConnectorRpcClient client(
+                            this->options.rpcCommunicator);
+                        WebsocketClientConnectorRpcRemote remoteConnector(
+                            PeerDescriptor(localPeerDescriptor),
+                            PeerDescriptor(targetPeerDescriptor),
+                            std::move(client));
+                        // Cancellable by destroy(): abort fires before the
+                        // executor join drains this task.
+                        co_await streamr::utils::co_withCancellation(
+                            this->abortController.getSignal()
+                                .getCancellationToken(),
+                            remoteConnector.requestConnection());
+                        SLogger::trace(
+                            "Sent WebsocketConnectionRequest notification"
+                            " to peer");
+                    } catch (const std::exception& err) {
+                        SLogger::debug(
+                            "Failed to send WebsocketConnectionRequest"
+                            " notification to peer " +
+                            std::string(err.what()));
+                    }
+                })));
         return pendingConnection;
     }
 

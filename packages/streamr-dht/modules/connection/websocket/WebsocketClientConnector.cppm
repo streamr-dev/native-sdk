@@ -67,24 +67,22 @@ public:
 
     explicit WebsocketClientConnector(WebsocketClientConnectorOptions&& options)
         : options(std::move(options)),
-          rpcLocal(
-              WebsocketClientConnectorRpcLocalOptions{
-                  .connect = [this](const PeerDescriptor& targetPeerDescriptor)
-                      -> std::shared_ptr<IPendingConnection> {
-                      return this->connect(targetPeerDescriptor, std::nullopt);
+          rpcLocal(WebsocketClientConnectorRpcLocalOptions{
+              .connect = [this](const PeerDescriptor& targetPeerDescriptor)
+                  -> std::shared_ptr<IPendingConnection> {
+                  return this->connect(targetPeerDescriptor, std::nullopt);
+              },
+              .hasConnection = [this](const DhtAddress& nodeId) -> bool {
+                  std::scoped_lock lock(this->mutex);
+                  return this->connectingHandshakers.contains(nodeId) ||
+                      this->options.hasConnection(nodeId);
+              },
+              .onNewConnection =
+                  [this](
+                      const std::shared_ptr<IPendingConnection>& connection) {
+                      return this->options.onNewConnection(connection);
                   },
-                  .hasConnection = [this](const DhtAddress& nodeId) -> bool {
-                      std::scoped_lock lock(this->mutex);
-                      return this->connectingHandshakers.contains(nodeId) ||
-                          this->options.hasConnection(nodeId);
-                  },
-                  .onNewConnection =
-                      [this](
-                          const std::shared_ptr<IPendingConnection>&
-                              connection) {
-                          return this->options.onNewConnection(connection);
-                      },
-                  .abortSignal = this->abortController.getSignal()}) {
+              .abortSignal = this->abortController.getSignal()}) {
         this->options.rpcCommunicator
             .registerRpcNotification<WebsocketConnectionRequest>(
                 "requestConnection",
@@ -157,14 +155,22 @@ public:
     }
 
     void destroy() {
-        std::scoped_lock lock(this->mutex);
-        this->abortController.abort();
-
-        for (const auto& [_, handshaker] : this->connectingHandshakers) {
+        // Snapshot under the lock, close() OUTSIDE it: close(true) fans
+        // out into Disconnected handlers that re-enter connection and
+        // connector code — holding this->mutex across that call-out
+        // deadlocks ABBA against a thread that holds a connection's
+        // mutex (an rtc close callback, a pool worker in connect()) and
+        // needs this->mutex in the HandshakerStopped handler (sampled
+        // wedging the full-node teardown).
+        std::map<DhtAddress, std::shared_ptr<OutgoingHandshaker>> handshakers;
+        {
+            std::scoped_lock lock(this->mutex);
+            this->abortController.abort();
+            handshakers.swap(this->connectingHandshakers);
+        }
+        for (const auto& [_, handshaker] : handshakers) {
             handshaker->getPendingConnection()->close(true);
         }
-
-        this->connectingHandshakers.clear();
     }
 };
 
