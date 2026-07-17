@@ -61,6 +61,47 @@ TEST_F(StreamrProxyClientTest, CanCreateAndDeleteProxyClient) {
     SLogger::info("test finished");
 }
 
+// Regression test for use-after-cleanup: the fixture destructor calls
+// proxyClientCleanupLibrary() after every test, so any test that runs
+// after another one in the same process starts with the library torn
+// down. API entry points must re-initialize the library on demand
+// instead of dereferencing the destroyed instance (this crashed with
+// SIGSEGV before the fix; CI masked it by running every test in its
+// own process).
+TEST_F(StreamrProxyClientTest, ApiIsUsableAfterCleanupLibrary) {
+    // Implicit re-initialization: call the API right after a cleanup.
+    proxyClientCleanupLibrary();
+
+    const ProxyResult* result = nullptr;
+    uint64_t clientHandle =
+        proxyClientNew(&result, validEthereumAddress, validStreamPartId);
+    EXPECT_EQ(result->numErrors, 0);
+    EXPECT_NE(clientHandle, 0);
+    proxyClientResultDelete(result);
+
+    const ProxyResult* result2 = nullptr;
+    proxyClientDelete(&result2, clientHandle);
+    EXPECT_EQ(result2->numErrors, 0);
+    proxyClientResultDelete(result2);
+
+    // Explicit re-initialization (the path documented in
+    // streamrproxyclient.h): cleanup, init, use.
+    proxyClientCleanupLibrary();
+    proxyClientInitLibrary();
+
+    const ProxyResult* result3 = nullptr;
+    uint64_t clientHandle2 =
+        proxyClientNew(&result3, validEthereumAddress, validStreamPartId);
+    EXPECT_EQ(result3->numErrors, 0);
+    EXPECT_NE(clientHandle2, 0);
+    proxyClientResultDelete(result3);
+
+    const ProxyResult* result4 = nullptr;
+    proxyClientDelete(&result4, clientHandle2);
+    EXPECT_EQ(result4->numErrors, 0);
+    proxyClientResultDelete(result4);
+}
+
 TEST_F(StreamrProxyClientTest, InvalidEthereumAddress) {
     const ProxyResult* result = nullptr;
 
