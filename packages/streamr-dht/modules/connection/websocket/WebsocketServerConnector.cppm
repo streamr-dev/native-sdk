@@ -136,8 +136,8 @@ public:
     explicit WebsocketServerConnector(WebsocketServerConnectorOptions&& options)
         : options(std::move(options)), host(this->options.host) {
         if (this->options.portRange.has_value()) {
-            this->websocketServer = std::make_unique<WebsocketServer>(
-                std::move(WebsocketServerConfig{
+            this->websocketServer = std::make_unique<WebsocketServer>(std::move(
+                WebsocketServerConfig{
                     .portRange = this->options.portRange.value(),
                     .enableTls = this->options.serverEnableTls.value_or(false),
                     .tlsCertificateFiles = this->options.tlsCertificateFiles,
@@ -171,9 +171,10 @@ public:
             this->websocketServer) {
             this->websocketServer->on<
                 websocketserverevents::
-                    Connected>([this](const std::shared_ptr<
-                                      WebsocketServerConnection>&
-                                          serverSocket) {
+                    Connected>([this](
+                                   const std::shared_ptr<
+                                       WebsocketServerConnection>&
+                                       serverSocket) {
                 const auto resourceUrl = serverSocket->getResourceURL();
                 const auto action = getActionFromUrl(resourceUrl);
                 SLogger::trace(
@@ -422,34 +423,35 @@ private:
                 this->ongoingConnectRequests.erase(nodeId);
             });
         this->ongoingConnectRequests.emplace(nodeId, pendingConnection);
-        this->requestConnectionScope.add(streamr::utils::co_withExecutor(
-            &this->requestConnectionExecutor,
-            folly::coro::co_invoke(
-                [this, localPeerDescriptor, targetPeerDescriptor]()
-                    -> folly::coro::Task<void> {
-                    try {
-                        WebsocketClientConnectorRpcClient client(
-                            this->options.rpcCommunicator);
-                        WebsocketClientConnectorRpcRemote remoteConnector(
-                            PeerDescriptor(localPeerDescriptor),
-                            PeerDescriptor(targetPeerDescriptor),
-                            std::move(client));
-                        // Cancellable by destroy(): abort fires before the
-                        // executor join drains this task.
-                        co_await streamr::utils::co_withCancellation(
-                            this->abortController.getSignal()
-                                .getCancellationToken(),
-                            remoteConnector.requestConnection());
-                        SLogger::trace(
-                            "Sent WebsocketConnectionRequest notification"
-                            " to peer");
-                    } catch (const std::exception& err) {
-                        SLogger::debug(
-                            "Failed to send WebsocketConnectionRequest"
-                            " notification to peer " +
-                            std::string(err.what()));
-                    }
-                })));
+        this->requestConnectionScope.add(
+            streamr::utils::co_withExecutor(
+                &this->requestConnectionExecutor,
+                folly::coro::co_invoke(
+                    [this, localPeerDescriptor, targetPeerDescriptor]()
+                        -> folly::coro::Task<void> {
+                        try {
+                            WebsocketClientConnectorRpcClient client(
+                                this->options.rpcCommunicator);
+                            WebsocketClientConnectorRpcRemote remoteConnector(
+                                PeerDescriptor(localPeerDescriptor),
+                                PeerDescriptor(targetPeerDescriptor),
+                                std::move(client));
+                            // Cancellable by destroy(): abort fires before the
+                            // executor join drains this task.
+                            co_await streamr::utils::co_withCancellation(
+                                this->abortController.getSignal()
+                                    .getCancellationToken(),
+                                remoteConnector.requestConnection());
+                            SLogger::trace(
+                                "Sent WebsocketConnectionRequest notification"
+                                " to peer");
+                        } catch (const std::exception& err) {
+                            SLogger::debug(
+                                "Failed to send WebsocketConnectionRequest"
+                                " notification to peer " +
+                                std::string(err.what()));
+                        }
+                    })));
         return pendingConnection;
     }
 

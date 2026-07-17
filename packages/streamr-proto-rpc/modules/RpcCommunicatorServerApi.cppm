@@ -197,13 +197,14 @@ private:
             return;
         }
         auto handler = mServerRegistry.getAsyncHandler(rpcMessage);
-        mScope.add(streamr::utils::co_withExecutor(
-            &mSerialExecutor,
-            makeResponseTask(
-                std::move(handler),
-                mOutgoingMessageCallback,
-                rpcMessage,
-                callContext)));
+        mScope.add(
+            streamr::utils::co_withExecutor(
+                &mSerialExecutor,
+                makeResponseTask(
+                    std::move(handler),
+                    mOutgoingMessageCallback,
+                    rpcMessage,
+                    callContext)));
     }
 
     void handleNotification(

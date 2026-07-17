@@ -83,8 +83,9 @@ inline StreamMessage createStreamMessage(
 // identity (mirrors the streamr-dht test util of the same name).
 inline PeerDescriptor createMockPeerDescriptor() {
     PeerDescriptor descriptor;
-    descriptor.set_nodeid(streamr::dht::Identifiers::getRawFromDhtAddress(
-        streamr::dht::Identifiers::createRandomDhtAddress()));
+    descriptor.set_nodeid(
+        streamr::dht::Identifiers::getRawFromDhtAddress(
+            streamr::dht::Identifiers::createRandomDhtAddress()));
     descriptor.set_type(::dht::NodeType::NODEJS);
     return descriptor;
 }

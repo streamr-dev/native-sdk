@@ -166,41 +166,43 @@ public:
                   this->send(message, sendOptions);
               },
               RpcCommunicatorOptions{.rpcRequestTimeout = 10s}), // NOLINT
-          connectionLockRpcLocal(ConnectionLockRpcLocalOptions{
-              .addRemoteLocked =
-                  [this](const DhtAddress& id, const LockID& lockId) {
-                      this->locks.addRemoteLocked(id, lockId);
-                  },
-              .removeRemoteLocked =
-                  [this](const DhtAddress& id, const LockID& lockId) {
-                      this->locks.removeRemoteLocked(id, lockId);
-                  },
-              .closeConnection =
-                  [this](
-                      const PeerDescriptor& peerDescriptor,
-                      bool gracefulLeave,
-                      const std::optional<std::string>& reason) {
-                      SLogger::debug("closeConnection() callback of RpcLocal");
-                      this->closeConnection(
-                          peerDescriptor, gracefulLeave, reason);
-                  },
-              .getLocalPeerDescriptor =
-                  [this]() { return this->getLocalPeerDescriptor(); },
-              .setPrivate =
-                  [this](const DhtAddress& id, bool isPrivate) {
-                      if (!this->options.allowIncomingPrivateConnections) {
+          connectionLockRpcLocal(
+              ConnectionLockRpcLocalOptions{
+                  .addRemoteLocked =
+                      [this](const DhtAddress& id, const LockID& lockId) {
+                          this->locks.addRemoteLocked(id, lockId);
+                      },
+                  .removeRemoteLocked =
+                      [this](const DhtAddress& id, const LockID& lockId) {
+                          this->locks.removeRemoteLocked(id, lockId);
+                      },
+                  .closeConnection =
+                      [this](
+                          const PeerDescriptor& peerDescriptor,
+                          bool gracefulLeave,
+                          const std::optional<std::string>& reason) {
                           SLogger::debug(
-                              "node " + id +
-                              " attempted to set a connection as private,"
-                              " but it is not allowed");
-                          return;
-                      }
-                      if (isPrivate) {
-                          this->locks.addPrivate(id);
-                      } else {
-                          this->locks.removePrivate(id);
-                      }
-                  }}) {
+                              "closeConnection() callback of RpcLocal");
+                          this->closeConnection(
+                              peerDescriptor, gracefulLeave, reason);
+                      },
+                  .getLocalPeerDescriptor =
+                      [this]() { return this->getLocalPeerDescriptor(); },
+                  .setPrivate =
+                      [this](const DhtAddress& id, bool isPrivate) {
+                          if (!this->options.allowIncomingPrivateConnections) {
+                              SLogger::debug(
+                                  "node " + id +
+                                  " attempted to set a connection as private,"
+                                  " but it is not allowed");
+                              return;
+                          }
+                          if (isPrivate) {
+                              this->locks.addPrivate(id);
+                          } else {
+                              this->locks.removePrivate(id);
+                          }
+                      }}) {
         SLogger::debug("ConnectionManager constructor start");
         SLogger::info("ConnectionManager constructor");
         this->connectorFacade = this->options.createConnectorFacade();
@@ -744,24 +746,27 @@ private:
         if (endpoint->isConnected()) {
             try {
                 SLogger::debug("gracefullyDisconnect() calling blockingWait()");
-                streamr::utils::blockingWait(folly::coro::co_invoke(
-                    [this,
-                     endpoint,
-                     targetDescriptor = std::move(targetDescriptor),
-                     disconnectMode]() -> folly::coro::Task<void> {
-                        co_await folly::coro::collectAll(
-                            waitForEvent<endpointevents::Disconnected>(
-                                endpoint.get(), 2000ms), // NOLINT
-                            folly::coro::co_invoke(
-                                [this,
-                                 endpoint,
-                                 targetDescriptor,
-                                 disconnectMode]() -> folly::coro::Task<void> {
-                                    co_return co_await this
-                                        ->doGracefullyDisconnectAsync(
-                                            targetDescriptor, disconnectMode);
-                                }));
-                    }));
+                streamr::utils::blockingWait(
+                    folly::coro::co_invoke(
+                        [this,
+                         endpoint,
+                         targetDescriptor = std::move(targetDescriptor),
+                         disconnectMode]() -> folly::coro::Task<void> {
+                            co_await folly::coro::collectAll(
+                                waitForEvent<endpointevents::Disconnected>(
+                                    endpoint.get(), 2000ms), // NOLINT
+                                folly::coro::co_invoke(
+                                    [this,
+                                     endpoint,
+                                     targetDescriptor,
+                                     disconnectMode]()
+                                        -> folly::coro::Task<void> {
+                                        co_return co_await this
+                                            ->doGracefullyDisconnectAsync(
+                                                targetDescriptor,
+                                                disconnectMode);
+                                    }));
+                        }));
             } catch (const std::exception& err) {
                 SLogger::error(
                     "Caught exception in gracefullyDisconnect " +

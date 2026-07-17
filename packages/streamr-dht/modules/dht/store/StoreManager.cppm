@@ -131,14 +131,15 @@ private:
         auto self = this->sharedFromThis<StoreManager>();
         DataEntry entry = dataEntry;
         PeerDescriptor target = contact;
-        this->replicationScope.add(streamr::utils::co_withExecutor(
-            &this->replicationExecutor,
-            streamr::utils::co_withCancellation(
-                this->replicationCancellation.getToken(),
-                folly::coro::co_invoke(
-                    [self, entry, target]() -> folly::coro::Task<void> {
-                        co_await self->doReplicate(entry, target);
-                    }))));
+        this->replicationScope.add(
+            streamr::utils::co_withExecutor(
+                &this->replicationExecutor,
+                streamr::utils::co_withCancellation(
+                    this->replicationCancellation.getToken(),
+                    folly::coro::co_invoke(
+                        [self, entry, target]() -> folly::coro::Task<void> {
+                            co_await self->doReplicate(entry, target);
+                        }))));
     }
 
     void registerLocalRpcMethods() {
@@ -201,18 +202,21 @@ private:
                 auto self = this->sharedFromThis<StoreManager>();
                 DhtAddress key = dataKey;
                 PeerDescriptor node = newNode;
-                this->replicationScope.add(streamr::utils::co_withExecutor(
-                    &this->replicationExecutor,
-                    streamr::utils::co_withCancellation(
-                        this->replicationCancellation.getToken(),
-                        folly::coro::co_invoke(
-                            [self, key, node]() -> folly::coro::Task<void> {
-                                const auto dataEntries =
-                                    self->options.localDataStore.values(key);
-                                for (const auto& dataEntry : dataEntries) {
-                                    co_await self->doReplicate(dataEntry, node);
-                                }
-                            }))));
+                this->replicationScope.add(
+                    streamr::utils::co_withExecutor(
+                        &this->replicationExecutor,
+                        streamr::utils::co_withCancellation(
+                            this->replicationCancellation.getToken(),
+                            folly::coro::co_invoke(
+                                [self, key, node]() -> folly::coro::Task<void> {
+                                    const auto dataEntries =
+                                        self->options.localDataStore.values(
+                                            key);
+                                    for (const auto& dataEntry : dataEntries) {
+                                        co_await self->doReplicate(
+                                            dataEntry, node);
+                                    }
+                                }))));
             }
         } else if (!std::ranges::any_of(
                        storers, [this](const PeerDescriptor& peer) {

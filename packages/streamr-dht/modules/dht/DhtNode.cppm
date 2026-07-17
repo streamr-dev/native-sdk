@@ -303,22 +303,24 @@ private:
     }
 
     void initPeerManager() {
-        this->peerManager = PeerManager::newInstance(PeerManagerOptions{
-            .numberOfNodesPerKBucket = this->options.numberOfNodesPerKBucket,
-            .maxContactCount = this->options.maxContactCount,
-            .localNodeId = this->getNodeId(),
-            .localPeerDescriptor = *this->localPeerDescriptor,
-            .connectionLocker = this->connectionLockerShared,
-            .neighborPingLimit = this->options.neighborPingLimit,
-            .lockId = LockID{this->options.serviceId},
-            .createDhtNodeRpcRemote =
-                [this](const PeerDescriptor& peerDescriptor) {
-                    return this->createDhtNodeRpcRemote(peerDescriptor);
-                },
-            .hasConnection =
-                [this](const DhtAddress& nodeId) {
-                    return this->connectionsView->hasConnection(nodeId);
-                }});
+        this->peerManager = PeerManager::newInstance(
+            PeerManagerOptions{
+                .numberOfNodesPerKBucket =
+                    this->options.numberOfNodesPerKBucket,
+                .maxContactCount = this->options.maxContactCount,
+                .localNodeId = this->getNodeId(),
+                .localPeerDescriptor = *this->localPeerDescriptor,
+                .connectionLocker = this->connectionLockerShared,
+                .neighborPingLimit = this->options.neighborPingLimit,
+                .lockId = LockID{this->options.serviceId},
+                .createDhtNodeRpcRemote =
+                    [this](const PeerDescriptor& peerDescriptor) {
+                        return this->createDhtNodeRpcRemote(peerDescriptor);
+                    },
+                .hasConnection =
+                    [this](const DhtAddress& nodeId) {
+                        return this->connectionsView->hasConnection(nodeId);
+                    }});
         // StoreManager tracks the neighbourhood via nearbyContactAdded (TS
         // re-emits it as a DhtNode event first; wired straight through here).
         this->peerManager->on<peermanagerevents::NearbyContactAdded>(
@@ -364,15 +366,17 @@ private:
                 const auto token =
                     this->abortController.getSignal().getCancellationToken();
                 for (const auto& entryPoint : this->options.entryPoints) {
-                    this->recoveryScope.add(streamr::utils::co_withExecutor(
-                        &this->recoveryExecutor,
-                        streamr::utils::co_withCancellation(
-                            token,
-                            folly::coro::co_invoke(
-                                [discovery,
-                                 entryPoint]() -> folly::coro::Task<void> {
-                                    co_await discovery->rejoinDht(entryPoint);
-                                }))));
+                    this->recoveryScope.add(
+                        streamr::utils::co_withExecutor(
+                            &this->recoveryExecutor,
+                            streamr::utils::co_withCancellation(
+                                token,
+                                folly::coro::co_invoke(
+                                    [discovery,
+                                     entryPoint]() -> folly::coro::Task<void> {
+                                        co_await discovery->rejoinDht(
+                                            entryPoint);
+                                    }))));
                 }
             }
         });
@@ -585,28 +589,32 @@ public:
 
         this->initPeerManager();
 
-        this->peerDiscovery = PeerDiscovery::newInstance(PeerDiscoveryOptions{
-            .localPeerDescriptor = *this->localPeerDescriptor,
-            .joinNoProgressLimit = this->options.joinNoProgressLimit,
-            .serviceId = this->options.serviceId,
-            .parallelism = this->options.joinParallelism,
-            .joinTimeout = this->options.dhtJoinTimeout,
-            .connectionLocker = this->connectionLockerShared,
-            .peerManager = *this->peerManager,
-            .abortSignal = this->abortController.getSignal(),
-            .createDhtNodeRpcRemote =
-                [this](const PeerDescriptor& peerDescriptor) {
-                    return this->createDhtNodeRpcRemote(peerDescriptor);
-                }});
-        this->router = Router::newInstance(RouterOptions{
-            .rpcCommunicator = *this->rpcCommunicator,
-            .localPeerDescriptor = *this->localPeerDescriptor,
-            .handleMessage =
-                [this](const Message& message) {
-                    this->handleMessageFromRouter(message);
-                },
-            .getConnections =
-                [this]() { return this->connectionsView->getConnections(); }});
+        this->peerDiscovery = PeerDiscovery::newInstance(
+            PeerDiscoveryOptions{
+                .localPeerDescriptor = *this->localPeerDescriptor,
+                .joinNoProgressLimit = this->options.joinNoProgressLimit,
+                .serviceId = this->options.serviceId,
+                .parallelism = this->options.joinParallelism,
+                .joinTimeout = this->options.dhtJoinTimeout,
+                .connectionLocker = this->connectionLockerShared,
+                .peerManager = *this->peerManager,
+                .abortSignal = this->abortController.getSignal(),
+                .createDhtNodeRpcRemote =
+                    [this](const PeerDescriptor& peerDescriptor) {
+                        return this->createDhtNodeRpcRemote(peerDescriptor);
+                    }});
+        this->router = Router::newInstance(
+            RouterOptions{
+                .rpcCommunicator = *this->rpcCommunicator,
+                .localPeerDescriptor = *this->localPeerDescriptor,
+                .handleMessage =
+                    [this](const Message& message) {
+                        this->handleMessageFromRouter(message);
+                    },
+                .getConnections =
+                    [this]() {
+                        return this->connectionsView->getConnections();
+                    }});
         auto routerPtr = this->router;
         this->recursiveOperationManager =
             RecursiveOperationManager::newInstance(
@@ -641,27 +649,30 @@ public:
                         [routerPtr](const std::string& requestId) {
                             routerPtr->addToDuplicateDetector(requestId);
                         }});
-        this->storeManager = StoreManager::newInstance(StoreManagerOptions{
-            .rpcCommunicator = *this->rpcCommunicator,
-            .localPeerDescriptor = *this->localPeerDescriptor,
-            .localDataStore = this->localDataStore,
-            .serviceId = this->options.serviceId,
-            .highestTtl = this->options.storeHighestTtl,
-            .redundancyFactor = this->options.storageRedundancyFactor,
-            .getNeighbors = [this]() { return this->getNeighborDescriptors(); },
-            .createRpcRemote =
-                [this](const PeerDescriptor& contact) {
-                    return std::make_shared<StoreRpcRemote>(
-                        *this->localPeerDescriptor,
-                        contact,
-                        StoreRpcClient(*this->rpcCommunicator),
-                        this->options.rpcRequestTimeout);
-                },
-            .executeRecursiveOperation =
-                [this](const DhtAddress& key, RecursiveOperation operation) {
-                    return this->recursiveOperationManager->execute(
-                        key, operation);
-                }});
+        this->storeManager = StoreManager::newInstance(
+            StoreManagerOptions{
+                .rpcCommunicator = *this->rpcCommunicator,
+                .localPeerDescriptor = *this->localPeerDescriptor,
+                .localDataStore = this->localDataStore,
+                .serviceId = this->options.serviceId,
+                .highestTtl = this->options.storeHighestTtl,
+                .redundancyFactor = this->options.storageRedundancyFactor,
+                .getNeighbors =
+                    [this]() { return this->getNeighborDescriptors(); },
+                .createRpcRemote =
+                    [this](const PeerDescriptor& contact) {
+                        return std::make_shared<StoreRpcRemote>(
+                            *this->localPeerDescriptor,
+                            contact,
+                            StoreRpcClient(*this->rpcCommunicator),
+                            this->options.rpcRequestTimeout);
+                    },
+                .executeRecursiveOperation =
+                    [this](
+                        const DhtAddress& key, RecursiveOperation operation) {
+                        return this->recursiveOperationManager->execute(
+                            key, operation);
+                    }});
         this->bindRpcLocalMethods();
         // Set only after everything above succeeded: if start() throws
         // (e.g. the websocket server port is taken), transportPtr is still

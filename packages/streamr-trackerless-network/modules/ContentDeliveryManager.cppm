@@ -357,39 +357,43 @@ public:
                     SLogger::debug(
                         "Manual rejoin required for stream part " +
                         streamPartId);
-                    this->joinScope.add(streamr::utils::co_withExecutor(
-                        &this->joinExecutor,
-                        streamr::utils::co_withCancellation(
-                            this->joinCancellation.getToken(),
-                            streamPartReconnect->reconnect())));
+                    this->joinScope.add(
+                        streamr::utils::co_withExecutor(
+                            &this->joinExecutor,
+                            streamr::utils::co_withCancellation(
+                                this->joinCancellation.getToken(),
+                                streamPartReconnect->reconnect())));
                 }
             });
         node->on<contentdeliverylayernodeevents::EntryPointLeaveDetected>(
             [this, streamPartId, peerDescriptorStoreManager]() {
-                this->joinScope.add(streamr::utils::co_withExecutor(
-                    &this->joinExecutor,
-                    streamr::utils::co_withCancellation(
-                        this->joinCancellation.getToken(),
-                        this->handleEntryPointLeave(
-                            streamPartId, peerDescriptorStoreManager))));
+                this->joinScope.add(
+                    streamr::utils::co_withExecutor(
+                        &this->joinExecutor,
+                        streamr::utils::co_withCancellation(
+                            this->joinCancellation.getToken(),
+                            this->handleEntryPointLeave(
+                                streamPartId, peerDescriptorStoreManager))));
             });
         // TS setImmediate(): detached bounded join.
-        this->joinScope.add(streamr::utils::co_withExecutor(
-            &this->joinExecutor,
-            streamr::utils::co_withCancellation(
-                this->joinCancellation.getToken(),
-                folly::coro::co_invoke(
-                    [this, streamPartId, peerDescriptorStoreManager]()
-                        -> folly::coro::Task<void> {
-                        try {
-                            co_await this->startLayersAndJoinDht(
-                                streamPartId, peerDescriptorStoreManager);
-                        } catch (const std::exception& err) {
-                            SLogger::warn(
-                                "Failed to join to stream part " +
-                                streamPartId + ": " + std::string(err.what()));
-                        }
-                    }))));
+        this->joinScope.add(
+            streamr::utils::co_withExecutor(
+                &this->joinExecutor,
+                streamr::utils::co_withCancellation(
+                    this->joinCancellation.getToken(),
+                    folly::coro::co_invoke(
+                        [this, streamPartId, peerDescriptorStoreManager]()
+                            -> folly::coro::Task<void> {
+                            try {
+                                co_await this->startLayersAndJoinDht(
+                                    streamPartId, peerDescriptorStoreManager);
+                            } catch (const std::exception& err) {
+                                SLogger::warn(
+                                    "Failed to join to stream part " +
+                                    streamPartId + ": " +
+                                    std::string(err.what()));
+                            }
+                        }))));
     }
 
     folly::coro::Task<void> setProxies(
@@ -474,11 +478,12 @@ public:
             if (part->proxied) {
                 continue;
             }
-            infos.push_back(StreamPartitionInfo{
-                .id = streamPartId,
-                .controlLayerNeighbors =
-                    part->discoveryLayerNode->getNeighbors(),
-                .contentDeliveryLayerNeighbors = part->node->getInfos()});
+            infos.push_back(
+                StreamPartitionInfo{
+                    .id = streamPartId,
+                    .controlLayerNeighbors =
+                        part->discoveryLayerNode->getNeighbors(),
+                    .contentDeliveryLayerNeighbors = part->node->getInfos()});
         }
         return infos;
     }
@@ -610,16 +615,17 @@ private:
                     minNeighborCount) {
                     auto networkSplitAvoidance =
                         streamPart->networkSplitAvoidance;
-                    this->joinScope.add(streamr::utils::co_withExecutor(
-                        &this->joinExecutor,
-                        streamr::utils::co_withCancellation(
-                            this->joinCancellation.getToken(),
-                            folly::coro::co_invoke(
-                                [networkSplitAvoidance]()
-                                    -> folly::coro::Task<void> {
-                                    co_await networkSplitAvoidance
-                                        ->avoidNetworkSplit();
-                                }))));
+                    this->joinScope.add(
+                        streamr::utils::co_withExecutor(
+                            &this->joinExecutor,
+                            streamr::utils::co_withCancellation(
+                                this->joinCancellation.getToken(),
+                                folly::coro::co_invoke(
+                                    [networkSplitAvoidance]()
+                                        -> folly::coro::Task<void> {
+                                        co_await networkSplitAvoidance
+                                            ->avoidNetworkSplit();
+                                    }))));
                 }
             }
         }
