@@ -173,12 +173,23 @@ if (NOT IOS)
 
     add_executable(streamrproxyclient-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrProxyClientCppWrapperTest.cpp)
     target_link_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
-    
+
     target_include_directories(streamrproxyclient-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/include)
-    
-    target_link_libraries(streamrproxyclient-cpp-wrapper-test 
+
+    target_link_libraries(streamrproxyclient-cpp-wrapper-test
         PRIVATE streamrproxyclient
-        PRIVATE GTest::gtest 
+        PRIVATE GTest::gtest
+        PRIVATE GTest::gtest_main
+    )
+
+    add_executable(streamrnode-cpp-wrapper-test  ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/test/StreamrNodeCppWrapperTest.cpp)
+    target_link_directories(streamrnode-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/build)
+
+    target_include_directories(streamrnode-cpp-wrapper-test PUBLIC ${CMAKE_CURRENT_LIST_DIR}/wrappers/cpp/include)
+
+    target_link_libraries(streamrnode-cpp-wrapper-test
+        PRIVATE streamrproxyclient
+        PRIVATE GTest::gtest
         PRIVATE GTest::gtest_main
     )
 
@@ -189,6 +200,9 @@ if (NOT IOS)
         # default on the 3-core CI runners.
         gtest_discover_tests(streamr-streamrnode-test-integration PROPERTIES TIMEOUT 600)
         gtest_discover_tests(streamrproxyclient-cpp-wrapper-test)
+        # Networked two-node round-trip, same budget as the streamrnode
+        # integration tests.
+        gtest_discover_tests(streamrnode-cpp-wrapper-test PROPERTIES TIMEOUT 600)
         # DISABLED: these tests build the whole streamr-dev/network TS
         # monorepo at a 2024 commit (ts-integration/install.sh), which no
         # longer works on current CI runners. The streamr network TS
