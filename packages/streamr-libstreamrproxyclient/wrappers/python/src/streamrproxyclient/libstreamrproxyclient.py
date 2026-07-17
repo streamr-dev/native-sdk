@@ -174,12 +174,12 @@ class LibStreamrProxyClient:
         
         self.lib.testRpc.restype = ctypes.c_char_p
         
-        self.lib.proxyClientInitLibrary.restype = None
+        self.lib.streamrInitLibrary.restype = None
         
-        self.lib.proxyClientCleanupLibrary.restype = None
+        self.lib.streamrCleanupLibrary.restype = None
 
-        self.lib.proxyClientResultDelete.argtypes = [ctypes.POINTER(CProxyClientResult)]
-        self.lib.proxyClientResultDelete.restype = None
+        self.lib.streamrResultDelete.argtypes = [ctypes.POINTER(CProxyClientResult)]
+        self.lib.streamrResultDelete.restype = None
 
         self.lib.proxyClientNew.argtypes = [ctypes.POINTER(ctypes.POINTER(CProxyClientResult)), ctypes.c_char_p, ctypes.c_char_p]
         self.lib.proxyClientNew.restype = ctypes.c_uint64
@@ -193,7 +193,7 @@ class LibStreamrProxyClient:
         self.lib.proxyClientPublish.argtypes = [ctypes.POINTER(ctypes.POINTER(CProxyClientResult)), ctypes.c_uint64, ctypes.c_char_p, ctypes.c_uint64, ctypes.c_char_p]
         self.lib.proxyClientPublish.restype = ctypes.c_uint64
         
-        self.lib.proxyClientInitLibrary()
+        self.lib.streamrInitLibrary()
         
         return self
 
@@ -201,7 +201,7 @@ class LibStreamrProxyClient:
         """
         Cleanup the library.
         """
-        self.lib.proxyClientCleanupLibrary()
+        self.lib.streamrCleanupLibrary()
 
 class ProxyClient:
     """
@@ -229,7 +229,7 @@ class ProxyClient:
         self.clientHandle = self.lib.proxyClientNew(ctypes.byref(result), self.ownEthereumAddress.encode('utf-8'), self.streamPartId.encode('utf-8'))
         if result.contents.numErrors > 0:
             raise ProxyClientException(Error(result.contents.errors[0]))
-        self.lib.proxyClientResultDelete(result)
+        self.lib.streamrResultDelete(result)
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -239,7 +239,7 @@ class ProxyClient:
         result = ctypes.POINTER(CProxyClientResult)()
         self.lib.proxyClientDelete(ctypes.byref(result), self.clientHandle)
         assert result.contents.numErrors == 0
-        self.lib.proxyClientResultDelete(result)
+        self.lib.streamrResultDelete(result)
 
     def connect(self, proxies: list[Proxy]) -> ProxyClientResult:
         """
@@ -253,7 +253,7 @@ class ProxyClient:
         result = ctypes.POINTER(CProxyClientResult)()
         self.lib.proxyClientConnect(ctypes.byref(result), self.clientHandle, proxy_array, num_proxies)
         res = ProxyClientResult(result)
-        self.lib.proxyClientResultDelete(result)
+        self.lib.streamrResultDelete(result)
         return res
     
     def publish(self, data: bytes, ethereumPrivateKey: str = None) -> ProxyClientResult:
@@ -270,5 +270,5 @@ class ProxyClient:
         else:
             self.lib.proxyClientPublish(ctypes.byref(result), self.clientHandle, data, len(data), None)
         res = ProxyClientResult(result)
-        self.lib.proxyClientResultDelete(result)
+        self.lib.streamrResultDelete(result)
         return res

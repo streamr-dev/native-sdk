@@ -153,7 +153,7 @@ protected:
     std::set<std::string> tsReceived; // texts the TS node reported
 
     void SetUp() override {
-        proxyClientInitLibrary();
+        streamrInitLibrary();
         const auto nodeBinary = findNodeBinary();
         if (!nodeBinary) {
             GTEST_SKIP() << "No node runtime >= " << minNodeMajorVersion
@@ -172,7 +172,7 @@ protected:
 
     void TearDown() override {
         stopDriver();
-        proxyClientCleanupLibrary();
+        streamrCleanupLibrary();
     }
 
     static std::filesystem::path harnessDir() {
@@ -354,23 +354,23 @@ TEST_F(StreamrNodeTsInteropTest, MessagesFlowBothWaysWithTsNetwork) {
 
     // A client-only node: no websocket server, exactly the mobile
     // configuration milestone D targets.
-    const ProxyResult* result = nullptr;
+    const StreamrResult* result = nullptr;
     StreamrNodeConfig config{.entryPoints = &entryPoint, .numEntryPoints = 1};
     const uint64_t nodeHandle =
         streamrNodeNew(&result, cppEthereumAddress, &config);
     ASSERT_NE(nodeHandle, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeStart(&result, nodeHandle);
     ASSERT_EQ(result->numErrors, 0)
         << "start failed: " << result->errors[0].message;
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     streamrNodeJoinStreamPart(
         &result, nodeHandle, interopStreamPartId, &entryPoint, 1);
     ASSERT_EQ(result->numErrors, 0)
         << "join failed: " << result->errors[0].message;
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     ReceivedMessages received;
     const uint64_t subscriptionHandle = streamrNodeSubscribe(
@@ -380,16 +380,16 @@ TEST_F(StreamrNodeTsInteropTest, MessagesFlowBothWaysWithTsNetwork) {
         ReceivedMessages::callback,
         &received);
     ASSERT_NE(subscriptionHandle, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 
     // Wait until the C node and the TS node are stream-part neighbors.
     const auto joinDeadline = std::chrono::steady_clock::now() + joinTimeout;
     uint64_t neighborCount = 0;
     while (std::chrono::steady_clock::now() < joinDeadline) {
-        const ProxyResult* pollResult = nullptr;
+        const StreamrResult* pollResult = nullptr;
         neighborCount = streamrNodeGetNeighborCount(
             &pollResult, nodeHandle, interopStreamPartId);
-        proxyClientResultDelete(pollResult);
+        streamrResultDelete(pollResult);
         if (neighborCount >= 1) {
             break;
         }
@@ -409,7 +409,7 @@ TEST_F(StreamrNodeTsInteropTest, MessagesFlowBothWaysWithTsNetwork) {
         nullptr);
     ASSERT_EQ(result->numErrors, 0)
         << "publish failed: " << result->errors[0].message;
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     EXPECT_TRUE(this->waitForTsReceived(cppText, messageTimeout))
         << "the TS node never reported the C API message";
 
@@ -426,10 +426,10 @@ TEST_F(StreamrNodeTsInteropTest, MessagesFlowBothWaysWithTsNetwork) {
         << "the C API callback never got the TS message";
 
     streamrNodeUnsubscribe(&result, nodeHandle, subscriptionHandle);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeStop(&result, nodeHandle);
     EXPECT_EQ(result->numErrors, 0);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
     streamrNodeDelete(&result, nodeHandle);
-    proxyClientResultDelete(result);
+    streamrResultDelete(result);
 }
