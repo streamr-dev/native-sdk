@@ -188,15 +188,22 @@ private:
     // immediately, so the delivery thread is never blocked by handler work.
     void handleRequest(
         const RpcMessage& rpcMessage, const CallContextType& callContext) {
+        if (mDrained) {
+            // The owner has drained this scope during its stop(); a
+            // request arriving after that is dropped like any request to
+            // a stopped node (and folly forbids add-after-join).
+            SLogger::debug(
+                "handleRequest() after drainAsyncTasks(), dropping request");
+            return;
+        }
         auto handler = mServerRegistry.getAsyncHandler(rpcMessage);
-        mScope.add(
-            streamr::utils::co_withExecutor(
-                &mSerialExecutor,
-                makeResponseTask(
-                    std::move(handler),
-                    mOutgoingMessageCallback,
-                    rpcMessage,
-                    callContext)));
+        mScope.add(streamr::utils::co_withExecutor(
+            &mSerialExecutor,
+            makeResponseTask(
+                std::move(handler),
+                mOutgoingMessageCallback,
+                rpcMessage,
+                callContext)));
     }
 
     void handleNotification(

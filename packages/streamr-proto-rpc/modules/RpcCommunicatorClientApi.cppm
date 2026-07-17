@@ -228,6 +228,13 @@ public:
         const CallContextType& callContext,
         std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         SLogger::trace("request(): methodName:", methodName);
+        if (mDrained) {
+            // A drained scope must not be add()ed to (folly forbids
+            // add-after-join); a request after drainAsyncTasks() is a
+            // stop()-ordering bug in the caller — fail it cleanly.
+            throw RpcClientError(
+                "request() called on a drained RpcCommunicator: " + methodName);
+        }
 
         std::chrono::milliseconds timeoutValue = mRpcRequestTimeout;
         if (timeout.has_value()) {
@@ -254,31 +261,27 @@ public:
                 // scope task settles.
                 auto&& contract =
                     folly::coro::makePromiseContract<ReturnType>();
-                mScope.add(
-                    streamr::utils::co_withExecutor(
-                        &streamr::utils::SharedExecutors::worker(),
-                        folly::coro::co_invoke(
-                            [requestMessage,
-                             callContext,
-                             timeoutValue,
-                             this,
-                             promise = std::move(contract.first)]() mutable
-                                -> folly::coro::Task<void> {
-                                try {
-                                    auto ongoingRequest =
-                                        this->makeRpcRequest<ReturnType>(
-                                            requestMessage, callContext);
-                                    promise.setValue(
-                                        co_await folly::coro::timeout(
-                                            std::move(
-                                                ongoingRequest->getFuture()),
-                                            timeoutValue));
-                                } catch (...) {
-                                    promise.setException(
-                                        folly::exception_wrapper(
-                                            std::current_exception()));
-                                }
-                            })));
+                mScope.add(streamr::utils::co_withExecutor(
+                    &streamr::utils::SharedExecutors::worker(),
+                    folly::coro::co_invoke(
+                        [requestMessage,
+                         callContext,
+                         timeoutValue,
+                         this,
+                         promise = std::move(contract.first)]() mutable
+                        -> folly::coro::Task<void> {
+                            try {
+                                auto ongoingRequest =
+                                    this->makeRpcRequest<ReturnType>(
+                                        requestMessage, callContext);
+                                promise.setValue(co_await folly::coro::timeout(
+                                    std::move(ongoingRequest->getFuture()),
+                                    timeoutValue));
+                            } catch (...) {
+                                promise.setException(folly::exception_wrapper(
+                                    std::current_exception()));
+                            }
+                        })));
 
                 try {
                     co_return co_await folly::coro::detachOnCancel(
@@ -310,6 +313,12 @@ public:
         const CallContextType& callContext,
         std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         SLogger::trace("notify() notificationName:", notificationName);
+        if (mDrained) {
+            // See request(): no adds after the scope drain.
+            throw RpcClientError(
+                "notify() called on a drained RpcCommunicator: " +
+                std::string(notificationName));
+        }
 
         std::chrono::milliseconds timeoutValue = mRpcRequestTimeout;
         if (timeout.has_value()) {
@@ -328,33 +337,31 @@ public:
             // the communicator owner), so it runs as an mScope task — the
             // scope drain in the destructor replaces the former private
             // executor's join.
-            mScope.add(
-                streamr::utils::co_withExecutor(
-                    &streamr::utils::SharedExecutors::worker(),
-                    folly::coro::co_invoke(
-                        [requestMessage,
-                         callContext,
-                         promise = std::move(promiseContract.first),
-                         outgoingMessageCallback =
-                             mOutgoingMessageCallback]() mutable
-                            -> folly::coro::Task<void> {
-                            try {
-                                outgoingMessageCallback(
-                                    requestMessage,
-                                    requestMessage.requestid(),
-                                    callContext);
-                                promise.setValue();
-                            } catch (
-                                const std::exception& clientSideException) {
-                                SLogger::debug(
-                                    "Error when calling outgoing message callback from client for sending notification",
-                                    clientSideException.what());
-                                promise.setException(RpcClientError(
-                                    "Error when calling outgoing message callback from client for sending notification",
-                                    clientSideException.what()));
-                            }
-                            co_return;
-                        })));
+            mScope.add(streamr::utils::co_withExecutor(
+                &streamr::utils::SharedExecutors::worker(),
+                folly::coro::co_invoke(
+                    [requestMessage,
+                     callContext,
+                     promise = std::move(promiseContract.first),
+                     outgoingMessageCallback =
+                         mOutgoingMessageCallback]() mutable
+                    -> folly::coro::Task<void> {
+                        try {
+                            outgoingMessageCallback(
+                                requestMessage,
+                                requestMessage.requestid(),
+                                callContext);
+                            promise.setValue();
+                        } catch (const std::exception& clientSideException) {
+                            SLogger::debug(
+                                "Error when calling outgoing message callback from client for sending notification",
+                                clientSideException.what());
+                            promise.setException(RpcClientError(
+                                "Error when calling outgoing message callback from client for sending notification",
+                                clientSideException.what()));
+                        }
+                        co_return;
+                    })));
             co_return co_await folly::coro::timeout(
                 folly::coro::detachOnCancel(std::move(promiseContract.second)),
                 timeoutValue);
