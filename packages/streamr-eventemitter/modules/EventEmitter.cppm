@@ -4,16 +4,49 @@
 // this file is now the source of truth.
 module;
 
+#include <algorithm>
+#include <condition_variable>
 #include <cstddef>
 #include <functional>
 #include <list>
 #include <map>
 #include <mutex>
 #include <optional>
+#include <thread>
 #include <tuple>
 #include <type_traits>
+#include <vector>
 
 export module streamr.eventemitter.EventEmitter;
+
+namespace streamr::eventemitter::detail {
+
+// Number of event-handler invocations currently on THIS thread's call
+// stack, across ALL emitter instances and event types. offAndWait() and
+// removeAllListenersAndWait() block on in-flight invocations only when
+// this is zero: a wait issued from inside a handler can deadlock,
+// because handlers routinely remove each other's listeners from within
+// handler context. The proven cycle (Layer1ScaleTest, 2026-07-13):
+// thread A ran a connection's Data handler (handshake success ->
+// stopHandshaker -> off<Disconnected>) while thread B ran the same
+// connection's Disconnected handler (close tie-break -> off<Data>) —
+// each waited for the other's invocation to end, forever. Depth must be
+// global (not per-emitter): the cycle spans emitter instances.
+// With the depth guard, every blocked waiter runs no handler itself, so
+// wait edges only point from non-handler threads to handler-running
+// threads and no cycle can form among them.
+inline thread_local size_t handlerInvocationDepth = 0;
+
+struct InvocationDepthGuard {
+    InvocationDepthGuard() { ++handlerInvocationDepth; }
+    ~InvocationDepthGuard() { --handlerInvocationDepth; }
+    InvocationDepthGuard(const InvocationDepthGuard&) = delete;
+    InvocationDepthGuard& operator=(const InvocationDepthGuard&) = delete;
+    InvocationDepthGuard(InvocationDepthGuard&&) = delete;
+    InvocationDepthGuard& operator=(InvocationDepthGuard&&) = delete;
+};
+
+} // namespace streamr::eventemitter::detail
 
 export namespace streamr::eventemitter {
 
@@ -135,6 +168,65 @@ private:
     std::map<size_t, typename EmitterEventType::Handler>
         mExecutingEmitLoopHandlers;
 
+    // Invocations currently RUNNING, per handler id (one entry per
+    // invoking thread; replays and the emit loop may overlap). Guarded
+    // by mExecutingEmitLoopHandlersMutex. offAndWait() blocks on
+    // mInvocationFinished until the removed handler has no in-flight
+    // invocation on another thread, so a listener's owner may free the
+    // captured state right after offAndWait() returns — without this, a
+    // handler mid-invocation on the emit thread dereferences freed
+    // memory (seen as ListeningRpcCommunicator crashes when a transport
+    // Message raced the communicator's destroy()).
+    std::map<size_t, std::vector<std::thread::id>> mInFlightInvocations;
+    std::condition_variable mInvocationFinished;
+
+    // Call under mExecutingEmitLoopHandlersMutex.
+    [[nodiscard]] bool hasInFlightInvocationOnOtherThread(
+        size_t handlerId) const {
+        const auto it = mInFlightInvocations.find(handlerId);
+        if (it == mInFlightInvocations.end()) {
+            return false;
+        }
+        return std::ranges::any_of(
+            it->second, [](const std::thread::id& threadId) {
+                return threadId != std::this_thread::get_id();
+            });
+    }
+
+    // Call under mExecutingEmitLoopHandlersMutex.
+    [[nodiscard]] bool hasAnyInFlightInvocationOnOtherThread() const {
+        return std::ranges::any_of(mInFlightInvocations, [](const auto& entry) {
+            return std::ranges::any_of(
+                entry.second, [](const std::thread::id& threadId) {
+                    return threadId != std::this_thread::get_id();
+                });
+        });
+    }
+
+    void beginInvocation(size_t handlerId) {
+        std::lock_guard guard{mExecutingEmitLoopHandlersMutex};
+        mInFlightInvocations[handlerId].push_back(std::this_thread::get_id());
+    }
+
+    void endInvocation(size_t handlerId) {
+        {
+            std::lock_guard guard{mExecutingEmitLoopHandlersMutex};
+            const auto it = mInFlightInvocations.find(handlerId);
+            if (it != mInFlightInvocations.end()) {
+                auto& threads = it->second;
+                const auto threadIt =
+                    std::ranges::find(threads, std::this_thread::get_id());
+                if (threadIt != threads.end()) {
+                    threads.erase(threadIt);
+                }
+                if (threads.empty()) {
+                    mInFlightInvocations.erase(it);
+                }
+            }
+        }
+        mInvocationFinished.notify_all();
+    }
+
     std::optional<StoredEvent<typename EmitterEventType::ArgumentTypes>>
         mLatestEvent;
     std::mutex mLatestEventMutex;
@@ -171,6 +263,12 @@ private:
         auto handler = handlerIterator->second;
 
         mExecutingEmitLoopHandlers.erase(handlerIterator);
+
+        // Marked in-flight atomically with the pop, so off() sees the
+        // handler either in the pending snapshot or in-flight — never
+        // in the gap between the two.
+        mInFlightInvocations[handler.getId()].push_back(
+            std::this_thread::get_id());
 
         return handler;
     }
@@ -244,7 +342,16 @@ public:
                 }
             }
             if (replayArguments.has_value()) {
-                invokeLatestEvent(handler, std::move(replayArguments.value()));
+                this->beginInvocation(handler.getId());
+                try {
+                    detail::InvocationDepthGuard depthGuard;
+                    invokeLatestEvent(
+                        handler, std::move(replayArguments.value()));
+                } catch (...) {
+                    this->endInvocation(handler.getId());
+                    throw;
+                }
+                this->endInvocation(handler.getId());
                 if (once) {
                     return HandlerToken{};
                 }
@@ -284,14 +391,67 @@ public:
 
     template <MatchingEventType<EmitterEventType> EventType>
     void off(HandlerToken handlerReference) {
-        std::lock_guard guard{mEventHandlersMutex};
+        {
+            std::lock_guard guard{mEventHandlersMutex};
+            mEventHandlers.remove_if(
+                [&handlerReference](
+                    const typename EmitterEventType::Handler& handler) {
+                    return handler.getId() == handlerReference.getId();
+                });
+        }
+        // Also remove the pending copy an executing emit loop may still
+        // hold. NOTE: an invocation of this handler that already STARTED
+        // on another thread may still be running when off() returns; an
+        // owner that frees the handler's captures right after off() must
+        // use offAndWait() instead.
+        this->removeHandlerFromExecutingEmitLoops(handlerReference);
+    }
 
-        mEventHandlers.remove_if(
-            [&handlerReference](
-                const typename EmitterEventType::Handler& handler) {
-                return handler.getId() == handlerReference.getId();
+    /**
+     * @brief Remove an event listener and wait until it is no longer
+     * running, so the caller may free the listener's captured state
+     * immediately afterwards.
+     *
+     * @details Waits out an invocation already running on ANOTHER
+     * thread. The wait is skipped when called from inside any event
+     * handler invocation (on any emitter): handlers legitimately remove
+     * each other's listeners from handler context, and blocking there
+     * deadlocks — two threads, each inside a handler the other wants
+     * removed, would wait on each other forever (seen between a
+     * connection's Data and Disconnected handlers in the Layer1 scale
+     * tests). The caller must also not hold any lock that this event's
+     * handlers can take, or the wait deadlocks on that lock (seen
+     * between Endpoint's state mutex and a PendingConnection Connected
+     * handler).
+     *
+     * @tparam EventType The type of the event to remove the listener from.
+     * @param handlerReference The token of the listener to remove.
+     */
+
+    template <MatchingEventType<EmitterEventType> EventType>
+    void offAndWait(HandlerToken handlerReference) {
+        {
+            std::lock_guard guard{mEventHandlersMutex};
+            mEventHandlers.remove_if(
+                [&handlerReference](
+                    const typename EmitterEventType::Handler& handler) {
+                    return handler.getId() == handlerReference.getId();
+                });
+        }
+        // Remove the pending snapshot copy and wait out an invocation
+        // already running on another thread. NB: the wait must not hold
+        // mEventHandlersMutex: the running handler may need it
+        // (once-removal, on()/off() reentry).
+        std::unique_lock lock{mExecutingEmitLoopHandlersMutex};
+        mExecutingEmitLoopHandlers.erase(handlerReference.getId());
+        // Wait only from non-handler context (see the method comment and
+        // detail::handlerInvocationDepth).
+        if (detail::handlerInvocationDepth == 0) {
+            mInvocationFinished.wait(lock, [this, &handlerReference]() {
+                return !this->hasInFlightInvocationOnOtherThread(
+                    handlerReference.getId());
             });
-        removeHandlerFromExecutingEmitLoops(handlerReference);
+        }
     }
 
     /**
@@ -317,6 +477,33 @@ public:
     void removeAllListeners() {
         std::lock_guard guard{mEventHandlersMutex};
         mEventHandlers.clear();
+    }
+
+    /**
+     * @brief Remove all listeners for an event type and wait until none
+     * of them is still running — same guarantee and same caller
+     * constraints as offAndWait(), for every handler at once.
+     *
+     * @tparam EventType The type of the event to remove all listeners for.
+     */
+
+    template <MatchingEventType<EmitterEventType> EventType>
+    void removeAllListenersAndWait() {
+        {
+            std::lock_guard guard{mEventHandlersMutex};
+            mEventHandlers.clear();
+        }
+        // Also cancel invocations an in-progress emit loop has not started
+        // yet — after this method returns, no handler may start.
+        std::unique_lock lock{mExecutingEmitLoopHandlersMutex};
+        mExecutingEmitLoopHandlers.clear();
+        // Wait only from non-handler context — same deadlock-avoidance
+        // rule as offAndWait().
+        if (detail::handlerInvocationDepth == 0) {
+            mInvocationFinished.wait(lock, [this]() {
+                return !this->hasAnyInFlightInvocationOnOtherThread();
+            });
+        }
     }
 
     /**
@@ -362,7 +549,14 @@ public:
             // event, for instance). The per-handler copy is the intended
             // fan-out semantics; Handler::operator() then moves the copy
             // on into the stored std::function.
-            std::invoke(handler, args...);
+            try {
+                detail::InvocationDepthGuard depthGuard;
+                std::invoke(handler, args...);
+            } catch (...) {
+                this->endInvocation(handler.getId());
+                throw;
+            }
+            this->endInvocation(handler.getId());
             if (handler.isOnce()) {
                 std::lock_guard guard{mEventHandlersMutex};
                 mEventHandlers.remove(handler);
@@ -413,8 +607,10 @@ public:
     using EventEmitterImpl<EventTypes>::on...;
     using EventEmitterImpl<EventTypes>::once...;
     using EventEmitterImpl<EventTypes>::off...;
+    using EventEmitterImpl<EventTypes>::offAndWait...;
     using EventEmitterImpl<EventTypes>::listenerCount...;
     using EventEmitterImpl<EventTypes>::removeAllListeners...;
+    using EventEmitterImpl<EventTypes>::removeAllListenersAndWait...;
     using EventEmitterImpl<EventTypes>::emit...;
 
     template <typename EventType>
@@ -434,6 +630,21 @@ public:
         // Use C++ 17 fold expression to remove all listeners for all event
         // types https://www.foonathan.net/2020/05/fold-tricks/
         (EventEmitterImpl<EventTypes>::template removeAllListeners<
+             EventTypes>(),
+         ...);
+    }
+
+    /**
+     * @brief Remove all listeners for all event types and wait until none
+     * of them is still running (see
+     * EventEmitterImpl::removeAllListenersAndWait for the caller
+     * constraints).
+     *
+     */
+
+    template <typename T = std::nullopt_t>
+    void removeAllListenersAndWait() {
+        (EventEmitterImpl<EventTypes>::template removeAllListenersAndWait<
              EventTypes>(),
          ...);
     }
@@ -458,8 +669,10 @@ public:
     using EventEmitterImpl<EventTypes, true>::on...;
     using EventEmitterImpl<EventTypes, true>::once...;
     using EventEmitterImpl<EventTypes, true>::off...;
+    using EventEmitterImpl<EventTypes, true>::offAndWait...;
     using EventEmitterImpl<EventTypes, true>::listenerCount...;
     using EventEmitterImpl<EventTypes, true>::removeAllListeners...;
+    using EventEmitterImpl<EventTypes, true>::removeAllListenersAndWait...;
     using EventEmitterImpl<EventTypes, true>::emit...;
 
     template <typename EventType>
@@ -482,6 +695,21 @@ public:
         // Use C++ 17 fold expression to remove all listeners for all event
         // types https://www.foonathan.net/2020/05/fold-tricks/
         (EventEmitterImpl<EventTypes, true>::template removeAllListeners<
+             EventTypes>(),
+         ...);
+    }
+
+    /**
+     * @brief Remove all listeners for all event types and wait until none
+     * of them is still running (see
+     * EventEmitterImpl::removeAllListenersAndWait for the caller
+     * constraints).
+     *
+     */
+
+    template <typename T = std::nullopt_t>
+    void removeAllListenersAndWait() {
+        (EventEmitterImpl<EventTypes, true>::template removeAllListenersAndWait<
              EventTypes>(),
          ...);
     }
