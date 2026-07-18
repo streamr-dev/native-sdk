@@ -112,19 +112,37 @@ public:
 
     void stop() {
         SLogger::info("stop() start");
-        if (mStopped) {
+        if (mStopped.exchange(true)) {
             SLogger::info("stop() already stopped, returning");
             return;
         }
-        mStopped = true;
-        removeAllListeners();
-        SLogger::info(
-            "stop() removeAllListeners() end, calling mServer->stop()");
+        // Quiesce the accept thread first: mServer->stop() joins it, and
+        // handleIncomingClient is gated on mStopped, so no new half-ready
+        // connection can be inserted after this.
         if (mServer) {
             mServer->stop();
             mServer = nullptr;
         }
-        SLogger::info("stop() mServer->stop() end");
+        // Tear down the half-ready connections. Their listeners capture
+        // this server by raw pointer and run on the connections' dispatch
+        // executors, so each queue must be drained before the caller may
+        // destroy this object (removeAllListeners() first makes queued
+        // not-yet-run emits no-ops).
+        std::unordered_map<
+            std::string,
+            std::shared_ptr<WebsocketServerConnection>>
+            halfReady;
+        {
+            std::scoped_lock lock(mHalfReadyConnectionsMutex);
+            halfReady.swap(mHalfReadyConnections);
+        }
+        for (auto& [id, connection] : halfReady) {
+            connection->removeAllListeners();
+            connection->destroy();
+            connection->drainDispatchQueue();
+        }
+        removeAllListeners();
+        SLogger::info("stop() end");
     }
 
     void updateCertificate(const std::string& cert, const std::string& key) {
@@ -142,6 +160,10 @@ private:
 
     void handleIncomingClient(std::shared_ptr<rtc::WebSocket> ws) {
         std::scoped_lock lock(mHalfReadyConnectionsMutex);
+        if (mStopped) {
+            // Racing stop(): dropping ws here closes the socket.
+            return;
+        }
         auto websocketServerConnection =
             WebsocketServerConnection::newInstance();
         auto id = Uuid::v4();
@@ -151,7 +173,12 @@ private:
             SLogger::info(
                 "Half-ready WebSocketServerConnection emitted Connected, emitting it as Connected");
             std::scoped_lock lock(mHalfReadyConnectionsMutex);
-            auto readyConnection = mHalfReadyConnections.at(id);
+            const auto entry = mHalfReadyConnections.find(id);
+            if (entry == mHalfReadyConnections.end()) {
+                // stop() swapped the map out while this task was queued.
+                return;
+            }
+            auto readyConnection = entry->second;
 
             readyConnection->removeAllListeners();
 

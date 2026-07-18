@@ -261,26 +261,78 @@ public:
         });
 
         // TS delFunc: the attempt is dropped once the connection settles
-        // either way (erasing an absent key is a no-op).
+        // either way. Every handler below erases the map entry ONLY if it
+        // still belongs to the connection/pending pair that fired — the map
+        // is keyed by nodeId and repeated connects to the same peer insert
+        // new pairs, so an unconditional erase(nodeId) from a stale handler
+        // (an older connection's Disconnected arriving late) deleted a
+        // freshly inserted attempt and orphaned its WebrtcConnection
+        // (observed: insert and stale erase within the same millisecond).
+        // An orphan is immortal — its rtc callbacks capture a strong self,
+        // broken only by doClose — and its dispatch executor's worker-pool
+        // KeepAlive then blocks process exit in the shared pool destructor
+        // (joinKeepAliveOnce). The captured raw pointers are compared for
+        // identity only, never dereferenced.
         connection->on<connectionevents::Disconnected>(
-            [this, nodeId](
+            [this, nodeId, connPtr = connection.get()](
                 bool /*gracefulLeave*/,
                 uint64_t /*code*/,
                 const std::string& /*reason*/) {
                 std::scoped_lock lock(this->mMutex);
-                this->ongoingConnectAttempts.erase(nodeId);
+                const auto it = this->ongoingConnectAttempts.find(nodeId);
+                if (it == this->ongoingConnectAttempts.end()) {
+                    return;
+                }
+                if (it->second.connection.get() != connPtr) {
+                    return;
+                }
+                this->ongoingConnectAttempts.erase(it);
             });
         pendingConnection->on<pendingconnectionevents::Disconnected>(
-            [this, nodeId](bool /*gracefulLeave*/) {
-                std::scoped_lock lock(this->mMutex);
-                this->ongoingConnectAttempts.erase(nodeId);
+            [this, nodeId, pendingPtr = pendingConnection.get()](
+                bool /*gracefulLeave*/) {
+                // The attempt's WebrtcConnection must be closed HERE, not
+                // just dropped from the map: for an answerer that never
+                // received a handshake request, no handshaker links the
+                // pending connection's Disconnected to connection->close()
+                // (IncomingHandshaker wires that link only inside
+                // onHandshakeRequest), so a bare erase would remove the last
+                // owner stop() could still destroy and leave the connection
+                // orphaned (see the immortality note above — this was the
+                // 1-in-10 post-PASSED exit hang of the 22-node webrtc test).
+                // close() is idempotent, so the offerer path (whose
+                // OutgoingHandshaker closes the connection from this same
+                // event first) is unaffected. Identity-checked like the
+                // handler above.
+                std::shared_ptr<WebrtcConnection> connectionToClose;
+                {
+                    std::scoped_lock lock(this->mMutex);
+                    const auto it = this->ongoingConnectAttempts.find(nodeId);
+                    if (it == this->ongoingConnectAttempts.end() ||
+                        it->second.managedConnection.get() != pendingPtr) {
+                        return;
+                    }
+                    connectionToClose = it->second.connection;
+                    this->ongoingConnectAttempts.erase(it);
+                }
+                // Outside mMutex (locking policy: no call-outs under the
+                // connector mutex — the close emits Disconnected and defers
+                // the rtc teardown to the worker pool).
+                if (connectionToClose) {
+                    connectionToClose->close(false);
+                }
             });
         pendingConnection->on<pendingconnectionevents::Connected>(
-            [this, nodeId](
+            [this, nodeId, pendingPtr = pendingConnection.get()](
                 const PeerDescriptor& /*peerDescriptor*/,
                 const std::shared_ptr<Connection>& /*connection*/) {
                 std::scoped_lock lock(this->mMutex);
-                this->ongoingConnectAttempts.erase(nodeId);
+                const auto it = this->ongoingConnectAttempts.find(nodeId);
+                if (it == this->ongoingConnectAttempts.end() ||
+                    it->second.managedConnection.get() != pendingPtr) {
+                    return;
+                }
+                this->ongoingConnectAttempts.erase(it);
             });
 
         connection->webrtcEvents().on<webrtcconnectionevents::LocalCandidate>(

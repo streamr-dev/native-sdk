@@ -7,12 +7,15 @@ module;
 #include <functional>
 #include <rtc/rtc.hpp>
 
+#include <folly/synchronization/Baton.h>
+
 #include <string>
 
 export module streamr.dht.WebsocketConnection;
 
 import streamr.logger.SLogger;
 import streamr.utils.EnableSharedFromThis;
+import streamr.utils.SharedExecutors;
 import streamr.dht.Connection;
 
 // Hoisted from the former header (file scope, NOT exported);
@@ -43,6 +46,33 @@ protected:
     std::atomic<bool> mConnectedEmitted{false}; // NOLINT
     std::recursive_mutex mMutex; // NOLINT
 
+private:
+    // All libdatachannel callbacks are dispatched through this per-connection
+    // serial view of the shared worker pool instead of running inline. Every
+    // websocket in the process shares ONE libdatachannel poll thread; running
+    // the emit chains (handshake, RPC parse/dispatch) inline there starved
+    // concurrent websocket upgrades so badly that a 12-node start storm
+    // pushed connect latency past the 1 s connectivity-check timeout
+    // (measured: the poll thread was >95% busy in Data emit chains while
+    // accepts sat waiting). The serial executor preserves the per-connection
+    // event order the emitter contract relies on: Connected before any Data,
+    // Data in arrival order, Disconnected last (the same per-association
+    // ordering idiom as the Simulator's delivery executors).
+    streamr::utils::SharedSerialExecutor mDispatchExecutor{
+        streamr::utils::SharedExecutors::worker()};
+
+    // Enqueue a callback body; the task keeps the connection alive until it
+    // has run. Callers are live rtc callbacks (rtc's callback mutex
+    // guarantees the object cannot be mid-destruction there — the
+    // destructor's resetCallbacks() blocks on in-flight callbacks) or
+    // methods invoked through an owning shared_ptr (setSocket's
+    // already-open path), so sharedFromThis is safe.
+    void dispatch(std::function<void()> task) {
+        auto self = this->sharedFromThis<WebsocketConnection>();
+        mDispatchExecutor.add([self, task = std::move(task)]() { task(); });
+    }
+
+protected:
     // Only allow subclasses to be created
     explicit WebsocketConnection(ConnectionType type)
         : Connection(type),
@@ -157,23 +187,32 @@ protected:
 
         SLogger::trace("setSocket() after move " + getConnectionTypeString());
 
-        // Set socket callbacks. The message callback is deliberately NOT
-        // attached here — see startReceiving().
+        // Set socket callbacks. Each is a thin wrapper that only enqueues
+        // the real body onto the per-connection dispatch executor — the rtc
+        // callback threads (the shared poll thread, the per-server accept
+        // thread) must never run the emit chains (see mDispatchExecutor).
+        // The message callback is deliberately NOT attached here — see
+        // startReceiving().
 
-        mSocket->onError(this->onError);
-        mSocket->onClosed(this->onClosed);
-        mSocket->onOpen(this->onOpen);
+        mSocket->onError([this](std::string error) {
+            this->dispatch(
+                [this, error = std::move(error)]() { this->onError(error); });
+        });
+        mSocket->onClosed(
+            [this]() { this->dispatch([this]() { this->onClosed(); }); });
+        mSocket->onOpen(
+            [this]() { this->dispatch([this]() { this->onOpen(); }); });
 
         // rtc does not retro-fire the open callback: if the websocket
         // handshake completed on the processor thread before the callback
         // above was attached, onOpen would never run and Connected would
-        // never be emitted. Emit it here in that case (mConnectedEmitted
+        // never be emitted. Enqueue it here in that case (mConnectedEmitted
         // keeps the two paths idempotent).
         if (mSocket->readyState() == rtc::WebSocket::State::Open) {
             SLogger::trace(
                 "setSocket() socket already open, emitting Connected " +
                 getConnectionTypeString());
-            this->onOpen();
+            this->dispatch([this]() { this->onOpen(); });
         }
 
         SLogger::trace("setSocket() end " + getConnectionTypeString());
@@ -203,7 +242,17 @@ public:
         SLogger::trace("startReceiving() " + getConnectionTypeString());
         std::scoped_lock lock(mMutex);
         if (!mDestroyed && mSocket) {
-            mSocket->onMessage(this->onMessage, this->onStringMessage);
+            // Thin wrapper (see setSocket): the poll thread only copies the
+            // frame into a task; the emit<Data> chain runs on the dispatch
+            // executor. The attach-time flush of queued frames enqueues
+            // them here in order, ahead of any later-arriving frame.
+            mSocket->onMessage(
+                [this](rtc::binary data) {
+                    this->dispatch([this, data = std::move(data)]() mutable {
+                        this->onMessage(std::move(data));
+                    });
+                },
+                this->onStringMessage);
         }
     }
 
@@ -286,6 +335,19 @@ public:
             socket->resetCallbacks();
             socket->close();
         }
+    }
+
+    // Barrier: returns once every dispatch task enqueued so far has run.
+    // resetCallbacks() only stops NEW rtc callbacks; already-enqueued
+    // bodies still run afterwards, so an owner whose listeners capture it
+    // by raw pointer must drain before destroying itself (WebsocketServer
+    // does, for half-ready connections). MUST NOT be called from a task
+    // running on this connection's own dispatch executor — that would
+    // deadlock the serial queue.
+    void drainDispatchQueue() {
+        folly::Baton<> baton;
+        mDispatchExecutor.add([&baton]() { baton.post(); });
+        baton.wait();
     }
 };
 
