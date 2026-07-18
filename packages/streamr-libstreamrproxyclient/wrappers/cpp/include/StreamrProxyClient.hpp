@@ -206,7 +206,7 @@ public:
     [[nodiscard]] StreamrProxyResult connect(
         const std::vector<StreamrProxyAddress>& proxies) const {
         const StreamrResult* result;
-        std::vector<Proxy> cProxies;
+        std::vector<StreamrPeer> cProxies;
         cProxies.reserve(proxies.size());
         for (const auto& proxy : proxies) {
             cProxies.push_back(

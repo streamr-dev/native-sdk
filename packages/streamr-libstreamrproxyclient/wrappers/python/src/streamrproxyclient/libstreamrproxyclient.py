@@ -272,3 +272,231 @@ class ProxyClient:
         res = ProxyClientResult(result)
         self.lib.streamrResultDelete(result)
         return res
+
+
+# ---------------------------------------------------------------------------
+# Full-node API (streamrnode.h) — phase D3b.
+# ---------------------------------------------------------------------------
+
+class NodeErrorCodes:
+    """
+    Error codes of the full-node API (streamrnode.h).
+    """
+    ERROR_NODE_NOT_FOUND = "NODE_NOT_FOUND"
+    ERROR_NODE_NOT_STARTED = "NODE_NOT_STARTED"
+    ERROR_NODE_ALREADY_STARTED = "NODE_ALREADY_STARTED"
+    ERROR_NODE_STOPPED = "NODE_STOPPED"
+    ERROR_INVALID_ENTRY_POINT_URL = "INVALID_ENTRY_POINT_URL"
+    ERROR_SUBSCRIPTION_NOT_FOUND = "SUBSCRIPTION_NOT_FOUND"
+    ERROR_NODE_OPERATION_FAILED = "NODE_OPERATION_FAILED"
+
+
+class CStreamrNodeConfig(ctypes.Structure):
+    """
+    C struct for StreamrNodeConfig.
+    """
+    _fields_ = [("entryPoints", ctypes.POINTER(CProxy)),
+                ("numEntryPoints", ctypes.c_uint64),
+                ("websocketPort", ctypes.c_uint16),
+                ("websocketHost", ctypes.c_char_p),
+                ("acceptProxyConnections", ctypes.c_bool)]
+
+
+# void (*StreamrNodeMessageCallback)(uint64_t nodeHandle,
+#     const char* streamPartId, const char* content,
+#     uint64_t contentLength, void* userData)
+# content is opaque bytes (may contain NULs), so it is bound as a raw
+# pointer and sliced with contentLength.
+CMessageCallback = ctypes.CFUNCTYPE(
+    None, ctypes.c_uint64, ctypes.c_char_p, ctypes.POINTER(ctypes.c_char),
+    ctypes.c_uint64, ctypes.c_void_p)
+
+
+def _register_node_functions(lib):
+    """
+    Define the ctypes signatures of the streamrNode* functions.
+    """
+    result_out = ctypes.POINTER(ctypes.POINTER(CProxyClientResult))
+    lib.streamrNodeNew.argtypes = [
+        result_out, ctypes.c_char_p, ctypes.POINTER(CStreamrNodeConfig)]
+    lib.streamrNodeNew.restype = ctypes.c_uint64
+    lib.streamrNodeDelete.argtypes = [result_out, ctypes.c_uint64]
+    lib.streamrNodeDelete.restype = None
+    lib.streamrNodeStart.argtypes = [result_out, ctypes.c_uint64]
+    lib.streamrNodeStart.restype = None
+    lib.streamrNodeStop.argtypes = [result_out, ctypes.c_uint64]
+    lib.streamrNodeStop.restype = None
+    lib.streamrNodeJoinStreamPart.argtypes = [
+        result_out, ctypes.c_uint64, ctypes.c_char_p,
+        ctypes.POINTER(CProxy), ctypes.c_uint64]
+    lib.streamrNodeJoinStreamPart.restype = None
+    lib.streamrNodeLeaveStreamPart.argtypes = [
+        result_out, ctypes.c_uint64, ctypes.c_char_p]
+    lib.streamrNodeLeaveStreamPart.restype = None
+    lib.streamrNodePublish.argtypes = [
+        result_out, ctypes.c_uint64, ctypes.c_char_p, ctypes.c_char_p,
+        ctypes.c_uint64, ctypes.c_char_p]
+    lib.streamrNodePublish.restype = None
+    lib.streamrNodeSubscribe.argtypes = [
+        result_out, ctypes.c_uint64, ctypes.c_char_p, CMessageCallback,
+        ctypes.c_void_p]
+    lib.streamrNodeSubscribe.restype = ctypes.c_uint64
+    lib.streamrNodeUnsubscribe.argtypes = [
+        result_out, ctypes.c_uint64, ctypes.c_uint64]
+    lib.streamrNodeUnsubscribe.restype = None
+    lib.streamrNodeGetNeighborCount.argtypes = [
+        result_out, ctypes.c_uint64, ctypes.c_char_p]
+    lib.streamrNodeGetNeighborCount.restype = ctypes.c_uint64
+    lib.streamrNodeSetProxies.argtypes = [
+        result_out, ctypes.c_uint64, ctypes.c_char_p,
+        ctypes.POINTER(CProxy), ctypes.c_uint64, ctypes.c_int,
+        ctypes.c_uint64]
+    lib.streamrNodeSetProxies.restype = None
+
+
+class StreamrNode:
+    """
+    The full network node (context manager). Mirrors the C++
+    StreamrNode wrapper: create with an optional entry-point list and
+    websocket port, then start/join/publish/subscribe.
+    """
+
+    PROXY_DIRECTION_PUBLISH = 0
+    PROXY_DIRECTION_SUBSCRIBE = 1
+
+    def __init__(self, lib: LibStreamrProxyClient, own_ethereum_address: str,
+                 entry_points: list[Proxy] = None, websocket_port: int = 0,
+                 websocket_host: str = None,
+                 accept_proxy_connections: bool = False):
+        self.lib = lib.lib
+        _register_node_functions(self.lib)
+        self.own_ethereum_address = own_ethereum_address
+        self.entry_points = entry_points or []
+        self.websocket_port = websocket_port
+        self.websocket_host = websocket_host
+        self.accept_proxy_connections = accept_proxy_connections
+        self.node_handle = 0
+        # ctypes callback objects must outlive their subscriptions; the C
+        # API may still dispatch a message whose delivery already started
+        # when unsubscribe returns, so these are kept until node deletion.
+        self._callbacks = []
+
+    def _check(self, result):
+        if result and result.contents.numErrors > 0:
+            error = Error(result.contents.errors[0])
+            self.lib.streamrResultDelete(result)
+            raise ProxyClientException(error)
+        self.lib.streamrResultDelete(result)
+
+    def __enter__(self):
+        entry_point_array = (CProxy * len(self.entry_points))(
+            *[CProxy(ep.websocket_url.encode('utf-8'),
+                     ep.ethereum_address.encode('utf-8'))
+              for ep in self.entry_points])
+        config = CStreamrNodeConfig(
+            entryPoints=entry_point_array if self.entry_points else None,
+            numEntryPoints=len(self.entry_points),
+            websocketPort=self.websocket_port,
+            websocketHost=self.websocket_host.encode('utf-8')
+            if self.websocket_host else None,
+            acceptProxyConnections=self.accept_proxy_connections)
+        result = ctypes.POINTER(CProxyClientResult)()
+        self.node_handle = self.lib.streamrNodeNew(
+            ctypes.byref(result),
+            self.own_ethereum_address.encode('utf-8'),
+            ctypes.byref(config))
+        self._check(result)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        result = ctypes.POINTER(CProxyClientResult)()
+        self.lib.streamrNodeDelete(ctypes.byref(result), self.node_handle)
+        self.lib.streamrResultDelete(result)
+        self._callbacks.clear()
+
+    def start(self):
+        result = ctypes.POINTER(CProxyClientResult)()
+        self.lib.streamrNodeStart(ctypes.byref(result), self.node_handle)
+        self._check(result)
+
+    def stop(self):
+        result = ctypes.POINTER(CProxyClientResult)()
+        self.lib.streamrNodeStop(ctypes.byref(result), self.node_handle)
+        self._check(result)
+
+    def join_stream_part(self, stream_part_id: str,
+                         entry_points: list[Proxy] = None):
+        entry_points = entry_points or []
+        entry_point_array = (CProxy * len(entry_points))(
+            *[CProxy(ep.websocket_url.encode('utf-8'),
+                     ep.ethereum_address.encode('utf-8'))
+              for ep in entry_points])
+        result = ctypes.POINTER(CProxyClientResult)()
+        self.lib.streamrNodeJoinStreamPart(
+            ctypes.byref(result), self.node_handle,
+            stream_part_id.encode('utf-8'),
+            entry_point_array if entry_points else None, len(entry_points))
+        self._check(result)
+
+    def leave_stream_part(self, stream_part_id: str):
+        result = ctypes.POINTER(CProxyClientResult)()
+        self.lib.streamrNodeLeaveStreamPart(
+            ctypes.byref(result), self.node_handle,
+            stream_part_id.encode('utf-8'))
+        self._check(result)
+
+    def publish(self, stream_part_id: str, data: bytes,
+                ethereum_private_key: str = None):
+        result = ctypes.POINTER(CProxyClientResult)()
+        key = ethereum_private_key.encode('utf-8') \
+            if ethereum_private_key else None
+        self.lib.streamrNodePublish(
+            ctypes.byref(result), self.node_handle,
+            stream_part_id.encode('utf-8'), data, len(data), key)
+        self._check(result)
+
+    def subscribe(self, stream_part_id: str, callback) -> int:
+        """
+        Subscribe to a stream part. callback(stream_part_id: str,
+        content: bytes) is invoked on an internal network thread: return
+        quickly and do not call node methods from inside it.
+        """
+        def trampoline(_node_handle, c_stream_part_id, c_content,
+                       content_length, _user_data):
+            callback(c_stream_part_id.decode('utf-8'),
+                     ctypes.string_at(c_content, content_length))
+        c_callback = CMessageCallback(trampoline)
+        result = ctypes.POINTER(CProxyClientResult)()
+        subscription_handle = self.lib.streamrNodeSubscribe(
+            ctypes.byref(result), self.node_handle,
+            stream_part_id.encode('utf-8'), c_callback, None)
+        self._check(result)
+        self._callbacks.append(c_callback)
+        return subscription_handle
+
+    def unsubscribe(self, subscription_handle: int):
+        result = ctypes.POINTER(CProxyClientResult)()
+        self.lib.streamrNodeUnsubscribe(
+            ctypes.byref(result), self.node_handle, subscription_handle)
+        self._check(result)
+
+    def neighbor_count(self, stream_part_id: str) -> int:
+        result = ctypes.POINTER(CProxyClientResult)()
+        count = self.lib.streamrNodeGetNeighborCount(
+            ctypes.byref(result), self.node_handle,
+            stream_part_id.encode('utf-8'))
+        self._check(result)
+        return count
+
+    def set_proxies(self, stream_part_id: str, proxies: list[Proxy],
+                    direction: int, connection_count: int = 0):
+        proxy_array = (CProxy * len(proxies))(
+            *[CProxy(p.websocket_url.encode('utf-8'),
+                     p.ethereum_address.encode('utf-8')) for p in proxies])
+        result = ctypes.POINTER(CProxyClientResult)()
+        self.lib.streamrNodeSetProxies(
+            ctypes.byref(result), self.node_handle,
+            stream_part_id.encode('utf-8'),
+            proxy_array if proxies else None, len(proxies), direction,
+            connection_count)
+        self._check(result)
