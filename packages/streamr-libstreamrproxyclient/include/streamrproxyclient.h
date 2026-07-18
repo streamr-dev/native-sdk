@@ -43,8 +43,10 @@ EXTERN_C SHARED_EXPORT void proxyClientInitLibrary(void);
 /**
  * @brief Cleanup the library. This function MUST be called before the program exits.
  * Can be safely called multiple times. This is needed because the standard dynamic library
- * destructor (__attribute__((destructor))) is called after static variables have already been destroyed, 
+ * destructor (__attribute__((destructor))) is called after static variables have already been destroyed,
  * which makes it impossible to clean up the other objects that depend on the static variables.
+ * The library may be used again after a cleanup: any API call re-initializes it automatically
+ * (an explicit proxyClientInitLibrary() call is also fine).
  */
 // NOLINTNEXTLINE
 EXTERN_C SHARED_EXPORT void proxyClientCleanupLibrary(void);

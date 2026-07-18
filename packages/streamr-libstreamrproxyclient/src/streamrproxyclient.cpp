@@ -1375,6 +1375,12 @@ void proxyClientCleanupLibrary() { // NOLINT
 }
 
 static LibProxyClientApi& getProxyClientApi() { // NOLINT
+    // proxyClientCleanupLibrary() destroys the instance and only the
+    // load-time constructor re-creates it, so an API call made after a
+    // cleanup would dereference a null pointer here. Re-initialize on
+    // demand instead — the header documents that the library can be
+    // re-initialized after a cleanup.
+    proxyClientInitLibrary();
     return *libProxyClientApi;
 }
 
