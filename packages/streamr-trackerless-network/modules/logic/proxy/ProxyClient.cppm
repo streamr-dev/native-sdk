@@ -393,14 +393,20 @@ public:
                 std::current_exception(), peerDescriptor);
         }
         if (accepted) {
-            this->options.connectionLocker.lockConnection(
-                peerDescriptor, LockID{SERVICE_ID});
+            // ProxyClient's connection routine is synchronous today (it
+            // blockingWaits its RPCs above); keep that behavior for the
+            // now-asynchronous locker API. Async-ifying this whole path
+            // is a separate task.
+            streamr::utils::blockingWait(
+                this->options.connectionLocker.lockConnection(
+                    peerDescriptor, LockID{SERVICE_ID}));
 
             {
                 std::scoped_lock lock(this->mutex);
                 if (this->stopped) {
-                    this->options.connectionLocker.unlockConnection(
-                        peerDescriptor, LockID{SERVICE_ID});
+                    streamr::utils::blockingWait(
+                        this->options.connectionLocker.unlockConnection(
+                            peerDescriptor, LockID{SERVICE_ID}));
                     return;
                 }
                 this->connections.emplace(
@@ -464,8 +470,9 @@ public:
             streamr::utils::blockingWait(server.value()->leaveStreamPartNotice(
                 this->options.streamPartId, false));
         }
-        this->options.connectionLocker.unlockConnection(
-            peerDescriptor.value(), LockID{SERVICE_ID});
+        streamr::utils::blockingWait(
+            this->options.connectionLocker.unlockConnection(
+                peerDescriptor.value(), LockID{SERVICE_ID}));
         this->neighbors.remove(nodeId);
     }
 
@@ -552,8 +559,9 @@ public:
                 return;
             }
         }
-        this->options.connectionLocker.unlockConnection(
-            peerDescriptor, LockID{SERVICE_ID});
+        streamr::utils::blockingWait(
+            this->options.connectionLocker.unlockConnection(
+                peerDescriptor, LockID{SERVICE_ID}));
         this->neighbors.remove(nodeId);
         // Deviation from TS: no automatic reconnection attempt here. The
         // TS single retry always fails in practice (the proxy that
@@ -590,8 +598,9 @@ public:
         // event thread parked on it may be the thread these sends need.
         auto allNeighbors = this->neighbors.getAll();
         for (const auto& remote : allNeighbors) {
-            this->options.connectionLocker.unlockConnection(
-                remote->getPeerDescriptor(), LockID{SERVICE_ID});
+            streamr::utils::blockingWait(
+                this->options.connectionLocker.unlockConnection(
+                    remote->getPeerDescriptor(), LockID{SERVICE_ID}));
             streamr::utils::blockingWait(remote->leaveStreamPartNotice(
                 this->options.streamPartId, false));
         }

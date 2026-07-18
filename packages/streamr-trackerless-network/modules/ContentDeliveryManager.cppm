@@ -158,6 +158,14 @@ private:
     streamr::utils::SharedSerialExecutor joinExecutor{
         streamr::utils::SharedExecutors::worker()};
     GuardedAsyncScope joinScope;
+    // Cancels the detached join/rejoin tasks at destroy(): the scope
+    // contract requires the tasks to be cancelled BEFORE the drain,
+    // otherwise destroy() waits for the joins to complete naturally — an
+    // unbounded wait on worker-pool/network progress. Same mechanism and
+    // fix as NetworkStack's joinCancellation; without it the CI
+    // full-node teardown wedged in ContentDeliveryManager::destroy() ->
+    // joinScope.close() one layer below the NetworkStack drain.
+    folly::CancellationSource joinCancellation;
 
 public:
     explicit ContentDeliveryManager(ContentDeliveryManagerOptions options)
@@ -206,7 +214,13 @@ public:
                 }
             }
         }
-        this->joinScope.close();
+        // Cancel the detached join/rejoin tasks, then drain with the
+        // suspending closeAsync(): destroy() runs on a shared
+        // blockingWait drive thread during test teardown, and a blocking
+        // close() would both serialize sibling stops and wait unboundedly
+        // for un-cancelled joins (the CI full-node teardown hang).
+        this->joinCancellation.requestCancellation();
+        co_await this->joinScope.closeAsync();
         std::vector<std::shared_ptr<StreamPartDelivery>> parts;
         {
             std::scoped_lock lock(this->mutex);
@@ -346,7 +360,9 @@ public:
                     this->joinScope.add(
                         streamr::utils::co_withExecutor(
                             &this->joinExecutor,
-                            streamPartReconnect->reconnect()));
+                            streamr::utils::co_withCancellation(
+                                this->joinCancellation.getToken(),
+                                streamPartReconnect->reconnect())));
                 }
             });
         node->on<contentdeliverylayernodeevents::EntryPointLeaveDetected>(
@@ -354,25 +370,30 @@ public:
                 this->joinScope.add(
                     streamr::utils::co_withExecutor(
                         &this->joinExecutor,
-                        this->handleEntryPointLeave(
-                            streamPartId, peerDescriptorStoreManager)));
+                        streamr::utils::co_withCancellation(
+                            this->joinCancellation.getToken(),
+                            this->handleEntryPointLeave(
+                                streamPartId, peerDescriptorStoreManager))));
             });
         // TS setImmediate(): detached bounded join.
         this->joinScope.add(
             streamr::utils::co_withExecutor(
                 &this->joinExecutor,
-                folly::coro::co_invoke(
-                    [this, streamPartId, peerDescriptorStoreManager]()
-                        -> folly::coro::Task<void> {
-                        try {
-                            co_await this->startLayersAndJoinDht(
-                                streamPartId, peerDescriptorStoreManager);
-                        } catch (const std::exception& err) {
-                            SLogger::warn(
-                                "Failed to join to stream part " +
-                                streamPartId + ": " + std::string(err.what()));
-                        }
-                    })));
+                streamr::utils::co_withCancellation(
+                    this->joinCancellation.getToken(),
+                    folly::coro::co_invoke(
+                        [this, streamPartId, peerDescriptorStoreManager]()
+                            -> folly::coro::Task<void> {
+                            try {
+                                co_await this->startLayersAndJoinDht(
+                                    streamPartId, peerDescriptorStoreManager);
+                            } catch (const std::exception& err) {
+                                SLogger::warn(
+                                    "Failed to join to stream part " +
+                                    streamPartId + ": " +
+                                    std::string(err.what()));
+                            }
+                        }))));
     }
 
     folly::coro::Task<void> setProxies(
@@ -597,12 +618,14 @@ private:
                     this->joinScope.add(
                         streamr::utils::co_withExecutor(
                             &this->joinExecutor,
-                            folly::coro::co_invoke(
-                                [networkSplitAvoidance]()
-                                    -> folly::coro::Task<void> {
-                                    co_await networkSplitAvoidance
-                                        ->avoidNetworkSplit();
-                                })));
+                            streamr::utils::co_withCancellation(
+                                this->joinCancellation.getToken(),
+                                folly::coro::co_invoke(
+                                    [networkSplitAvoidance]()
+                                        -> folly::coro::Task<void> {
+                                        co_await networkSplitAvoidance
+                                            ->avoidNetworkSplit();
+                                    }))));
                 }
             }
         }

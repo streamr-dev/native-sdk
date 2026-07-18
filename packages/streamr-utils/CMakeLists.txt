@@ -127,6 +127,7 @@ if(NOT IOS AND STREAMR_MODULES_SUPPORTED)
   add_executable(streamr-utils-test-unit 
     test/unit/BrandedTest.cpp
     test/unit/AbortableTimersTest.cpp
+    test/unit/GuardedAsyncScopeTest.cpp
     test/unit/waitForEventTest.cpp
     test/unit/waitForConditionTest.cpp
     test/unit/runAndWaitForEventsTest.cpp

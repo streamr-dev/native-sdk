@@ -253,8 +253,15 @@ public:
         for (size_t i = 0; i < this->options.parallelism; ++i) {
             workers.push_back(this->worker());
         }
+        // MERGE the caller's (ambient) cancellation token with the node's
+        // abort signal instead of replacing it: a stop()-time cancellation
+        // of the detached join must reach the workers' RPC awaits, or the
+        // scope drain waits a full session timeout for them (the full-node
+        // teardown hang).
         co_await streamr::utils::co_withCancellation(
-            this->options.abortSignal.getCancellationToken(),
+            streamr::utils::cancellationTokenMerge(
+                co_await streamr::utils::co_currentCancellationToken(),
+                this->options.abortSignal.getCancellationToken()),
             folly::coro::timeout(
                 folly::coro::collectAllRange(std::move(workers)), timeout));
     }

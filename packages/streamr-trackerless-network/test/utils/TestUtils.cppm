@@ -150,10 +150,14 @@ class MockConnectionLocker : public ConnectionLocker {
 public:
     ~MockConnectionLocker() override = default;
 
-    void lockConnection(
-        PeerDescriptor /*targetDescriptor*/, LockID /*lockId*/) override {}
-    void unlockConnection(
-        PeerDescriptor /*targetDescriptor*/, LockID /*lockId*/) override {}
+    folly::coro::Task<void> lockConnection(
+        PeerDescriptor /*targetDescriptor*/, LockID /*lockId*/) override {
+        co_return;
+    }
+    folly::coro::Task<void> unlockConnection(
+        PeerDescriptor /*targetDescriptor*/, LockID /*lockId*/) override {
+        co_return;
+    }
     void weakLockConnection(
         const DhtAddress& /*targetDescriptor*/,
         const LockID& /*lockId*/) override {}

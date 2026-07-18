@@ -730,9 +730,15 @@ public:
         // recovery executor's destructor join). A KBucketEmpty still firing
         // mid-join is dropped by the scope's close() gate.
         this->recoveryScope.close();
-        this->transportPtr->off<transportevents::Message>(this->messageToken);
-        this->transportPtr->off<Connected>(this->connectedToken);
-        this->transportPtr->off<Disconnected>(this->disconnectedToken);
+        // The waiting variants: a Message handler mid-invocation on
+        // another thread may still schedule a detached server-RPC
+        // dispatch; plain off() returning early would let it slip past
+        // the drain below (seen as a getClosestPeers dispatch resuming
+        // into a destroyed DhtNode on the CI-sized worker pool).
+        this->transportPtr->offAndWait<transportevents::Message>(
+            this->messageToken);
+        this->transportPtr->offAndWait<Connected>(this->connectedToken);
+        this->transportPtr->offAndWait<Disconnected>(this->disconnectedToken);
         streamr::utils::blockingWait(this->storeManager->destroy());
         this->localDataStore.clear();
         if (this->peerManager) {
@@ -753,6 +759,18 @@ public:
             this->ownedConnectionManager->stop();
         }
         this->connectionLocker = nullptr;
+        // Cancel and join this node's detached RPC dispatch/request
+        // coroutines while every member they capture is still alive. The
+        // implicit drain in ~RoutingRpcCommunicator runs only during
+        // member destruction — after later-declared members are already
+        // gone — and a straggler server dispatch then resumes into freed
+        // memory (seen as a getClosestPeers dispatch crashing on the
+        // CI-sized worker pool). Placed LAST: the drain gates new scope
+        // adds off, and the steps above still send through this
+        // communicator (leave notices, final replications). No new server
+        // dispatch can arrive here — the transport listeners were removed
+        // with offAndWait() at the top of stop().
+        this->rpcCommunicator->drainAsyncTasks();
     }
 
     // --- Public API ------------------------------------------------------

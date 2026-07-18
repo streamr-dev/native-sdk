@@ -26,6 +26,7 @@ module;
 #include <folly/experimental/coro/AsyncScope.h>
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Collect.h>
+#include <folly/experimental/coro/CurrentExecutor.h>
 #include <folly/experimental/coro/DetachOnCancel.h>
 #include <folly/experimental/coro/Invoke.h>
 #include <folly/experimental/coro/Promise.h>
@@ -72,6 +73,11 @@ using folly::Unit;
 
 export namespace streamr::utils {
 
+// (Comment touch to invalidate stale CI build caches: the restored
+// macOS cache carried a pre-cancellation-shim BMI of this module and
+// ninja under-rebuilt, failing DiscoverySession/RingDiscoverySession
+// compiles on symbols that exist — the documented incremental-cache
+// trap.)
 // folly's blockingWait / co_withExecutor / co_withCancellation are
 // customization-point objects that cannot be re-exported by
 // using-declaration (internal linkage or conflicting redeclarations
@@ -96,6 +102,25 @@ inline auto co_withCancellation(
     Args&&... args) // NOLINT(readability-identifier-naming)
     -> decltype(folly::coro::co_withCancellation(std::forward<Args>(args)...)) {
     return folly::coro::co_withCancellation(std::forward<Args>(args)...);
+}
+
+// The awaitable tag that yields the CURRENT (ambient) cancellation token
+// inside a Task: co_await co_currentCancellationToken(). Exported so
+// awaited subtrees can MERGE the caller's token with their own instead of
+// replacing it (co_withCancellation replaces; a replaced token made
+// stop()-time cancellation invisible inside DiscoverySession — the
+// full-node teardown hang).
+inline auto
+co_currentCancellationToken() // NOLINT(readability-identifier-naming)
+    -> folly::coro::co_current_cancellation_token_t {
+    return folly::coro::co_current_cancellation_token;
+}
+
+// folly::cancellation_token_merge is a CPO like the ones above.
+template <typename... Args>
+inline auto cancellationTokenMerge(Args&&... args)
+    -> decltype(folly::cancellation_token_merge(std::forward<Args>(args)...)) {
+    return folly::cancellation_token_merge(std::forward<Args>(args)...);
 }
 
 } // namespace streamr::utils

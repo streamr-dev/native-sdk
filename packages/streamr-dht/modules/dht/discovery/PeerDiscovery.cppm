@@ -175,6 +175,11 @@ private:
         std::vector<std::shared_ptr<DiscoverySession>> sessions,
         PeerDescriptor entryPointDescriptor,
         bool retry) {
+        // Snapshot the caller's cancellation token: a join cancelled by
+        // its owner's stop() must not schedule a rejoin (the detached
+        // rejoin would outlive the intent to stop).
+        const auto callerToken =
+            co_await streamr::utils::co_currentCancellationToken();
         try {
             for (const auto& session : sessions) {
                 {
@@ -186,7 +191,7 @@ private:
         } catch (const std::exception&) {
             SLogger::debug("DHT join timed out");
         }
-        if (!this->isStopped()) {
+        if (!this->isStopped() && !callerToken.isCancellationRequested()) {
             if (this->options.peerManager.getNeighborCount() == 0) {
                 if (retry) {
                     this->scheduleRejoin(entryPointDescriptor, rejoinDelay);
@@ -396,7 +401,7 @@ public:
             co_return;
         }
         if (this->options.connectionLocker != nullptr) {
-            this->options.connectionLocker->lockConnection(
+            co_await this->options.connectionLocker->lockConnection(
                 entryPointDescriptor, this->joinLockId());
         }
         this->options.peerManager.addContact(entryPointDescriptor);
@@ -412,7 +417,7 @@ public:
         co_await this->runSessions(
             std::move(sessions), entryPointDescriptor, retry);
         if (this->options.connectionLocker != nullptr) {
-            this->options.connectionLocker->unlockConnection(
+            co_await this->options.connectionLocker->unlockConnection(
                 entryPointDescriptor, this->joinLockId());
         }
     }

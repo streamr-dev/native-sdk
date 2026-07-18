@@ -270,8 +270,13 @@ public:
         for (size_t i = 0; i < this->options.parallelism; ++i) {
             workers.push_back(this->worker());
         }
+        // MERGE the ambient cancellation with the abort signal (see
+        // DiscoverySession::findClosestNodes for why replacing it hangs
+        // the stop()-time scope drain).
         co_await streamr::utils::co_withCancellation(
-            this->options.abortSignal.getCancellationToken(),
+            streamr::utils::cancellationTokenMerge(
+                co_await streamr::utils::co_currentCancellationToken(),
+                this->options.abortSignal.getCancellationToken()),
             folly::coro::timeout(
                 folly::coro::collectAllRange(std::move(workers)), timeout));
     }

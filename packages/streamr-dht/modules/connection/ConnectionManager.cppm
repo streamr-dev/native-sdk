@@ -473,12 +473,12 @@ public:
         return this->locks.isRemoteLocked(nodeId);
     }
 
-    void lockConnection(
+    folly::coro::Task<void> lockConnection(
         PeerDescriptor targetDescriptor, LockID lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             Identifiers::areEqualPeerDescriptors(
                 targetDescriptor, this->getLocalPeerDescriptor())) {
-            return;
+            co_return;
         }
         const auto nodeId =
             Identifiers::getNodeIdFromPeerDescriptor(targetDescriptor);
@@ -490,8 +490,9 @@ public:
         this->locks.addLocalLocked(nodeId, lockId);
 
         try {
-            auto accepted = streamr::utils::blockingWait(
-                rpcRemote.lockRequest(std::move(lockId)));
+            // co_await, never blockingWait: this runs on shared worker
+            // pool threads (see ConnectionLocker::lockConnection).
+            auto accepted = co_await rpcRemote.lockRequest(std::move(lockId));
             if (accepted) {
                 SLogger::trace("LockRequest successful");
             } else {
@@ -504,12 +505,12 @@ public:
         }
     }
 
-    void unlockConnection(
+    folly::coro::Task<void> unlockConnection(
         PeerDescriptor targetDescriptor, LockID lockId) override {
         if (this->state == ConnectionManagerState::STOPPED ||
             Identifiers::areEqualPeerDescriptors(
                 targetDescriptor, this->getLocalPeerDescriptor())) {
-            return;
+            co_return;
         }
 
         const auto nodeId =
@@ -522,7 +523,7 @@ public:
             SLogger::debug("Acquired mutex lock in unlockConnection");
             if (!this->endpoints.contains(nodeId)) {
                 SLogger::debug("Node ID not found in endpoints");
-                return;
+                co_return;
             }
         }
 
@@ -530,8 +531,7 @@ public:
         ConnectionLockRpcRemote rpcRemote(
             this->getLocalPeerDescriptor(), targetDescriptor, client);
 
-        streamr::utils::blockingWait(
-            rpcRemote.unlockRequest(std::move(lockId)));
+        co_await rpcRemote.unlockRequest(std::move(lockId));
     }
 
     void weakLockConnection(

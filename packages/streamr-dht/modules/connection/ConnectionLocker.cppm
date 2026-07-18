@@ -8,6 +8,8 @@ module;
 
 #include <string>
 
+#include <folly/coro/Task.h>
+
 export module streamr.dht.ConnectionLocker;
 
 import streamr.dht.protos;
@@ -26,9 +28,16 @@ protected:
 public:
     virtual ~ConnectionLocker() = default;
 
-    virtual void lockConnection(
+    // Coroutines, not blocking calls: locking awaits a lockRequest RPC
+    // round-trip. The former synchronous implementation blockingWait()ed
+    // for it — on the shared worker pool that is a self-deadlock once
+    // poolsize concurrent joins sit inside lockConnection at once (every
+    // thread waits for an RPC response only those same threads could
+    // process; seen wedging the full-node teardown on the 4-thread CI
+    // pool).
+    virtual folly::coro::Task<void> lockConnection(
         PeerDescriptor targetDescriptor, LockID lockId) = 0;
-    virtual void unlockConnection(
+    virtual folly::coro::Task<void> unlockConnection(
         PeerDescriptor targetDescriptor, LockID lockId) = 0;
     virtual void weakLockConnection(
         const DhtAddress& targetDescriptor, const LockID& lockId) = 0;

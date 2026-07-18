@@ -228,6 +228,13 @@ public:
         const CallContextType& callContext,
         std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         SLogger::trace("request(): methodName:", methodName);
+        if (mDrained) {
+            // A drained scope must not be add()ed to (folly forbids
+            // add-after-join); a request after drainAsyncTasks() is a
+            // stop()-ordering bug in the caller — fail it cleanly.
+            throw RpcClientError(
+                "request() called on a drained RpcCommunicator: " + methodName);
+        }
 
         std::chrono::milliseconds timeoutValue = mRpcRequestTimeout;
         if (timeout.has_value()) {
@@ -310,6 +317,12 @@ public:
         const CallContextType& callContext,
         std::optional<std::chrono::milliseconds> timeout = std::nullopt) {
         SLogger::trace("notify() notificationName:", notificationName);
+        if (mDrained) {
+            // See request(): no adds after the scope drain.
+            throw RpcClientError(
+                "notify() called on a drained RpcCommunicator: " +
+                std::string(notificationName));
+        }
 
         std::chrono::milliseconds timeoutValue = mRpcRequestTimeout;
         if (timeout.has_value()) {

@@ -59,6 +59,23 @@ public:
         streamr::utils::blockingWait(this->scope.joinAsync());
     }
 
+    // Coroutine variant of close() for stop() paths that share a drive
+    // thread (e.g. several stops under one collectAllRange): it SUSPENDS
+    // while the scope drains instead of blocking the thread, so sibling
+    // stops keep making progress. Same single-owning-stopper contract as
+    // close(); the drain-vs-destruction ordering is the caller's (the
+    // co_awaiting stop() completes before its owner is destroyed).
+    folly::coro::Task<void> closeAsync() {
+        {
+            std::scoped_lock lock(this->mutex);
+            if (this->closed) {
+                co_return;
+            }
+            this->closed = true;
+        }
+        co_await this->scope.joinAsync();
+    }
+
     ~GuardedAsyncScope() { this->close(); }
 
     GuardedAsyncScope() = default;

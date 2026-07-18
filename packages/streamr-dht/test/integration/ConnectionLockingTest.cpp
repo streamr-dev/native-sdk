@@ -144,7 +144,8 @@ TEST_F(ConnectionLockingTest, CanLockConnections) {
     auto tmpMockPeerDescriptor2 = mockPeerDescriptor2;
     auto tmpMockPeerDescriptor1 = mockPeerDescriptor1;
     SLogger::trace("before lockConnection() start");
-    connectionManager1->lockConnection(mockPeerDescriptor2, LockID("testLock"));
+    streamr::utils::blockingWait(connectionManager1->lockConnection(
+        mockPeerDescriptor2, LockID("testLock")));
     SLogger::trace("lockConnection done");
 
     std::function<bool()> condition = [&connectionManager2,
@@ -204,8 +205,8 @@ TEST_F(ConnectionLockingTest, LockingBothWays) {
 
     auto task = collect(
         [&]() {
-            connectionManager3->lockConnection(
-                mockPeerDescriptor4, LockID("testLock1"));
+            streamr::utils::blockingWait(connectionManager3->lockConnection(
+                mockPeerDescriptor4, LockID("testLock1")));
         },
         waitForCondition(condition) // NOLINT
     );
@@ -214,8 +215,8 @@ TEST_F(ConnectionLockingTest, LockingBothWays) {
 
     auto task2 = collect(
         [&]() {
-            connectionManager4->lockConnection(
-                mockPeerDescriptor3, LockID("testLock2"));
+            streamr::utils::blockingWait(connectionManager4->lockConnection(
+                mockPeerDescriptor3, LockID("testLock2")));
         },
         waitForCondition(condition) // NOLINT
     );

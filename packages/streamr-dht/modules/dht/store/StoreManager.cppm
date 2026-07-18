@@ -30,6 +30,7 @@ export module streamr.dht.StoreManager;
 import streamr.dht.protos;
 
 import streamr.utils.CoroutineHelper;
+import streamr.utils.GuardedAsyncScope;
 import streamr.utils.SharedExecutors;
 import streamr.utils.EnableSharedFromThis;
 import streamr.utils.ExecutorHelper;
@@ -88,6 +89,16 @@ private:
     // replication tasks pin `self` (sharedFromThis), exactly as before.
     streamr::utils::SharedSerialExecutor replicationExecutor{
         streamr::utils::SharedExecutors::worker()};
+    // The detached onContactAdded replications pin `self`, but their RPC
+    // remotes send through the owning DhtNode's communicator, which
+    // destroy() does NOT keep alive: a replication coroutine resuming
+    // after DhtNode::stop() dereferenced the freed communicator (SIGSEGV
+    // in RpcCommunicatorClientApi::notify<ReplicateDataRequest> resume,
+    // reproduced 13/16 under a CI-sized worker pool). Track them here and
+    // drain in destroy(), while the communicator and transport are still
+    // alive; cancel first so the drain does not wait on network progress.
+    streamr::utils::GuardedAsyncScope replicationScope;
+    folly::CancellationSource replicationCancellation;
     std::unique_ptr<StoreRpcLocal> rpcLocal;
 
     explicit StoreManager(StoreManagerOptions options)
@@ -113,19 +124,22 @@ private:
         }
     }
 
-    // Fire-and-forget the async replication onto the worker executor.
+    // Fire-and-forget the async replication onto the worker executor,
+    // tracked by replicationScope (see the member comment).
     void replicateDataToContact(
         const DataEntry& dataEntry, const PeerDescriptor& contact) {
         auto self = this->sharedFromThis<StoreManager>();
         DataEntry entry = dataEntry;
         PeerDescriptor target = contact;
-        streamr::utils::co_withExecutor(
-            &this->replicationExecutor,
-            folly::coro::co_invoke(
-                [self, entry, target]() -> folly::coro::Task<void> {
-                    co_await self->doReplicate(entry, target);
-                }))
-            .start();
+        this->replicationScope.add(
+            streamr::utils::co_withExecutor(
+                &this->replicationExecutor,
+                streamr::utils::co_withCancellation(
+                    this->replicationCancellation.getToken(),
+                    folly::coro::co_invoke(
+                        [self, entry, target]() -> folly::coro::Task<void> {
+                            co_await self->doReplicate(entry, target);
+                        }))));
     }
 
     void registerLocalRpcMethods() {
@@ -188,17 +202,21 @@ private:
                 auto self = this->sharedFromThis<StoreManager>();
                 DhtAddress key = dataKey;
                 PeerDescriptor node = newNode;
-                streamr::utils::co_withExecutor(
-                    &this->replicationExecutor,
-                    folly::coro::co_invoke(
-                        [self, key, node]() -> folly::coro::Task<void> {
-                            const auto dataEntries =
-                                self->options.localDataStore.values(key);
-                            for (const auto& dataEntry : dataEntries) {
-                                co_await self->doReplicate(dataEntry, node);
-                            }
-                        }))
-                    .start();
+                this->replicationScope.add(
+                    streamr::utils::co_withExecutor(
+                        &this->replicationExecutor,
+                        streamr::utils::co_withCancellation(
+                            this->replicationCancellation.getToken(),
+                            folly::coro::co_invoke(
+                                [self, key, node]() -> folly::coro::Task<void> {
+                                    const auto dataEntries =
+                                        self->options.localDataStore.values(
+                                            key);
+                                    for (const auto& dataEntry : dataEntries) {
+                                        co_await self->doReplicate(
+                                            dataEntry, node);
+                                    }
+                                }))));
             }
         } else if (!std::ranges::any_of(
                        storers, [this](const PeerDescriptor& peer) {
@@ -317,6 +335,13 @@ public:
     }
 
     folly::coro::Task<void> destroy() {
+        // Cancel and drain the detached onContactAdded replications while
+        // the communicator/transport they send through are still alive
+        // (DhtNode::stop() awaits this before tearing those down). The
+        // final leave-replication below is awaited directly and is not
+        // cancelled.
+        this->replicationCancellation.requestCancellation();
+        co_await this->replicationScope.closeAsync();
         co_await this->replicateDataToClosestNodes();
     }
 };

@@ -352,34 +352,41 @@ public:
 
     void destroy() {
         SLogger::trace("WebsocketServerConnector::destroy() called");
+        std::map<std::string, std::shared_ptr<IncomingHandshaker>> handshakers;
+        std::map<DhtAddress, std::shared_ptr<IPendingConnection>> requests;
+        std::unique_ptr<WebsocketServer> server;
         {
             std::scoped_lock lock(this->mMutex);
             this->abortController.abort();
-
-            SLogger::trace("Closing ongoing connect requests");
-            for (const auto& request : this->ongoingConnectRequests) {
-                if (request.second) {
-                    request.second->close(true);
-                }
+            handshakers.swap(this->connectingHandshakers);
+            requests.swap(this->ongoingConnectRequests);
+            server = std::move(this->websocketServer);
+        }
+        // Every call-out below runs OUTSIDE mMutex: close(true) fans out
+        // into Disconnected handlers that re-enter connection/connector
+        // code, and holding the lock across that deadlocks ABBA against a
+        // thread that holds a connection's mutex and needs mMutex (the
+        // shape sampled in WebsocketClientConnector::destroy(); same
+        // hazard here).
+        SLogger::trace("Closing ongoing connect requests");
+        for (const auto& request : requests) {
+            if (request.second) {
+                request.second->close(true);
             }
+        }
 
-            SLogger::trace("Closing connecting handshakers");
-            for (const auto& handshaker : this->connectingHandshakers) {
-                if (handshaker.second &&
-                    handshaker.second->getPendingConnection()) {
-                    handshaker.second->getPendingConnection()->close(true);
-                }
+        SLogger::trace("Closing connecting handshakers");
+        for (const auto& handshaker : handshakers) {
+            if (handshaker.second &&
+                handshaker.second->getPendingConnection()) {
+                handshaker.second->getPendingConnection()->close(true);
             }
+        }
 
-            SLogger::trace("Clearing maps");
-            this->connectingHandshakers.clear();
-            this->ongoingConnectRequests.clear();
-
-            SLogger::trace("Stopping websocket server");
-            if (this->websocketServer) {
-                this->websocketServer->stop();
-                this->websocketServer.reset();
-            }
+        SLogger::trace("Stopping websocket server");
+        if (server) {
+            server->stop();
+            server.reset();
         }
         // Drained OUTSIDE the mutex (the PeerManager::stop() pattern): a
         // detached requestConnection notification still in flight references

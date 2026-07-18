@@ -103,6 +103,12 @@ private:
     streamr::utils::SharedSerialExecutor joinExecutor{
         streamr::utils::SharedExecutors::worker()};
     GuardedAsyncScope joinScope;
+    // Cancels the fire-and-forget joinDht at stop(): the scope contract
+    // requires the tasks to be cancelled BEFORE the drain, otherwise
+    // stop() waits for the join to complete naturally — an unbounded
+    // wait on network progress (the CI full-node teardown hang: a
+    // starved shared worker pool never let the join finish).
+    folly::CancellationSource joinCancellation;
 
     folly::coro::Task<void> ensureConnectedToControlLayer() {
         // TS TODO preserved: could wrap joinDht with pOnce and call it
@@ -113,11 +119,13 @@ private:
                 this->joinScope.add(
                     streamr::utils::co_withExecutor(
                         &this->joinExecutor,
-                        folly::coro::co_invoke(
-                            [this]() -> folly::coro::Task<void> {
-                                co_await this->controlLayerNode->joinDht(
-                                    this->options.layer0.entryPoints);
-                            })));
+                        streamr::utils::co_withCancellation(
+                            this->joinCancellation.getToken(),
+                            folly::coro::co_invoke(
+                                [this]() -> folly::coro::Task<void> {
+                                    co_await this->controlLayerNode->joinDht(
+                                        this->options.layer0.entryPoints);
+                                }))));
             }
             co_await this->controlLayerNode->waitForNetworkConnectivity();
         }
@@ -323,7 +331,12 @@ public:
             this->stopped = true;
             // Drain the fire-and-forget joins before the members die
             // (teardown ordering; see ContentDeliveryManager::destroy).
-            this->joinScope.close();
+            // Cancel first — the drain must not wait for the join to make
+            // network progress — and suspend (not block) while draining,
+            // so concurrent sibling stops sharing this drive thread
+            // proceed meanwhile (the CI full-node teardown hang).
+            this->joinCancellation.requestCancellation();
+            co_await this->joinScope.closeAsync();
             co_await this->contentDeliveryManager->destroy();
             // The info communicator listens on the transport — take it
             // down while the transport is still alive.
